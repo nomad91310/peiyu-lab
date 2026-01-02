@@ -6,7 +6,7 @@
     <title>人類圖能量諮詢報表 | 培癒試驗室</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        /* [保留你的 V41 樣式] */
+        /* [完全保留你的 V41 樣式] */
         body { font-family: -apple-system, "Microsoft JhengHei", "Heiti TC", sans-serif; background: #e0e5ec; padding: 30px; margin: 0; color: #333; }
         .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 1280px; margin: 0 auto; }
         h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px;}
@@ -15,13 +15,13 @@
         .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
         .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
 
-        /* [新增] 核心能量輸入區 (為了讓你能輸入生命力等數值) */
+        /* [新增] 核心能量輸入區 (6格排版) */
         .core-metrics-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; background: #fff3e0; padding: 10px; border-radius: 10px; border: 1px solid #ffe0b2; }
         .metric-card { background: white; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: center; display:flex; align-items:center; justify-content:space-between; }
         .metric-title { font-weight: bold; color: #e65100; font-size: 14px; margin-right:5px; flex-shrink: 0; }
         .metric-inputs { display:flex; gap:5px; flex: 1; justify-content: flex-end; }
-        .metric-inputs input { width: 60px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
-
+        .metric-inputs input { width: 50px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
+        
         /* [新增] 加購項目區容器 */
         #addon-section-wrapper { display: none; margin-bottom: 25px; }
         #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
@@ -61,14 +61,14 @@
 
         .btn { width: 100%; padding: 18px; background: #2c3e50; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3); transition: 0.3s; }
         .btn:hover { background: #34495e; transform: translateY(-2px); }
-        .action-bar { display: flex; gap: 15px; margin-top: 30px; } /* [新增] 按鈕並排容器 */
-        .btn-preview { background: #546e7a; } .btn-save { background: #2e7d32; display: none; } /* [新增] 存檔按鈕樣式 */
+        .action-bar { display: flex; gap: 15px; margin-top: 30px; } 
+        .btn-preview { background: #546e7a; } .btn-save { background: #2e7d32; display: none; }
 
         #result-wrapper { display: none; margin-top: 40px; text-align: center; }
         #final-image { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid #eee; }
         .save-hint { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 16px; font-weight: bold; display: inline-block; }
         .canvas-container { display: none; } 
-        #status-msg { margin-top: 15px; text-align: center; font-weight: bold; color: #d32f2f; min-height: 24px;} /* [新增] 狀態訊息 */
+        #status-msg { margin-top: 15px; text-align: center; font-weight: bold; color: #d32f2f; min-height: 24px;}
 
         @media (max-width: 768px) { .header-inputs { grid-template-columns: 1fr 1fr; } #inputs-container { grid-template-columns: 1fr; } .core-metrics-container { grid-template-columns: 1fr; } }
     </style>
@@ -108,7 +108,7 @@
         <div id="inputs-container" style="margin-top:20px;"></div>
 
         <div class="summary-section">
-            <label>📝 整體療癒師總結</label>
+            <label>📝 療癒師總結</label>
             <textarea id="overall-summary" placeholder="請輸入總結...支援 Enter 換行"></textarea>
         </div>
         
@@ -143,7 +143,7 @@
         
         const CENTER_THEMES = { head: '靈感・壓力・疑問', ajna: '概念・信念・分析', throat: '顯化・溝通・行動', g: '愛・方向・認同', ego: '價值感・承諾・動力', solar: '情緒・感受・神經系統', spleen: '生存・直覺・健康', sacral: '生產力・性・生命力', root: '壓力・衝勁・腎上腺' };
 
-        // 🌟 [保留你的 V41 文字內容] 🌟
+        // 🌟 [絕對保留 V41 的文字內容]
         const CENTER_CONTENT = {
             head: { label: "頭腦", organ: "松果體", static: { defined: "天生有固定的思考模式。健康時能享受思考壓力，啟發他人；不健康時困在自己的問題裡憂鬱，或對他人漠不關心。", undefined: "靈感來自四面八方。健康時能區分什麼問題重要；不健康時會把別人的問題攬在身上，急於解決腦中困惑。", open: "對靈感完全開放。健康時享受未知；不健康時會迷失在資訊海中，不知道什麼對自己重要。" }, dynamic: [ { label: "困在腦中/憂鬱 (內縮)", defDiag: "思考內捲陷入封閉迴圈，腦壓過高導致低潮。", defAdj: "釋放累積內在壓力，助思緒重新流動連結外界。", undefDiag: "吸收環境混亂思緒無法過濾，大腦當機深層疲憊。", undefAdj: "清理外來雜訊，助大腦關機釋放不屬於你的煩惱。", isHealthy: false }, { label: "雞婆/焦慮行動 (外顯)", defDiag: "急於找答案而衝動行事，消除疑惑壓力未看清全貌。", defAdj: "安撫急躁腦波，協助學會等待靈感自然浮現。", undefDiag: "把他人問題當責任，急於幫忙解決以紓解壓力。", undefAdj: "切斷非己責任能量，協助劃清界線放下他人問題。", isHealthy: false }, { label: "失眠/停不下來 (失調)", defDiag: "身體累大腦仍慣性運轉，執著想通某事致失眠。", defAdj: "注入深層放鬆頻率，強制松果體進入休眠模式。", undefDiag: "睡前受高壓環境影響，不知非己壓力而持續空轉。", undefAdj: "建立頂輪防護罩，過濾夜間集體潛意識干擾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。松果體運作清晰。", undefDiag: "頭腦清明，不為他人問題煩惱。", adjust: "", isHealthy: true } ] },
             ajna: { label: "邏輯", organ: "腦下垂體", static: { defined: "享受研究，有穩固觀點。健康時思緒清晰；不健康時固執己見，聽不進別人的話，或焦慮於「沒做到」。", undefined: "思考有彈性。健康時能接納各種觀點；不健康時擔心自己不聰明，或為了假裝確定而變得比已定義更固執。", open: "心智像白紙。健康時客觀中立；不健康時因為缺乏定見而極度不安，無法做決定。" }, dynamic: [ { label: "焦慮/自責 (內縮)", defDiag: "誤認想通即做到，因現實落差陷入自責與批判。", defAdj: "整合思考與行動落差，釋放不夠努力的自責感。", undefDiag: "因無固定想法而不安，怕顯無知而自我懷疑。", undefAdj: "轉化對未知恐懼，協助接納不確定也是一種智慧。", isHealthy: false }, { label: "固執/假裝確定 (外顯)", defDiag: "思維僵化太信邏輯，聽不進建議鎖在象牙塔。", defAdj: "軟化僵固信念結構，增心智彈性聽見不同聲音。", undefDiag: "掩飾不確定感而假裝堅定，死守借來的觀點不放。", undefAdj: "釋放防衛機制，卸下必須全知全能的偽裝面具。", isHealthy: false }, { label: "專注力渙散 (失調)", defDiag: "腦下垂體壓力過大，邏輯線斷裂致思緒混亂。", defAdj: "修復眉心輪能量，協助重新聚焦找回組織力。", undefDiag: "心智被資訊淹沒，試圖處理過量訊息而當機。", undefAdj: "清理心智緩存區，刪除無用資訊垃圾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。邏輯清晰。", undefDiag: "思維靈活，能客觀看待不同資訊。", adjust: "", isHealthy: true } ] },
@@ -170,9 +170,6 @@
 
         const CHANNELS = [['head','ajna'],['ajna','throat'],['throat','g'],['throat','spleen'],['throat','sacral'],['throat','solar'],['g','sacral'],['g','spleen'],['g','ego'],['ego','throat'],['ego','solar'],['sacral','root'],['sacral','spleen'],['sacral','solar'],['spleen','root'],['solar','root']];
 
-        // -----------------------------------------------------------
-        // 2. 初始化邏輯
-        // -----------------------------------------------------------
         window.onload = async function() {
             document.getElementById('info-date').valueAsDate = new Date();
             renderInputs(); 
@@ -203,10 +200,6 @@
             }
         };
 
-        // -----------------------------------------------------------
-        // 3. 核心功能函式
-        // -----------------------------------------------------------
-
         async function fetchBookingService(bid) {
             if(!myDB) return;
             try {
@@ -215,10 +208,12 @@
                 if (data && data.service_detail) {
                     const mainItem = data.service_item.trim();
                     const details = data.service_detail.split('|').map(s => s.trim());
+                    // 保留完整加購項目名稱
                     detectedAddons = details.filter(d => {
                         const cleanName = d.replace(/\(\$\d+\)/g, '').trim();
                         return !cleanName.includes(mainItem) && cleanName !== "";
                     }).map(d => d.replace(/\(\$\d+\)/g, '').trim());
+                    
                     if (detectedAddons.length > 0) renderAddonInputs(detectedAddons);
                 }
             } catch(e) { console.error("Fetch Service Error", e); }
@@ -231,7 +226,6 @@
             addonNames.forEach((name, idx) => {
                 const div = document.createElement('div');
                 div.className = 'addon-card';
-                // 🌟 使用 title 屬性讓滑鼠懸停可見完整名稱
                 div.innerHTML = `
                     <div class="addon-title" title="${name}">🎯 ${name}</div>
                     <input type="hidden" id="addon-name-${idx}" value="${name}">
@@ -264,7 +258,7 @@
                         </div>
                     </div>
                     <div class="diagnosis-area"><div style="font-weight:bold;color:#e65100;margin-bottom:5px;">📋 靈擺診斷</div><div class="checkbox-group">${checkHTML}</div></div>
-                    <div class="input-row"><div class="input-group"><label>檢測數值 (%)</label><input type="number" id="val-${c.id}"></div><div class="input-group"><label>調整後數值 (%)</label><input type="number" id="adj-${c.id}"></div></div>
+                    <div class="input-row"><div class="input-group"><label>檢測(%)</label><input type="number" id="val-${c.id}"></div><div class="input-group"><label>調整(%)</label><input type="number" id="adj-${c.id}"></div></div>
                     <div class="custom-note-area"><textarea id="note-${c.id}" placeholder="手寫補充..."></textarea></div>
                 `;
                 container.appendChild(card);
@@ -290,7 +284,6 @@
         }
 
         function collectDataFromUI() {
-            // 1. 收集能量中心數據
             const centersData = CENTERS.map(c => {
                 const centerKey = c.id;
                 const db = CENTER_CONTENT[centerKey];
@@ -319,7 +312,6 @@
                 return { ...c, label: db.label, status, statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
             });
 
-            // 2. 收集必測項目
             const coreData = MANDATORY_CHECKS.map((name, i) => ({
                 name: name,
                 val: document.getElementById(`core-val-${i}`).value || "--",
@@ -327,7 +319,6 @@
                 isCore: true
             }));
 
-            // 3. 收集加購項目
             const addonsData = [];
             if (detectedAddons.length > 0) {
                 detectedAddons.forEach((name, idx) => {
@@ -341,7 +332,6 @@
             return { centers: centersData, specialItems: [...coreData, ...addonsData] };
         }
 
-        // 🌟 預覽生成
         function generatePreview() {
             try {
                 const msg = document.getElementById('status-msg');
@@ -350,7 +340,6 @@
                 drawClassicReport(fullData);
                 msg.innerText = "";
                 document.getElementById('btn-real-save').style.display = 'inline-block';
-                document.getElementById('result-wrapper').style.display = 'block';
                 document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
             } catch (e) {
                 console.error(e);
@@ -432,7 +421,6 @@
                     centersData = data.raw_data.centers || []; 
                     const special = data.raw_data.specialItems || [];
                     const oldAddons = data.raw_data.addons || [];
-                    
                     const cores = special.filter(x => x.isCore);
                     const adds = special.filter(x => !x.isCore).concat(oldAddons);
 
@@ -499,7 +487,7 @@
             const ADJUST_CARD_HEIGHT = 400; 
             const HEALTHY_CARD_HEIGHT = 140; 
             const SPECIAL_GRID_H = 100; 
-            const lineHeight = 22; // ✅ 補回這個變數，防止轉圈圈
+            const lineHeight = 22; // ✅ 補回此行，防止轉圈圈
 
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
             const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
@@ -576,7 +564,7 @@
                 if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
                 else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
-                else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
+                else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(cx, cy+h/2); ctx.closePath(); }
                 else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
@@ -618,7 +606,6 @@
                     ctx.fillStyle = item.isCore ? "#ff9800" : "#0288d1";
                     ctx.fillRect(dx, dy, 5, SPECIAL_GRID_H);
 
-                    // 標題
                     let py = dy + 25; const px = dx + 15;
                     ctx.textAlign = "left";
                     ctx.fillStyle = "#333"; ctx.font = "bold 18px Microsoft JhengHei";
@@ -631,7 +618,6 @@
                         ctx.fillText(item.name, px, py);
                     }
                     
-                    // 數值
                     py += 40;
                     ctx.font = "14px Microsoft JhengHei";
                     let cx = px; 
@@ -676,7 +662,7 @@
                         const lines = getLines(ctx, staticBlock.text, mainColWidth - 40);
                         for(let line of lines.slice(0, 2)) { ctx.fillText(line, px, cy); cy += 18; }
                     }
-                    cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，能量穩定。", dx+15, dy+120); // 恢復你 V41 的文字
+                    cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，能量穩定。", dx+15, dy+120);
                     
                     tempY[colIdx] += h + 20;
                 });

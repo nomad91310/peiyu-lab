@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>培癒中控室 V19 | 終極整合版</title>
+    <title>培癒中控室 V20 | 穩定防呆版</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         /* ================= 樣式表 (CSS) ================= */
@@ -93,7 +93,7 @@
         .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
         .compact-slot:hover .compact-del { display: block; }
 
-        /* 服務列表管理樣式 (移植自 service.html) */
+        /* 服務列表管理樣式 */
         .admin-row { display: flex; gap: 10px; align-items: center; padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
         .admin-row:hover { background: #e8f5e9; }
         input, select, textarea { padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family:inherit; }
@@ -305,8 +305,16 @@
             const { data: b } = await myDB.from('bookings').select('*, profiles(*)').order('created_at',{ascending:false}).limit(100);
             const { data: p } = await myDB.from('profiles').select('*').order('created_at',{ascending:false});
             const { data: c } = await myDB.from('service_categories').select('*').order('created_at');
-            // 🌟 排序關鍵：先排 sort_order，再排 created_at
-            const { data: s } = await myDB.from('services').select('*').order('sort_order', {ascending: true}).order('created_at', {ascending: true});
+            
+            // 🌟 容錯查詢：如果資料庫沒有 sort_order，這裡可能會報錯
+            // 我們用簡單的 select(*) 來避免整個掛掉，排序在前端做
+            let { data: s, error: svcErr } = await myDB.from('services').select('*');
+            if (svcErr) { console.error("Service fetch err:", svcErr); s = []; }
+            else {
+                // 前端排序
+                s.sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
+            }
+
             const { data: sl } = await myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time');
 
             cache = { bks:b||[], pros:p||[], cats:c||[], svcs:s||[], slots:sl||[] };
@@ -375,18 +383,23 @@
         render7DaySchedule();
     }
 
-    // 🌟 核心：智慧判斷開啟哪張報表 🌟
+    // 🌟 核心修復：防止詳情按不進去 🌟
     function openBooking(id) {
         const b = cache.bks.find(x => x.id === id);
-        if(!b) return;
+        if(!b) { alert("找不到訂單資料"); return; }
         
-        const cleanDetail = b.wish_detail.replace(/\| \[付款碼.*?\]/g, '');
+        // 防呆：確保欄位不是 null
+        const wishDetail = b.wish_detail || '';
+        const serviceDetail = b.service_detail || '';
+        const serviceItem = b.service_item || '';
+
+        const cleanDetail = wishDetail.replace(/\| \[付款碼.*?\]/g, '');
         let extractName="未知", extractEmail="未知", extractData=cleanDetail;
         const nm=cleanDetail.match(/姓名:(.*?) \|/), em=cleanDetail.match(/Email:(.*?) \|/), dt=cleanDetail.match(/數據:(.*)/);
         if(nm) extractName=nm[1]; if(em) extractEmail=em[1]; if(dt) extractData=dt[1];
 
         // 1. 🔍 尋找主項目服務
-        const mainService = cache.svcs.find(s => s.is_main && b.service_detail.includes(s.title));
+        const mainService = (cache.svcs || []).find(s => s.is_main && serviceDetail.includes(s.title));
 
         let reportTemplate = "srt_report.html"; 
         let btnLabel = "📄 生成服務報告";
@@ -396,7 +409,7 @@
             btnLabel = `📄 生成 ${mainService.title} 報告`;
         }
 
-        const reportMatch = b.wish_detail.match(/\[報告已生成 ID:(.*?)\]/);
+        const reportMatch = wishDetail.match(/\[報告已生成 ID:(.*?)\]/);
         const existingReportId = reportMatch ? reportMatch[1] : null;
         let reportUrl = "";
         let btnClass = "btn-forest";
@@ -409,15 +422,15 @@
             reportUrl = `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
         }
 
-        const serviceListHtml = b.service_detail.split(' | ').map(item => {
-            const matchedSvc = cache.svcs.find(s => item.includes(s.title));
+        const serviceListHtml = serviceDetail.split(' | ').map(item => {
+            const matchedSvc = (cache.svcs||[]).find(s => item.includes(s.title));
             return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${item}</span><span style="color:#666;">${matchedSvc?'$'+matchedSvc.price:''}</span></div>`;
         }).join('');
 
         const scheduledTime = b.scheduled_at ? new Date(b.scheduled_at).toLocaleString() : '<span style="color:#999">尚未排程</span>';
         
         const today = new Date().toISOString().split('T')[0];
-        const availableSlots = cache.slots.filter(s => !s.is_booked && s.slot_date >= today);
+        const availableSlots = (cache.slots||[]).filter(s => !s.is_booked && s.slot_date >= today);
         let slotOptions = '<option value="">-- 請選擇排程空檔 --</option>';
         availableSlots.forEach(s => { slotOptions += `<option value="${s.id}" data-time="${s.slot_date} ${s.slot_time}">${s.slot_date} ${s.slot_time.slice(0,5)}</option>`; });
 
@@ -428,7 +441,7 @@
                 <small>${b.temp_phone} | ${extractEmail}</small>
             </div>
             <div style="margin-top:15px; background:#fafafa; padding:10px; border-radius:8px;">
-                <b>${b.service_item}</b>
+                <b>${serviceItem}</b>
                 ${serviceListHtml}
                 <div style="margin-top:5px; color:#999; font-size:12px;">連結：${mainService ? '✅ '+mainService.title : '⚠️ 預設'}</div>
             </div>
@@ -451,41 +464,30 @@
         document.getElementById('modal').style.display = 'flex';
     }
 
-    // --- 服務配置與 CRUD (移植自 service.html) ---
+    // --- 服務配置與 CRUD ---
     function renderConfigTables() {
-        // 大類列表
         document.getElementById('cat-list').innerHTML=cache.cats.map(c=>`<tr><td>${c.name}</td><td><button onclick="editCat('${c.id}')">✏️</button><button onclick="delData('service_categories','${c.id}')">🗑️</button></td></tr>`).join('');
         
-        // 更新過濾器下拉選單
         const sel = document.getElementById('svc-cat-filter');
         const oldVal = sel.value;
         sel.innerHTML = `<option value="">-- 請選擇大類以管理項目 --</option>` + cache.cats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        if(oldVal && cache.cats.find(c=>c.id===oldVal)) { sel.value = oldVal; } 
+        else if (cache.cats.length > 0) { sel.value = cache.cats[0].id; }
         
-        // 自動選擇第一個或保持選擇
-        if(oldVal && cache.cats.find(c=>c.id===oldVal)) {
-            sel.value = oldVal;
-        } else if (cache.cats.length > 0) {
-            sel.value = cache.cats[0].id;
-        }
-        
-        filterServiceList(); // 渲染細項列表
+        filterServiceList();
     }
 
     function filterServiceList() {
         const catId = document.getElementById('svc-cat-filter').value;
         const listContainer = document.getElementById('svc-list-container');
-        
         if (!catId) { listContainer.innerHTML = "<p style='padding:10px;'>請先選擇大類</p>"; return; }
-
         const filteredSvcs = cache.svcs.filter(s => s.category_id === catId);
-        
         if (filteredSvcs.length === 0) { listContainer.innerHTML = "<p style='padding:10px; color:#999;'>此類別尚無項目</p>"; return; }
 
         listContainer.innerHTML = filteredSvcs.map((s, index) => {
             const tag = s.is_main ? `<span class="tag-main">主</span>` : `<span class="tag-addon">加</span>`;
             const fileTag = s.report_template ? `<span class="tag-file">📄 ${s.report_template}</span>` : '';
             const isFirst = index === 0; const isLast = index === filteredSvcs.length - 1;
-
             return `
                 <div class="admin-row">
                     <div style="display:flex; flex-direction:column; gap:2px; margin-right:5px;">
@@ -511,11 +513,7 @@
         if (idx === -1) return;
         const targetIdx = idx + direction;
         if (targetIdx < 0 || targetIdx >= currentList.length) return;
-
-        const temp = currentList[idx];
-        currentList[idx] = currentList[targetIdx];
-        currentList[targetIdx] = temp;
-
+        const temp = currentList[idx]; currentList[idx] = currentList[targetIdx]; currentList[targetIdx] = temp;
         const updates = currentList.map((s, i) => ({ id: s.id, sort_order: (i + 1) * 1000 }));
         document.getElementById('svc-list-container').innerHTML = "<p style='padding:10px;'>更新排序中...</p>";
         for (let item of updates) { await myDB.from('services').update({ sort_order: item.sort_order }).eq('id', item.id); }
@@ -543,41 +541,27 @@
         const isMain = document.getElementById('i-is-main').checked;
         const mainWrapper = document.getElementById('main-opt-wrapper');
         const subWrapper = document.getElementById('sub-opt-wrapper');
-        if (isMain) {
-            mainWrapper.style.display = 'block'; subWrapper.style.display = 'none'; document.getElementById('i-sub-opts').value = '';
-        } else {
-            mainWrapper.style.display = 'none'; subWrapper.style.display = 'block'; document.getElementById('i-report-tpl').value = '';
-        }
+        if (isMain) { mainWrapper.style.display = 'block'; subWrapper.style.display = 'none'; document.getElementById('i-sub-opts').value = ''; } 
+        else { mainWrapper.style.display = 'none'; subWrapper.style.display = 'block'; document.getElementById('i-report-tpl').value = ''; }
     }
 
     async function saveCategory(){const id=document.getElementById('cat-id-edit').value,n=document.getElementById('cat-name').value,t=document.getElementById('cat-type').value,tm=document.getElementById('cat-terms').value; const q=id?myDB.from('service_categories').update({name:n,question_type:t,terms:tm}).eq('id',id):myDB.from('service_categories').insert([{name:n,question_type:t,terms:tm}]); await q; cancelEdit('cat'); fetchAll();}
     
     async function saveItem(){
         const id=document.getElementById('svc-id-edit').value;
-        const c=document.getElementById('svc-cat-filter').value; // 使用過濾器選中的大類
+        const c=document.getElementById('svc-cat-filter').value;
         const n=document.getElementById('i-name').value;
         const p=document.getElementById('i-price').value;
         const isM=document.getElementById('i-is-main').checked;
         const subs=isM ? '' : document.getElementById('i-sub-opts').value;
         const rpt=document.getElementById('i-report-tpl').value;
-
-        if(!c) return alert("請先選擇大類");
-        if(!n) return alert("請輸入項目名稱");
-
-        // 新增時自動計算排序
+        if(!c) return alert("請先選擇大類"); if(!n) return alert("請輸入項目名稱");
         let newSort = 0;
-        if(!id) {
-            const sibs = cache.svcs.filter(s=>s.category_id === c);
-            const max = sibs.length>0 ? Math.max(...sibs.map(s=>s.sort_order||0)) : 0;
-            newSort = max + 1000;
-        }
-
+        if(!id) { const sibs = cache.svcs.filter(s=>s.category_id === c); const max = sibs.length>0 ? Math.max(...sibs.map(s=>s.sort_order||0)) : 0; newSort = max + 1000; }
         const payload = {category_id:c, title:n, price:p, is_main:isM, sub_options:subs, report_template:rpt};
         if(!id) payload.sort_order = newSort;
-
         const q=id?myDB.from('services').update(payload).eq('id',id):myDB.from('services').insert([payload]);
-        const { error } = await q; 
-        if(error) alert(error.message); else { alert("OK"); cancelEdit('svc'); fetchAll(); }
+        const { error } = await q; if(error) alert(error.message); else { alert("OK"); cancelEdit('svc'); fetchAll(); }
     }
 
     async function delData(t,id){if(confirm('刪除?'))await myDB.from(t).delete().eq('id',id);fetchAll();}
@@ -587,7 +571,7 @@
     }
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
 
-    // --- 其他原有功能 ---
+    // --- 其他功能 ---
     function render7DaySchedule() { const container = document.getElementById('dashboard-7day-schedule'); const today = new Date(); let html = ""; for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(today.getDate() + i); const dateStr = d.toISOString().split('T')[0]; const dayLabel = `${d.getMonth()+1}/${d.getDate()} (${['日','一','二','三','四','五','六'][d.getDay()]})`; const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time)); if(daySlots.length === 0) continue; else { let slotsHtml = daySlots.map(s => `<span class="u-slot ${s.is_booked ? 'booked' : ''}">${s.slot_time.slice(0,5)}</span>`).join(''); html += `<div class="upcoming-day"><div class="upcoming-day-header">${dayLabel}</div><div class="upcoming-slots">${slotsHtml}</div></div>`; } } container.innerHTML = html || "<p style='color:#999;text-align:center;'>未來一週無排程</p>"; }
     function renderTimeGrid() { const grid = document.getElementById('time-grid'); if(!grid || grid.innerHTML !== "") return; let html = ''; for (let h = 13; h <= 25; h++) { [0, 30].forEach(m => { let displayH = h >= 24 ? h - 24 : h; let displayTime = `${displayH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; let val = `${h}:${m}`; html += `<div class="batch-slot"><input type="checkbox" id="t-${val}" value="${val}" name="batch-times"><label for="t-${val}">${displayTime}</label></div>`; }); } grid.innerHTML = html; }
     async function batchAddSchedule() { const startDateVal = document.getElementById('batch-start').value; let endDateVal = document.getElementById('batch-end').value; if (!endDateVal) endDateVal = startDateVal; if (!startDateVal) return alert("請至少選擇開始日期"); const checkboxes = document.querySelectorAll('input[name="batch-times"]:checked'); if (checkboxes.length === 0) return alert("請至少勾選一個時段"); const { data: existings } = await myDB.from('schedule_slots').select('slot_date, slot_time').gte('slot_date', startDateVal).lte('slot_date', endDateVal); const existingSet = new Set(existings ? existings.map(e => `${e.slot_date}_${e.slot_time.slice(0,5)}`) : []); const start = new Date(startDateVal); const end = new Date(endDateVal); let inserts = []; let skipCount = 0; for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) { checkboxes.forEach(chk => { const [h, m] = chk.value.split(':').map(Number); let currentDay = new Date(d); let finalTimeStr = ""; if (h >= 24) { currentDay.setDate(currentDay.getDate() + 1); finalTimeStr = `${(h-24).toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; } else { finalTimeStr = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; } const dateStr = currentDay.toISOString().split('T')[0]; const checkKey = `${dateStr}_${finalTimeStr}`; if (existingSet.has(checkKey)) { skipCount++; } else { inserts.push({ slot_date: dateStr, slot_time: finalTimeStr, is_booked: false }); } }); } if (inserts.length === 0) return alert(`所有時段都已存在 (跳過 ${skipCount} 筆)`); if(!confirm(`即將新增 ${inserts.length} 個時段 (已跳過 ${skipCount} 個重複)，確定嗎？`)) return; const { error } = await myDB.from('schedule_slots').insert(inserts); if (error) alert("❌ 失敗：" + error.message); else { alert("✅ 成功！"); fetchAll(); } }

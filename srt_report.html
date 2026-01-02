@@ -324,7 +324,7 @@
                 content.push({ type: 'static', text: db.static[status] });
                 content = content.concat(dynamicPairs.map(p => ({ type: p.type, text: p.diag || p.text })));
                 if (customNote) { content.push({ type: 'note', text: `💡 補充：${customNote}` }); }
-                return { ...c, label: db.label, status, statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
+return { ...c, label: db.label, status, sLabel: statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
             });
 
             const coreData = MANDATORY_CHECKS.map((name, i) => ({

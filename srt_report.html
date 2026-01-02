@@ -6,7 +6,7 @@
     <title>人類圖能量諮詢報表 | 培癒試驗室</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        /* [完全保留你的 V41 樣式] */
+        /* [完全保留 V41 樣式] */
         body { font-family: -apple-system, "Microsoft JhengHei", "Heiti TC", sans-serif; background: #e0e5ec; padding: 30px; margin: 0; color: #333; }
         .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 1280px; margin: 0 auto; }
         h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px;}
@@ -15,21 +15,19 @@
         .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
         .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
 
-        /* [新增] 核心能量輸入區 (6格排版) */
+        /* [新增] 核心能量與加購區樣式 */
         .core-metrics-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; background: #fff3e0; padding: 10px; border-radius: 10px; border: 1px solid #ffe0b2; }
         .metric-card { background: white; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: center; display:flex; align-items:center; justify-content:space-between; }
         .metric-title { font-weight: bold; color: #e65100; font-size: 14px; margin-right:5px; flex-shrink: 0; }
         .metric-inputs { display:flex; gap:5px; flex: 1; justify-content: flex-end; }
         .metric-inputs input { width: 50px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
         
-        /* [新增] 加購項目區容器 */
         #addon-section-wrapper { display: none; margin-bottom: 25px; }
         #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
         .addon-card { border: 1px solid #b3e5fc; background: #f1f8e9; padding:10px; border-radius: 8px; position: relative; overflow: hidden; }
         .addon-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0288d1; }
         .addon-title { font-weight:bold; color:#0277bd; margin-bottom:8px; font-size: 15px; padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: help;}
 
-        /* [保留] 總結與其他 */
         .summary-section { background: #fff8e1; border: 2px solid #ffecb3; border-radius: 10px; padding: 15px; margin-bottom: 25px; }
         .summary-section label { display: block; font-size: 16px; color: #f57f17; font-weight: bold; margin-bottom: 8px; }
         .summary-section textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #ffe082; border-radius: 6px; font-size: 15px; resize: vertical; box-sizing: border-box; font-family: inherit; line-height: 1.5; }
@@ -226,6 +224,7 @@
             addonNames.forEach((name, idx) => {
                 const div = document.createElement('div');
                 div.className = 'addon-card';
+                // 🌟 使用 title 屬性讓滑鼠懸停可見完整名稱
                 div.innerHTML = `
                     <div class="addon-title" title="${name}">🎯 ${name}</div>
                     <input type="hidden" id="addon-name-${idx}" value="${name}">
@@ -421,6 +420,7 @@
                     centersData = data.raw_data.centers || []; 
                     const special = data.raw_data.specialItems || [];
                     const oldAddons = data.raw_data.addons || [];
+                    
                     const cores = special.filter(x => x.isCore);
                     const adds = special.filter(x => !x.isCore).concat(oldAddons);
 
@@ -487,7 +487,7 @@
             const ADJUST_CARD_HEIGHT = 400; 
             const HEALTHY_CARD_HEIGHT = 140; 
             const SPECIAL_GRID_H = 100; 
-            const lineHeight = 22; // ✅ 補回此行，防止轉圈圈
+            const lineHeight = 22; // ✅ 補回此行
 
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
             const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
@@ -561,11 +561,9 @@
                 if (displayVal !== "--") { if (parseInt(displayVal) <= 40) badgeColor = ENERGY_COLORS.red; else if (parseInt(displayVal) <= 70) badgeColor = ENERGY_COLORS.yellow; }
 
                 ctx.beginPath();
-                // 🟥 修正重點：把所有的 cx 改成 x，把所有的 cy 改成 y
                 if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
                 else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
-                // 👇 之前報錯的是這幾行，現在修好了 👇
                 else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
                 else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
@@ -608,6 +606,7 @@
                     ctx.fillStyle = item.isCore ? "#ff9800" : "#0288d1";
                     ctx.fillRect(dx, dy, 5, SPECIAL_GRID_H);
 
+                    // 標題
                     let py = dy + 25; const px = dx + 15;
                     ctx.textAlign = "left";
                     ctx.fillStyle = "#333"; ctx.font = "bold 18px Microsoft JhengHei";
@@ -620,6 +619,7 @@
                         ctx.fillText(item.name, px, py);
                     }
                     
+                    // 數值
                     py += 40;
                     ctx.font = "14px Microsoft JhengHei";
                     let cx = px; 
@@ -655,7 +655,7 @@
                     
                     let cy = dy + 30; const px = dx + 20; 
                     ctx.textAlign = "left"; ctx.fillStyle = "#2e7d32"; ctx.font = "bold 18px Microsoft JhengHei";
-                    ctx.fillText(`${item.label} - [${item.sLabel}]`, px, cy);
+                    ctx.fillText(`${item.label} - [${item.statusLabel}]`, px, cy);
                     
                     cy += 25; 
                     const staticBlock = item.content.find(b => b.type === 'static');

@@ -15,27 +15,30 @@
         .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
         .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 15px; }
         
+        /* 必測項目區 */
+        .core-metrics-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; background: #fff3e0; padding: 10px; border-radius: 10px; border: 1px solid #ffe0b2; }
+        .metric-card { background: white; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: center; display:flex; align-items:center; justify-content:space-between; }
+        .metric-title { font-weight: bold; color: #e65100; font-size: 14px; margin-right:5px; flex-shrink: 0; }
+        .metric-inputs { display:flex; gap:5px; flex: 1; justify-content: flex-end; }
+        .metric-inputs input { width: 55px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
+
         /* 加購項目區 */
         #addon-section-wrapper { display: none; margin-bottom: 25px; }
-        #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        .addon-section-title { font-size: 18px; font-weight: bold; color: #0277bd; margin: 20px 0 10px 0; padding-left: 10px; border-left: 5px solid #0277bd; background: #e1f5fe; padding: 10px; border-radius: 0 5px 5px 0; }
+        #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .addon-card { border: 1px solid #b3e5fc; background: #f1f8e9; padding:10px; border-radius: 8px; position: relative; overflow: hidden; }
+        .addon-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0288d1; }
+        .addon-title { font-weight:bold; color:#0277bd; margin-bottom:8px; font-size: 15px; padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* 總結區 */
         .summary-section { background: #fff8e1; border: 2px solid #ffecb3; border-radius: 10px; padding: 15px; margin-bottom: 25px; }
         .summary-section label { display: block; font-size: 16px; color: #f57f17; font-weight: bold; margin-bottom: 8px; }
         .summary-section textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ffe082; border-radius: 6px; font-size: 15px; resize: vertical; font-family: inherit;}
 
-        /* 能量中心與加購卡片共用樣式 */
+        /* 能量中心 */
         #inputs-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        .center-card, .addon-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative; }
-        
-        /* 能量中心顏色條 */
+        .center-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative; }
         .center-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #ccc; }
         .center-card[data-color="head"]::before { background: #e8e6a5; } .center-card[data-color="ajna"]::before { background: #a7d28b; } .center-card[data-color="throat"]::before { background: #c6a87c; } .center-card[data-color="g"]::before { background: #f4eb68; } .center-card[data-color="ego"]::before { background: #e85d5d; } .center-card[data-color="solar"]::before { background: #c69c6d; } .center-card[data-color="spleen"]::before { background: #c69c6d; } .center-card[data-color="sacral"]::before { background: #e85d5d; } .center-card[data-color="root"]::before { background: #c69c6d; }
-        
-        /* 加購卡片樣式 */
-        .addon-card { border: 1px solid #b3e5fc; background: #f1f8e9; }
-        .addon-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #0288d1; }
         
         .center-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; padding-left: 8px; }
         .center-title { font-weight: bold; font-size: 17px; } .status-group { display: flex; gap: 4px; }
@@ -58,7 +61,7 @@
         #result-wrapper { display: none; margin-top: 40px; text-align: center; }
         #final-image { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .canvas-container { display: none; }
-        @media (max-width: 768px) { .header-inputs { grid-template-columns: 1fr 1fr; } #inputs-container, #addon-container { grid-template-columns: 1fr; } .action-bar { flex-direction: column; align-items: center; } .btn { width: 100%; } }
+        @media (max-width: 768px) { .header-inputs { grid-template-columns: 1fr 1fr; } #inputs-container, #addon-container, .core-metrics-container { grid-template-columns: 1fr; } .action-bar { flex-direction: column; align-items: center; } .btn { width: 100%; } }
     </style>
 </head>
 <body>
@@ -73,12 +76,27 @@
             <div class="header-group"><label>療癒師</label><input type="text" id="info-healer" value="培癒試驗室"></div>
         </div>
 
-        <div id="inputs-container"></div>
+        <h3 style="color:#e65100; margin-bottom:10px; font-size:16px;">⚡ 核心能量 & 加購 (必填區)</h3>
+        <div class="core-metrics-container">
+            <div class="metric-card">
+                <div class="metric-title">🔥 生命力</div>
+                <div class="metric-inputs"><input type="number" id="core-val-0" placeholder="檢%"><input type="number" id="core-adj-0" placeholder="調%"></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🚀 執行力</div>
+                <div class="metric-inputs"><input type="number" id="core-val-1" placeholder="檢%"><input type="number" id="core-adj-1" placeholder="調%"></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🎨 創造力</div>
+                <div class="metric-inputs"><input type="number" id="core-val-2" placeholder="檢%"><input type="number" id="core-adj-2" placeholder="調%"></div>
+            </div>
+        </div>
 
         <div id="addon-section-wrapper">
-            <div class="addon-section-title">➕ 加購項目 / 客製化檢測</div>
             <div id="addon-container"></div>
         </div>
+
+        <div id="inputs-container" style="margin-top:20px;"></div>
 
         <div class="summary-section">
             <label>📝 療癒師總結</label>
@@ -112,6 +130,8 @@
         let currentBookingId = null;
         let currentReportId = null;
         let detectedAddons = []; 
+
+        const MANDATORY_CHECKS = ["生命力", "執行力", "創造力"];
 
         const HD_COLORS = { head: '#e8e6a5', ajna: '#a7d28b', throat: '#c6a87c', g: '#f4eb68', ego: '#e85d5d', solar: '#c69c6d', spleen: '#c69c6d', sacral: '#e85d5d', root: '#c69c6d' };
         const ENERGY_COLORS = { red: '#ff5252', yellow: '#ffd740', green: '#69f0ae' };
@@ -148,12 +168,9 @@
 
         const CHANNELS = [['head','ajna'],['ajna','throat'],['throat','g'],['throat','spleen'],['throat','sacral'],['throat','solar'],['g','sacral'],['g','spleen'],['g','ego'],['ego','throat'],['ego','solar'],['sacral','root'],['sacral','spleen'],['sacral','solar'],['spleen','root'],['solar','root']];
 
-        // -----------------------------------------------------------
-        // 2. 初始化邏輯
-        // -----------------------------------------------------------
         window.onload = async function() {
             document.getElementById('info-date').valueAsDate = new Date();
-            renderInputs(); // 渲染 9 大中心
+            renderInputs(); 
 
             try {
                 myDB = window.supabase.createClient(SB_URL, SB_KEY);
@@ -181,10 +198,6 @@
             }
         };
 
-        // -----------------------------------------------------------
-        // 3. 核心功能函式
-        // -----------------------------------------------------------
-
         async function fetchBookingService(bid) {
             if(!myDB) return;
             try {
@@ -193,35 +206,35 @@
                 if (data && data.service_detail) {
                     const mainItem = data.service_item.trim();
                     const details = data.service_detail.split('|').map(s => s.trim());
+                    // 🌟 關鍵修正：這裡保留完整的加購項目名稱 (含細項)
                     detectedAddons = details.filter(d => {
+                        // 移除 ($xxx) 方便比對，但保留原始名稱
                         const cleanName = d.replace(/\(\$\d+\)/g, '').trim();
+                        // 排除主項目名稱
                         return !cleanName.includes(mainItem) && cleanName !== "";
-                    }).map(d => d.replace(/\(\$\d+\)/g, '').trim());
+                    }).map(d => d.replace(/\(\$\d+\)/g, '').trim()); // 只移除價格，保留細項
+                    
                     if (detectedAddons.length > 0) renderAddonInputs(detectedAddons);
                 }
             } catch(e) { console.error("Fetch Service Error", e); }
         }
 
         function renderAddonInputs(addonNames) {
-            const wrapper = document.getElementById('addon-section-wrapper');
             const container = document.getElementById('addon-container');
-            wrapper.style.display = 'block';
+            document.getElementById('addon-section-wrapper').style.display = 'block';
             container.innerHTML = '';
             addonNames.forEach((name, idx) => {
                 const div = document.createElement('div');
                 div.className = 'addon-card';
+                // 🌟 使用 title 屬性讓滑鼠懸停可見完整名稱
                 div.innerHTML = `
-                    <div class="center-header" style="border-bottom-color:#b3e5fc;">
-                        <div class="center-title" style="color:#0277bd;">🎯 ${name}</div>
-                        <input type="hidden" id="addon-name-${idx}" value="${name}">
+                    <div class="addon-title" title="${name}">🎯 ${name}</div>
+                    <input type="hidden" id="addon-name-${idx}" value="${name}">
+                    <div style="display:flex; gap:5px; margin-bottom:5px;">
+                        <input type="number" id="addon-val-${idx}" placeholder="檢%" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="addon-adj-${idx}" placeholder="調%" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
                     </div>
-                    <div class="input-row" style="margin-top:15px;">
-                        <div class="input-group"><label>檢測數值 (%)</label><input type="number" id="addon-val-${idx}" placeholder="%"></div>
-                        <div class="input-group"><label>調整後 (%)</label><input type="number" id="addon-adj-${idx}" placeholder="%"></div>
-                    </div>
-                    <div class="custom-note-area">
-                        <textarea id="addon-note-${idx}" placeholder="針對 ${name} 的觀察或建議..."></textarea>
-                    </div>
+                    <textarea id="addon-note-${idx}" placeholder="備註..." style="width:100%; height:30px; border:1px solid #ccc; font-size:12px;"></textarea>
                 `;
                 container.appendChild(div);
             });
@@ -300,16 +313,24 @@
                 return { ...c, label: db.label, status, statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
             });
 
+            const coreData = MANDATORY_CHECKS.map((name, i) => ({
+                name: name,
+                val: document.getElementById(`core-val-${i}`).value || "--",
+                adj: document.getElementById(`core-adj-${i}`).value || "--",
+                isCore: true
+            }));
+
             const addonsData = [];
             if (detectedAddons.length > 0) {
                 detectedAddons.forEach((name, idx) => {
                     const val = document.getElementById(`addon-val-${idx}`).value || "--";
                     const adj = document.getElementById(`addon-adj-${idx}`).value || "--";
                     const note = document.getElementById(`addon-note-${idx}`).value.trim();
-                    addonsData.push({ name, val, adj, note });
+                    addonsData.push({ name, val, adj, note, isCore: false });
                 });
             }
-            return { centers: centersData, addons: addonsData };
+            
+            return { centers: centersData, specialItems: [...coreData, ...addonsData] };
         }
 
         function generatePreview() {
@@ -391,7 +412,24 @@
             let centersData = [], addonsData = [];
             if (data.raw_data) {
                 if (Array.isArray(data.raw_data)) { centersData = data.raw_data; } 
-                else { centersData = data.raw_data.centers || []; addonsData = data.raw_data.addons || []; }
+                else { 
+                    centersData = data.raw_data.centers || []; 
+                    const special = data.raw_data.specialItems || [];
+                    const oldAddons = data.raw_data.addons || [];
+                    
+                    const cores = special.filter(x => x.isCore);
+                    const adds = special.filter(x => !x.isCore).concat(oldAddons);
+
+                    if(cores.length > 0) {
+                        cores.forEach((c, i) => {
+                            if(i < 3) {
+                                document.getElementById(`core-val-${i}`).value = c.val;
+                                document.getElementById(`core-adj-${i}`).value = c.adj;
+                            }
+                        });
+                    }
+                    addonsData = adds;
+                }
             }
 
             if (centersData) {
@@ -436,55 +474,53 @@
 
         function drawClassicReport(fullData) {
             const reportData = fullData.centers; 
-            const addonsData = fullData.addons;  
+            const specialItems = fullData.specialItems || []; 
+            
             const canvas = document.getElementById('mainCanvas');
             const ctx = canvas.getContext('2d');
             const canvasWidth = 2600;
             const headerHeight = 180;
-            // 🌟 依照指示設定為 400
             const ADJUST_CARD_HEIGHT = 400; 
             const HEALTHY_CARD_HEIGHT = 140; 
-            const ADDON_CARD_H = 180; 
+            const SPECIAL_GRID_H = 85; 
             
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
             const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
             
-            const rightPanelX = 850; const rightPanelW = 1700; const gap = 40; 
-            const colWidth = (rightPanelW - (gap * 2)) / 3;
-            const colX = [rightPanelX, rightPanelX + colWidth + gap, rightPanelX + (colWidth + gap) * 2];
-            const lineHeight = 22; 
-
-            let currentY = headerHeight + 20; 
-            let healthySectionY = currentY;
-            let healthyColsY = [0, 0, 0];
+            const rightPanelX = 850; const rightPanelW = 1700; const gap = 15; 
+            const colWidth = (rightPanelW - (gap * 5)) / 6;
             
+            let currentY = headerHeight + 30; 
+            
+            let specialRows = 0;
+            if (specialItems.length > 0) {
+                specialRows = Math.ceil(specialItems.length / 6);
+                currentY += (specialRows * (SPECIAL_GRID_H + 20)) + 60; 
+            }
+
+            const mainColWidth = (rightPanelW - (gap * 2)) / 3;
+            const mainColX = [rightPanelX, rightPanelX + mainColWidth + gap, rightPanelX + (mainColWidth + gap) * 2];
+
+            let healthyStartY = currentY;
+            let healthyColsY = [0, 0, 0];
             if (healthyCenters.length > 0) {
-                currentY += 50; healthySectionY = currentY; 
-                healthyCenters.forEach((item, index) => {
-                    const colIdx = index % 3;
-                    item.drawX = colX[colIdx]; item.drawY = currentY + healthyColsY[colIdx]; item.cardH = HEALTHY_CARD_HEIGHT;
+                currentY += 50; healthyStartY = currentY;
+                healthyCenters.forEach((item, i) => {
+                    const colIdx = i % 3;
                     healthyColsY[colIdx] += HEALTHY_CARD_HEIGHT + 20;
                 });
-                currentY += Math.max(...healthyColsY) + 20;
+                currentY += Math.max(...healthyColsY) + 30;
             }
-            
-            let adjustSectionY = currentY + 30; 
-            let adjustColsY = [0, 0, 0];
 
+            let adjustStartY = currentY;
+            let adjustColsY = [0, 0, 0];
             if (adjustCenters.length > 0) {
-                currentY += 50; adjustSectionY = currentY;
-                adjustCenters.forEach((item, index) => {
-                    const colIdx = index % 3;
-                    item.drawX = colX[colIdx]; item.drawY = currentY + adjustColsY[colIdx]; item.cardH = ADJUST_CARD_HEIGHT;
+                currentY += 50; adjustStartY = currentY;
+                adjustCenters.forEach((item, i) => {
+                    const colIdx = i % 3;
                     adjustColsY[colIdx] += ADJUST_CARD_HEIGHT + 20;
                 });
-                currentY += Math.max(...adjustColsY) + 20;
-            }
-
-            let addonSectionH = 0;
-            if (addonsData && addonsData.length > 0) {
-                const rows = Math.ceil(addonsData.length / 3);
-                addonSectionH = 100 + (rows * (ADDON_CARD_H + 20)) + 40; 
+                currentY += Math.max(...adjustColsY) + 30;
             }
 
             const overallSummary = document.getElementById('overall-summary').value.trim();
@@ -495,16 +531,15 @@
                 summaryH = 100 + (sumLines.length * 40) + 60; 
             }
             
-            const totalH = Math.max(1500 + headerHeight, currentY + 50) + addonSectionH + summaryH;
+            const totalH = Math.max(1500 + headerHeight, currentY + 50) + summaryH;
             canvas.width = canvasWidth; canvas.height = totalH;
             
             ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             drawHeader(ctx, canvasWidth);
 
             ctx.save(); ctx.translate(0, headerHeight);
-            
             ctx.strokeStyle = "#e0e0e0"; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(800, 0); ctx.lineTo(800, totalH - headerHeight - addonSectionH - summaryH - 20); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(800, 0); ctx.lineTo(800, totalH - headerHeight - summaryH - 20); ctx.stroke();
 
             ctx.lineWidth = 3; ctx.strokeStyle = "#e0e0e0";
             CHANNELS.forEach(pair => {
@@ -512,7 +547,7 @@
                 const c2 = CENTERS.find(c => c.id === pair[1]);
                 if(c1 && c2) { ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); }
             });
-
+            
             reportData.forEach(item => {
                 const x = item.cx; const y = item.cy; const w = item.w; const h = item.h;
                 let bodyColor = (item.status === 'defined') ? HD_COLORS[item.id] : "#ffffff";
@@ -545,109 +580,142 @@
             });
             ctx.restore();
 
+            // A. 特別項目 (6欄位)
+            if (specialItems.length > 0) {
+                let startY = headerHeight + 30;
+                ctx.fillStyle = "#e65100"; ctx.font = "bold 28px Microsoft JhengHei"; ctx.textAlign = "left";
+                ctx.fillText("⚡ 綜合能量指數 & 加購項目", rightPanelX, startY + 25);
+                
+                startY += 45;
+                specialItems.forEach((item, idx) => {
+                    const colIdx = idx % 6; 
+                    const rowIdx = Math.floor(idx / 6);
+                    const dx = rightPanelX + (colIdx * (colWidth + gap));
+                    const dy = startY + (rowIdx * (SPECIAL_GRID_H + 20));
+                    
+                    ctx.fillStyle = item.isCore ? "#fff3e0" : "#e1f5fe";
+                    ctx.strokeStyle = item.isCore ? "#ffe0b2" : "#81d4fa";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, colWidth, SPECIAL_GRID_H); ctx.fillRect(dx, dy, colWidth, SPECIAL_GRID_H);
+                    
+                    ctx.fillStyle = item.isCore ? "#ff9800" : "#0288d1";
+                    ctx.fillRect(dx, dy, 5, SPECIAL_GRID_H);
+
+                    // 標題 (自動換行/縮小)
+                    let py = dy + 25; const px = dx + 15;
+                    ctx.textAlign = "left";
+                    ctx.fillStyle = "#333"; ctx.font = "bold 18px Microsoft JhengHei";
+                    
+                    // 🌟 智慧標題顯示：若有細項(長度>7)，則換行或縮字
+                    if (item.name.length > 10) {
+                        ctx.font = "bold 14px Microsoft JhengHei"; // 縮小字體
+                        const lines = getLines(ctx, item.name, colWidth - 25);
+                        lines.slice(0, 2).forEach((l, li) => ctx.fillText(l, px, py + (li*16) - 5));
+                    } else {
+                        ctx.fillText(item.name, px, py);
+                    }
+                    
+                    // 數值 (完整顯示 檢測/調整)
+                    py += 35;
+                    ctx.font = "14px Microsoft JhengHei";
+                    let cx = px; 
+                    
+                    ctx.fillStyle = "#666"; ctx.fillText("檢測:", cx, py); 
+                    const m1 = ctx.measureText("檢測:").width + 3;
+                    ctx.fillStyle = "#d35400"; ctx.fillText(item.val || "--", cx + m1, py);
+                    
+                    // 第二行 (如果太擠就換行，這裡空間夠就同一行)
+                    const m2 = m1 + ctx.measureText(item.val || "--").width + 10;
+                    // 若空間不足換行
+                    if (m2 > colWidth / 2) { py += 16; cx = px; } else { cx += m2; }
+                    
+                    ctx.fillStyle = "#666"; ctx.fillText("調整:", cx, py);
+                    const m3 = ctx.measureText("調整:").width + 3;
+                    ctx.fillStyle = "#2e7d32"; ctx.fillText(item.adj || "--", cx + m3, py);
+                });
+            }
+
+            // B. 健康中心 (3欄)
             if (healthyCenters.length > 0) {
                 ctx.fillStyle = "#4a766e"; ctx.font = "bold 32px Microsoft JhengHei"; ctx.textAlign = "left";
-                ctx.fillText("✅ 健康無須調整的能量中心 (請保持！)", rightPanelX, healthySectionY - 10);
-                healthyCenters.forEach(item => {
-                    const dx = item.drawX; const dy = item.drawY;
-                    ctx.fillStyle = "#e8f5e9"; ctx.strokeStyle = "#c8e6c9"; ctx.lineJoin = "round"; ctx.lineWidth = 1;
-                    ctx.strokeRect(dx, dy, colWidth, item.cardH); ctx.fillRect(dx, dy, colWidth, item.cardH);
-                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, colWidth, 4);
+                ctx.fillText("✅ 健康無須調整的能量中心 (請保持！)", rightPanelX, healthyStartY - 15);
+                
+                let tempY = [healthyStartY, healthyStartY, healthyStartY];
+                healthyCenters.forEach((item, i) => {
+                    const colIdx = i % 3;
+                    const dx = mainColX[colIdx];
+                    const dy = tempY[colIdx];
+                    const h = 140;
+
+                    ctx.fillStyle = "#e8f5e9"; ctx.strokeStyle = "#c8e6c9"; ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, mainColWidth, h); ctx.fillRect(dx, dy, mainColWidth, h);
+                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, mainColWidth, 4);
+                    
                     let cy = dy + 30; const px = dx + 20; 
-                    const centerTheme = CENTER_THEMES[item.id] ? ` (${CENTER_THEMES[item.id]})` : '';
                     ctx.textAlign = "left"; ctx.fillStyle = "#2e7d32"; ctx.font = "bold 18px Microsoft JhengHei";
-                    ctx.fillText(`${item.label}中心 - [${item.statusLabel}] ${centerTheme}`, px, cy);
+                    ctx.fillText(`${item.label} - [${item.statusLabel}]`, px, cy);
+                    
                     cy += 25; 
                     const staticBlock = item.content.find(b => b.type === 'static');
                     if (staticBlock) {
                         ctx.font = "15px Microsoft JhengHei"; ctx.fillStyle = "#4a6e4d";
-                        const lines = getLines(ctx, staticBlock.text, colWidth - 40);
+                        const lines = getLines(ctx, staticBlock.text, mainColWidth - 40);
                         for(let line of lines.slice(0, 2)) { ctx.fillText(line, px, cy); cy += 18; }
                     }
-                    cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，請保持清明與覺察！", px, cy);
+                    cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，請保持！", px, cy);
+                    
+                    tempY[colIdx] += h + 20;
                 });
             }
 
+            // C. 調整中心 (3欄)
             if (adjustCenters.length > 0) {
-                let adjustTitleY = adjustSectionY - 40; if (healthyCenters.length === 0) adjustTitleY = healthySectionY - 10;
                 ctx.fillStyle = "#c62828"; ctx.font = "bold 32px Microsoft JhengHei"; ctx.textAlign = "left";
-                ctx.fillText("🛠️ 此次實施靈擺調頻的能量中心 (重點！)", rightPanelX, adjustTitleY);
-                adjustCenters.forEach(item => {
-                    const dx = item.drawX; const dy = item.drawY;
-                    ctx.fillStyle = "#fcfcfc"; ctx.strokeStyle = "#e0e0e0"; ctx.lineJoin = "round"; ctx.lineWidth = 1;
-                    ctx.strokeRect(dx, dy, colWidth, item.cardH); ctx.fillRect(dx, dy, colWidth, item.cardH);
-                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, colWidth, 6);
-                    let cy = dy + 32; const px = dx + 20; const cardBottom = dy + item.cardH - 15;
-                    const canDraw = (y) => y < cardBottom;
-                    const centerTheme = CENTER_THEMES[item.id] ? ` (${CENTER_THEMES[item.id]})` : '';
+                ctx.fillText("🛠️ 此次實施靈擺調頻的能量中心 (重點！)", rightPanelX, adjustStartY - 15);
+                
+                let tempY = [adjustStartY, adjustStartY, adjustStartY];
+                adjustCenters.forEach((item, i) => {
+                    const colIdx = i % 3;
+                    const dx = mainColX[colIdx];
+                    const dy = tempY[colIdx];
+                    const h = 400;
+
+                    ctx.fillStyle = "#fcfcfc"; ctx.strokeStyle = "#e0e0e0"; ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, mainColWidth, h); ctx.fillRect(dx, dy, mainColWidth, h);
+                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, mainColWidth, 6);
+                    
+                    let cy = dy + 32; const px = dx + 20; 
                     ctx.textAlign = "left"; ctx.fillStyle = "#2c3e50"; ctx.font = "bold 21px Microsoft JhengHei";
-                    ctx.fillText(`${item.label}中心 - [${item.statusLabel}] ${centerTheme}`, px, cy);
+                    ctx.fillText(`${item.label} - [${item.statusLabel}]`, px, cy);
+                    
                     cy += 28; 
                     const staticBlock = item.content.find(b => b.type === 'static');
-                    if (staticBlock && canDraw(cy)) {
+                    if (staticBlock) {
                         ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#666";
-                        const lines = getLines(ctx, staticBlock.text, colWidth - 40);
-                        for(let line of lines) { if (!canDraw(cy)) break; ctx.fillText(line, px, cy); cy += 22; }
+                        const lines = getLines(ctx, staticBlock.text, mainColWidth - 40);
+                        for(let line of lines.slice(0,3)) { ctx.fillText(line, px, cy); cy += 22; }
                     }
+                    
                     cy += 12;
-                    if (canDraw(cy)) {
-                        ctx.font = "bold 18px Microsoft JhengHei";
-                        let currentX = px; ctx.fillStyle = "#2c3e50"; ctx.fillText("能量檢測/調整項目 ", currentX, cy); currentX += ctx.measureText("能量檢測/調整項目 ").width;
-                        ctx.fillStyle = "#555"; ctx.fillText("檢測數值: ", currentX, cy); currentX += ctx.measureText("檢測數值: ").width;
-                        ctx.fillStyle = "#d35400"; ctx.fillText(item.val, currentX, cy); currentX += ctx.measureText(item.val).width;
-                        ctx.fillStyle = "#ccc"; ctx.fillText("  /  ", currentX, cy); currentX += ctx.measureText("  /  ").width;
-                        ctx.fillStyle = "#555"; ctx.fillText("調整後數值: ", currentX, cy); currentX += ctx.measureText("調整後數值: ").width;
-                        ctx.fillStyle = (item.finalAdj === "無須調整") ? "#999" : "#27ae60"; ctx.fillText(item.finalAdj, currentX, cy);
-                    }
+                    ctx.font = "bold 18px Microsoft JhengHei";
+                    let currentX = px; ctx.fillStyle = "#555"; ctx.fillText("檢測: ", currentX, cy); currentX += 50;
+                    ctx.fillStyle = "#d35400"; ctx.fillText(item.val, currentX, cy); currentX += 40;
+                    ctx.fillStyle = "#555"; ctx.fillText("➜ 調後: ", currentX, cy); currentX += 65;
+                    ctx.fillStyle = "#27ae60"; ctx.fillText(item.finalAdj, currentX, cy);
+
                     cy += 28; 
                     const dynamicBlocks = item.content.filter(b => b.type !== 'static');
                     dynamicBlocks.forEach(block => {
-                        if (!canDraw(cy)) return;
+                        if (cy > dy + h - 20) return;
                         if (block.type === 'diag') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#c62828"; }
                         else if (block.type === 'adjust') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#0277bd"; }
                         else if (block.type === 'note') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#333"; }
-                        const lines = getLines(ctx, block.text, colWidth - 40);
-                        for(let line of lines) { if (canDraw(cy)) { ctx.fillText(line, px, cy); cy += lineHeight; } else break; }
+                        const lines = getLines(ctx, block.text, mainColWidth - 40);
+                        for(let line of lines) { ctx.fillText(line, px, cy); cy += lineHeight; }
                         cy += 4;
                     });
-                });
-            }
-
-            if (addonsData && addonsData.length > 0) {
-                const sy = totalH - summaryH - addonSectionH;
-                ctx.fillStyle = "#0277bd"; ctx.font = "bold 28px Microsoft JhengHei"; ctx.textAlign = "left";
-                ctx.fillText("➕ 客製化加購項目調整：", 80, sy + 40);
-
-                let startY = sy + 60;
-                let colsY = [0, 0, 0];
-                addonsData.forEach((a, idx) => {
-                    const colIdx = idx % 3;
-                    const dx = colX[colIdx];
-                    const dy = startY + colsY[colIdx];
                     
-                    ctx.fillStyle = "#e1f5fe"; ctx.strokeStyle = "#81d4fa"; ctx.lineWidth = 1;
-                    ctx.strokeRect(dx, dy, colWidth, ADDON_CARD_H); ctx.fillRect(dx, dy, colWidth, ADDON_CARD_H);
-                    ctx.fillStyle = "#0288d1"; ctx.fillRect(dx, dy, colWidth, 5); 
-
-                    let py = dy + 35; const px = dx + 20;
-                    ctx.fillStyle = "#01579b"; ctx.font = "bold 22px Microsoft JhengHei";
-                    ctx.fillText(a.name, px, py);
-                    
-                    py += 35;
-                    ctx.font = "18px Microsoft JhengHei";
-                    let cx = px; 
-                    ctx.fillStyle = "#555"; ctx.fillText("檢測：", cx, py); cx += 60;
-                    ctx.fillStyle = "#d35400"; ctx.fillText(a.val || "--", cx, py); cx += 50;
-                    ctx.fillStyle = "#555"; ctx.fillText("➜ 調整後：", cx, py); cx += 90;
-                    ctx.fillStyle = "#2e7d32"; ctx.fillText(a.adj || "--", cx, py);
-
-                    py += 35;
-                    if (a.note) {
-                        ctx.fillStyle = "#333"; ctx.font = "16px Microsoft JhengHei";
-                        const lines = getLines(ctx, "💡 " + a.note, colWidth - 40);
-                        for(let line of lines.slice(0, 3)) { ctx.fillText(line, px, py); py += 20; }
-                    }
-                    colsY[colIdx] += ADDON_CARD_H + 20;
+                    tempY[colIdx] += h + 20;
                 });
             }
 
@@ -668,7 +736,7 @@
             document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
         }
 
-        // 🌟 修正後的 Header 繪製函式：確保療癒師名字出現
+        // 🌟 Header
         function drawHeader(ctx, width) {
             ctx.fillStyle = "#2c3e50"; ctx.font = "bold 56px Microsoft JhengHei"; ctx.textAlign = "center";
             ctx.fillText("人類圖能量檢測報表", width/2, 70);
@@ -678,16 +746,16 @@
             
             const date = document.getElementById('info-date').value;
             const name = document.getElementById('info-name').value || "---";
-            const healer = document.getElementById('info-healer').value || "---"; // 確實抓取
+            const healer = document.getElementById('info-healer').value || "---";
             const phone = document.getElementById('info-phone').value || "---";
             
             ctx.fillStyle = "#333"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.textAlign = "left";
-            const colW = boxW / 4; // 🌟 關鍵修正：分成 4 欄
+            const colW = boxW / 4; 
             
             ctx.fillText(`調整日期：${date}`, boxX + 40, boxY + 50);
             ctx.fillText(`姓名：${name}`, boxX + colW + 40, boxY + 50);
             ctx.fillText(`手機：${phone}`, boxX + colW*2 + 40, boxY + 50);
-            ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50); // 🌟 補上這一行
+            ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50);
         }
 
         function getLines(ctx, text, maxWidth) {

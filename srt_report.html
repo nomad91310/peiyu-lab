@@ -801,17 +801,31 @@
             ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50);
         }
 
-        // 🌟 [修復：補回 getLines 函式]
-        function getLines(ctx, text, maxWidth) {
-            if(!text) return [];
-            const words = text.split(''); const lines = []; let currentLine = words[0];
-            for (let i = 1; i < words.length; i++) {
-                const width = ctx.measureText(currentLine + words[i]).width;
-                if (width < maxWidth) { currentLine += words[i]; } 
-                else { lines.push(currentLine); currentLine = words[i]; }
-            }
-            lines.push(currentLine); return lines;
+       // 🌟 [請用這段取代原本最下面的 getLines 函式]
+        function processParagraphs(ctx, text, maxWidth) {
+            if (!text) return [""];
+            const paras = text.split('\n'); // 支援 Enter 換行
+            let allLines = [];
+            paras.forEach(p => {
+                if (p.trim() === "") { allLines.push(""); return; }
+                const chars = p.split('');
+                let line = "";
+                for (let n = 0; n < chars.length; n++) {
+                    let testLine = line + chars[n];
+                    if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                        allLines.push(line);
+                        line = chars[n];
+                    } else {
+                        line = testLine;
+                    }
+                }
+                allLines.push(line);
+            });
+            return allLines;
         }
+
+        // 讓 getLines 也指向同一個功能，防止舊代碼報錯
+        const getLines = processParagraphs;
     </script>
 </body>
 </html>

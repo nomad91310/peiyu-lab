@@ -35,6 +35,9 @@
         /* 服務項目卡片 */
         .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
         .service-card:hover { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* 🌟 反灰樣式 */
+        .service-card.disabled-card { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); }
+
         .service-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
         .service-info { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; cursor: pointer; flex: 1; }
         .service-info input { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; margin: 0; }
@@ -66,72 +69,26 @@
             padding: 20px 0; perspective: 1000px;
         }
         
-        /* ==================== 全新品牌卡背設計 (開始) ==================== */
-.card-back {
-    width: 60px; height: 100px;
-    /* 1. 基底：深森綠漸層背景 */
-    background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%);
-    /* 2. 邊框：靜謐金雙重邊框 */
-    border: 2px solid #c6a87c;
-    outline: 1px solid #1a2f23; /* 內圈深色勾邊增加層次 */
-    outline-offset: -4px;
-    border-radius: 8px;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1);
-    overflow: hidden; /* 確保內容不超出圓角 */
-
-    /* 3. 紋理：神聖幾何能量網格 (純CSS繪製的微妙背景紋理) */
-    background-image: 
-        radial-gradient(circle at center, rgba(198, 168, 124, 0.05) 0%, transparent 70%), /* 中央微光 */
-        repeating-linear-gradient(45deg, rgba(198, 168, 124, 0.03) 0px, rgba(198, 168, 124, 0.03) 1px, transparent 1px, transparent 15px), /* 斜線網格1 */
-        repeating-linear-gradient(-45deg, rgba(198, 168, 124, 0.03) 0px, rgba(198, 168, 124, 0.03) 1px, transparent 1px, transparent 15px); /* 斜線網格2 */
-    background-blend-mode: overlay;
-    
-    /* 讓內部元素居中 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* 卡背中央的品牌 LOGO */
-.card-back::after {
-    content: '培癒\A試驗室'; /* \A 是換行符號，讓文字變兩行 */
-    white-space: pre; /* 允許換行 */
-    font-family: 'Noto Serif TC', 'Shippori Mincho', serif; /* 使用有氣質的宋體/明體 */
-    color: #c6a87c; /* 靜謐金 */
-    font-size: 12px; /* 字體大小 */
-    font-weight: 900;
-    text-align: center;
-    line-height: 1.4;
-    letter-spacing: 2px;
-    text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); /* 文字發光效果 */
-    opacity: 0.9;
-    
-    /* LOGO 外面的裝飾圈 */
-    padding: 12px 8px;
-    border: 1px solid rgba(198, 168, 124, 0.5);
-    border-radius: 50% / 30%; /* 橢圓形裝飾框 */
-    background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%);
-    box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2);
-}
-
-/* 滑鼠懸停效果 */
-.card-back:hover {
-    transform: translateY(-12px) scale(1.05); /* 懸浮感更強 */
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); /* 金色光暈 */
-    border-color: #e0c8a0; /* 邊框變亮 */
-    z-index: 100;
-}
-/* ==================== 全新品牌卡背設計 (結束) ==================== */
-
-/* 手機版適配調整 */
-@media (max-width: 600px) {
-    .card-back { width: 45px; height: 75px; outline-offset: -3px; }
-    .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; }
-    .card-reveal { width: 300px; height: 515px; } 
-}
+        .card-back {
+            width: 60px; height: 100px;
+            background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%);
+            border: 2px solid #c6a87c;
+            outline: 1px solid #1a2f23; outline-offset: -4px;
+            border-radius: 8px; cursor: pointer; position: relative;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1);
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+        }
+        .card-back::after {
+            content: '培癒\A試驗室'; white-space: pre;
+            font-family: 'Noto Serif TC', 'Shippori Mincho', serif;
+            color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center;
+            line-height: 1.4; letter-spacing: 2px; text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); opacity: 0.9;
+            padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%;
+            background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%);
+            box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2);
+        }
+        .card-back:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); border-color: #e0c8a0; z-index: 100; }
 
         .result-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -150,10 +107,7 @@
         .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
 
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
-        .layer-text { 
-            position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; 
-            transform: translate(-50%, -50%); pointer-events: none; width: max-content; 
-        }
+        .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
         .retry-btn {
             position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%);
@@ -163,11 +117,7 @@
         }
         .retry-btn:hover { background: #d4b585; transform: translateX(-50%) scale(1.05); }
 
-        /* 手機適配 */
-        @media (max-width: 600px) {
-            .card-back { width: 45px; height: 75px; }
-            .card-reveal { width: 300px; height: 515px; } 
-        }
+        @media (max-width: 600px) { .card-back { width: 45px; height: 75px; outline-offset: -3px; } .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; } .card-reveal { width: 300px; height: 515px; } }
     </style>
 </head>
 <body>
@@ -229,7 +179,6 @@
     let cats = [], items = [], activeCat = null;
     let allCards = [];
 
-    // 原廠預設樣式
     const defaultStyle = {
         gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" },
         info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 },
@@ -240,14 +189,13 @@
     window.onload = async () => {
         try {
             await Promise.all([initBookingData(), initDrawData()]);
-        } catch (e) {
-            console.error("Init Error:", e);
-        }
+        } catch (e) { console.error("Init Error:", e); }
     };
 
     async function initBookingData() {
-        const { data: c } = await myDB.from('service_categories').select('*'); cats = c || [];
-        const { data: i } = await myDB.from('services').select('*'); items = i || [];
+        // 🌟 排序修正：加上 order
+        const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
+        const { data: i } = await myDB.from('services').select('*').order('sort_order', {ascending: true}); items = i || [];
         const { data: posts } = await myDB.from('site_content').select('*').order('created_at', {ascending:false});
         renderCats();
         if(posts) {
@@ -256,13 +204,9 @@
         }
     }
 
-    // 🌟 初始化抽卡資料
     async function initDrawData() {
         const { data, error } = await myDB.from('card_pool').select('*');
-        if(!error && data) {
-            allCards = data;
-            renderDrawTable();
-        }
+        if(!error && data) { allCards = data; renderDrawTable(); }
     }
 
     function showSection(id) { 
@@ -274,16 +218,12 @@
         window.scrollTo(0,0); 
     }
 
-    // === 抽卡邏輯 ===
     function renderDrawTable() {
-        const table = document.getElementById('draw-area');
-        table.innerHTML = '';
+        const table = document.getElementById('draw-area'); table.innerHTML = '';
         const deck = allCards.length > 0 ? allCards : Array.from({length:64}, (_, i) => ({ gate_id: i+1 }));
         const shuffled = deck.sort(() => Math.random() - 0.5);
-
         shuffled.forEach((card, index) => {
-            const el = document.createElement('div');
-            el.className = 'card-back';
+            const el = document.createElement('div'); el.className = 'card-back';
             el.style.animation = `fadeIn 0.5s ease ${index * 0.02}s backwards`;
             el.onclick = () => openCard(card);
             table.appendChild(el);
@@ -292,55 +232,34 @@
 
     function openCard(card) {
         if (!card.gate_id) return alert("資料庫讀取中...");
-
         const bgUrl = card.image_url ? card.image_url : 'https://via.placeholder.com/320x550?text=No+Image';
         document.getElementById('p-bg').src = bgUrl + `?t=${new Date().getTime()}`;
-        
         document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`;
         document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`;
         document.getElementById('p-zodiac').innerText = card.zodiac || '';
         document.getElementById('p-quote').innerText = card.quote || '';
-
-        // 🌟 優先使用卡片自己的樣式
         const style = card.style_config || defaultStyle;
         applyStyle('gate', style.gate || defaultStyle.gate);
         applyStyle('info', style.info || defaultStyle.info);
         applyStyle('zodiac', style.zodiac || defaultStyle.zodiac);
         applyStyle('quote', style.quote || defaultStyle.quote);
-
         document.getElementById('overlay').classList.add('active');
     }
 
     function applyStyle(id, s) {
-        const el = document.getElementById(`p-${id}`);
-        const def = defaultStyle[id];
+        const el = document.getElementById(`p-${id}`); const def = defaultStyle[id];
         const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop];
-
-        el.style.left = val('x') + '%';
-        el.style.top = val('y') + '%';
-        el.style.fontSize = val('size') + 'px';
-        el.style.fontFamily = val('font');
-        el.style.color = val('color');
-        
+        el.style.left = val('x') + '%'; el.style.top = val('y') + '%';
+        el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color');
         const str = val('stroke');
         el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none';
-
         if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px';
-        if(id === 'quote') {
-            el.style.lineHeight = val('lh');
-            el.style.letterSpacing = val('ls') + 'px';
-        }
-        if(id === 'zodiac') {
-            el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none';
-        }
+        if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; }
+        if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none';
     }
 
-    function closeResult() {
-        document.getElementById('overlay').classList.remove('active');
-        setTimeout(() => { renderDrawTable(); }, 500);
-    }
+    function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); }, 500); }
 
-    // === 預約系統邏輯 (保留原功能) ===
     function toggleFlow() { 
         const isD = document.getElementById('data-flow').value === 'data'; 
         document.getElementById('flow-data').style.display = isD ? 'block' : 'none'; 
@@ -367,14 +286,34 @@
         const sub = items.filter(x => x.category_id === id);
         const isSleepMode = activeCat.question_type === 'sleep'; 
         const listArea = document.getElementById('items-area');
+        
         listArea.innerHTML = sub.map(i => {
             let subHtml = "";
             if (i.sub_options) {
                 const opts = i.sub_options.split(/[,，]/);
                 subHtml = `<div class="sub-check-grid">` + opts.map(opt => `<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${opt.trim()}"> ${opt.trim()}</label>`).join('') + `</div>`;
             }
-            return `<div class="service-card"><div class="service-header"><label class="service-info"><input type="${isSleepMode ? 'checkbox' : 'radio'}" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" ${i.is_auto_check?'checked disabled':''} onchange="calcTotal()"><span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div>${i.description ? `<div class="service-desc">${i.description}</div>` : ''}${subHtml}${i.has_text_input ? `<input type="text" class="addon-note" data-id="${i.id}" placeholder="請簡述您的需求..." style="margin-top:10px;">` : ''}</div>`;
+            // 🌟 修正：一律使用 checkbox + data-is-main 控制互斥
+            const isMain = i.is_main ? 'true' : 'false';
+            return `<div class="service-card" id="card-${i.id}">
+                <div class="service-header">
+                    <label class="service-info">
+                        <input type="checkbox" name="svc" value="${i.id}" 
+                               data-price="${i.price}" 
+                               data-title="${i.title}" 
+                               data-is-main="${isMain}"
+                               ${i.is_auto_check?'checked disabled':''} 
+                               onchange="handleServiceCheck(this)">
+                        <span>${i.title}</span>
+                    </label>
+                    <span class="price-badge">$${i.price}</span>
+                </div>
+                ${i.description ? `<div class="service-desc">${i.description}</div>` : ''}
+                ${subHtml}
+                ${i.has_text_input ? `<input type="text" class="addon-note" data-id="${i.id}" placeholder="請簡述您的需求..." style="margin-top:10px;">` : ''}
+            </div>`;
         }).join('');
+        
         const qArea = document.getElementById('conditional-question');
         if (isSleepMode) {
             qArea.innerHTML = `<label>🌙 請填寫您的「預計睡眠/休息時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">老師將於您休息時進行遠端能量調整，請提供您通常的作息時間。</div><input type="text" id="q-val" placeholder="例如：每天 23:30 ~ 07:00">`;
@@ -382,6 +321,25 @@
             qArea.innerHTML = `<label>📅 請填寫您「希望預約的諮詢時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">請提供 2-3 個方便的時間，後續將由專人確認最終排程。</div><input type="text" id="q-val" placeholder="例如：平日晚上 8 點後、12/25 下午">`;
         }
         calcTotal(); showSection('booking-step-2');
+    }
+
+    // 🌟 修正：主項目互斥邏輯
+    function handleServiceCheck(el) {
+        const isMain = el.dataset.isMain === 'true';
+        if (isMain) {
+            const allMainInputs = document.querySelectorAll('input[name="svc"][data-is-main="true"]');
+            allMainInputs.forEach(input => {
+                if (input !== el) {
+                    // 如果自己被勾選，其他人就 disable
+                    input.disabled = el.checked; 
+                    const card = document.getElementById(`card-${input.value}`);
+                    if(card) {
+                        card.classList.toggle('disabled-card', el.checked);
+                    }
+                }
+            });
+        }
+        calcTotal();
     }
 
     function calcTotal() {

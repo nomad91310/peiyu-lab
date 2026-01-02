@@ -20,7 +20,7 @@
         .metric-card { background: white; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: center; display:flex; align-items:center; justify-content:space-between; }
         .metric-title { font-weight: bold; color: #e65100; font-size: 14px; margin-right:5px; flex-shrink: 0; }
         .metric-inputs { display:flex; gap:5px; flex: 1; justify-content: flex-end; }
-        .metric-inputs input { width: 55px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
+        .metric-inputs input { width: 60px; padding: 5px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
 
         /* 加購項目區 */
         #addon-section-wrapper { display: none; margin-bottom: 25px; }
@@ -80,15 +80,15 @@
         <div class="core-metrics-container">
             <div class="metric-card">
                 <div class="metric-title">🔥 生命力</div>
-                <div class="metric-inputs"><input type="number" id="core-val-0" placeholder="檢%"><input type="number" id="core-adj-0" placeholder="調%"></div>
+                <div class="metric-inputs"><input type="number" id="core-val-0" placeholder="數值"><input type="number" id="core-adj-0" placeholder="調後"></div>
             </div>
             <div class="metric-card">
                 <div class="metric-title">🚀 執行力</div>
-                <div class="metric-inputs"><input type="number" id="core-val-1" placeholder="檢%"><input type="number" id="core-adj-1" placeholder="調%"></div>
+                <div class="metric-inputs"><input type="number" id="core-val-1" placeholder="數值"><input type="number" id="core-adj-1" placeholder="調後"></div>
             </div>
             <div class="metric-card">
                 <div class="metric-title">🎨 創造力</div>
-                <div class="metric-inputs"><input type="number" id="core-val-2" placeholder="檢%"><input type="number" id="core-adj-2" placeholder="調%"></div>
+                <div class="metric-inputs"><input type="number" id="core-val-2" placeholder="數值"><input type="number" id="core-adj-2" placeholder="調後"></div>
             </div>
         </div>
 
@@ -228,8 +228,8 @@
                     <div class="addon-title" title="${name}">🎯 ${name}</div>
                     <input type="hidden" id="addon-name-${idx}" value="${name}">
                     <div style="display:flex; gap:5px; margin-bottom:5px;">
-                        <input type="number" id="addon-val-${idx}" placeholder="檢%" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
-                        <input type="number" id="addon-adj-${idx}" placeholder="調%" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="addon-val-${idx}" placeholder="數值" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
+                        <input type="number" id="addon-adj-${idx}" placeholder="調後" style="width:45%; padding:5px; border:1px solid #ccc; border-radius:4px;">
                     </div>
                     <textarea id="addon-note-${idx}" placeholder="備註..." style="width:100%; height:30px; border:1px solid #ccc; font-size:12px;"></textarea>
                 `;
@@ -282,7 +282,6 @@
         }
 
         function collectDataFromUI() {
-            // 1. 能量中心
             const centersData = CENTERS.map(c => {
                 const centerKey = c.id;
                 const db = CENTER_CONTENT[centerKey];
@@ -305,17 +304,12 @@
                 });
                 const customNote = document.getElementById(`note-${centerKey}`).value.trim();
                 let content = [];
-                
-                // 🛡️ 防呆：確保 static text 存在
-                const staticText = db.static[status] || "狀態說明載入中...";
-                content.push({ type: 'static', text: staticText });
-                
+                content.push({ type: 'static', text: db.static[status] });
                 content = content.concat(dynamicPairs.map(p => ({ type: p.type, text: p.diag || p.text })));
                 if (customNote) { content.push({ type: 'note', text: `💡 補充：${customNote}` }); }
                 return { ...c, label: db.label, status, statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
             });
 
-            // 2. 必測項目
             const coreData = MANDATORY_CHECKS.map((name, i) => ({
                 name: name,
                 val: document.getElementById(`core-val-${i}`).value || "--",
@@ -323,7 +317,6 @@
                 isCore: true
             }));
 
-            // 3. 加購項目
             const addonsData = [];
             if (detectedAddons.length > 0) {
                 detectedAddons.forEach((name, idx) => {
@@ -337,7 +330,7 @@
             return { centers: centersData, specialItems: [...coreData, ...addonsData] };
         }
 
-        // 🌟 生成預覽 (含 Try-Catch 防呆)
+        // 🌟 修正後的生成預覽
         function generatePreview() {
             try {
                 const msg = document.getElementById('status-msg');
@@ -349,7 +342,7 @@
                 document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
             } catch (e) {
                 console.error(e);
-                alert("生成失敗，請檢查資料是否完整。\n錯誤訊息: " + e.message);
+                alert("生成失敗: " + e.message);
                 document.getElementById('status-msg').innerText = "❌ 生成失敗";
             }
         }
@@ -427,6 +420,7 @@
                     centersData = data.raw_data.centers || []; 
                     const special = data.raw_data.specialItems || [];
                     const oldAddons = data.raw_data.addons || [];
+                    
                     const cores = special.filter(x => x.isCore);
                     const adds = special.filter(x => !x.isCore).concat(oldAddons);
 
@@ -492,7 +486,7 @@
             const headerHeight = 180;
             const ADJUST_CARD_HEIGHT = 400; 
             const HEALTHY_CARD_HEIGHT = 140; 
-            const SPECIAL_GRID_H = 100; // 稍微加高以容納換行
+            const SPECIAL_GRID_H = 85; 
             
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
             const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
@@ -500,6 +494,9 @@
             const rightPanelX = 850; const rightPanelW = 1700; const gap = 15; 
             const colWidth = (rightPanelW - (gap * 5)) / 6;
             
+            // 🌟 補回這裡！這就是轉圈圈的元兇
+            const lineHeight = 22;
+
             let currentY = headerHeight + 30; 
             
             let specialRows = 0;
@@ -611,22 +608,20 @@
                     ctx.fillStyle = item.isCore ? "#ff9800" : "#0288d1";
                     ctx.fillRect(dx, dy, 5, SPECIAL_GRID_H);
 
-                    // 標題 (自動換行/縮小)
+                    // 標題
                     let py = dy + 25; const px = dx + 15;
                     ctx.textAlign = "left";
                     ctx.fillStyle = "#333"; ctx.font = "bold 18px Microsoft JhengHei";
                     
-                    // 🌟 智慧標題顯示
                     if (item.name.length > 10) {
                         ctx.font = "bold 14px Microsoft JhengHei"; 
                         const lines = getLines(ctx, item.name, colWidth - 25);
-                        // 最多顯示兩行，避免溢出
                         lines.slice(0, 2).forEach((l, li) => ctx.fillText(l, px, py + (li*16) - 5));
                     } else {
                         ctx.fillText(item.name, px, py);
                     }
                     
-                    // 數值 (完整顯示 檢測/調整)
+                    // 數值 (顯示全名)
                     py += 40;
                     ctx.font = "14px Microsoft JhengHei";
                     let cx = px; 
@@ -635,7 +630,6 @@
                     const m1 = ctx.measureText("檢測:").width + 3;
                     ctx.fillStyle = "#d35400"; ctx.fillText(item.val || "--", cx + m1, py);
                     
-                    // 第二行 (如果太擠就換行)
                     const m2 = m1 + ctx.measureText(item.val || "--").width + 10;
                     if (m2 > colWidth / 2) { py += 16; cx = px; } else { cx += m2; }
                     
@@ -746,18 +740,6 @@
             document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
         }
 
-        // 🌟 防呆版 getLines：遇到空值直接回傳空陣列，防止崩潰
-        function getLines(ctx, text, maxWidth) {
-            if (!text) return []; 
-            const words = text.split(''); const lines = []; let currentLine = words[0];
-            for (let i = 1; i < words.length; i++) {
-                const width = ctx.measureText(currentLine + words[i]).width;
-                if (width < maxWidth) { currentLine += words[i]; } 
-                else { lines.push(currentLine); currentLine = words[i]; }
-            }
-            lines.push(currentLine); return lines;
-        }
-
         // 🌟 Header
         function drawHeader(ctx, width) {
             ctx.fillStyle = "#2c3e50"; ctx.font = "bold 56px Microsoft JhengHei"; ctx.textAlign = "center";
@@ -778,6 +760,17 @@
             ctx.fillText(`姓名：${name}`, boxX + colW + 40, boxY + 50);
             ctx.fillText(`手機：${phone}`, boxX + colW*2 + 40, boxY + 50);
             ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50);
+        }
+
+        function getLines(ctx, text, maxWidth) {
+            if(!text) return [];
+            const words = text.split(''); const lines = []; let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const width = ctx.measureText(currentLine + words[i]).width;
+                if (width < maxWidth) { currentLine += words[i]; } 
+                else { lines.push(currentLine); currentLine = words[i]; }
+            }
+            lines.push(currentLine); return lines;
         }
     </script>
 </body>

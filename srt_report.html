@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人類圖能量諮詢報表 | 培癒試驗室</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #e0e5ec; padding: 30px; margin: 0; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 1280px; margin: 0 auto; }
+        h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px;}
+        
+        /* 頂部資料 */
+        .header-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; background: #f0f4f8; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #dcebf7; }
+        .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
+        .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 15px; }
+        
+        /* 加購項目區 (新) */
+        #addon-section-wrapper { display: none; margin-bottom: 25px; }
+        #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .addon-section-title { font-size: 18px; font-weight: bold; color: #0277bd; margin: 20px 0 10px 0; padding-left: 10px; border-left: 5px solid #0277bd; background: #e1f5fe; padding: 10px; border-radius: 0 5px 5px 0; }
+
+        /* 總結區 */
+        .summary-section { background: #fff8e1; border: 2px solid #ffecb3; border-radius: 10px; padding: 15px; margin-bottom: 25px; }
+        .summary-section label { display: block; font-size: 16px; color: #f57f17; font-weight: bold; margin-bottom: 8px; }
+        .summary-section textarea { width: 100%; height: 70px; padding: 10px; border: 1px solid #ffe082; border-radius: 6px; font-size: 15px; resize: vertical; font-family: inherit;}
+
+        /* 能量中心與加購卡片共用樣式 */
+        #inputs-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .center-card, .addon-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative; }
+        
+        /* 能量中心顏色條 */
+        .center-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #ccc; }
+        .center-card[data-color="head"]::before { background: #e8e6a5; } .center-card[data-color="ajna"]::before { background: #a7d28b; } .center-card[data-color="throat"]::before { background: #c6a87c; } .center-card[data-color="g"]::before { background: #f4eb68; } .center-card[data-color="ego"]::before { background: #e85d5d; } .center-card[data-color="solar"]::before { background: #c69c6d; } .center-card[data-color="spleen"]::before { background: #c69c6d; } .center-card[data-color="sacral"]::before { background: #e85d5d; } .center-card[data-color="root"]::before { background: #c69c6d; }
+        
+        /* 加購卡片樣式 */
+        .addon-card { border: 1px solid #b3e5fc; background: #f1f8e9; }
+        .addon-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #0288d1; }
+        
+        .center-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; padding-left: 8px; }
+        .center-title { font-weight: bold; font-size: 17px; } .status-group { display: flex; gap: 4px; }
+        .status-btn { padding: 5px 8px; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; }
+        .status-btn.active { background: #34495e; color: white; }
+        .diagnosis-area { background: #fafafa; padding: 12px; border-radius: 8px; border: 1px dashed #ddd; margin-bottom: 10px; }
+        .checkbox-item { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; cursor: pointer; margin-bottom: 5px; line-height: 1.3; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 12px; } .input-group { flex: 1; } .input-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }
+        .custom-note-area textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 45px; }
+        
+        /* 按鈕區 */
+        .action-bar { display: flex; gap: 15px; margin-top: 30px; justify-content: center; }
+        .btn { padding: 15px 30px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition:0.3s; flex: 1; max-width: 300px;}
+        .btn-preview { background: #546e7a; color: white; }
+        .btn-preview:hover { background: #455a64; transform:translateY(-2px); }
+        .btn-save { background: #2e7d32; color: white; display: none; } 
+        .btn-save:hover { background: #1b5e20; transform:translateY(-2px); }
+
+        #status-msg { margin-top: 15px; text-align: center; font-weight: bold; color: #d32f2f; min-height: 24px;}
+        #result-wrapper { display: none; margin-top: 40px; text-align: center; }
+        #final-image { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .save-hint { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 16px; font-weight: bold; display: inline-block; }
+        .canvas-container { display: none; }
+        @media (max-width: 768px) { .header-inputs { grid-template-columns: 1fr 1fr; } #inputs-container, #addon-container { grid-template-columns: 1fr; } .action-bar { flex-direction: column; align-items: center; } .btn { width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 id="page-title">🔮 人類圖能量諮詢報表</h2>
+        
+        <div class="header-inputs">
+            <div class="header-group"><label>調整日期</label><input type="date" id="info-date"></div>
+            <div class="header-group phone-group"><label>個案手機</label><input type="tel" id="info-phone" placeholder="系統自動帶入"></div>
+            <div class="header-group"><label>個案姓名</label><input type="text" id="info-name" placeholder="系統自動帶入"></div>
+            <div class="header-group"><label>療癒師</label><input type="text" id="info-healer" value="培癒試驗室"></div>
+        </div>
+
+        <div id="inputs-container"></div>
+
+        <div id="addon-section-wrapper">
+            <div class="addon-section-title">➕ 加購項目 / 客製化檢測</div>
+            <div id="addon-container"></div>
+        </div>
+
+        <div class="summary-section">
+            <label>📝 療癒師總結</label>
+            <textarea id="overall-summary" placeholder="例如：本次整體能量場調整重點..."></textarea>
+        </div>
+        
+        <div id="status-msg"></div>
+
+        <div class="action-bar">
+            <button class="btn btn-preview" onclick="generatePreview()">
+                📸 生成圖片預覽
+            </button>
+            <button class="btn btn-save" id="btn-real-save" onclick="saveToDatabase()">
+                💾 確認存檔並結案
+            </button>
+        </div>
+
+        <div id="result-wrapper">
+            <div id="preview-hint" style="color:#555; margin-bottom:10px;">👇 這是圖片預覽，確認無誤後請按上方的「確認存檔」</div>
+            <img id="final-image" />
+        </div>
+    </div>
+
+    <div class="canvas-container"><canvas id="mainCanvas"></canvas></div>
+
+    <script>
+        const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co"; 
+        const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
+        let myDB = null; 
+        
+        let currentBookingId = null;
+        let currentReportId = null;
+        let detectedAddons = []; // 存取解析出來的加購項目文字
+
+        // -----------------------------------------------------------
+        // 1. 資料常數 (完整版，一字不漏)
+        // -----------------------------------------------------------
+        const HD_COLORS = { head: '#e8e6a5', ajna: '#a7d28b', throat: '#c6a87c', g: '#f4eb68', ego: '#e85d5d', solar: '#c69c6d', spleen: '#c69c6d', sacral: '#e85d5d', root: '#c69c6d' };
+        const ENERGY_COLORS = { red: '#ff5252', yellow: '#ffd740', green: '#69f0ae' };
+        
+        const CENTER_THEMES = {
+            head: '靈感・壓力・疑問', ajna: '概念・信念・分析', throat: '顯化・溝通・行動',
+            g: '愛・方向・認同', ego: '價值感・承諾・動力', solar: '情緒・感受・神經系統',
+            spleen: '生存・直覺・健康', sacral: '生產力・性・生命力', root: '壓力・衝勁・腎上腺'
+        };
+
+        const CENTER_CONTENT = {
+            head: { label: "頭腦", organ: "松果體", static: { defined: "天生有固定的思考模式，能持續處理資訊。", undefined: "靈感來自四面八方，思考有彈性。", open: "對靈感完全開放，但也容易迷失。" }, dynamic: [{ label: "困在腦中/憂鬱 (內縮)", defDiag: "思考內捲陷入封閉迴圈，想太多導致憂鬱。", defAdj: "釋放累積內在壓力，清理思考迴路。", undefDiag: "吸收環境混亂思緒，分不清哪些是自己的。", undefAdj: "清理外來雜訊，建立頭部能量屏障。", isHealthy: false }, { label: "雞婆/焦慮行動 (外顯)", defDiag: "急於找答案，給人壓迫感。", defAdj: "安撫急躁腦波，引導能量下行。", undefDiag: "把他人問題當責任，焦慮地想解決。", undefAdj: "切斷非己責任能量索，回歸平靜。", isHealthy: false }, { label: "失眠/停不下來 (失調)", defDiag: "身體累大腦仍慣性運轉，無法關機。", defAdj: "注入深層放鬆頻率，強制關機。", undefDiag: "睡前受高壓環境影響，腦波過度活躍。", undefAdj: "建立頂輪防護罩，淨化睡眠場域。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，思考清晰。", undefDiag: "頭腦清明，不執著於答案。", adjust: "", isHealthy: true }] },
+            ajna: { label: "邏輯", organ: "腦下垂體", static: { defined: "享受研究，有固定的看法。", undefined: "思考有彈性，能看見多種可能性。", open: "心智像白紙，對資訊無偏見。" }, dynamic: [{ label: "焦慮/自責 (內縮)", defDiag: "誤認想通即做到，對結果失望。", defAdj: "整合思考與行動能量。", undefDiag: "因無固定想法而不安，擔心自己不聰明。", undefAdj: "轉化對未知恐懼，肯定彈性價值。", isHealthy: false }, { label: "固執/假裝確定 (外顯)", defDiag: "思維僵化，聽不進他人意見。", defAdj: "軟化僵固信念，注入流動能量。", undefDiag: "掩飾不確定感，假裝自己什麼都懂。", undefAdj: "卸下偽裝盔甲，接受不確定性。", isHealthy: false }, { label: "專注力渙散 (失調)", defDiag: "腦下垂體壓力過大，用腦過度。", defAdj: "修復眉心輪能量，補充腦力。", undefDiag: "心智被資訊淹沒，無法聚焦。", undefAdj: "清理心智緩存區，恢復專注。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，見解獨到。", undefDiag: "思維靈活，能吸納不同觀點。", adjust: "", isHealthy: true }] },
+            throat: { label: "喉嚨", organ: "甲狀腺", static: { defined: "有固定表達模式，說話有影響力。", undefined: "聲音多變，容易反應環境。", open: "無固定聲音，甚至可能沉默。" }, dynamic: [{ label: "有口難言/壓抑 (內縮)", defDiag: "因受挫或制約而不敢表達。", defAdj: "疏通顯化管道，移除喉輪阻塞。", undefDiag: "不知如何表達，覺得沒人想聽。", undefAdj: "清理表達通道焦慮，連結內在真實。", isHealthy: false }, { label: "喋喋不休 (外顯)", defDiag: "急於表達，說話不經大腦。", defAdj: "平衡喉輪躁動能量，慢下來。", undefDiag: "怕空氣安靜，為了說而說。", undefAdj: "安住於內在，練習沈默的力量。", isHealthy: false }, { label: "光說不練/空談 (失調)", defDiag: "能量停在嘴巴，無法顯化行動。", defAdj: "連結喉輪與動力中心，落地執行。", undefDiag: "迎合氣氛說錯話，事後後悔。", undefAdj: "校準語言能量，保持覺知。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，言行一致。", undefDiag: "隨順因緣發聲，聲音有磁性。", adjust: "", isHealthy: true }] },
+            g: { label: "G中心", organ: "肝臟", static: { defined: "愛與方向是固定的，了解自己。", undefined: "場所的變色龍，對環境敏感。", open: "無身分標籤，體驗不同角色。" }, dynamic: [{ label: "缺乏自愛/討好 (內縮)", defDiag: "為維持關係而委屈自己。", defAdj: "修補能量場破洞，喚醒自愛。", undefDiag: "討愛而過度配合，失去自我。", undefAdj: "注入無條件的愛，回歸中心。", isHealthy: false }, { label: "強勢/控制狂 (外顯)", defDiag: "過於堅持原則，強迫他人接受。", defAdj: "柔化心輪能量，增加包容性。", undefDiag: "依附他人以獲得身分認同。", undefAdj: "切斷依附能量索，獨立自主。", isHealthy: false }, { label: "迷失方向/空虛 (失調)", defDiag: "太久沒回內在，找不到熱情。", defAdj: "校準內在導航，重燃熱情。", undefDiag: "迷失在環境裡，不知道去哪。", undefAdj: "清理外在干擾，等待指引。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，方向明確。", undefDiag: "享受當下環境，隨遇而安。", adjust: "", isHealthy: true }] },
+            ego: { label: "意志", organ: "心臟/胃", static: { defined: "意志力固定，承諾必達。", undefined: "價值無需證明，不必承諾。", open: "無競爭意識，不知為何而戰。" }, dynamic: [{ label: "自卑/價值感低 (內縮)", defDiag: "因失敗懷疑能力，自我攻擊。", defAdj: "釋放挫敗感，修復自我價值。", undefDiag: "陷比較陷阱，覺得不如人。", undefAdj: "釋放自我懷疑毒素，肯定自我。", isHealthy: false }, { label: "傲慢/施壓 (外顯)", defDiag: "自我膨脹，對他人頤指氣使。", defAdj: "轉化過強自我意識，學會謙卑。", undefDiag: "虛張聲勢，假裝強大。", undefAdj: "卸下偽裝盔甲，接受真實。", isHealthy: false }, { label: "過度承諾/過勞 (失調)", defDiag: "高估電量，承諾過多。", defAdj: "切斷超載承諾，保留能量。", undefDiag: "為證明自己而拚命，心臟負荷大。", undefAdj: "強化能量邊界，拒絕證明。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，信守承諾。", undefDiag: "不需證明什麼，輕鬆自在。", adjust: "", isHealthy: true }] },
+            solar: { label: "情緒", organ: "腎/神經", static: { defined: "自帶情緒波，情緒有高低週期。", undefined: "共感者，放大環境情緒。", open: "情緒冷靜，旁觀者視角。" }, dynamic: [{ label: "壓抑/好人症候群 (內縮)", defDiag: "受制約認情緒不好，強顏歡笑。", defAdj: "疏通情緒管道，允許情緒流動。", undefDiag: "怕衝突而隱忍，內傷嚴重。", undefAdj: "清理堆積情緒垃圾，釋放委屈。", isHealthy: false }, { label: "情緒勒索/倒垃圾 (外顯)", defDiag: "拒為情緒負責，遷怒他人。", defAdj: "淨化能量場，轉化負面情緒。", undefDiag: "反射環境憤怒，情緒失控。", undefAdj: "協助抽離當下情緒，回歸平靜。", isHealthy: false }, { label: "衝動/焦慮 (失調)", defDiag: "浪尖上做決定，事後後悔。", defAdj: "安撫神經系統，練習等待。", undefDiag: "神經系統過載，莫名焦慮。", undefAdj: "注入寧靜頻率，修復神經。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，情緒穩定。", undefDiag: "不沾染他人情緒，清明覺察。", adjust: "", isHealthy: true }] },
+            spleen: { label: "直覺", organ: "脾/淋巴", static: { defined: "直覺可靠，身體反應快。", undefined: "直覺不穩，容易被環境影響。", open: "恐懼無濾網，對危險敏感。" }, dynamic: [{ label: "過度保守/不敢變 (內縮)", defDiag: "太清楚風險，導致裹足不前。", defAdj: "釋放僵化防禦，增強勇氣。", undefDiag: "被恐懼癱瘓，不敢行動。", undefAdj: "清理深層恐懼印記，建立安全感。", isHealthy: false }, { label: "鐵齒/忽視警訊 (外顯)", defDiag: "大腦蓋過身體訊號，硬撐。", defAdj: "重新校準身體雷達，恢復連結。", undefDiag: "為掩飾恐懼而魯莽行事。", undefAdj: "連結生存本能，落地踏實。", isHealthy: false }, { label: "依賴/緊抓不放 (失調)", defDiag: "只信舊習慣，抗拒改變。", defAdj: "切斷舊有慣性連結，迎接新流。", undefDiag: "怕孤單，緊抓不健康關係。", undefAdj: "切斷依附能量索，獨立自主。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，直覺敏銳。", undefDiag: "面對恐懼不依附，來去自如。", adjust: "", isHealthy: true }] },
+            sacral: { label: "薦骨", organ: "生殖系統", static: { defined: "強大發電機，持續工作的動力。", undefined: "能量引導者，知人善任。", open: "性能量模糊，對工作無固定偏好。" }, dynamic: [{ label: "勉強/能量阻塞 (內縮)", defDiag: "腦逼身體，做不喜歡的事。", defAdj: "修復能量漏洞，找回喜悅。", undefDiag: "吸收他人興奮，不知何時停。", undefAdj: "協助與空白和解，允許休息。", isHealthy: false }, { label: "亂發起/挫敗 (外顯)", defDiag: "忘記等待，主動發起受挫。", defAdj: "協助能量歸位，練習回應。", undefDiag: "拼命工作，想跟上他人節奏。", undefAdj: "釋放我不夠好驅動力，放慢。", isHealthy: false }, { label: "性/創造力受阻 (失調)", defDiag: "創造之火熄滅，性冷感。", defAdj: "激活臍輪能量，重燃生命力。", undefDiag: "能量透支，徹底燒毀。", undefAdj: "注入修復能量，深層滋養。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，工作滿足。", undefDiag: "工作有度，懂得下班。", adjust: "", isHealthy: true }] },
+            root: { label: "根部", organ: "腎上腺", static: { defined: "抗壓性強，壓力是動力。", undefined: "壓力放大器，急於擺脫壓力。", open: "對壓力無感，但也可能無動力。" }, dynamic: [{ label: "壓抑焦慮/便秘 (內縮)", defDiag: "壓力吞肚內，造成身體僵硬。", defAdj: "釋放累積底層壓力，放鬆筋膜。", undefDiag: "被他人壓力綁架，莫名焦躁。", undefAdj: "清理外來壓力能量，回歸中心。", isHealthy: false }, { label: "逼迫他人/暴躁 (外顯)", defDiag: "受不了慢步調，催促他人。", defAdj: "平衡根部能量，學習耐心。", undefDiag: "急於解脫，把行程塞滿。", undefAdj: "協助安住當下，一次做一事。", isHealthy: false }, { label: "生存焦慮/無法扎根 (失調)", defDiag: "對現實不安，擔憂未來。", defAdj: "強化海底輪，連結大地。", undefDiag: "壓力大到想逃避，魂不守舍。", undefAdj: "協助能量扎根，穩定核心。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好，從容應對。", undefDiag: "不被他人壓力驅動，自在逍遙。", adjust: "", isHealthy: true }] }
+        };
+
+        const CENTERS = [
+            { id: 'head',   shape: 'tri-up',    cx: 400, cy: 150, w: 160, h: 140, textDy: 10 },
+            { id: 'ajna',   shape: 'tri-down',  cx: 400, cy: 290, w: 160, h: 140, textDy: -10 },
+            { id: 'throat', shape: 'square',    cx: 400, cy: 450, w: 140, h: 140, textDy: 0 },
+            { id: 'g',      shape: 'diamond',   cx: 400, cy: 650, w: 170, h: 170, textDy: 0 },
+            { id: 'ego',    shape: 'tri-small', cx: 620, cy: 680, w: 130, h: 120, textDy: 0 }, 
+            { id: 'sacral', shape: 'square',    cx: 400, cy: 840, w: 140, h: 140, textDy: 0 },
+            { id: 'spleen', shape: 'tri-left',  cx: 160, cy: 830, w: 160, h: 140, textDy: 0 },
+            { id: 'solar',  shape: 'tri-right', cx: 640, cy: 830, w: 160, h: 140, textDy: 0 },
+            { id: 'root',   shape: 'square',    cx: 400, cy: 1030, w: 140, h: 140, textDy: 0 }
+        ];
+
+        const CHANNELS = [
+            ['head', 'ajna'], ['ajna', 'throat'], ['throat', 'g'], ['throat', 'spleen'], 
+            ['throat', 'sacral'], ['throat', 'solar'], ['g', 'sacral'], ['g', 'spleen'], 
+            ['g', 'ego'], ['ego', 'throat'], ['ego', 'solar'], ['sacral', 'root'], 
+            ['sacral', 'spleen'], ['sacral', 'solar'], ['spleen', 'root'], ['solar', 'root']
+        ];
+
+        // -----------------------------------------------------------
+        // 2. 初始化邏輯
+        // -----------------------------------------------------------
+        window.onload = async function() {
+            document.getElementById('info-date').valueAsDate = new Date();
+            renderInputs(); // 渲染 9 大中心
+
+            try {
+                myDB = window.supabase.createClient(SB_URL, SB_KEY);
+                console.log("✅ DB Connected");
+            } catch(e) { console.error("DB Error:", e); }
+
+            const params = new URLSearchParams(window.location.search);
+            const pId = params.get('id'); 
+            const pName = params.get('name');
+            const pPhone = params.get('phone');
+            const pBid = params.get('bid');
+
+            if (pId) {
+                // 編輯模式
+                currentReportId = pId;
+                document.getElementById('page-title').innerText = "📝 編輯歷史報表";
+                document.getElementById('btn-real-save').innerText = "💾 更新儲存";
+                await loadReportData(pId);
+            } else {
+                // 新增模式
+                if (pName) document.getElementById('info-name').value = pName;
+                if (pPhone) document.getElementById('info-phone').value = pPhone;
+                if (pBid) {
+                    currentBookingId = pBid;
+                    fetchBookingService(pBid); // 🌟 抓取並分析加購
+                }
+            }
+        };
+
+        // -----------------------------------------------------------
+        // 3. 核心功能函式
+        // -----------------------------------------------------------
+
+        // 抓取並解析加購項目
+        async function fetchBookingService(bid) {
+            if(!myDB) return;
+            try {
+                const { data, error } = await myDB.from('bookings').select('service_item, service_detail').eq('id', bid).single();
+                if (error) throw error;
+                
+                if (data && data.service_detail) {
+                    const mainItem = data.service_item.trim();
+                    const details = data.service_detail.split('|').map(s => s.trim());
+                    
+                    // 🌟 智慧過濾：只留下「不等於主項目」的細項
+                    detectedAddons = details.filter(d => {
+                        const cleanName = d.replace(/\(\$\d+\)/g, '').trim();
+                        // 簡單的判斷：如果細項名稱不完全包含主項目名稱，就視為加購
+                        return !cleanName.includes(mainItem) && cleanName !== "";
+                    }).map(d => d.replace(/\(\$\d+\)/g, '').trim());
+
+                    if (detectedAddons.length > 0) {
+                        renderAddonInputs(detectedAddons);
+                    }
+                }
+            } catch(e) {
+                console.error("Fetch Service Error", e);
+            }
+        }
+
+        // 渲染加購項目輸入框
+        function renderAddonInputs(addonNames) {
+            const wrapper = document.getElementById('addon-section-wrapper');
+            const container = document.getElementById('addon-container');
+            wrapper.style.display = 'block';
+            container.innerHTML = '';
+
+            addonNames.forEach((name, idx) => {
+                const div = document.createElement('div');
+                div.className = 'addon-card';
+                div.innerHTML = `
+                    <div class="center-header" style="border-bottom-color:#b3e5fc;">
+                        <div class="center-title" style="color:#0277bd;">🎯 ${name}</div>
+                        <input type="hidden" id="addon-name-${idx}" value="${name}">
+                    </div>
+                    <div class="input-row" style="margin-top:15px;">
+                        <div class="input-group"><label>檢測數值 (%)</label><input type="number" id="addon-val-${idx}" placeholder="%"></div>
+                        <div class="input-group"><label>調整後 (%)</label><input type="number" id="addon-adj-${idx}" placeholder="%"></div>
+                    </div>
+                    <div class="custom-note-area">
+                        <textarea id="addon-note-${idx}" placeholder="針對 ${name} 的觀察或建議..."></textarea>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 渲染 9 大中心輸入框
+        function renderInputs() {
+            const container = document.getElementById('inputs-container');
+            CENTERS.forEach(c => {
+                const data = CENTER_CONTENT[c.id];
+                const card = document.createElement('div');
+                card.className = 'center-card';
+                card.setAttribute('data-color', c.id);
+                
+                let checkHTML = data.dynamic.map((d, i) => {
+                    return `<label class="checkbox-item">
+                        <input type="checkbox" name="diag-${c.id}" value="${i}" onclick="handleCheck('${c.id}', ${i})">
+                        <span>${d.label}</span>
+                    </label>`;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="center-header">
+                        <div class="center-title">${data.label} <span style="font-size:12px;color:#777;">(${data.organ})</span></div>
+                        <div class="status-group" id="group-${c.id}">
+                            <button class="status-btn active" onclick="setStatus('${c.id}', 'defined')">已定義</button>
+                            <button class="status-btn" onclick="setStatus('${c.id}', 'undefined')">未定義</button>
+                            <button class="status-btn" onclick="setStatus('${c.id}', 'open')">全空白</button>
+                            <input type="hidden" id="status-${c.id}" value="defined">
+                        </div>
+                    </div>
+                    <div class="diagnosis-area">
+                        <div style="font-weight:bold;color:#e65100;margin-bottom:5px;">📋 靈擺診斷</div>
+                        <div class="checkbox-group">${checkHTML}</div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>檢測(%)</label><input type="number" id="val-${c.id}"></div>
+                        <div class="input-group"><label>調整(%)</label><input type="number" id="adj-${c.id}"></div>
+                    </div>
+                    <div class="custom-note-area">
+                        <textarea id="note-${c.id}" placeholder="手寫補充..."></textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setStatus(centerId, status) {
+            const group = document.getElementById(`group-${centerId}`);
+            const buttons = group.getElementsByTagName('button');
+            buttons[0].className = status === 'defined' ? 'status-btn active' : 'status-btn';
+            buttons[1].className = status === 'undefined' ? 'status-btn active' : 'status-btn';
+            buttons[2].className = status === 'open' ? 'status-btn active' : 'status-btn';
+            document.getElementById(`status-${centerId}`).value = status;
+        }
+
+        function handleCheck(centerId, index) {
+            const checkboxes = document.getElementsByName(`diag-${centerId}`);
+            const data = CENTER_CONTENT[centerId].dynamic[index];
+            if (data.isHealthy) {
+                if (checkboxes[index].checked) {
+                    checkboxes.forEach((cb, i) => { if(i !== index) cb.checked = false; });
+                    document.getElementById(`val-${centerId}`).value = 100; 
+                }
+            } else {
+                checkboxes.forEach((cb, i) => {
+                    const d = CENTER_CONTENT[centerId].dynamic[i];
+                    if (d.isHealthy) cb.checked = false;
+                });
+            }
+        }
+
+        // 收集 UI 資料
+        function collectDataFromUI() {
+            // 1. 9大中心
+            const centersData = CENTERS.map(c => {
+                const centerKey = c.id;
+                const db = CENTER_CONTENT[centerKey];
+                const status = document.getElementById(`status-${centerKey}`).value;
+                let statusLabel = (status === 'defined') ? "已定義" : (status === 'undefined') ? "未定義" : "全空白";
+                let valInput = document.getElementById(`val-${centerKey}`).value;
+                let val = valInput === "" ? "--" : valInput;
+                let adjInput = document.getElementById(`adj-${centerKey}`).value;
+                let finalAdj = (adjInput !== "") ? adjInput : ((valInput !== "" && parseInt(valInput) !== 100) ? "100" : "無須調整");
+                const checkboxes = document.getElementsByName(`diag-${centerKey}`);
+                let dynamicPairs = [];
+                checkboxes.forEach((cb, i) => {
+                    if (cb.checked) {
+                        const item = db.dynamic[i];
+                        let dTxt = (status === 'defined') ? item.defDiag : item.undefDiag;
+                        let aTxt = (status === 'defined') ? item.defAdj : item.undefAdj;
+                        if (item.isHealthy) { dynamicPairs.push({ type: 'healthy_diag', diag: `🟢 ${dTxt}` }); } 
+                        else { dynamicPairs.push({ type: 'diag', text: `⚠️ ${dTxt}` }); dynamicPairs.push({ type: 'adjust', text: `🛠️ ${aTxt}` }); }
+                    }
+                });
+                const customNote = document.getElementById(`note-${centerKey}`).value.trim();
+                let content = [];
+                content.push({ type: 'static', text: db.static[status] });
+                content = content.concat(dynamicPairs.map(p => ({ type: p.type, text: p.diag || p.text })));
+                if (customNote) { content.push({ type: 'note', text: `💡 補充：${customNote}` }); }
+                return { ...c, label: db.label, status, statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
+            });
+
+            // 2. 加購項目
+            const addonsData = [];
+            if (detectedAddons.length > 0) {
+                detectedAddons.forEach((name, idx) => {
+                    const val = document.getElementById(`addon-val-${idx}`).value || "--";
+                    const adj = document.getElementById(`addon-adj-${idx}`).value || "--";
+                    const note = document.getElementById(`addon-note-${idx}`).value.trim();
+                    addonsData.push({ name, val, adj, note });
+                });
+            }
+
+            return { centers: centersData, addons: addonsData };
+        }
+
+        function generatePreview() {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "🎨 正在生成預覽圖...";
+            const fullData = collectDataFromUI();
+            drawClassicReport(fullData);
+            msg.innerText = "";
+            document.getElementById('btn-real-save').style.display = 'inline-block';
+            document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
+        }
+
+        async function saveToDatabase() {
+            const msg = document.getElementById('status-msg');
+            const ph = document.getElementById('info-phone').value.trim();
+            const nm = document.getElementById('info-name').value.trim();
+            if(!myDB) { alert("連線錯誤"); return; }
+            if(!ph) { alert("請填寫個案手機"); return; }
+
+            msg.innerText = "⏳ 正在存檔中...";
+            document.getElementById('btn-real-save').disabled = true;
+
+            const fullData = collectDataFromUI();
+
+            try {
+                let uid = null;
+                const { data: prof } = await myDB.from('profiles').select('id').eq('phone', ph).single();
+                if(prof) uid = prof.id; 
+                else {
+                    const { data: np } = await myDB.from('profiles').insert([{phone: ph, full_name: nm}]).select().single();
+                    uid = np.id;
+                }
+
+                const sum = document.getElementById('overall-summary').value;
+                const dt = document.getElementById('info-date').value;
+                const healer = document.getElementById('info-healer').value;
+
+                let reportId = currentReportId;
+
+                if (currentReportId) {
+                    await myDB.from('reports').update({
+                        summary: sum, raw_data: fullData, service_date: dt, healer_name: healer
+                    }).eq('id', currentReportId);
+                } else {
+                    const { data: newR, error: ie } = await myDB.from('reports').insert([{
+                        user_id: uid, service_date: dt, healer_name: healer,
+                        summary: sum, raw_data: fullData
+                    }]).select().single();
+                    if(ie) throw ie;
+                    reportId = newR.id;
+                    currentReportId = newR.id;
+                }
+
+                if (currentBookingId) {
+                    const linkText = `[報告已生成 ID:${reportId}]`;
+                    const { data: oldB } = await myDB.from('bookings').select('wish_detail').eq('id', currentBookingId).single();
+                    let newDetail = oldB.wish_detail;
+                    if (!newDetail.includes("報告已生成")) { newDetail += ` | ${linkText}`; }
+                    await myDB.from('bookings').update({ status: 'completed', wish_detail: newDetail }).eq('id', currentBookingId);
+                }
+
+                msg.innerText = "✅ 存檔成功！訂單已結案。";
+                alert("存檔成功！");
+                
+            } catch(err) {
+                console.error(err);
+                msg.innerText = "⚠️ 存檔失敗: " + err.message;
+                document.getElementById('btn-real-save').disabled = false;
+            }
+        }
+
+        // --- 4. 讀取與回填 ---
+        async function loadReportData(reportId) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "⏳ 正在讀取歷史資料...";
+            const { data, error } = await myDB.from('reports').select('*').eq('id', reportId).single();
+            if (error) { alert("讀取失敗：" + error.message); return; }
+
+            document.getElementById('info-date').value = data.service_date;
+            document.getElementById('info-healer').value = data.healer_name;
+            document.getElementById('overall-summary').value = data.summary || "";
+            
+            if (data.user_id) {
+                const { data: prof } = await myDB.from('profiles').select('*').eq('id', data.user_id).single();
+                if (prof) {
+                    document.getElementById('info-name').value = prof.full_name;
+                    document.getElementById('info-phone').value = prof.phone;
+                }
+            }
+
+            let centersData = [];
+            let addonsData = [];
+
+            if (data.raw_data) {
+                if (Array.isArray(data.raw_data)) {
+                    centersData = data.raw_data;
+                } else {
+                    centersData = data.raw_data.centers || [];
+                    addonsData = data.raw_data.addons || [];
+                }
+            }
+
+            if (centersData) {
+                centersData.forEach(item => {
+                    const cid = item.id;
+                    setStatus(cid, item.status);
+                    if(item.val && item.val!=="--") document.getElementById(`val-${cid}`).value = item.val;
+                    if(item.finalAdj && item.finalAdj!=="無須調整" && item.finalAdj!=="100") document.getElementById(`adj-${cid}`).value = item.finalAdj;
+
+                    if (item.raw_diags) {
+                        const dbDynamic = CENTER_CONTENT[cid].dynamic;
+                        item.raw_diags.forEach(d => {
+                            let rawTxt = d.text || d.diag; 
+                            if (!rawTxt) return;
+                            const cleanTxt = rawTxt.substring(2).trim();
+                            dbDynamic.forEach((def, idx) => {
+                                if (def.defDiag === cleanTxt || def.undefDiag === cleanTxt || def.defAdj === cleanTxt || def.undefAdj === cleanTxt) {
+                                    const cbs = document.getElementsByName(`diag-${cid}`);
+                                    if(cbs[idx]) cbs[idx].checked = true;
+                                }
+                            });
+                        });
+                    }
+                    if (item.content) {
+                        const noteBlock = item.content.find(x => x.type === 'note');
+                        if (noteBlock) document.getElementById(`note-${cid}`).value = noteBlock.text.replace("💡 補充：", "");
+                    }
+                });
+            }
+
+            if (addonsData.length > 0) {
+                detectedAddons = addonsData.map(a => a.name);
+                renderAddonInputs(detectedAddons);
+                addonsData.forEach((a, idx) => {
+                    document.getElementById(`addon-val-${idx}`).value = a.val !== "--" ? a.val : "";
+                    document.getElementById(`addon-adj-${idx}`).value = a.adj !== "--" ? a.adj : "";
+                    document.getElementById(`addon-note-${idx}`).value = a.note || "";
+                });
+            }
+
+            msg.innerText = "";
+            generatePreview();
+        }
+
+        // --- 5. 繪圖 (Canvas) ---
+        function drawClassicReport(fullData) {
+            const reportData = fullData.centers; 
+            const addonsData = fullData.addons;  
+
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+            const canvasWidth = 2600;
+            const headerHeight = 180;
+            const ADJUST_CARD_HEIGHT = 380;
+            const HEALTHY_CARD_HEIGHT = 130;
+            const ADDON_CARD_H = 180; // 加購卡片高度
+            
+            const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
+            const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
+            
+            const rightPanelX = 850; const rightPanelW = 1700; const gap = 40; 
+            const colWidth = (rightPanelW - (gap * 2)) / 3;
+            const colX = [rightPanelX, rightPanelX + colWidth + gap, rightPanelX + (colWidth + gap) * 2];
+            const lineHeight = 22; 
+
+            let currentY = headerHeight + 20; 
+            let healthySectionY = currentY;
+            let healthyColsY = [0, 0, 0];
+            
+            if (healthyCenters.length > 0) {
+                currentY += 50; healthySectionY = currentY; 
+                healthyCenters.forEach((item, index) => {
+                    const colIdx = index % 3;
+                    item.drawX = colX[colIdx]; item.drawY = currentY + healthyColsY[colIdx]; item.cardH = HEALTHY_CARD_HEIGHT;
+                    healthyColsY[colIdx] += HEALTHY_CARD_HEIGHT + 20;
+                });
+                currentY += Math.max(...healthyColsY) + 20;
+            }
+            
+            let adjustSectionY = currentY + 30; 
+            let adjustColsY = [0, 0, 0];
+
+            if (adjustCenters.length > 0) {
+                currentY += 50; adjustSectionY = currentY;
+                adjustCenters.forEach((item, index) => {
+                    const colIdx = index % 3;
+                    item.drawX = colX[colIdx]; item.drawY = currentY + adjustColsY[colIdx]; item.cardH = ADJUST_CARD_HEIGHT;
+                    adjustColsY[colIdx] += ADJUST_CARD_HEIGHT + 20;
+                });
+                currentY += Math.max(...adjustColsY) + 20;
+            }
+
+            // 計算加購項目區塊高度
+            let addonSectionH = 0;
+            if (addonsData && addonsData.length > 0) {
+                const rows = Math.ceil(addonsData.length / 3);
+                addonSectionH = 100 + (rows * (ADDON_CARD_H + 20)) + 40; 
+            }
+
+            const overallSummary = document.getElementById('overall-summary').value.trim();
+            let summaryH = 0; let sumLines = [];
+            if (overallSummary) {
+                ctx.font = "24px Microsoft JhengHei";
+                sumLines = getLines(ctx, overallSummary, canvasWidth - 160);
+                summaryH = 100 + (sumLines.length * 40) + 60; 
+            }
+            
+            const totalH = Math.max(1350 + headerHeight, currentY + 50) + addonSectionH + summaryH;
+            canvas.width = canvasWidth; canvas.height = totalH;
+            
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawHeader(ctx, canvasWidth);
+
+            ctx.save(); ctx.translate(0, headerHeight);
+            
+            // 左側分隔線
+            ctx.strokeStyle = "#e0e0e0"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(800, 0); ctx.lineTo(800, totalH - headerHeight - addonSectionH - summaryH - 20); ctx.stroke();
+
+            ctx.lineWidth = 3; ctx.strokeStyle = "#e0e0e0";
+            CHANNELS.forEach(pair => {
+                const c1 = CENTERS.find(c => c.id === pair[0]);
+                const c2 = CENTERS.find(c => c.id === pair[1]);
+                if(c1 && c2) { ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); }
+            });
+
+            // 畫 9 大中心 (Bodygraph)
+            reportData.forEach(item => {
+                const x = item.cx; const y = item.cy; const w = item.w; const h = item.h;
+                let bodyColor = (item.status === 'defined') ? HD_COLORS[item.id] : "#ffffff";
+                let displayVal = item.val;
+                let badgeColor = ENERGY_COLORS.green;
+                if (displayVal !== "--") { if (parseInt(displayVal) <= 40) badgeColor = ENERGY_COLORS.red; else if (parseInt(displayVal) <= 70) badgeColor = ENERGY_COLORS.yellow; }
+
+                ctx.beginPath();
+                if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
+                else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
+                else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
+                else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
+                else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
+
+                ctx.fillStyle = bodyColor; ctx.fill();
+                ctx.lineWidth = 4; ctx.strokeStyle = "#444";
+                ctx.setLineDash(item.status === 'open' ? [8, 6] : []); ctx.stroke(); ctx.setLineDash([]); 
+
+                const textY = y + (item.textDy || 0);
+                ctx.fillStyle = "#2c3e50"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 4; ctx.strokeStyle = "white";
+                ctx.strokeText(item.label, x - 12, textY); ctx.fillText(item.label, x - 12, textY);   
+
+                const badgeX = (x - 12) + (ctx.measureText(item.label).width / 2) + 28; const badgeY = textY - 2; 
+                ctx.beginPath(); ctx.arc(badgeX, badgeY, 20, 0, Math.PI * 2); ctx.fillStyle = badgeColor; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
+                ctx.fillStyle = (displayVal !== "--" && parseInt(displayVal) <= 70 && badgeColor !== ENERGY_COLORS.green) ? "#333" : "#000";
+                if (badgeColor === ENERGY_COLORS.red) ctx.fillStyle = "#fff";
+                ctx.font = "bold 16px Arial"; ctx.fillText(displayVal === "--" ? "?" : displayVal, badgeX, badgeY);
+            });
+            ctx.restore();
+
+            // 畫右側卡片 (健康)
+            if (healthyCenters.length > 0) {
+                ctx.fillStyle = "#4a766e"; ctx.font = "bold 32px Microsoft JhengHei"; ctx.textAlign = "left";
+                ctx.fillText("✅ 健康無須調整的能量中心 (請保持！)", rightPanelX, healthySectionY - 10);
+                healthyCenters.forEach(item => {
+                    const dx = item.drawX; const dy = item.drawY;
+                    ctx.fillStyle = "#e8f5e9"; ctx.strokeStyle = "#c8e6c9"; ctx.lineJoin = "round"; ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, colWidth, item.cardH); ctx.fillRect(dx, dy, colWidth, item.cardH);
+                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, colWidth, 4);
+                    let cy = dy + 30; const px = dx + 20; 
+                    const centerTheme = CENTER_THEMES[item.id] ? ` (${CENTER_THEMES[item.id]})` : '';
+                    ctx.textAlign = "left"; ctx.fillStyle = "#2e7d32"; ctx.font = "bold 18px Microsoft JhengHei";
+                    ctx.fillText(`${item.label}中心 - [${item.statusLabel}] ${centerTheme}`, px, cy);
+                    cy += 25; 
+                    const staticBlock = item.content.find(b => b.type === 'static');
+                    if (staticBlock) {
+                        ctx.font = "15px Microsoft JhengHei"; ctx.fillStyle = "#4a6e4d";
+                        const lines = getLines(ctx, staticBlock.text, colWidth - 40);
+                        for(let line of lines.slice(0, 2)) { ctx.fillText(line, px, cy); cy += 18; }
+                    }
+                    cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，請保持清明與覺察！", px, cy);
+                });
+            }
+
+            // 畫右側卡片 (調整)
+            if (adjustCenters.length > 0) {
+                let adjustTitleY = adjustSectionY - 40; if (healthyCenters.length === 0) adjustTitleY = healthySectionY - 10;
+                ctx.fillStyle = "#c62828"; ctx.font = "bold 32px Microsoft JhengHei"; ctx.textAlign = "left";
+                ctx.fillText("🛠️ 此次實施靈擺調頻的能量中心 (重點！)", rightPanelX, adjustTitleY);
+                adjustCenters.forEach(item => {
+                    const dx = item.drawX; const dy = item.drawY;
+                    ctx.fillStyle = "#fcfcfc"; ctx.strokeStyle = "#e0e0e0"; ctx.lineJoin = "round"; ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, colWidth, item.cardH); ctx.fillRect(dx, dy, colWidth, item.cardH);
+                    ctx.fillStyle = HD_COLORS[item.id]; ctx.fillRect(dx, dy, colWidth, 6);
+                    let cy = dy + 32; const px = dx + 20; const cardBottom = dy + item.cardH - 15;
+                    const canDraw = (y) => y < cardBottom;
+                    const centerTheme = CENTER_THEMES[item.id] ? ` (${CENTER_THEMES[item.id]})` : '';
+                    ctx.textAlign = "left"; ctx.fillStyle = "#2c3e50"; ctx.font = "bold 21px Microsoft JhengHei";
+                    ctx.fillText(`${item.label}中心 - [${item.statusLabel}] ${centerTheme}`, px, cy);
+                    cy += 28; 
+                    const staticBlock = item.content.find(b => b.type === 'static');
+                    if (staticBlock && canDraw(cy)) {
+                        ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#666";
+                        const lines = getLines(ctx, staticBlock.text, colWidth - 40);
+                        for(let line of lines) { if (!canDraw(cy)) break; ctx.fillText(line, px, cy); cy += 22; }
+                    }
+                    cy += 12;
+                    if (canDraw(cy)) {
+                        ctx.font = "bold 18px Microsoft JhengHei";
+                        let currentX = px; ctx.fillStyle = "#2c3e50"; ctx.fillText("能量檢測/調整項目 ", currentX, cy); currentX += ctx.measureText("能量檢測/調整項目 ").width;
+                        ctx.fillStyle = "#555"; ctx.fillText("檢測數值: ", currentX, cy); currentX += ctx.measureText("檢測數值: ").width;
+                        ctx.fillStyle = "#d35400"; ctx.fillText(item.val, currentX, cy); currentX += ctx.measureText(item.val).width;
+                        ctx.fillStyle = "#ccc"; ctx.fillText("  /  ", currentX, cy); currentX += ctx.measureText("  /  ").width;
+                        ctx.fillStyle = "#555"; ctx.fillText("調整後數值: ", currentX, cy); currentX += ctx.measureText("調整後數值: ").width;
+                        ctx.fillStyle = (item.finalAdj === "無須調整") ? "#999" : "#27ae60"; ctx.fillText(item.finalAdj, currentX, cy);
+                    }
+                    cy += 28; 
+                    const dynamicBlocks = item.content.filter(b => b.type !== 'static');
+                    dynamicBlocks.forEach(block => {
+                        if (!canDraw(cy)) return;
+                        if (block.type === 'diag') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#c62828"; }
+                        else if (block.type === 'adjust') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#0277bd"; }
+                        else if (block.type === 'note') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#333"; }
+                        const lines = getLines(ctx, block.text, colWidth - 40);
+                        for(let line of lines) { if (canDraw(cy)) { ctx.fillText(line, px, cy); cy += lineHeight; } else break; }
+                        cy += 4;
+                    });
+                });
+            }
+
+            // 5. 繪製加購項目 (Blue Cards)
+            if (addonsData && addonsData.length > 0) {
+                const sy = totalH - summaryH - addonSectionH;
+                ctx.fillStyle = "#0277bd"; ctx.font = "bold 28px Microsoft JhengHei"; ctx.textAlign = "left";
+                ctx.fillText("➕ 客製化加購項目調整：", 80, sy + 40);
+
+                let startY = sy + 60;
+                let colsY = [0, 0, 0];
+                addonsData.forEach((a, idx) => {
+                    const colIdx = idx % 3;
+                    const dx = colX[colIdx];
+                    const dy = startY + colsY[colIdx];
+                    
+                    ctx.fillStyle = "#e1f5fe"; ctx.strokeStyle = "#81d4fa"; ctx.lineWidth = 1;
+                    ctx.strokeRect(dx, dy, colWidth, ADDON_CARD_H); ctx.fillRect(dx, dy, colWidth, ADDON_CARD_H);
+                    ctx.fillStyle = "#0288d1"; ctx.fillRect(dx, dy, colWidth, 5); 
+
+                    let py = dy + 35; const px = dx + 20;
+                    ctx.fillStyle = "#01579b"; ctx.font = "bold 22px Microsoft JhengHei";
+                    ctx.fillText(a.name, px, py);
+                    
+                    py += 35;
+                    ctx.font = "18px Microsoft JhengHei";
+                    let cx = px; 
+                    ctx.fillStyle = "#555"; ctx.fillText("檢測：", cx, py); cx += 60;
+                    ctx.fillStyle = "#d35400"; ctx.fillText(a.val || "--", cx, py); cx += 50;
+                    ctx.fillStyle = "#555"; ctx.fillText("➜ 調整後：", cx, py); cx += 90;
+                    ctx.fillStyle = "#2e7d32"; ctx.fillText(a.adj || "--", cx, py);
+
+                    py += 35;
+                    if (a.note) {
+                        ctx.fillStyle = "#333"; ctx.font = "16px Microsoft JhengHei";
+                        const lines = getLines(ctx, "💡 " + a.note, colWidth - 40);
+                        for(let line of lines.slice(0, 3)) { ctx.fillText(line, px, py); py += 20; }
+                    }
+                    colsY[colIdx] += ADDON_CARD_H + 20;
+                });
+            }
+
+            // 6. 繪製總結區塊 (黃)
+            if (overallSummary) {
+                const sy = totalH - summaryH;
+                ctx.fillStyle = "#fff8e1"; ctx.strokeStyle = "#ffecb3"; ctx.lineWidth = 2;
+                ctx.strokeRect(50, sy, canvasWidth - 100, summaryH - 20); ctx.fillRect(50, sy, canvasWidth - 100, summaryH - 20);
+                ctx.fillStyle = "#e65100"; ctx.font = "bold 28px Microsoft JhengHei"; ctx.textAlign = "left";
+                ctx.fillText("📝 療癒師總結：", 80, sy + 50);
+                ctx.fillStyle = "#333"; ctx.font = "24px Microsoft JhengHei";
+                let stY = sy + 100;
+                sumLines.forEach(line => { ctx.fillText(line, 80, stY); stY += 40; });
+            }
+
+            const imgData = canvas.toDataURL("image/jpeg", 0.9);
+            document.getElementById('final-image').src = imgData;
+            document.getElementById('result-wrapper').style.display = 'block';
+            document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
+        }
+
+        function drawHeader(ctx, width) {
+            ctx.fillStyle = "#2c3e50"; ctx.font = "bold 56px Microsoft JhengHei"; ctx.textAlign = "center";
+            ctx.fillText("人類圖能量檢測報表", width/2, 70);
+            const boxW = width - 100; const boxX = 50; const boxY = 100; const boxH = 80;
+            ctx.fillStyle = "#f1f8e9"; ctx.strokeStyle = "#c5e1a5"; ctx.lineWidth = 2;
+            ctx.fillRect(boxX, boxY, boxW, boxH); ctx.strokeRect(boxX, boxY, boxW, boxH);
+            const date = document.getElementById('info-date').value;
+            const name = document.getElementById('info-name').value || "---";
+            const healer = document.getElementById('info-healer').value || "---";
+            const phone = document.getElementById('info-phone').value || "---";
+            ctx.fillStyle = "#333"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.textAlign = "left";
+            const colW = boxW / 3;
+            ctx.fillText(`調整日期：${date}`, boxX + 40, boxY + 50);
+            ctx.fillText(`姓名：${name}`, boxX + colW + 40, boxY + 50);
+            ctx.fillText(`手機：${phone}`, boxX + colW*2 + 40, boxY + 50);
+        }
+
+        function getLines(ctx, text, maxWidth) {
+            const words = text.split(''); const lines = []; let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const width = ctx.measureText(currentLine + words[i]).width;
+                if (width < maxWidth) { currentLine += words[i]; } 
+                else { lines.push(currentLine); currentLine = words[i]; }
+            }
+            lines.push(currentLine); return lines;
+        }
+    </script>
+</body>
+</html>

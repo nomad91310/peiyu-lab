@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>培癒中控室 V11 | 7日速覽版</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* ================= 樣式表 (CSS) ================= */
+        :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --dark: #2c3e50; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; display: flex; }
+        
+        /* 側邊欄 */
+        .sidebar { width: 240px; background: var(--forest); height: 100vh; color: white; position: fixed; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; z-index: 100; }
+        .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; }
+        .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
+        .sidebar button:hover { background: #2a3f33; color: white; }
+        .sidebar button.active { background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); }
+        
+        /* 主內容區 */
+        .main { margin-left: 240px; padding: 30px; flex: 1; min-height: 100vh; display:none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 卡片與元件 */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); }
+        
+        /* 表格與按鈕 */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        tr:hover { background: #fdfaf1; }
+        
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* Modal 彈窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-body { background: white; width: 90%; max-width: 700px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .id-card { background: #f0f7ff; padding: 15px; border-radius: 10px; border-left: 5px solid var(--info); margin-bottom: 15px; }
+
+        /* 登入鎖 */
+        #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
+
+        /* 儀表板佈局 (V11 新增) */
+        .dashboard-layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px; }
+        
+        /* 右側 7 日排程樣式 */
+        .upcoming-day { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .upcoming-day-header { font-weight: bold; color: var(--forest); margin-bottom: 5px; font-size: 14px; }
+        .upcoming-slots { display: flex; flex-wrap: wrap; gap: 5px; }
+        .u-slot { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #f0f7ff; border: 1px solid #d6e9f9; color: #2980b9; }
+        .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+
+        /* 批次排班 & 月曆樣式 (保留 V10) */
+        .batch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .batch-slot { position: relative; }
+        .batch-slot input { position: absolute; opacity: 0; cursor: pointer; }
+        .batch-slot label { display: block; padding: 8px; background: #fff; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .batch-slot input:checked + label { background: var(--forest); color: white; border-color: var(--forest); }
+        .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #fff; }
+        .cal-header { text-align: center; font-weight: bold; padding: 5px; background: #eee; font-size: 12px; }
+        .cal-cell { border: 1px solid #eee; min-height: 80px; padding: 5px; cursor: pointer; position: relative; background: white; transition: 0.2s; }
+        .cal-cell:hover { background: #f9f9f9; border-color: var(--accent); }
+        .cal-cell.active { border: 2px solid var(--forest); background: #f0f7ff; }
+        .cal-cell.empty { background: #fafafa; cursor: default; }
+        .cal-date { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+        .cal-stat { font-size: 11px; display: block; margin-top: 2px; }
+        .dot-free { color: var(--info); }
+        .dot-booked { color: var(--danger); }
+        .day-detail-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+        .compact-slot { padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px; background: white; position: relative; }
+        .compact-slot.booked { background: #fff5f5; color: #c0392b; border-color: #e74c3c; }
+        .compact-slot.free { background: #f0f7ff; color: #2980b9; border-color: #3498db; }
+        .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
+        .compact-slot:hover .compact-del { display: block; }
+    </style>
+</head>
+<body>
+
+<div id="admin-lock">
+    <h2 style="color:var(--accent);">🔒 培癒中控室</h2>
+    <input type="password" id="admin-pwd" placeholder="請輸入密碼">
+    <button class="btn btn-warning" onclick="checkAdmin()">進入系統</button>
+</div>
+
+<div class="sidebar">
+    <h2>培癒控制中心</h2>
+    <button onclick="switchTab('bks')" id="nav-bks" class="active">📅 預約看板</button>
+    <button onclick="switchTab('schedule')" id="nav-schedule">🕒 排程管理</button>
+    <button onclick="switchTab('pro')" id="nav-pro">👤 個案 CRM</button>
+    <button onclick="switchTab('menu')" id="nav-menu">⚙️ 服務配置</button>
+</div>
+
+<div class="main">
+    
+    <div id="tab-bks" class="tab-content active">
+        <div class="dashboard-layout">
+            
+            <div>
+                <div style="display:flex; gap:15px; margin-bottom:20px;">
+                    <div class="stat-card" style="flex:1; border-top-color:var(--success);">
+                        <small>💰 本月實收營收</small><h2 id="inc-val" style="color:var(--success); margin:5px 0;">$0</h2>
+                    </div>
+                    <div class="stat-card" style="flex:1; border-top-color:var(--info);">
+                        <small>👤 累積個案數</small><h2 id="total-val" style="margin:5px 0;">0</h2>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3>📋 近期預約清單</h3>
+                        <button class="btn btn-outline" onclick="fetchAll()">🔄 刷新</button>
+                    </div>
+                    <input type="text" id="search-key" placeholder="🔍 搜尋 姓名 / 手機 / 單號..." style="padding:10px; width:100%; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;" onkeyup="renderUI()">
+                    <table>
+                        <thead><tr><th>日期/單號</th><th>個案資訊</th><th>服務內容</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+                        <tbody id="bk-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" style="height: calc(100vh - 60px); overflow-y: auto; border-top-color: var(--purple);">
+                    <h3 style="color:var(--purple); border-bottom:1px solid #eee; padding-bottom:10px; margin-top:0;">
+                        📅 未來 7 天排程
+                    </h3>
+                    <div id="dashboard-7day-schedule">
+                        <p style="color:#999; font-size:12px;">載入中...</p>
+                    </div>
+                    <button class="btn btn-outline" style="width:100%; margin-top:15px;" onclick="switchTab('schedule')">前往完整排程管理 &gt;</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="tab-schedule" class="tab-content">
+        <div style="display: flex; gap: 20px; height: calc(100vh - 100px);">
+            <div class="schedule-sidebar card" style="width:280px; flex-shrink:0; overflow-y:auto;">
+                <h4 style="color:var(--forest); margin-top:0;">⚡ 快速排班</h4>
+                <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:15px;">
+                    <label>日期區間</label>
+                    <div style="display:flex; gap:2px;">
+                        <input type="date" id="batch-start" style="width:48%; font-size:11px;">
+                        <span style="font-size:10px; padding-top:5px;">~</span>
+                        <input type="date" id="batch-end" style="width:48%; font-size:11px;">
+                    </div>
+                </div>
+                <label>勾選時段 (每30分)</label>
+                <div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <button class="btn btn-outline" style="font-size:10px; width:50%;" onclick="toggleAllSlots(true)">全選</button>
+                    <button class="btn btn-outline" style="font-size:10px; width:50%;" onclick="toggleAllSlots(false)">清空</button>
+                </div>
+                <div id="time-grid" class="batch-grid"></div>
+                <button class="btn btn-forest" style="width:100%; margin-top:15px;" onclick="batchAddSchedule()">🚀 生成排程</button>
+            </div>
+            <div class="card" style="flex: 2; display:flex; flex-direction:column;">
+                <div class="calendar-controls">
+                    <button class="btn btn-outline" onclick="changeMonth(-1)">◀ 上個月</button>
+                    <h3 id="cal-title" style="margin:0;">2025 年 12 月</h3>
+                    <button class="btn btn-outline" onclick="changeMonth(1)">下個月 ▶</button>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(7, 1fr); text-align:center; background:#eee;">
+                    <div class="cal-header" style="color:red">日</div>
+                    <div class="cal-header">一</div>
+                    <div class="cal-header">二</div>
+                    <div class="cal-header">三</div>
+                    <div class="cal-header">四</div>
+                    <div class="cal-header">五</div>
+                    <div class="cal-header" style="color:green">六</div>
+                </div>
+                <div id="calendar-body" class="calendar-grid" style="flex:1; overflow-y:auto;"></div>
+            </div>
+            <div class="card" style="width:250px; flex-shrink:0; background:#fdfdfd;">
+                <h4 id="detail-date-title" style="margin-top:0; color:var(--dark); border-bottom:2px solid var(--accent); padding-bottom:10px;">請選擇日期</h4>
+                <div id="day-detail-container" class="day-detail-list">
+                    <p style="color:#999; font-size:13px;">點擊月曆日期<br>查看當日時段詳情</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-pro" class="tab-content">
+        <div class="card">
+            <h3>👤 個案資料庫</h3>
+            <table>
+                <thead><tr><th width="15%">姓名</th><th width="15%">手機</th><th width="15%">累積消費</th><th width="15%">最近預約</th><th width="20%">帳號資訊</th><th width="20%">操作</th></tr></thead>
+                <tbody id="pro-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-menu" class="tab-content">
+        <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:20px;">
+            <div class="card" id="card-cat">
+                <h3>📂 大類管理</h3>
+                <input type="hidden" id="cat-id-edit">
+                <input type="text" id="cat-name" placeholder="大類名稱" style="width:100%; margin-bottom:10px; padding:8px;">
+                <select id="cat-type" style="width:100%; margin-bottom:10px; padding:8px;"><option value="sleep">詢問睡眠</option><option value="consult">詢問日期</option></select>
+                <textarea id="cat-terms" placeholder="服務規範條款" style="width:100%; height:80px; margin-bottom:10px; padding:8px;"></textarea>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增</button>
+                    <button class="btn btn-outline" id="btn-cat-cancel" onclick="cancelEdit('cat')" style="display:none;">取消</button>
+                </div>
+                <table id="cat-list" style="margin-top:15px;"></table>
+            </div>
+            <div class="card" id="card-svc">
+                <h3>⚙️ 細項管理</h3>
+                <input type="hidden" id="svc-id-edit">
+                <select id="item-parent" style="width:100%; margin-bottom:10px; padding:8px;"></select>
+                <input type="text" id="i-name" placeholder="項目名" style="width:100%; margin-bottom:10px; padding:8px;">
+                <input type="number" id="i-price" placeholder="價格" style="width:100%; margin-bottom:10px; padding:8px;">
+                <textarea id="i-desc" placeholder="說明" style="width:100%; height:50px; margin-bottom:10px; padding:8px;"></textarea>
+                <input type="text" id="i-sub-opts" placeholder="子選項 (逗號隔開)" style="width:100%; margin-bottom:10px; padding:8px;">
+                <div style="display:flex; gap:15px; margin-bottom:10px;">
+                    <label><input type="checkbox" id="i-auto"> 預設勾選</label>
+                    <label><input type="checkbox" id="i-has-text"> 需備註欄</label>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-forest" id="btn-svc-save" onclick="saveItem()">＋ 新增</button>
+                    <button class="btn btn-outline" id="btn-svc-cancel" onclick="cancelEdit('svc')" style="display:none;">取消</button>
+                </div>
+                <div style="max-height:400px; overflow-y:auto; margin-top:15px;"><table id="svc-list"></table></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-body">
+        <span onclick="closeModal()" style="position:absolute;right:20px;top:15px;cursor:pointer;font-size:24px;">×</span>
+        <h2 id="m-title">詳情</h2>
+        <div id="m-content"></div>
+    </div>
+</div>
+
+<script>
+    // --- 【設定區】 ---
+    const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
+    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r"; 
+    const myDB = supabase.createClient(SB_URL, SB_KEY);
+    
+    let cache = { bks:[], pros:[], cats:[], svcs:[], slots:[] };
+    const cleanPhone = (p) => p ? p.replace(/\D/g, '') : '';
+
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
+    let selectedDateStr = "";
+
+    function checkAdmin() {
+        if(document.getElementById('admin-pwd').value === "admin888") { 
+            document.getElementById('admin-lock').style.display = 'none';
+            document.querySelector('.main').style.display = 'block';
+            fetchAll(); 
+        } else { alert("密碼錯誤"); }
+    }
+
+    async function fetchAll() {
+        try {
+            const { data: b } = await myDB.from('bookings').select('*, profiles(*)').order('created_at',{ascending:false}).limit(100);
+            const { data: p } = await myDB.from('profiles').select('*').order('created_at',{ascending:false});
+            const { data: c } = await myDB.from('service_categories').select('*').order('created_at');
+            const { data: s } = await myDB.from('services').select('*').order('category_id');
+            const { data: sl } = await myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time');
+
+            cache = { bks:b||[], pros:p||[], cats:c||[], svcs:s||[], slots:sl||[] };
+            
+            renderUI();
+            renderTimeGrid();
+            renderCalendar(); 
+            if(selectedDateStr) selectDate(selectedDateStr);
+
+        } catch (e) {
+            console.error(e);
+            alert("資料載入發生錯誤，請檢查網路");
+        }
+    }
+
+    // --- 【UI 渲染區】 ---
+    function renderUI() {
+        // 1. 訂單列表
+        const search = document.getElementById('search-key').value.trim().toUpperCase();
+        const cleanSearch = cleanPhone(search);
+        
+        document.getElementById('bk-list').innerHTML = cache.bks.filter(x => {
+            const str = JSON.stringify(x).toUpperCase();
+            const phone = x.profiles?.phone || x.temp_phone || '';
+            const cPhone = cleanPhone(phone);
+            return !search || str.includes(search) || phone.includes(search) || cPhone.includes(cleanSearch);
+        }).map(x => {
+            const phone = x.profiles?.phone || x.temp_phone;
+            const hasPro = !!x.profiles;
+            const potentialMatch = !hasPro ? cache.pros.find(p => cleanPhone(p.phone) === cleanPhone(phone)) : null;
+
+            let preName = '新個案';
+            if (x.wish_detail) { const nm = x.wish_detail.match(/姓名:(.*?) \|/); if(nm) preName = nm[1].trim(); }
+
+            let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` :
+                           potentialMatch ? `<b style="color:var(--info)">[疑似] ${potentialMatch.full_name}</b><br><button class="btn btn-success" style="font-size:10px;padding:2px;" onclick="linkUser('${potentialMatch.id}', '${x.id}')">歸戶</button>` :
+                           `<b>${preName}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${phone}', '${x.id}', '${preName}', '')">＋建立</button>`;
+
+            let stColor = '#e74c3c'; let stText = '未付款';
+            if(x.status === 'paid') { stColor = '#27ae60'; stText = '已付款 (待安排)'; }
+            else if(x.status === 'awaiting_payment') { stColor = '#f39c12'; stText = '待付款'; }
+            else if(x.status === 'awaiting_service') { stColor = '#9b59b6'; stText = '服務中/待報告'; }
+            else if(x.status === 'completed') { stColor = '#2c3e50'; stText = '已完成'; }
+
+            return `<tr>
+                <td><small style="color:#999">${x.created_at.slice(0,10)}</small><br>${x.payment_method==='shopee'?'🦐':'🌐'} <small>${x.booking_id.slice(-6)}</small></td>
+                <td>${userHtml}</td>
+                <td><small>${x.service_item}</small></td>
+                <td>$${x.price}</td>
+                <td><span style="color:${stColor}; font-weight:bold;">${stText}</span></td>
+                <td><button class="btn btn-forest" onclick="openBooking('${x.id}')">詳情</button></td>
+            </tr>`;
+        }).join('');
+
+        // 2. 營收與會員統計 (更新左上方數據)
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const inc = cache.bks.filter(x => x.status === 'paid' && x.created_at.startsWith(currentMonth)).reduce((s, x) => s + (x.price || 0), 0);
+        document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
+        document.getElementById('total-val').innerText = cache.pros.length;
+
+        // 3. CRM 列表
+        document.getElementById('pro-list').innerHTML = cache.pros.map(p => {
+            const userBks = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone));
+            const totalSpent = userBks.filter(b => b.status === 'paid').reduce((sum, b) => sum + (b.price||0), 0);
+            const lastBk = userBks.length > 0 ? userBks[0].created_at.slice(0,10) : '-';
+            return `<tr><td>${p.full_name}</td><td>${p.phone}</td><td style="color:#d35400;">$${totalSpent.toLocaleString()}</td><td>${lastBk}</td><td><small>${p.email||'-'}<br>pwd:${p.password}</small></td><td><button class="btn btn-info" onclick="showHistory('${p.id}', '${p.full_name}')">歷史</button><button class="btn btn-warning" onclick="editProfile('${p.id}')">改</button></td></tr>`;
+        }).join('');
+
+        renderConfigTables();
+        render7DaySchedule(); // 🌟 渲染右側 7 天排程
+    }
+
+    // --- 【排程區：7日速覽 (Dashboard)】 ---
+    function render7DaySchedule() {
+        const container = document.getElementById('dashboard-7day-schedule');
+        const today = new Date();
+        let html = "";
+
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() + i);
+            const dateStr = d.toISOString().split('T')[0];
+            const dayLabel = `${d.getMonth()+1}/${d.getDate()} (${['日','一','二','三','四','五','六'][d.getDay()]})`;
+            
+            const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+            
+            if(daySlots.length === 0) {
+                // html += `<div class="upcoming-day"><div class="upcoming-day-header">${dayLabel}</div><small style="color:#ccc;">無排程</small></div>`;
+                continue; // 無排程的天直接不顯示，節省版面，或者你想顯示也可以打開上面那行
+            } else {
+                let slotsHtml = daySlots.map(s => 
+                    `<span class="u-slot ${s.is_booked ? 'booked' : ''}">${s.slot_time.slice(0,5)}</span>`
+                ).join('');
+                html += `<div class="upcoming-day"><div class="upcoming-day-header">${dayLabel}</div><div class="upcoming-slots">${slotsHtml}</div></div>`;
+            }
+        }
+        
+        container.innerHTML = html || "<p style='color:#999;text-align:center;'>未來一週無排程</p>";
+    }
+
+    // --- 【排程區：批次與月曆 (Schedule Tab)】 ---
+    function renderTimeGrid() {
+        const grid = document.getElementById('time-grid');
+        if(!grid || grid.innerHTML !== "") return;
+        let html = '';
+        for (let h = 13; h <= 25; h++) {
+            [0, 30].forEach(m => {
+                let displayH = h >= 24 ? h - 24 : h;
+                let displayTime = `${displayH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                let val = `${h}:${m}`; 
+                html += `<div class="batch-slot"><input type="checkbox" id="t-${val}" value="${val}" name="batch-times"><label for="t-${val}">${displayTime}</label></div>`;
+            });
+        }
+        grid.innerHTML = html;
+    }
+
+    // 批次排班 (智慧防重複)
+    async function batchAddSchedule() {
+        const startDateVal = document.getElementById('batch-start').value;
+        let endDateVal = document.getElementById('batch-end').value;
+        if (!endDateVal) endDateVal = startDateVal;
+
+        if (!startDateVal) return alert("請至少選擇開始日期");
+        const checkboxes = document.querySelectorAll('input[name="batch-times"]:checked');
+        if (checkboxes.length === 0) return alert("請至少勾選一個時段");
+
+        // 1. 查勤
+        const { data: existings } = await myDB.from('schedule_slots').select('slot_date, slot_time').gte('slot_date', startDateVal).lte('slot_date', endDateVal);
+        const existingSet = new Set(existings ? existings.map(e => `${e.slot_date}_${e.slot_time.slice(0,5)}`) : []);
+
+        const start = new Date(startDateVal);
+        const end = new Date(endDateVal);
+        let inserts = [];
+        let skipCount = 0;
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            checkboxes.forEach(chk => {
+                const [h, m] = chk.value.split(':').map(Number);
+                let currentDay = new Date(d);
+                let finalTimeStr = "";
+                if (h >= 24) { 
+                    currentDay.setDate(currentDay.getDate() + 1);
+                    finalTimeStr = `${(h-24).toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                } else {
+                    finalTimeStr = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                }
+                const dateStr = currentDay.toISOString().split('T')[0];
+                const checkKey = `${dateStr}_${finalTimeStr}`;
+
+                if (existingSet.has(checkKey)) { skipCount++; } 
+                else { inserts.push({ slot_date: dateStr, slot_time: finalTimeStr, is_booked: false }); }
+            });
+        }
+
+        if (inserts.length === 0) return alert(`所有時段都已存在 (跳過 ${skipCount} 筆)`);
+        if(!confirm(`即將新增 ${inserts.length} 個時段 (已跳過 ${skipCount} 個重複)，確定嗎？`)) return;
+
+        const { error } = await myDB.from('schedule_slots').insert(inserts);
+        if (error) alert("❌ 失敗：" + error.message);
+        else { alert("✅ 成功！"); fetchAll(); }
+    }
+
+    function toggleAllSlots(checked) {
+        document.querySelectorAll('input[name="batch-times"]').forEach(el => el.checked = checked);
+    }
+
+    // 月曆渲染
+    function renderCalendar() {
+        const calBody = document.getElementById('calendar-body');
+        const calTitle = document.getElementById('cal-title');
+        if(!calBody) return; 
+
+        calBody.innerHTML = "";
+        calTitle.innerText = `${currentYear} 年 ${currentMonth} 月`;
+
+        const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay(); 
+        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) calBody.innerHTML += `<div class="cal-cell empty"></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+            const daySlots = cache.slots.filter(s => s.slot_date === dateStr);
+            const freeCount = daySlots.filter(s => !s.is_booked).length;
+            const bookedCount = daySlots.filter(s => s.is_booked).length;
+
+            let indicator = "";
+            if (daySlots.length > 0) {
+                if (freeCount > 0) indicator += `<span class="cal-stat dot-free">🔵 ${freeCount} 空</span>`;
+                if (bookedCount > 0) indicator += `<span class="cal-stat dot-booked">🔴 ${bookedCount} 滿</span>`;
+            }
+            const activeClass = (dateStr === selectedDateStr) ? 'active' : '';
+            calBody.innerHTML += `<div class="cal-cell ${activeClass}" onclick="selectDate('${dateStr}')"><div class="cal-date">${d}</div>${indicator}</div>`;
+        }
+    }
+
+    function changeMonth(offset) {
+        currentMonth += offset;
+        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+        else if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        renderCalendar();
+    }
+
+    function selectDate(dateStr) {
+        selectedDateStr = dateStr;
+        renderCalendar(); 
+        document.getElementById('detail-date-title').innerText = `${dateStr} 詳情`;
+        const container = document.getElementById('day-detail-container');
+        
+        const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+
+        if (daySlots.length === 0) {
+            container.innerHTML = "<p style='color:#999; font-size:13px;'>無排程</p>";
+            return;
+        }
+        container.innerHTML = daySlots.map(s => `
+            <div class="compact-slot ${s.is_booked ? 'booked' : 'free'}">
+                ${s.slot_time.slice(0,5)}
+                <span class="compact-del" onclick="event.stopPropagation(); delSlot('${s.id}')">×</span>
+            </div>
+        `).join('');
+    }
+
+    async function delSlot(id) {
+        if(!confirm("刪除？")) return;
+        const { error } = await myDB.from('schedule_slots').delete().eq('id', id);
+        if(!error) {
+            const { data } = await myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time');
+            cache.slots = data || [];
+            renderCalendar();
+            selectDate(selectedDateStr);
+            render7DaySchedule(); // 同步更新儀表板
+        }
+    }
+
+   // --- [admin.html] 預約詳情 Modal (V13: 支援開啟舊報告) ---
+    function openBooking(id) {
+        const b = cache.bks.find(x => x.id === id);
+        if(!b) return;
+        
+        // 1. 準備空檔選單
+        const today = new Date().toISOString().split('T')[0];
+        const availableSlots = cache.slots.filter(s => !s.is_booked && s.slot_date >= today);
+        let slotOptions = '<option value="">-- 請選擇排程空檔 --</option>';
+        availableSlots.forEach(s => { slotOptions += `<option value="${s.id}" data-time="${s.slot_date} ${s.slot_time}">${s.slot_date} ${s.slot_time.slice(0,5)}</option>`; });
+
+        // 2. 解析資料
+        const cleanDetail = b.wish_detail.replace(/\| \[付款碼.*?\]/g, '');
+        let extractName="未知", extractEmail="未知", extractData=cleanDetail;
+        const nm=cleanDetail.match(/姓名:(.*?) \|/), em=cleanDetail.match(/Email:(.*?) \|/), dt=cleanDetail.match(/數據:(.*)/);
+        if(nm) extractName=nm[1]; if(em) extractEmail=em[1]; if(dt) extractData=dt[1];
+
+        // 🌟 檢查是否有舊報告 ID (格式: [報告已生成 ID:xxx])
+        const reportMatch = b.wish_detail.match(/\[報告已生成 ID:(.*?)\]/);
+        const existingReportId = reportMatch ? reportMatch[1] : null;
+
+        // 🌟 決定按鈕連結 (有 ID 就開舊的，沒 ID 就開新的)
+        let reportUrl = "";
+        let btnLabel = "";
+        let btnClass = "";
+        
+        if (existingReportId) {
+            // 開啟舊報告模式
+            reportUrl = `srt_report.html?id=${existingReportId}`; // 傳報告 ID
+            btnLabel = "📄 查看 / 修改已存報告";
+            btnClass = "btn-purple";
+        } else {
+            // 建立新報告模式
+            reportUrl = `srt_report.html?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
+            btnLabel = "📄 生成新服務報告";
+            btnClass = "btn-forest";
+        }
+
+        const serviceListHtml = b.service_detail.split(' | ').map(item => {
+            const matchedSvc = cache.svcs.find(s => item.includes(s.title));
+            return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${item}</span><span style="color:#666;">${matchedSvc?'$'+matchedSvc.price:''}</span></div>`;
+        }).join('');
+
+        const scheduledTime = b.scheduled_at ? new Date(b.scheduled_at).toLocaleString() : '<span style="color:#999">尚未排程</span>';
+
+        document.getElementById('m-title').innerText = "預約詳情";
+        document.getElementById('m-content').innerHTML = `
+            <div class="id-card" style="background:#f0f7ff; padding:15px;">
+                <b>${extractName}</b> <small>(${!!b.profiles?'會員':'訪客'})</small><br>
+                <small>${b.temp_phone} | ${extractEmail}</small>
+            </div>
+            
+            <div style="margin-top:15px; background:#fafafa; padding:10px; border-radius:8px;">
+                <b>${b.service_item}</b>
+                ${serviceListHtml}
+            </div>
+            
+            <div style="margin-top:15px; background:#fffdf0; padding:10px; border:1px solid #eee; border-radius:8px;">
+                ${extractData}
+                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc; color:#d35400;">
+                    💡 客人許願：${b.sleep_time || '無'}
+                </div>
+            </div>
+
+            <div style="margin-top:15px; padding:15px; background:#f3e5f5; border-radius:8px;">
+                <div style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span><b>📅 預計服務：</b> <span style="font-size:1.1em; color:var(--purple);">${scheduledTime}</span></span>
+                    ${b.scheduled_at ? `<button class="btn btn-outline" style="font-size:12px;padding:2px 5px;" onclick="document.getElementById('schedule-box').style.display='block'">✎</button>` : ''}
+                </div>
+                
+                <div id="schedule-box" style="display:${b.scheduled_at ? 'none' : 'block'};">
+                    ${b.status === 'paid' || b.scheduled_at ? `
+                        <div style="display:flex; gap:10px;">
+                            <select id="slot-selector" style="flex:1;">${slotOptions}</select>
+                            <button class="btn btn-purple" onclick="saveSchedule('${b.id}')">排入</button>
+                        </div>` : '<small style="color:#999">未付款無法排程</small>'}
+                </div>
+            </div>
+
+            ${b.status === 'awaiting_service' || b.status === 'completed' ? `
+                <div style="margin-top:15px; padding:15px; background:#e8f5e9; border-radius:8px; text-align:center;">
+                    <a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="text-decoration:none; display:block; width:100%;">
+                        ${btnLabel}
+                    </a>
+                </div>
+            ` : ''}
+
+            <div style="margin-top:20px; text-align:right;">
+                <div style="font-size:24px; color:#d35400; font-weight:bold; margin-bottom:10px;">$${b.price}</div>
+                ${renderActionButtons(b)}
+            </div>
+        `;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    async function saveSchedule(bid) {
+        const sel = document.getElementById('slot-selector');
+        if(!sel.value) return alert("請選時段");
+        const timeText = sel.options[sel.selectedIndex].dataset.time;
+        
+        await myDB.from('bookings').update({ scheduled_at: timeText, status: 'awaiting_service' }).eq('id', bid);
+        await myDB.from('schedule_slots').update({ is_booked: true }).eq('id', sel.value);
+        
+        alert("✅ 排程成功！"); closeModal(); fetchAll();
+    }
+
+    function renderActionButtons(b) {
+        if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程 (請上方選時段)</button>`;
+        if (b.status === 'awaiting_service') return `<span style="color:var(--purple); font-weight:bold; margin-right:10px;">⏳ 服務中...</span><button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`;
+        if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">🎉 已結案</button>`;
+        if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}', '${b.price}')">📧 傳付款碼</button>`;
+        if (b.status === 'awaiting_payment') return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`;
+        if (b.payment_method === 'shopee') return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">確認蝦皮入帳</button>`;
+        return "";
+    }
+
+    // --- 共用函式 ---
+    async function sendPayLink(id, p) { if(confirm("寄送?")) { await myDB.from('bookings').update({status:'awaiting_payment', wish_detail: cache.bks.find(x=>x.id===id).wish_detail+' | [付款碼已傳]'}).eq('id',id); alert("OK"); closeModal(); fetchAll(); } }
+    window.updateS = async function(id, s) { if(confirm("確定?")) { await myDB.from('bookings').update({status:s}).eq('id',id); closeModal(); fetchAll(); } }
+    async function linkUser(uid, bid) { if(confirm("歸戶?")) { await myDB.from('bookings').update({user_id:uid}).eq('id',bid); fetchAll(); } }
+    
+    // Config & CRM 簡化
+    function renderConfigTables() {
+        document.getElementById('cat-list').innerHTML=cache.cats.map(c=>`<tr><td>${c.name}</td><td><button onclick="editCat('${c.id}')">✏️</button><button onclick="delData('service_categories','${c.id}')">🗑️</button></td></tr>`).join('');
+        document.getElementById('svc-list').innerHTML=cache.svcs.map(s=>`<tr><td>${s.title}</td><td><button onclick="editSvc('${s.id}')">✏️</button><button onclick="delData('services','${s.id}')">🗑️</button></td></tr>`).join('');
+        const sel = document.getElementById('item-parent'); if(sel.options.length !== cache.cats.length) sel.innerHTML = cache.cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    function editCat(id){const c=cache.cats.find(x=>x.id===id);document.getElementById('cat-id-edit').value=c.id;document.getElementById('cat-name').value=c.name;document.getElementById('cat-terms').value=c.terms;}
+    function editSvc(id){const s=cache.svcs.find(x=>x.id===id);document.getElementById('svc-id-edit').value=s.id;document.getElementById('item-parent').value=s.category_id;document.getElementById('i-name').value=s.title;document.getElementById('i-price').value=s.price;}
+    async function saveCategory(){const id=document.getElementById('cat-id-edit').value,n=document.getElementById('cat-name').value,t=document.getElementById('cat-type').value,tm=document.getElementById('cat-terms').value; const q=id?myDB.from('service_categories').update({name:n,question_type:t,terms:tm}).eq('id',id):myDB.from('service_categories').insert([{name:n,question_type:t,terms:tm}]); await q; fetchAll();}
+    async function saveItem(){const id=document.getElementById('svc-id-edit').value,c=document.getElementById('item-parent').value,n=document.getElementById('i-name').value,p=document.getElementById('i-price').value; const q=id?myDB.from('services').update({category_id:c,title:n,price:p}).eq('id',id):myDB.from('services').insert([{category_id:c,title:n,price:p}]); await q; fetchAll();}
+    async function delData(t,id){if(confirm('刪?'))await myDB.from(t).delete().eq('id',id);fetchAll();}
+    function cancelEdit(t){ document.getElementById(t==='cat'?'cat-id-edit':'svc-id-edit').value=''; }
+
+    function showHistory(uid, name) { 
+        const h=cache.bks.filter(b=>b.user_id===uid||cleanPhone(b.temp_phone)===cleanPhone(cache.pros.find(p=>p.id===uid).phone));
+        let html=`<h3>${name}</h3>`; h.forEach(b=>{html+=`<div class="id-card" onclick="openBooking('${b.id}')" style="cursor:pointer;margin-bottom:5px;">${b.service_item} $${b.price}<br><small>${b.created_at.slice(0,10)} ${b.status}</small></div>`});
+        document.getElementById('m-title').innerText="歷史"; document.getElementById('m-content').innerHTML=html||"無"; document.getElementById('modal').style.display='flex'; 
+    }
+    function editProfile(uid) { const p=cache.pros.find(x=>x.id===uid); document.getElementById('m-content').innerHTML=`<input id="ep-n" value="${p.full_name}"><input id="ep-p" value="${p.phone}"><button onclick="updPro('${p.id}')">存</button>`; document.getElementById('modal').style.display='flex'; }
+    async function updPro(id){ await myDB.from('profiles').update({full_name:document.getElementById('ep-n').value,phone:document.getElementById('ep-p').value}).eq('id',id); closeModal(); fetchAll(); }
+    async function smartAddMem(p, bid, n, e) { openCreateMemberModal(p, bid, n, e); }
+    function openCreateMemberModal(p,bid,n,e) { document.getElementById('m-title').innerText="建立"; document.getElementById('m-content').innerHTML=`<input id="new-p" value="${p}"><input id="new-n" value="${n}"><input id="new-e" value="${e}"><input id="new-pw" value="guest${p.slice(-4)}"><button onclick="doCreate('${bid}')">建立</button>`; document.getElementById('modal').style.display='flex'; }
+    async function doCreate(bid){ const p=document.getElementById('new-p').value; const {data:u, error}=await myDB.from('profiles').insert([{phone:p, full_name:document.getElementById('new-n').value, email:document.getElementById('new-e').value, password:document.getElementById('new-pw').value}]).select().single(); if(!error){ await myDB.from('bookings').update({user_id:u.id}).eq('id',bid); fetchAll(); closeModal(); } else alert(error.message); }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function switchTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+id).classList.add('active'); document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active')); document.getElementById('nav-'+id).classList.add('active'); }
+</script>
+</body>
+</html>

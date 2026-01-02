@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>培癒試驗室 | 能量與人類圖導引</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;900&family=ZCOOL+XiaoWei&family=Shippori+Mincho&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --text: #2c3e50; --shopee: #ff5722; --error: #e74c3c; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--cream); margin: 0; color: var(--text); line-height: 1.6; }
+        
+        /* 導航列 */
+        nav { background: var(--forest); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .logo { color: var(--cream); font-size: 22px; font-weight: bold; cursor: pointer; letter-spacing: 2px; }
+        .nav-links button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-size: 14px; color: #ccc; transition: 0.3s; }
+        .nav-links button.active { color: var(--accent); font-weight: bold; border-bottom: 2px solid var(--accent); }
+        .nav-links button:hover { color: white; }
+
+        /* 內容區塊 */
+        .section { display: none; padding: 40px 20px; max-width: 900px; margin: 0 auto; min-height: calc(100vh - 70px); }
+        .section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 卡片與通用樣式 */
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
+        
+        input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+        /* 服務項目卡片 */
+        .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
+        .service-card:hover { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .service-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
+        .service-info { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; cursor: pointer; flex: 1; }
+        .service-info input { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; margin: 0; }
+        .price-badge { background: var(--forest); color: white; padding: 3px 10px; border-radius: 6px; font-size: 13px; flex-shrink: 0; }
+        .service-desc { font-size: 14px; color: #777; margin-left: 32px; padding-top: 8px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
+
+        .sub-check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; margin-left: 32px; padding: 15px; background: #f4f7f5; border-radius: 10px; border: 1px solid #e0e0e0; }
+        .sub-opt-label { font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); margin-bottom: 0; }
+        .sub-opt-label input { margin: 0; width: 16px; height: 16px; }
+
+        .agree-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-size: 14px; color: var(--text); }
+        .agree-wrapper input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
+        #terms-box { font-size: 13px; height: 120px; overflow-y: auto; background: white; padding: 15px; border: 1px solid #eee; color: #666; border-radius: 8px; }
+
+        .total-box { text-align: right; font-size: 26px; font-weight: bold; color: #d35400; border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; }
+        
+        .btn-primary { width: 100%; padding: 18px; background: var(--forest); color: var(--cream); border: none; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-primary:hover { background: #2c4739; }
+        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
+        
+        .cat-card { border: 2px solid #eee; padding: 25px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; background: white; transition: 0.3s; }
+        .cat-card:hover { border-color: var(--accent); background: #fdf9f0; transform: translateY(-2px); }
+        
+        .required::after { content: " *"; color: var(--error); }
+
+        /* ==================== 抽卡系統專用樣式 ==================== */
+        #draw-area {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; 
+            padding: 20px 0; perspective: 1000px;
+        }
+        
+        /* ==================== 全新品牌卡背設計 (開始) ==================== */
+.card-back {
+    width: 60px; height: 100px;
+    /* 1. 基底：深森綠漸層背景 */
+    background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%);
+    /* 2. 邊框：靜謐金雙重邊框 */
+    border: 2px solid #c6a87c;
+    outline: 1px solid #1a2f23; /* 內圈深色勾邊增加層次 */
+    outline-offset: -4px;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1);
+    overflow: hidden; /* 確保內容不超出圓角 */
+
+    /* 3. 紋理：神聖幾何能量網格 (純CSS繪製的微妙背景紋理) */
+    background-image: 
+        radial-gradient(circle at center, rgba(198, 168, 124, 0.05) 0%, transparent 70%), /* 中央微光 */
+        repeating-linear-gradient(45deg, rgba(198, 168, 124, 0.03) 0px, rgba(198, 168, 124, 0.03) 1px, transparent 1px, transparent 15px), /* 斜線網格1 */
+        repeating-linear-gradient(-45deg, rgba(198, 168, 124, 0.03) 0px, rgba(198, 168, 124, 0.03) 1px, transparent 1px, transparent 15px); /* 斜線網格2 */
+    background-blend-mode: overlay;
+    
+    /* 讓內部元素居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 卡背中央的品牌 LOGO */
+.card-back::after {
+    content: '培癒\A試驗室'; /* \A 是換行符號，讓文字變兩行 */
+    white-space: pre; /* 允許換行 */
+    font-family: 'Noto Serif TC', 'Shippori Mincho', serif; /* 使用有氣質的宋體/明體 */
+    color: #c6a87c; /* 靜謐金 */
+    font-size: 12px; /* 字體大小 */
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); /* 文字發光效果 */
+    opacity: 0.9;
+    
+    /* LOGO 外面的裝飾圈 */
+    padding: 12px 8px;
+    border: 1px solid rgba(198, 168, 124, 0.5);
+    border-radius: 50% / 30%; /* 橢圓形裝飾框 */
+    background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%);
+    box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2);
+}
+
+/* 滑鼠懸停效果 */
+.card-back:hover {
+    transform: translateY(-12px) scale(1.05); /* 懸浮感更強 */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); /* 金色光暈 */
+    border-color: #e0c8a0; /* 邊框變亮 */
+    z-index: 100;
+}
+/* ==================== 全新品牌卡背設計 (結束) ==================== */
+
+/* 手機版適配調整 */
+@media (max-width: 600px) {
+    .card-back { width: 45px; height: 75px; outline-offset: -3px; }
+    .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; }
+    .card-reveal { width: 300px; height: 515px; } 
+}
+
+        .result-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center;
+            z-index: 2000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.5s;
+        }
+        .result-overlay.active { display: flex; opacity: 1; }
+
+        .card-reveal {
+            position: relative; width: 320px; height: 550px; background: #fff;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 0 50px rgba(198, 168, 124, 0.6);
+            transform: scale(0.8); opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s;
+        }
+        .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
+
+        .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
+        .layer-text { 
+            position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; 
+            transform: translate(-50%, -50%); pointer-events: none; width: max-content; 
+        }
+
+        .retry-btn {
+            position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%);
+            padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px;
+            font-weight: bold; cursor: pointer; font-size: 16px;
+            box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s;
+        }
+        .retry-btn:hover { background: #d4b585; transform: translateX(-50%) scale(1.05); }
+
+        /* 手機適配 */
+        @media (max-width: 600px) {
+            .card-back { width: 45px; height: 75px; }
+            .card-reveal { width: 300px; height: 515px; } 
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo" onclick="showSection('home')">🕯️ 培癒試驗室</div>
+    <div class="nav-links">
+        <button onclick="showSection('home')" id="nav-home" class="active">首頁</button>
+        <button onclick="showSection('soliloquy')" id="nav-soliloquy">自言自語</button>
+        <button onclick="showSection('knowledge')" id="nav-knowledge">知識庫</button>
+        <button onclick="showSection('draw')" id="nav-draw">能量抽卡</button>
+        <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
+        <button onclick="showSection('member')" id="nav-member">個案專區</button>
+    </div>
+</nav>
+
+<div id="home" class="section active" style="text-align:center; padding-top:100px;">
+    <h1 style="color: var(--forest); font-size: 3.5rem; letter-spacing: 5px; margin-bottom: 20px;">培癒試驗室</h1>
+    <p style="font-size: 1.2rem; color: #666; margin-bottom: 50px;">找回本該屬於你的能量流動。</p>
+    <button class="btn-primary" style="width:auto; padding: 15px 60px; border-radius:30px;" onclick="showSection('booking-step-1')">開始調頻預約</button>
+</div>
+
+<div id="booking-step-1" class="section"><div class="card"><h2>📂 選擇服務類型</h2><p style="color:#666;">請根據您的需求選擇主要服務領域：</p><div id="category-list">載入資料中...</div></div></div>
+<div id="booking-step-2" class="section"><div class="card"><button onclick="showSection('booking-step-1')" style="background:none; border:none; color:#999; cursor:pointer; margin-bottom:15px; padding:0;">← 返回</button><h2 id="active-cat-name" style="color:var(--forest);">服務詳情</h2><div style="background:#e0f7fa; padding:20px; border-radius:12px; margin-bottom:25px; border:1px solid #4dd0e1;"><div class="form-group"><label>🔶 付款狀態選擇</label><select id="pay-status" onchange="toggleShopee()"><option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option><option value="shopee">🦐 我已在蝦皮付款 (請提供訂單編號)</option></select></div><div id="shopee-area" style="display:none;"><label style="color:var(--shopee);">蝦皮訂單編號 (必填)</label><input type="text" id="shopee-id" placeholder="請貼上訂單編號供核對"></div></div><div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div><div class="form-group"><label class="required">手機號碼 (將作為登入帳號)</label><input type="tel" id="c-phone" placeholder="09xxxxxxxx"></div><div class="form-group"><label class="required">E-mail (接收報告通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div><div class="form-group"><label>🔶 您是從哪裡認識培癒試驗室的？</label><select id="client-source"><option value="Threads">Threads</option><option value="IG">Instagram</option><option value="Shopee">蝦皮</option><option value="Friend">朋友介紹</option><option value="Other">其他</option></select></div><hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;"><label style="font-size:18px; margin-bottom:15px;">1. 選擇方案內容與加購</label><div id="items-area" style="margin-bottom:30px;"></div><div id="conditional-question" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border-left:5px solid var(--accent);"></div><div class="form-group"><label>🔶 出生年月日資料提供</label><select id="data-flow" onchange="toggleFlow()"><option value="data">提供出生日期時間</option><option value="upload">直接上傳人類圖截圖</option></select></div><div id="flow-data" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div><div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00" onchange="timeHint()"><small id="t-hint" style="color:#d32f2f; display:block; margin-top:5px;">✅ 目前選擇：中午 12 點</small></div><div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div></div><div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><label>上傳人類圖截圖</label><input type="file" id="c-file" accept="image/*"></div><div class="card" style="background:#fdf9f0; border-top:none; padding:20px; margin-bottom:0;"><label>📜 服務規範</label><div id="terms-box"></div><label class="agree-wrapper"><input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)"><span>我已詳細閱讀並同意</span></label></div><div class="total-box">應付總額：$<span id="total-price">0</span></div><button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button></div></div>
+
+<div id="soliloquy" class="section"><h2>🕯️ 自言自語</h2><div id="sol-list"></div></div>
+<div id="knowledge" class="section"><h2>📚 能量知識庫</h2><div id="kno-list"></div></div>
+
+<div id="draw" class="section">
+    <div style="text-align:center; margin-bottom:20px;">
+        <h2>🃏 64 閘門能量指引</h2>
+        <p style="color:#666;">深呼吸，在心中默想你的問題，憑直覺選一張牌。</p>
+    </div>
+    <div id="draw-area" class="card-table">
+        <div style="color:#666;">正在洗牌中...</div>
+    </div>
+</div>
+
+<div id="overlay" class="result-overlay">
+    <div style="position:relative;">
+        <div id="final-card" class="card-reveal">
+            <img id="p-bg" class="layer-bg" src="">
+            <div id="p-gate" class="layer-text"></div>
+            <div id="p-info" class="layer-text"></div>
+            <div id="p-zodiac" class="layer-text"></div>
+            <div id="p-quote" class="layer-text"></div>
+        </div>
+        <button class="retry-btn" onclick="closeResult()">再次抽卡</button>
+    </div>
+</div>
+
+<div id="member" class="section"><h2>👤 個案專區</h2><div class="card" id="login-box"><input type="tel" id="l-phone" placeholder="手機"><input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;"><button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button></div><div id="dash" style="display:none;"></div></div>
+
+<script>
+    const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
+    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
+    const myDB = supabase.createClient(SB_URL, SB_KEY);
+
+    let cats = [], items = [], activeCat = null;
+    let allCards = [];
+
+    // 原廠預設樣式
+    const defaultStyle = {
+        gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" },
+        info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 },
+        zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" },
+        quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 }
+    };
+
+    window.onload = async () => {
+        try {
+            await Promise.all([initBookingData(), initDrawData()]);
+        } catch (e) {
+            console.error("Init Error:", e);
+        }
+    };
+
+    async function initBookingData() {
+        const { data: c } = await myDB.from('service_categories').select('*'); cats = c || [];
+        const { data: i } = await myDB.from('services').select('*'); items = i || [];
+        const { data: posts } = await myDB.from('site_content').select('*').order('created_at', {ascending:false});
+        renderCats();
+        if(posts) {
+            document.getElementById('sol-list').innerHTML = posts.filter(p=>p.category==='soliloquy').map(p=>`<div class="card"><h3>${p.title}</h3><p>${p.body}</p></div>`).join('');
+            document.getElementById('kno-list').innerHTML = posts.filter(p=>p.category==='knowledge').map(p=>`<div class="card"><h3>${p.title}</h3><p>${p.body}</p></div>`).join('');
+        }
+    }
+
+    // 🌟 初始化抽卡資料
+    async function initDrawData() {
+        const { data, error } = await myDB.from('card_pool').select('*');
+        if(!error && data) {
+            allCards = data;
+            renderDrawTable();
+        }
+    }
+
+    function showSection(id) { 
+        document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+        const activeBtn = document.getElementById('nav-'+id.split('-')[0]);
+        if(activeBtn) activeBtn.classList.add('active');
+        window.scrollTo(0,0); 
+    }
+
+    // === 抽卡邏輯 ===
+    function renderDrawTable() {
+        const table = document.getElementById('draw-area');
+        table.innerHTML = '';
+        const deck = allCards.length > 0 ? allCards : Array.from({length:64}, (_, i) => ({ gate_id: i+1 }));
+        const shuffled = deck.sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((card, index) => {
+            const el = document.createElement('div');
+            el.className = 'card-back';
+            el.style.animation = `fadeIn 0.5s ease ${index * 0.02}s backwards`;
+            el.onclick = () => openCard(card);
+            table.appendChild(el);
+        });
+    }
+
+    function openCard(card) {
+        if (!card.gate_id) return alert("資料庫讀取中...");
+
+        const bgUrl = card.image_url ? card.image_url : 'https://via.placeholder.com/320x550?text=No+Image';
+        document.getElementById('p-bg').src = bgUrl + `?t=${new Date().getTime()}`;
+        
+        document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`;
+        document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`;
+        document.getElementById('p-zodiac').innerText = card.zodiac || '';
+        document.getElementById('p-quote').innerText = card.quote || '';
+
+        // 🌟 優先使用卡片自己的樣式
+        const style = card.style_config || defaultStyle;
+        applyStyle('gate', style.gate || defaultStyle.gate);
+        applyStyle('info', style.info || defaultStyle.info);
+        applyStyle('zodiac', style.zodiac || defaultStyle.zodiac);
+        applyStyle('quote', style.quote || defaultStyle.quote);
+
+        document.getElementById('overlay').classList.add('active');
+    }
+
+    function applyStyle(id, s) {
+        const el = document.getElementById(`p-${id}`);
+        const def = defaultStyle[id];
+        const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop];
+
+        el.style.left = val('x') + '%';
+        el.style.top = val('y') + '%';
+        el.style.fontSize = val('size') + 'px';
+        el.style.fontFamily = val('font');
+        el.style.color = val('color');
+        
+        const str = val('stroke');
+        el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none';
+
+        if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px';
+        if(id === 'quote') {
+            el.style.lineHeight = val('lh');
+            el.style.letterSpacing = val('ls') + 'px';
+        }
+        if(id === 'zodiac') {
+            el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none';
+        }
+    }
+
+    function closeResult() {
+        document.getElementById('overlay').classList.remove('active');
+        setTimeout(() => { renderDrawTable(); }, 500);
+    }
+
+    // === 預約系統邏輯 (保留原功能) ===
+    function toggleFlow() { 
+        const isD = document.getElementById('data-flow').value === 'data'; 
+        document.getElementById('flow-data').style.display = isD ? 'block' : 'none'; 
+        document.getElementById('flow-upload').style.display = isD ? 'none' : 'block'; 
+    }
+    function toggleShopee() { document.getElementById('shopee-area').style.display = (document.getElementById('pay-status').value === 'shopee') ? 'block' : 'none'; }
+    function toggleSubmitBtn(checked) { const btn = document.getElementById('sub-btn'); btn.disabled = !checked; btn.innerText = checked ? "確認送出預約資料" : "請先勾選同意規範"; }
+    function timeHint() { const t = document.getElementById('b-time').value; if(!t) return; const h = parseInt(t.split(':')[0]); document.getElementById('t-hint').innerText = "✅ 已選：" + (h===0?"凌晨 0 點":h===12?"中午 12 點":h<12?"上午 "+h+" 點":"下午 "+(h-12)+" 點"); }
+    
+    function renderCats() {
+        document.getElementById('category-list').innerHTML = cats.map(c => `
+            <div class="cat-card" onclick="selectCat('${c.id}')">
+                <h3>${c.name}</h3>
+                <small>${c.description || '點擊查看詳情'}</small>
+            </div>`).join('');
+    }
+
+    function selectCat(id) {
+        activeCat = cats.find(x => x.id === id);
+        if(!activeCat) return;
+        document.getElementById('active-cat-name').innerText = activeCat.name;
+        document.getElementById('terms-box').innerText = activeCat.terms || "請詳閱並遵守相關服務規範。";
+        document.getElementById('agree-check').checked = false; toggleSubmitBtn(false);
+        const sub = items.filter(x => x.category_id === id);
+        const isSleepMode = activeCat.question_type === 'sleep'; 
+        const listArea = document.getElementById('items-area');
+        listArea.innerHTML = sub.map(i => {
+            let subHtml = "";
+            if (i.sub_options) {
+                const opts = i.sub_options.split(/[,，]/);
+                subHtml = `<div class="sub-check-grid">` + opts.map(opt => `<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${opt.trim()}"> ${opt.trim()}</label>`).join('') + `</div>`;
+            }
+            return `<div class="service-card"><div class="service-header"><label class="service-info"><input type="${isSleepMode ? 'checkbox' : 'radio'}" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" ${i.is_auto_check?'checked disabled':''} onchange="calcTotal()"><span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div>${i.description ? `<div class="service-desc">${i.description}</div>` : ''}${subHtml}${i.has_text_input ? `<input type="text" class="addon-note" data-id="${i.id}" placeholder="請簡述您的需求..." style="margin-top:10px;">` : ''}</div>`;
+        }).join('');
+        const qArea = document.getElementById('conditional-question');
+        if (isSleepMode) {
+            qArea.innerHTML = `<label>🌙 請填寫您的「預計睡眠/休息時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">老師將於您休息時進行遠端能量調整，請提供您通常的作息時間。</div><input type="text" id="q-val" placeholder="例如：每天 23:30 ~ 07:00">`;
+        } else {
+            qArea.innerHTML = `<label>📅 請填寫您「希望預約的諮詢時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">請提供 2-3 個方便的時間，後續將由專人確認最終排程。</div><input type="text" id="q-val" placeholder="例如：平日晚上 8 點後、12/25 下午">`;
+        }
+        calcTotal(); showSection('booking-step-2');
+    }
+
+    function calcTotal() {
+        let t = 0; document.querySelectorAll('input[name="svc"]:checked').forEach(el => t += parseInt(el.dataset.price || 0)); document.getElementById('total-price').innerText = t;
+    }
+
+    async function doSubmit() {
+        const name = document.getElementById('c-name').value.trim();
+        const phone = document.getElementById('c-phone').value.trim();
+        const email = document.getElementById('c-email').value.trim();
+        const checkedSvcs = document.querySelectorAll('input[name="svc"]:checked');
+        if (!name || !phone || !email) { alert("⚠️ 請完整填寫姓名、電話與 Email"); return; }
+        if (checkedSvcs.length === 0) { alert("⚠️ 請至少選擇一項服務方案"); return; }
+        const payType = document.getElementById('pay-status').value;
+        if (payType === 'shopee' && !document.getElementById('shopee-id').value.trim()) { alert("⚠️ 選擇「蝦皮付款」時，請務必填寫訂單編號"); return; }
+        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
+        const flow = document.getElementById('data-flow').value;
+        let finalDataInfo = "";
+        if(flow === 'upload') {
+            const file = document.getElementById('c-file').files[0];
+            let chartUrl = "";
+            if(file) {
+                const fName = `HD_${phone}_${Date.now()}.png`;
+                const { error: uploadErr } = await myDB.storage.from('case-charts').upload(fName, file);
+                if(uploadErr) { alert("❌ 圖片上傳失敗"); btn.disabled = false; return; }
+                const { data } = myDB.storage.from('case-charts').getPublicUrl(fName); chartUrl = data.publicUrl;
+            }
+            finalDataInfo = `截圖已上傳 ( <a href="${chartUrl}" target="_blank">點擊查看圖片</a> )`;
+        } else {
+            const bDate = document.getElementById('b-date').value || '未填'; const bTime = document.getElementById('b-time').value || '未填'; const bPlace = document.getElementById('b-place').value || '未填';
+            finalDataInfo = `出生日期: ${bDate} | 時間: ${bTime} | 地點: ${bPlace}`;
+        }
+        let details = [];
+        checkedSvcs.forEach(el => {
+            let txt = `${el.dataset.title} ($${el.dataset.price})`; 
+            let subs = Array.from(document.querySelectorAll(`.sub-opt-item[data-parent-id="${el.value}"]:checked`)).map(s=>s.value);
+            if(subs.length > 0) txt += ` [${subs.join('、')}]`;
+            let noteInput = document.querySelector(`.addon-note[data-id="${el.value}"]`);
+            if(noteInput && noteInput.value) txt += ` (備註: ${noteInput.value})`;
+            details.push(txt);
+        });
+        const { error } = await myDB.from('bookings').insert([{
+            booking_id: "OD" + Date.now(), temp_phone: phone, status: 'pending', price: parseInt(document.getElementById('total-price').innerText),
+            service_item: activeCat.name, service_detail: details.join(' | '), client_source: document.getElementById('client-source').value, 
+            shopee_order_id: document.getElementById('shopee-id').value, payment_method: payType, sleep_time: document.getElementById('q-val') ? document.getElementById('q-val').value : '',
+            wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}` 
+        }]);
+        if(!error) { alert("🎉 預約成功！"); location.reload(); } else { alert("❌ 預約失敗：" + error.message); btn.disabled = false; btn.innerText = "確認送出預約資料"; }
+    }
+
+    async function doLogin() {
+        const phone = document.getElementById('l-phone').value; const pass = document.getElementById('l-pass').value;
+        if(!phone || !pass) return alert("請輸入帳號密碼");
+        const { data } = await myDB.from('profiles').select('*, reports(*)').eq('phone', phone).eq('password', pass).single();
+        if(data) {
+            document.getElementById('login-box').style.display = 'none'; document.getElementById('dash').style.display = 'block';
+            document.getElementById('dash').innerHTML = `<h3>您好，${data.full_name}</h3><p>您的歷史報告：</p>${data.reports.length > 0 ? data.reports.map(r=>`<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>📅 ${r.service_date}</span><button onclick="window.open('viewer.html?id=${r.id}')" style="padding:5px 15px; cursor:pointer;">查看報表</button></div>`).join('') : "<div class='card'>目前尚無已完成的報告</div>"}`;
+        } else { alert("帳密錯誤"); }
+    }
+</script>
+</body>
+</html>

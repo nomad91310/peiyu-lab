@@ -113,9 +113,6 @@
         let currentReportId = null;
         let detectedAddons = []; 
 
-        // -----------------------------------------------------------
-        // 1. 資料常數 (使用 V41 完整版文字)
-        // -----------------------------------------------------------
         const HD_COLORS = { head: '#e8e6a5', ajna: '#a7d28b', throat: '#c6a87c', g: '#f4eb68', ego: '#e85d5d', solar: '#c69c6d', spleen: '#c69c6d', sacral: '#e85d5d', root: '#c69c6d' };
         const ENERGY_COLORS = { red: '#ff5252', yellow: '#ffd740', green: '#69f0ae' };
         
@@ -444,9 +441,9 @@
             const ctx = canvas.getContext('2d');
             const canvasWidth = 2600;
             const headerHeight = 180;
-            // 🌟 這裡根據您的測試結果，設定為 400
+            // 🌟 依照指示設定為 400
             const ADJUST_CARD_HEIGHT = 400; 
-            const HEALTHY_CARD_HEIGHT = 140; // 配合 V41 的健康卡片高度
+            const HEALTHY_CARD_HEIGHT = 140; 
             const ADDON_CARD_H = 180; 
             
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
@@ -671,21 +668,26 @@
             document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
         }
 
+        // 🌟 修正後的 Header 繪製函式：確保療癒師名字出現
         function drawHeader(ctx, width) {
             ctx.fillStyle = "#2c3e50"; ctx.font = "bold 56px Microsoft JhengHei"; ctx.textAlign = "center";
             ctx.fillText("人類圖能量檢測報表", width/2, 70);
             const boxW = width - 100; const boxX = 50; const boxY = 100; const boxH = 80;
             ctx.fillStyle = "#f1f8e9"; ctx.strokeStyle = "#c5e1a5"; ctx.lineWidth = 2;
             ctx.fillRect(boxX, boxY, boxW, boxH); ctx.strokeRect(boxX, boxY, boxW, boxH);
+            
             const date = document.getElementById('info-date').value;
             const name = document.getElementById('info-name').value || "---";
-            const healer = document.getElementById('info-healer').value || "---";
+            const healer = document.getElementById('info-healer').value || "---"; // 確實抓取
             const phone = document.getElementById('info-phone').value || "---";
+            
             ctx.fillStyle = "#333"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.textAlign = "left";
-            const colW = boxW / 3;
+            const colW = boxW / 4; // 🌟 關鍵修正：分成 4 欄
+            
             ctx.fillText(`調整日期：${date}`, boxX + 40, boxY + 50);
             ctx.fillText(`姓名：${name}`, boxX + colW + 40, boxY + 50);
             ctx.fillText(`手機：${phone}`, boxX + colW*2 + 40, boxY + 50);
+            ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50); // 🌟 補上這一行
         }
 
         function getLines(ctx, text, maxWidth) {

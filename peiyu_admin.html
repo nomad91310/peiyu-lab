@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>培癒中控室 V25 | 完整修復版</title>
+    <title>培癒中控室 V26 | QR Code 時間紀錄版</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         /* ================= 樣式表 (CSS) ================= */
@@ -476,6 +476,28 @@
         alert("✅ 排程成功！"); closeModal(); fetchAll();
     }
 
+    // 🌟 [修改] 記錄發送 LINE Pay QR Code 的時間
+    async function sendPayLink(id, p) { 
+        if(confirm("確定已向客人發送 LINE Pay QR Code？\n(系統將記錄發送時間並更改狀態為「待付款」)")) { 
+            // 1. 取得當下時間，格式：2025/1/3 14:30
+            const timeStr = new Date().toLocaleString('zh-TW', { hour12: false, year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            // 2. 找出目前的備註內容，避免覆蓋
+            const currentBooking = cache.bks.find(x => x.id === id);
+            const oldDetail = currentBooking ? (currentBooking.wish_detail || '') : '';
+
+            // 3. 更新資料庫：狀態變更 + 寫入時間紀錄
+            await myDB.from('bookings').update({
+                status: 'awaiting_payment', 
+                wish_detail: `${oldDetail} | [QR已傳: ${timeStr}]` 
+            }).eq('id', id); 
+            
+            alert("✅ 狀態已更新，已記錄發送時間！"); 
+            closeModal(); 
+            fetchAll(); 
+        } 
+    }
+
     // 🌟 補回來的 renderActionButtons 🌟
     function renderActionButtons(b) {
         if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程 (請上方選時段)</button>`;
@@ -602,11 +624,8 @@
     function changeMonth(offset) { currentMonth += offset; if (currentMonth > 12) { currentMonth = 1; currentYear++; } else if (currentMonth < 1) { currentMonth = 12; currentYear--; } renderCalendar(); }
     function selectDate(dateStr) { selectedDateStr = dateStr; renderCalendar(); document.getElementById('detail-date-title').innerText = `${dateStr} 詳情`; const container = document.getElementById('day-detail-container'); const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time)); if (daySlots.length === 0) { container.innerHTML = "<p style='color:#999; font-size:13px;'>無排程</p>"; return; } container.innerHTML = daySlots.map(s => `<div class="compact-slot ${s.is_booked ? 'booked' : 'free'}">${s.slot_time.slice(0,5)}<span class="compact-del" onclick="event.stopPropagation(); delSlot('${s.id}')">×</span></div>`).join(''); }
     async function delSlot(id) { if(!confirm("刪除？")) return; const { error } = await myDB.from('schedule_slots').delete().eq('id', id); if(!error) { fetchAll(); } }
-    function showHistory(uid, name) { const h=cache.bks.filter(b=>b.user_id===uid||cleanPhone(b.temp_phone)===cleanPhone(cache.pros.find(p=>p.id===uid).phone)); let html=`<h3>${name}</h3>`; h.forEach(b=>{html+=`<div class="id-card" onclick="openBooking('${b.id}')" style="cursor:pointer;margin-bottom:5px;">${b.service_item} $${b.price}<br><small>${b.created_at.slice(0,10)} ${b.status}</small></div>`}); document.getElementById('m-title').innerText="歷史"; document.getElementById('m-content').innerHTML=html||"無"; document.getElementById('modal').style.display='flex'; }
-    function editProfile(uid) { const p=cache.pros.find(x=>x.id===uid); document.getElementById('m-content').innerHTML=`<input id="ep-n" value="${p.full_name}"><input id="ep-p" value="${p.phone}"><button onclick="updPro('${p.id}')">存</button>`; document.getElementById('modal').style.display='flex'; }
-    async function updPro(id){ await myDB.from('profiles').update({full_name:document.getElementById('ep-n').value,phone:document.getElementById('ep-p').value}).eq('id',id); closeModal(); fetchAll(); }
-    function openCreateMemberModal(p,bid,n,e) { document.getElementById('m-title').innerText="建立"; document.getElementById('m-content').innerHTML=`<input id="new-p" value="${p}"><input id="new-n" value="${n}"><input id="new-e" value="${e}"><input id="new-pw" value="guest${p.slice(-4)}"><button onclick="doCreate('${bid}')">建立</button>`; document.getElementById('modal').style.display='flex'; }
-    async function doCreate(bid){ const p=document.getElementById('new-p').value; const {data:u, error}=await myDB.from('profiles').insert([{phone:p, full_name:document.getElementById('new-n').value, email:document.getElementById('new-e').value, password:document.getElementById('new-pw').value}]).select().single(); if(!error){ await myDB.from('bookings').update({user_id:u.id}).eq('id',bid); fetchAll(); closeModal(); } else alert(error.message); }
+    async function sendPayLink(id, p) { if(confirm("寄送?")) { await myDB.from('bookings').update({status:'awaiting_payment', wish_detail: cache.bks.find(x=>x.id===id).wish_detail+' | [付款碼已傳]'}).eq('id',id); alert("OK"); closeModal(); fetchAll(); } }
+    window.updateS = async function(id, s) { if(confirm("確定?")) { await myDB.from('bookings').update({status:s}).eq('id',id); closeModal(); fetchAll(); } }
     async function linkUser(uid, bid) { if(confirm("歸戶?")) { await myDB.from('bookings').update({user_id:uid}).eq('id',bid); fetchAll(); } }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function switchTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+id).classList.add('active'); document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active')); document.getElementById('nav-'+id).classList.add('active'); }

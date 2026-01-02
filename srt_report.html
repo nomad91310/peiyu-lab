@@ -324,8 +324,19 @@
                 content.push({ type: 'static', text: db.static[status] });
                 content = content.concat(dynamicPairs.map(p => ({ type: p.type, text: p.diag || p.text })));
                 if (customNote) { content.push({ type: 'note', text: `💡 補充：${customNote}` }); }
-return { ...c, label: db.label, status, sLabel: statusLabel, val, finalAdj, content, raw_diags: dynamicPairs }; 
-            });
+// 找到 collectDataFromUI 裡面的 return { ... }，整塊換成這個：
+                return { 
+                    ...c, 
+                    label: db.label, 
+                    status, 
+                    statusLabel,        // 確保變數存在
+                    sLabel: statusLabel, // 🌟 補上這行：解決「已定義」變 undefined
+                    val, 
+                    adj: finalAdj,       // 🌟 補上這行：解決「調整後數值」變 undefined
+                    finalAdj,            // 保留原本的以防萬一
+                    content, 
+                    raw_diags: dynamicPairs 
+                };
 
             const coreData = MANDATORY_CHECKS.map((name, i) => ({
                 name: name,

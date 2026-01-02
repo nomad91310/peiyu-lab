@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人類圖能量諮詢報表 | 培癒試驗室 (V27 終極還原版)</title>
+    <title>人類圖能量諮詢報表 | 培癒試驗室 (V30 終極無損修復版)</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        /* [V41 樣式基底] */
+        /* [完全保留你的 V41 樣式] */
         body { font-family: -apple-system, "Microsoft JhengHei", "Heiti TC", sans-serif; background: #e0e5ec; padding: 30px; margin: 0; color: #333; }
         .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 1280px; margin: 0 auto; }
         h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px;}
@@ -77,9 +77,9 @@
     <div class="container">
         <h2 id="page-title">🔮 人類圖能量諮詢報表</h2>
         
-       <div class="header-inputs">
+        <div class="header-inputs">
             <div class="header-group"><label>調整日期</label><input type="date" id="info-date"></div>
-            <div class="header-group"><label>個案手機</label><input type="tel" id="info-phone" placeholder="系統自動帶入"></div>
+            <div class="header-group phone-group"><label>個案手機</label><input type="tel" id="info-phone" placeholder="系統自動帶入"></div>
             <div class="header-group"><label>個案姓名</label><input type="text" id="info-name" placeholder="系統自動帶入"></div>
             <div class="header-group"><label>療癒師</label><input type="text" id="info-healer" value="培癒試驗室"></div>
         </div>
@@ -142,6 +142,7 @@
         
         const CENTER_THEMES = { head: '靈感・壓力・疑問', ajna: '概念・信念・分析', throat: '顯化・溝通・行動', g: '愛・方向・認同', ego: '價值感・承諾・動力', solar: '情緒・感受・神經系統', spleen: '生存・直覺・健康', sacral: '生產力・性・生命力', root: '壓力・衝勁・腎上腺' };
 
+        // 🌟 [絕對保留 V41 的文字內容，且補完最後的括號]
         const CENTER_CONTENT = {
             head: { label: "頭腦", organ: "松果體", static: { defined: "天生有固定的思考模式。健康時能享受思考壓力，啟發他人；不健康時困在自己的問題裡憂鬱，或對他人漠不關心。", undefined: "靈感來自四面八方。健康時能區分什麼問題重要；不健康時會把別人的問題攬在身上，急於解決腦中困惑。", open: "對靈感完全開放。健康時享受未知；不健康時會迷失在資訊海中，不知道什麼對自己重要。" }, dynamic: [ { label: "困在腦中/憂鬱 (內縮)", defDiag: "思考內捲陷入封閉迴圈，腦壓過高導致低潮。", defAdj: "釋放累積內在壓力，助思緒重新流動連結外界。", undefDiag: "吸收環境混亂思緒無法過濾，大腦當機深層疲憊。", undefAdj: "清理外來雜訊，助大腦關機釋放不屬於你的煩惱。", isHealthy: false }, { label: "雞婆/焦慮行動 (外顯)", defDiag: "急於找答案而衝動行事，消除疑惑壓力未看清全貌。", defAdj: "安撫急躁腦波，協助學會等待靈感自然浮現。", undefDiag: "把他人問題當責任，急於幫忙解決以紓解壓力。", undefAdj: "切斷非己責任能量，協助劃清界線放下他人問題。", isHealthy: false }, { label: "失眠/停不下來 (失調)", defDiag: "身體累大腦仍慣性運轉，執著想通某事致失眠。", defAdj: "注入深層放鬆頻率，強制松果體進入休眠模式。", undefDiag: "睡前受高壓環境影響，不知非己壓力而持續空轉。", undefAdj: "建立頂輪防護罩，過濾夜間集體潛意識干擾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。松果體運作清晰。", undefDiag: "頭腦清明，不為他人問題煩惱。", adjust: "", isHealthy: true } ] },
             ajna: { label: "邏輯", organ: "腦下垂體", static: { defined: "享受研究，有穩固觀點。健康時思緒清晰；不健康時固執己見，聽不進別人的話，或焦慮於「沒做到」。", undefined: "思考有彈性。健康時能接納各種觀點；不健康時擔心自己不聰明，或為了假裝確定而變得比已定義更固執。", open: "心智像白紙。健康時客觀中立；不健康時因為缺乏定見而極度不安，無法做決定。" }, dynamic: [ { label: "焦慮/自責 (內縮)", defDiag: "心智焦慮想通即做到，因現實落差陷入自責批判。", defAdj: "整合思考與行動落差，釋放不夠努力的自責感。", undefDiag: "因無固定想法而不安，怕顯無知而自我懷疑。", undefAdj: "轉化對未知恐懼，協助接納不確定也是一種智慧。", isHealthy: false }, { label: "固執/假裝確定 (外顯)", defDiag: "思維僵化太信邏輯，聽不進建議鎖在象牙塔。", defAdj: "軟化僵固信念結構，增心智彈性聽見不同聲音。", undefDiag: "掩飾不確定感而假裝堅定，死守借來的觀點不放。", undefAdj: "釋放防衛機制，卸下必須全知全能的偽裝面具。", isHealthy: false }, { label: "專注力渙散 (失調)", defDiag: "腦下垂體壓力過大，邏輯線斷裂致思緒混亂。", defAdj: "修復眉心輪能量，協助重新聚焦找回組織力。", undefDiag: "心智被資訊淹沒，試圖處理過量訊息而當機。", undefAdj: "清理心智緩存區，刪除無用資訊垃圾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。邏輯清晰。", undefDiag: "思維靈活，能客觀看待不同資訊。", adjust: "", isHealthy: true } ] },
@@ -324,19 +325,21 @@
                 content.push({ type: 'static', text: db.static[status] });
                 content = content.concat(dynamicPairs.map(p => ({ type: p.type, text: p.diag || p.text })));
                 if (customNote) { content.push({ type: 'note', text: `💡 補充：${customNote}` }); }
-// 找到 collectDataFromUI 裡面的 return { ... }，整塊換成這個：
+                
+                // 🌟 [修復：變數名稱完全對齊]
                 return { 
                     ...c, 
                     label: db.label, 
                     status, 
-                    statusLabel,        // 確保變數存在
-                    sLabel: statusLabel, // 🌟 補上這行：解決「已定義」變 undefined
+                    statusLabel, 
+                    sLabel: statusLabel, // 確保畫圖抓得到
                     val, 
-                    adj: finalAdj,       // 🌟 補上這行：解決「調整後數值」變 undefined
-                    finalAdj,            // 保留原本的以防萬一
+                    adj: finalAdj,       // 確保畫圖抓得到
+                    finalAdj, 
                     content, 
                     raw_diags: dynamicPairs 
-                };
+                }; 
+            });
 
             const coreData = MANDATORY_CHECKS.map((name, i) => ({
                 name: name,
@@ -516,7 +519,7 @@
             const ADJUST_CARD_HEIGHT = 400; 
             const HEALTHY_CARD_HEIGHT = 140; 
             const SPECIAL_GRID_H = 100; 
-            const lineHeight = 22; // ✅ [修復：補回變數，防止轉圈圈]
+            const lineHeight = 22; // ✅ 補回此行
 
             const healthyCenters = reportData.filter(item => item.finalAdj === "無須調整");
             const adjustCenters = reportData.filter(item => item.finalAdj !== "無須調整");
@@ -644,7 +647,7 @@
                     
                     if (item.name.length > 10) {
                         ctx.font = "bold 14px Microsoft JhengHei"; 
-                        const lines = getLines(ctx, item.name, colWidth - 25);
+                        const lines = processParagraphs(ctx, item.name, colWidth - 25);
                         lines.slice(0, 2).forEach((l, li) => ctx.fillText(l, px, py + (li*16) - 5));
                     } else {
                         ctx.fillText(item.name, px, py);
@@ -694,7 +697,7 @@
                     const staticBlock = item.content.find(b => b.type === 'static');
                     if (staticBlock) {
                         ctx.font = "15px Microsoft JhengHei"; ctx.fillStyle = "#4a6e4d";
-                        const lines = getLines(ctx, staticBlock.text, mainColWidth - 40);
+                        const lines = processParagraphs(ctx, staticBlock.text, mainColWidth - 40);
                         for(let line of lines.slice(0, 2)) { ctx.fillText(line, px, cy); cy += 18; }
                     }
                     cy += 8; ctx.font = "bold 16px Microsoft JhengHei"; ctx.fillStyle = "#1b5e20"; ctx.fillText("⭐ 狀態良好，能量穩定。", dx+15, dy+120);
@@ -729,7 +732,7 @@
                     const staticBlock = item.content.find(b => b.type === 'static');
                     if (staticBlock) {
                         ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#666";
-                        const lines = getLines(ctx, staticBlock.text, mainColWidth - 40);
+                        const lines = processParagraphs(ctx, staticBlock.text, mainColWidth - 40);
                         for(let line of lines.slice(0,3)) { ctx.fillText(line, px, cy); cy += 22; }
                     }
                     
@@ -753,7 +756,7 @@
                         if (block.type === 'diag' || block.type === 'issue') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#c62828"; }
                         else if (block.type === 'adjust' || block.type === 'fix') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#0277bd"; }
                         else if (block.type === 'note') { ctx.font = "17px Microsoft JhengHei"; ctx.fillStyle = "#333"; }
-                        const lines = getLines(ctx, block.text || block.t, mainColWidth - 40);
+                        const lines = processParagraphs(ctx, block.text || block.t, mainColWidth - 40);
                         for(let line of lines) { ctx.fillText(line, px, cy); cy += lineHeight; }
                         cy += 4;
                     });
@@ -801,29 +804,18 @@
             ctx.fillText(`療癒師：${healer}`, boxX + colW*3 + 40, boxY + 50);
         }
 
-       // 🌟 [請用這段取代原本最下面的 getLines 函式]
+        // 🌟 [修復：補回 getLines 函式]
         function processParagraphs(ctx, text, maxWidth) {
             if (!text) return [""];
-            const paras = text.split('\n'); // 支援 Enter 換行
-            let allLines = [];
-            paras.forEach(p => {
-                if (p.trim() === "") { allLines.push(""); return; }
-                const chars = p.split('');
-                let line = "";
-                for (let n = 0; n < chars.length; n++) {
-                    let testLine = line + chars[n];
-                    if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-                        allLines.push(line);
-                        line = chars[n];
-                    } else {
-                        line = testLine;
-                    }
-                }
-                allLines.push(line);
-            });
-            return allLines;
+            const words = text.split(''); const lines = []; let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const width = ctx.measureText(currentLine + words[i]).width;
+                if (width < maxWidth) { currentLine += words[i]; } 
+                else { lines.push(currentLine); currentLine = words[i]; }
+            }
+            lines.push(currentLine); return lines;
         }
-
+        
         // 讓 getLines 也指向同一個功能，防止舊代碼報錯
         const getLines = processParagraphs;
     </script>

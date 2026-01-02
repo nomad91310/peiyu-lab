@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>培癒中控室 V20 | 穩定防呆版</title>
+    <title>培癒中控室 V21 | 詳情修復版</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         /* ================= 樣式表 (CSS) ================= */
@@ -306,14 +306,10 @@
             const { data: p } = await myDB.from('profiles').select('*').order('created_at',{ascending:false});
             const { data: c } = await myDB.from('service_categories').select('*').order('created_at');
             
-            // 🌟 容錯查詢：如果資料庫沒有 sort_order，這裡可能會報錯
-            // 我們用簡單的 select(*) 來避免整個掛掉，排序在前端做
+            // 🌟 容錯查詢
             let { data: s, error: svcErr } = await myDB.from('services').select('*');
             if (svcErr) { console.error("Service fetch err:", svcErr); s = []; }
-            else {
-                // 前端排序
-                s.sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
-            }
+            else { s.sort((a,b) => (a.sort_order||0) - (b.sort_order||0)); }
 
             const { data: sl } = await myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time');
 
@@ -383,85 +379,112 @@
         render7DaySchedule();
     }
 
-    // 🌟 核心修復：防止詳情按不進去 🌟
+    // 🌟 核心：智慧判斷開啟哪張報表 🌟
     function openBooking(id) {
-        const b = cache.bks.find(x => x.id === id);
-        if(!b) { alert("找不到訂單資料"); return; }
-        
-        // 防呆：確保欄位不是 null
-        const wishDetail = b.wish_detail || '';
-        const serviceDetail = b.service_detail || '';
-        const serviceItem = b.service_item || '';
+        try {
+            const b = cache.bks.find(x => x.id === id);
+            if(!b) { alert("找不到訂單資料"); return; }
+            
+            // 防呆
+            const wishDetail = b.wish_detail || '';
+            const serviceDetail = b.service_detail || '';
+            const serviceItem = b.service_item || '';
 
-        const cleanDetail = wishDetail.replace(/\| \[付款碼.*?\]/g, '');
-        let extractName="未知", extractEmail="未知", extractData=cleanDetail;
-        const nm=cleanDetail.match(/姓名:(.*?) \|/), em=cleanDetail.match(/Email:(.*?) \|/), dt=cleanDetail.match(/數據:(.*)/);
-        if(nm) extractName=nm[1]; if(em) extractEmail=em[1]; if(dt) extractData=dt[1];
+            const cleanDetail = wishDetail.replace(/\| \[付款碼.*?\]/g, '');
+            let extractName="未知", extractEmail="未知", extractData=cleanDetail;
+            const nm=cleanDetail.match(/姓名:(.*?) \|/), em=cleanDetail.match(/Email:(.*?) \|/), dt=cleanDetail.match(/數據:(.*)/);
+            if(nm) extractName=nm[1]; if(em) extractEmail=em[1]; if(dt) extractData=dt[1];
 
-        // 1. 🔍 尋找主項目服務
-        const mainService = (cache.svcs || []).find(s => s.is_main && serviceDetail.includes(s.title));
+            // 1. 🔍 尋找主項目服務
+            const mainService = (cache.svcs || []).find(s => s.is_main && serviceDetail.includes(s.title));
 
-        let reportTemplate = "srt_report.html"; 
-        let btnLabel = "📄 生成服務報告";
-        
-        if (mainService && mainService.report_template) {
-            reportTemplate = mainService.report_template;
-            btnLabel = `📄 生成 ${mainService.title} 報告`;
-        }
+            let reportTemplate = "srt_report.html"; 
+            let btnLabel = "📄 生成服務報告";
+            
+            if (mainService && mainService.report_template) {
+                reportTemplate = mainService.report_template;
+                btnLabel = `📄 生成 ${mainService.title} 報告`;
+            }
 
-        const reportMatch = wishDetail.match(/\[報告已生成 ID:(.*?)\]/);
-        const existingReportId = reportMatch ? reportMatch[1] : null;
-        let reportUrl = "";
-        let btnClass = "btn-forest";
+            const reportMatch = wishDetail.match(/\[報告已生成 ID:(.*?)\]/);
+            const existingReportId = reportMatch ? reportMatch[1] : null;
+            let reportUrl = "";
+            let btnClass = "btn-forest";
 
-        if (existingReportId) {
-            reportUrl = `${reportTemplate}?id=${existingReportId}`;
-            btnLabel = "📄 查看 / 修改已存報告";
-            btnClass = "btn-purple";
-        } else {
-            reportUrl = `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
-        }
+            if (existingReportId) {
+                reportUrl = `${reportTemplate}?id=${existingReportId}`;
+                btnLabel = "📄 查看 / 修改已存報告";
+                btnClass = "btn-purple";
+            } else {
+                reportUrl = `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
+            }
 
-        const serviceListHtml = serviceDetail.split(' | ').map(item => {
-            const matchedSvc = (cache.svcs||[]).find(s => item.includes(s.title));
-            return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${item}</span><span style="color:#666;">${matchedSvc?'$'+matchedSvc.price:''}</span></div>`;
-        }).join('');
+            const serviceListHtml = serviceDetail.split(' | ').map(item => {
+                const matchedSvc = (cache.svcs||[]).find(s => item.includes(s.title));
+                return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${item}</span><span style="color:#666;">${matchedSvc?'$'+matchedSvc.price:''}</span></div>`;
+            }).join('');
 
-        const scheduledTime = b.scheduled_at ? new Date(b.scheduled_at).toLocaleString() : '<span style="color:#999">尚未排程</span>';
-        
-        const today = new Date().toISOString().split('T')[0];
-        const availableSlots = (cache.slots||[]).filter(s => !s.is_booked && s.slot_date >= today);
-        let slotOptions = '<option value="">-- 請選擇排程空檔 --</option>';
-        availableSlots.forEach(s => { slotOptions += `<option value="${s.id}" data-time="${s.slot_date} ${s.slot_time}">${s.slot_date} ${s.slot_time.slice(0,5)}</option>`; });
+            const scheduledTime = b.scheduled_at ? new Date(b.scheduled_at).toLocaleString() : '<span style="color:#999">尚未排程</span>';
+            
+            const today = new Date().toISOString().split('T')[0];
+            const availableSlots = (cache.slots||[]).filter(s => !s.is_booked && s.slot_date >= today);
+            let slotOptions = '<option value="">-- 請選擇排程空檔 --</option>';
+            availableSlots.forEach(s => { slotOptions += `<option value="${s.id}" data-time="${s.slot_date} ${s.slot_time}">${s.slot_date} ${s.slot_time.slice(0,5)}</option>`; });
 
-        document.getElementById('m-title').innerText = "預約詳情";
-        document.getElementById('m-content').innerHTML = `
-            <div class="id-card" style="background:#f0f7ff; padding:15px;">
-                <b>${extractName}</b> <small>(${!!b.profiles?'會員':'訪客'})</small><br>
-                <small>${b.temp_phone} | ${extractEmail}</small>
-            </div>
-            <div style="margin-top:15px; background:#fafafa; padding:10px; border-radius:8px;">
-                <b>${serviceItem}</b>
-                ${serviceListHtml}
-                <div style="margin-top:5px; color:#999; font-size:12px;">連結：${mainService ? '✅ '+mainService.title : '⚠️ 預設'}</div>
-            </div>
-            <div style="margin-top:15px; background:#fffdf0; padding:10px; border:1px solid #eee; border-radius:8px;">
-                ${extractData}
-                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc; color:#d35400;">💡 客人許願：${b.sleep_time || '無'}</div>
-            </div>
-            <div style="margin-top:15px; padding:15px; background:#f3e5f5; border-radius:8px;">
-                <div style="margin-bottom:10px; display:flex; justify-content:space-between;">
-                    <span><b>📅 預計服務：</b> <span style="font-size:1.1em; color:var(--purple);">${scheduledTime}</span></span>
-                    ${b.scheduled_at ? `<button class="btn btn-outline" style="font-size:12px;padding:2px 5px;" onclick="document.getElementById('schedule-box').style.display='block'">✎</button>` : ''}
+            document.getElementById('m-title').innerText = "預約詳情";
+            document.getElementById('m-content').innerHTML = `
+                <div class="id-card" style="background:#f0f7ff; padding:15px;">
+                    <b>${extractName}</b> <small>(${!!b.profiles?'會員':'訪客'})</small><br>
+                    <small>${b.temp_phone} | ${extractEmail}</small>
                 </div>
-                <div id="schedule-box" style="display:${b.scheduled_at ? 'none' : 'block'};">
-                    ${b.status === 'paid' || b.scheduled_at ? `<div style="display:flex; gap:10px;"><select id="slot-selector" style="flex:1;">${slotOptions}</select><button class="btn btn-purple" onclick="saveSchedule('${b.id}')">排入</button></div>` : '<small style="color:#999">未付款無法排程</small>'}
+                <div style="margin-top:15px; background:#fafafa; padding:10px; border-radius:8px;">
+                    <b>${serviceItem}</b>
+                    ${serviceListHtml}
+                    <div style="margin-top:5px; color:#999; font-size:12px;">連結：${mainService ? '✅ '+mainService.title : '⚠️ 預設'}</div>
                 </div>
-            </div>
-            ${b.status === 'awaiting_service' || b.status === 'completed' ? `<div style="margin-top:15px; padding:15px; background:#e8f5e9; border-radius:8px; text-align:center;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="text-decoration:none; display:block; width:100%;">${btnLabel}</a><div style="margin-top:5px; font-size:11px; color:#666;">目標檔案: ${reportTemplate}</div></div>` : ''}
-            <div style="margin-top:20px; text-align:right;"><div style="font-size:24px; color:#d35400; font-weight:bold; margin-bottom:10px;">$${b.price}</div>${renderActionButtons(b)}</div>
-        `;
-        document.getElementById('modal').style.display = 'flex';
+                <div style="margin-top:15px; background:#fffdf0; padding:10px; border:1px solid #eee; border-radius:8px;">
+                    ${extractData}
+                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc; color:#d35400;">💡 客人許願：${b.sleep_time || '無'}</div>
+                </div>
+                <div style="margin-top:15px; padding:15px; background:#f3e5f5; border-radius:8px;">
+                    <div style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                        <span><b>📅 預計服務：</b> <span style="font-size:1.1em; color:var(--purple);">${scheduledTime}</span></span>
+                        ${b.scheduled_at ? `<button class="btn btn-outline" style="font-size:12px;padding:2px 5px;" onclick="document.getElementById('schedule-box').style.display='block'">✎</button>` : ''}
+                    </div>
+                    <div id="schedule-box" style="display:${b.scheduled_at ? 'none' : 'block'};">
+                        ${b.status === 'paid' || b.scheduled_at ? `<div style="display:flex; gap:10px;"><select id="slot-selector" style="flex:1;">${slotOptions}</select><button class="btn btn-purple" onclick="saveSchedule('${b.id}')">排入</button></div>` : '<small style="color:#999">未付款無法排程</small>'}
+                    </div>
+                </div>
+                ${b.status === 'awaiting_service' || b.status === 'completed' ? `<div style="margin-top:15px; padding:15px; background:#e8f5e9; border-radius:8px; text-align:center;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="text-decoration:none; display:block; width:100%;">${btnLabel}</a><div style="margin-top:5px; font-size:11px; color:#666;">目標檔案: ${reportTemplate}</div></div>` : ''}
+                <div style="margin-top:20px; text-align:right;"><div style="font-size:24px; color:#d35400; font-weight:bold; margin-bottom:10px;">$${b.price}</div>${renderActionButtons(b)}</div>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        } catch (err) {
+            console.error(err);
+            alert("詳情開啟失敗: " + err.message);
+        }
+    }
+
+    async function saveSchedule(bid) {
+        const sel = document.getElementById('slot-selector');
+        if(!sel.value) return alert("請選時段");
+        const timeText = sel.options[sel.selectedIndex].dataset.time;
+        
+        await myDB.from('bookings').update({ scheduled_at: timeText, status: 'awaiting_service' }).eq('id', bid);
+        await myDB.from('schedule_slots').update({ is_booked: true }).eq('id', sel.value);
+        
+        alert("✅ 排程成功！"); closeModal(); fetchAll();
+    }
+
+    // 🌟 【就是這裡！】補回遺失的 renderActionButtons 函式 🌟
+    function renderActionButtons(b) {
+        if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程 (請上方選時段)</button>`;
+        if (b.status === 'awaiting_service') return `<span style="color:var(--purple); font-weight:bold; margin-right:10px;">⏳ 服務中...</span><button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`;
+        if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">🎉 已結案</button>`;
+        if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}', '${b.price}')">📧 傳付款碼</button>`;
+        if (b.status === 'awaiting_payment') return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`;
+        if (b.payment_method === 'shopee') return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">確認蝦皮入帳</button>`;
+        return "";
     }
 
     // --- 服務配置與 CRUD ---
@@ -520,7 +543,6 @@
         fetchAll();
     }
 
-    // --- 編輯與儲存 ---
     function editCat(id){const c=cache.cats.find(x=>x.id===id);document.getElementById('cat-id-edit').value=c.id;document.getElementById('cat-name').value=c.name;document.getElementById('cat-terms').value=c.terms;document.getElementById('btn-cat-save').innerText="💾 儲存";document.getElementById('btn-cat-cancel').style.display="inline-block";}
     
     function editSvc(id){
@@ -571,7 +593,7 @@
     }
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
 
-    // --- 其他功能 ---
+    // --- 共用 ---
     function render7DaySchedule() { const container = document.getElementById('dashboard-7day-schedule'); const today = new Date(); let html = ""; for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(today.getDate() + i); const dateStr = d.toISOString().split('T')[0]; const dayLabel = `${d.getMonth()+1}/${d.getDate()} (${['日','一','二','三','四','五','六'][d.getDay()]})`; const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time)); if(daySlots.length === 0) continue; else { let slotsHtml = daySlots.map(s => `<span class="u-slot ${s.is_booked ? 'booked' : ''}">${s.slot_time.slice(0,5)}</span>`).join(''); html += `<div class="upcoming-day"><div class="upcoming-day-header">${dayLabel}</div><div class="upcoming-slots">${slotsHtml}</div></div>`; } } container.innerHTML = html || "<p style='color:#999;text-align:center;'>未來一週無排程</p>"; }
     function renderTimeGrid() { const grid = document.getElementById('time-grid'); if(!grid || grid.innerHTML !== "") return; let html = ''; for (let h = 13; h <= 25; h++) { [0, 30].forEach(m => { let displayH = h >= 24 ? h - 24 : h; let displayTime = `${displayH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; let val = `${h}:${m}`; html += `<div class="batch-slot"><input type="checkbox" id="t-${val}" value="${val}" name="batch-times"><label for="t-${val}">${displayTime}</label></div>`; }); } grid.innerHTML = html; }
     async function batchAddSchedule() { const startDateVal = document.getElementById('batch-start').value; let endDateVal = document.getElementById('batch-end').value; if (!endDateVal) endDateVal = startDateVal; if (!startDateVal) return alert("請至少選擇開始日期"); const checkboxes = document.querySelectorAll('input[name="batch-times"]:checked'); if (checkboxes.length === 0) return alert("請至少勾選一個時段"); const { data: existings } = await myDB.from('schedule_slots').select('slot_date, slot_time').gte('slot_date', startDateVal).lte('slot_date', endDateVal); const existingSet = new Set(existings ? existings.map(e => `${e.slot_date}_${e.slot_time.slice(0,5)}`) : []); const start = new Date(startDateVal); const end = new Date(endDateVal); let inserts = []; let skipCount = 0; for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) { checkboxes.forEach(chk => { const [h, m] = chk.value.split(':').map(Number); let currentDay = new Date(d); let finalTimeStr = ""; if (h >= 24) { currentDay.setDate(currentDay.getDate() + 1); finalTimeStr = `${(h-24).toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; } else { finalTimeStr = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; } const dateStr = currentDay.toISOString().split('T')[0]; const checkKey = `${dateStr}_${finalTimeStr}`; if (existingSet.has(checkKey)) { skipCount++; } else { inserts.push({ slot_date: dateStr, slot_time: finalTimeStr, is_booked: false }); } }); } if (inserts.length === 0) return alert(`所有時段都已存在 (跳過 ${skipCount} 筆)`); if(!confirm(`即將新增 ${inserts.length} 個時段 (已跳過 ${skipCount} 個重複)，確定嗎？`)) return; const { error } = await myDB.from('schedule_slots').insert(inserts); if (error) alert("❌ 失敗：" + error.message); else { alert("✅ 成功！"); fetchAll(); } }
@@ -580,11 +602,8 @@
     function changeMonth(offset) { currentMonth += offset; if (currentMonth > 12) { currentMonth = 1; currentYear++; } else if (currentMonth < 1) { currentMonth = 12; currentYear--; } renderCalendar(); }
     function selectDate(dateStr) { selectedDateStr = dateStr; renderCalendar(); document.getElementById('detail-date-title').innerText = `${dateStr} 詳情`; const container = document.getElementById('day-detail-container'); const daySlots = cache.slots.filter(s => s.slot_date === dateStr).sort((a,b) => a.slot_time.localeCompare(b.slot_time)); if (daySlots.length === 0) { container.innerHTML = "<p style='color:#999; font-size:13px;'>無排程</p>"; return; } container.innerHTML = daySlots.map(s => `<div class="compact-slot ${s.is_booked ? 'booked' : 'free'}">${s.slot_time.slice(0,5)}<span class="compact-del" onclick="event.stopPropagation(); delSlot('${s.id}')">×</span></div>`).join(''); }
     async function delSlot(id) { if(!confirm("刪除？")) return; const { error } = await myDB.from('schedule_slots').delete().eq('id', id); if(!error) { fetchAll(); } }
-    function showHistory(uid, name) { const h=cache.bks.filter(b=>b.user_id===uid||cleanPhone(b.temp_phone)===cleanPhone(cache.pros.find(p=>p.id===uid).phone)); let html=`<h3>${name}</h3>`; h.forEach(b=>{html+=`<div class="id-card" onclick="openBooking('${b.id}')" style="cursor:pointer;margin-bottom:5px;">${b.service_item} $${b.price}<br><small>${b.created_at.slice(0,10)} ${b.status}</small></div>`}); document.getElementById('m-title').innerText="歷史"; document.getElementById('m-content').innerHTML=html||"無"; document.getElementById('modal').style.display='flex'; }
-    function editProfile(uid) { const p=cache.pros.find(x=>x.id===uid); document.getElementById('m-content').innerHTML=`<input id="ep-n" value="${p.full_name}"><input id="ep-p" value="${p.phone}"><button onclick="updPro('${p.id}')">存</button>`; document.getElementById('modal').style.display='flex'; }
-    async function updPro(id){ await myDB.from('profiles').update({full_name:document.getElementById('ep-n').value,phone:document.getElementById('ep-p').value}).eq('id',id); closeModal(); fetchAll(); }
-    function openCreateMemberModal(p,bid,n,e) { document.getElementById('m-title').innerText="建立"; document.getElementById('m-content').innerHTML=`<input id="new-p" value="${p}"><input id="new-n" value="${n}"><input id="new-e" value="${e}"><input id="new-pw" value="guest${p.slice(-4)}"><button onclick="doCreate('${bid}')">建立</button>`; document.getElementById('modal').style.display='flex'; }
-    async function doCreate(bid){ const p=document.getElementById('new-p').value; const {data:u, error}=await myDB.from('profiles').insert([{phone:p, full_name:document.getElementById('new-n').value, email:document.getElementById('new-e').value, password:document.getElementById('new-pw').value}]).select().single(); if(!error){ await myDB.from('bookings').update({user_id:u.id}).eq('id',bid); fetchAll(); closeModal(); } else alert(error.message); }
+    async function sendPayLink(id, p) { if(confirm("寄送?")) { await myDB.from('bookings').update({status:'awaiting_payment', wish_detail: cache.bks.find(x=>x.id===id).wish_detail+' | [付款碼已傳]'}).eq('id',id); alert("OK"); closeModal(); fetchAll(); } }
+    window.updateS = async function(id, s) { if(confirm("確定?")) { await myDB.from('bookings').update({status:s}).eq('id',id); closeModal(); fetchAll(); } }
     async function linkUser(uid, bid) { if(confirm("歸戶?")) { await myDB.from('bookings').update({user_id:uid}).eq('id',bid); fetchAll(); } }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function switchTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+id).classList.add('active'); document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active')); document.getElementById('nav-'+id).classList.add('active'); }

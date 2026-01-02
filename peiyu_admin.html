@@ -326,7 +326,7 @@
         }
     }
 
-    function renderUI() {
+   function renderUI() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
         const cleanSearch = cleanPhone(search);
         
@@ -340,12 +340,18 @@
             const hasPro = !!x.profiles;
             const potentialMatch = !hasPro ? cache.pros.find(p => cleanPhone(p.phone) === cleanPhone(phone)) : null;
 
+            // 🌟 [修正] 把 Email 也抓出來
             let preName = '新個案';
-            if (x.wish_detail) { const nm = x.wish_detail.match(/姓名:(.*?) \|/); if(nm) preName = nm[1].trim(); }
+            let preEmail = '';
+            if (x.wish_detail) { 
+                const nm = x.wish_detail.match(/姓名:(.*?) \|/); if(nm) preName = nm[1].trim(); 
+                const em = x.wish_detail.match(/Email:(.*?) \|/); if(em) preEmail = em[1].trim();
+            }
 
+            // 🌟 [修正] openCreateMemberModal 第四個參數傳入 preEmail
             let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` :
                            potentialMatch ? `<b style="color:var(--info)">[疑似] ${potentialMatch.full_name}</b><br><button class="btn btn-success" style="font-size:10px;padding:2px;" onclick="linkUser('${potentialMatch.id}', '${x.id}')">歸戶</button>` :
-                           `<b>${preName}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${phone}', '${x.id}', '${preName}', '')">＋建立</button>`;
+                           `<b>${preName}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${phone}', '${x.id}', '${preName}', '${preEmail}')">＋建立</button>`;
 
             let stColor = '#e74c3c'; let stText = '未付款';
             if(x.status === 'paid') { stColor = '#27ae60'; stText = '已付款'; }
@@ -363,8 +369,21 @@
             </tr>`;
         }).join('');
 
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const inc = cache.bks.filter(x => x.status === 'paid' && x.created_at.startsWith(currentMonth)).reduce((s, x) => s + (x.price || 0), 0);
+        document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
+        document.getElementById('total-val').innerText = cache.pros.length;
+
+        document.getElementById('pro-list').innerHTML = cache.pros.map(p => {
+            const userBks = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone));
+            const totalSpent = userBks.filter(b => b.status === 'paid').reduce((sum, b) => sum + (b.price||0), 0);
+            const lastBk = userBks.length > 0 ? userBks[0].created_at.slice(0,10) : '-';
+            return `<tr><td>${p.full_name}</td><td>${p.phone}</td><td style="color:#d35400;">$${totalSpent.toLocaleString()}</td><td>${lastBk}</td><td><small>${p.email||'-'}</small></td><td><button class="btn btn-info" onclick="showHistory('${p.id}', '${p.full_name}')">歷史</button><button class="btn btn-warning" onclick="editProfile('${p.id}')">改</button></td></tr>`;
+        }).join('');
+
         renderConfigTables();
         render7DaySchedule();
+    }
 
         // [補] 顯示營收與人數
         const currentMonth = new Date().toISOString().slice(0, 7);

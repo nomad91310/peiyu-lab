@@ -193,8 +193,8 @@
     };
 
     async function initBookingData() {
-        // 🌟 排序修正：加上 order
         const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
+        // 🌟 排序修正
         const { data: i } = await myDB.from('services').select('*').order('sort_order', {ascending: true}); items = i || [];
         const { data: posts } = await myDB.from('site_content').select('*').order('created_at', {ascending:false});
         renderCats();
@@ -351,12 +351,37 @@
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
         const checkedSvcs = document.querySelectorAll('input[name="svc"]:checked');
+        
+        // 1. 基本資料檢查
         if (!name || !phone || !email) { alert("⚠️ 請完整填寫姓名、電話與 Email"); return; }
+        
+        // 2. 服務方案檢查
         if (checkedSvcs.length === 0) { alert("⚠️ 請至少選擇一項服務方案"); return; }
+        
+        // 3. 付款方式檢查
         const payType = document.getElementById('pay-status').value;
         if (payType === 'shopee' && !document.getElementById('shopee-id').value.trim()) { alert("⚠️ 選擇「蝦皮付款」時，請務必填寫訂單編號"); return; }
-        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
+        
+        // 4. 出生資料/圖片上傳檢查
         const flow = document.getElementById('data-flow').value;
+        if (flow === 'data') {
+            const bDate = document.getElementById('b-date').value;
+            const bTime = document.getElementById('b-time').value;
+            const bPlace = document.getElementById('b-place').value.trim();
+            if (!bDate || !bTime || !bPlace) { alert("⚠️ 請完整填寫出生日期、時間與地點"); return; }
+        } else {
+            const file = document.getElementById('c-file').files[0];
+            if (!file) { alert("⚠️ 請上傳人類圖截圖"); return; }
+        }
+
+        // 🌟 [修正] 5. 條件式問答檢查 (只針對「睡眠」必填)
+        const qVal = document.getElementById('q-val') ? document.getElementById('q-val').value.trim() : '';
+        if (activeCat && activeCat.question_type === 'sleep') {
+            if (!qVal) { alert("⚠️ 請填寫「預計睡眠/休息時段」以利老師進行遠端作業"); return; }
+        }
+
+        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
+        
         let finalDataInfo = "";
         if(flow === 'upload') {
             const file = document.getElementById('c-file').files[0];
@@ -364,14 +389,17 @@
             if(file) {
                 const fName = `HD_${phone}_${Date.now()}.png`;
                 const { error: uploadErr } = await myDB.storage.from('case-charts').upload(fName, file);
-                if(uploadErr) { alert("❌ 圖片上傳失敗"); btn.disabled = false; return; }
+                if(uploadErr) { alert("❌ 圖片上傳失敗: " + uploadErr.message); btn.disabled = false; btn.innerText = "確認送出預約資料"; return; }
                 const { data } = myDB.storage.from('case-charts').getPublicUrl(fName); chartUrl = data.publicUrl;
             }
             finalDataInfo = `截圖已上傳 ( <a href="${chartUrl}" target="_blank">點擊查看圖片</a> )`;
         } else {
-            const bDate = document.getElementById('b-date').value || '未填'; const bTime = document.getElementById('b-time').value || '未填'; const bPlace = document.getElementById('b-place').value || '未填';
+            const bDate = document.getElementById('b-date').value; 
+            const bTime = document.getElementById('b-time').value; 
+            const bPlace = document.getElementById('b-place').value;
             finalDataInfo = `出生日期: ${bDate} | 時間: ${bTime} | 地點: ${bPlace}`;
         }
+
         let details = [];
         checkedSvcs.forEach(el => {
             let txt = `${el.dataset.title} ($${el.dataset.price})`; 
@@ -381,12 +409,14 @@
             if(noteInput && noteInput.value) txt += ` (備註: ${noteInput.value})`;
             details.push(txt);
         });
+
         const { error } = await myDB.from('bookings').insert([{
             booking_id: "OD" + Date.now(), temp_phone: phone, status: 'pending', price: parseInt(document.getElementById('total-price').innerText),
             service_item: activeCat.name, service_detail: details.join(' | '), client_source: document.getElementById('client-source').value, 
-            shopee_order_id: document.getElementById('shopee-id').value, payment_method: payType, sleep_time: document.getElementById('q-val') ? document.getElementById('q-val').value : '',
+            shopee_order_id: document.getElementById('shopee-id').value, payment_method: payType, sleep_time: qVal,
             wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}` 
         }]);
+
         if(!error) { alert("🎉 預約成功！"); location.reload(); } else { alert("❌ 預約失敗：" + error.message); btn.disabled = false; btn.innerText = "確認送出預約資料"; }
     }
 

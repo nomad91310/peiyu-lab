@@ -561,10 +561,12 @@
                 if (displayVal !== "--") { if (parseInt(displayVal) <= 40) badgeColor = ENERGY_COLORS.red; else if (parseInt(displayVal) <= 70) badgeColor = ENERGY_COLORS.yellow; }
 
                 ctx.beginPath();
+                // 🟥 修正重點：把所有的 cx 改成 x，把所有的 cy 改成 y
                 if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
                 else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
-                else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(cx, cy+h/2); ctx.closePath(); }
+                // 👇 之前報錯的是這幾行，現在修好了 👇
+                else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
                 else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
                 else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }

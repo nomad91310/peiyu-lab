@@ -7,137 +7,181 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;900&family=ZCOOL+XiaoWei&family=Shippori+Mincho&display=swap" rel="stylesheet">
     
-    <style>
+<style>
         :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --text: #2c3e50; --shopee: #ff5722; --error: #e74c3c; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--cream); margin: 0; color: var(--text); line-height: 1.6; }
         
-        /* 導航列 */
-        nav { background: var(--forest); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .logo { color: var(--cream); font-size: 22px; font-weight: bold; cursor: pointer; letter-spacing: 2px; }
-        .nav-links button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-size: 14px; color: #ccc; transition: 0.3s; }
+        /* === 導航列 === */
+        nav { background: var(--forest); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); overflow: hidden; }
+        .logo-area { display: flex; align-items: center; gap: 10px; cursor: pointer; height: 100%; }
+        .logo-img { max-height: 45px; width: auto; object-fit: contain; } 
+        .logo-text-img { max-height: 30px; width: auto; object-fit: contain; } 
+        
+        .nav-links button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-size: 15px; color: #ccc; transition: 0.3s; font-weight: 500; }
         .nav-links button.active { color: var(--accent); font-weight: bold; border-bottom: 2px solid var(--accent); }
         .nav-links button:hover { color: white; }
 
-        /* 內容區塊 */
-        .section { display: none; padding: 40px 20px; max-width: 900px; margin: 0 auto; min-height: calc(100vh - 70px); }
-        .section.active { display: block; animation: fadeIn 0.4s ease; }
+        /* === 通用區塊 === */
+        /* 🌟 padding-top 改為 0，讓第一屏內容直接頂上去 */
+        .section { display: none; padding: 0 20px 40px 20px; max-width: 1200px; margin: 0 auto; min-height: calc(100vh - 70px); animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 卡片與通用樣式 */
+        /* === 首頁 Hero 區塊 (V37 重點修改：極致緊湊) === */
+        /* 🌟 padding-bottom: 0 (下方無留白) */
+        /* 🌟 padding-top: 20px (上方稍微留一點點呼吸，不然太壓迫) */
+        /* 🌟 gap: 20px (文字跟圖片靠得非常近) */
+        .hero-section { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 0; }
+        
+        .hero-text { flex: 0 1 auto; max-width: 500px; text-align: left; }
+        /* 🌟 margin-bottom: 5px (縮減標題跟副標題的距離) */
+        .hero-text h1 { font-family: 'Noto Serif TC', serif; font-size: 3rem; color: var(--forest); margin-bottom: 5px; line-height: 1.2; margin-top: 0; }
+        .hero-text h2 { font-size: 1.3rem; color: #555; margin-bottom: 20px; font-weight: normal; margin-top: 0; }
+        
+        .hero-img { flex: 0 1 auto; max-width: 400px; text-align: center; }
+        /* 🌟 vertical-align: bottom (解決圖片下方莫名多出 4px 空白的 bug) */
+        .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; /* 讓圖片稍微壓線，減少下方空白 */ }
+
+        /* === Story 區塊 === */
+        /* 🌟 padding-top: 30px (讓它跟上面的虛線近一點) */
+        .story-section { padding: 30px 0; text-align: center; max-width: 900px; margin: 0 auto; }
+        .story-section h3 { font-family: 'Noto Serif TC', serif; font-size: 2rem; color: var(--forest); margin-bottom: 20px; position: relative; display: inline-block; margin-top: 0; }
+        .story-section h3::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--accent); }
+        .story-content { text-align: left; font-size: 1.1rem; color: #444; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); line-height: 1.8; }
+
+        /* === 其他樣式維持不變 === */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 30px 0; }
+        .feature-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: 0.3s; cursor: pointer; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: space-between; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-color: var(--accent); }
+        .feature-icon { font-size: 3rem; margin-bottom: 15px; }
+        .feature-title { font-size: 1.5rem; font-weight: bold; color: var(--forest); margin-bottom: 10px; font-family: 'Noto Serif TC', serif; }
+        .feature-desc { color: #666; font-size: 1rem; line-height: 1.5; }
+
+        .disclaimer-box { background: #1a2f23; color: var(--cream); padding: 30px; border-radius: 15px; margin-top: 40px; margin-bottom: 40px; text-align: center; position: relative; overflow: hidden; }
+        .disclaimer-box::before { content: '⚠️'; position: absolute; top: -10px; left: 20px; font-size: 5rem; opacity: 0.1; }
+        .disclaimer-text { font-size: 1.1rem; font-weight: bold; line-height: 1.8; }
+
+        .btn-primary { padding: 15px 40px; background: var(--forest); color: var(--cream); border: none; border-radius: 30px; font-size: 1.2rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-block; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.3); }
+        .btn-primary:hover { background: #2c4739; transform: scale(1.05); }
+        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
+        
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
-        
         input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-
-        /* 服務項目卡片 */
+        
         .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
         .service-card:hover { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        /* 🌟 反灰樣式 */
         .service-card.disabled-card { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); }
-
         .service-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
         .service-info { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; cursor: pointer; flex: 1; }
         .service-info input { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; margin: 0; }
         .price-badge { background: var(--forest); color: white; padding: 3px 10px; border-radius: 6px; font-size: 13px; flex-shrink: 0; }
         .service-desc { font-size: 14px; color: #777; margin-left: 32px; padding-top: 8px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
-
         .sub-check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; margin-left: 32px; padding: 15px; background: #f4f7f5; border-radius: 10px; border: 1px solid #e0e0e0; }
         .sub-opt-label { font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); margin-bottom: 0; }
         .sub-opt-label input { margin: 0; width: 16px; height: 16px; }
-
         .agree-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-size: 14px; color: var(--text); }
         .agree-wrapper input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
         #terms-box { font-size: 13px; height: 120px; overflow-y: auto; background: white; padding: 15px; border: 1px solid #eee; color: #666; border-radius: 8px; }
-
         .total-box { text-align: right; font-size: 26px; font-weight: bold; color: #d35400; border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; }
-        
-        .btn-primary { width: 100%; padding: 18px; background: var(--forest); color: var(--cream); border: none; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-primary:hover { background: #2c4739; }
-        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
-        
         .cat-card { border: 2px solid #eee; padding: 25px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; background: white; transition: 0.3s; }
         .cat-card:hover { border-color: var(--accent); background: #fdf9f0; transform: translateY(-2px); }
-        
         .required::after { content: " *"; color: var(--error); }
 
-        /* ==================== 抽卡系統專用樣式 ==================== */
-        #draw-area {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; 
-            padding: 20px 0; perspective: 1000px;
-        }
-        
-        .card-back {
-            width: 60px; height: 100px;
-            background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%);
-            border: 2px solid #c6a87c;
-            outline: 1px solid #1a2f23; outline-offset: -4px;
-            border-radius: 8px; cursor: pointer; position: relative;
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1);
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
-        }
-        .card-back::after {
-            content: '培癒\A試驗室'; white-space: pre;
-            font-family: 'Noto Serif TC', 'Shippori Mincho', serif;
-            color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center;
-            line-height: 1.4; letter-spacing: 2px; text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); opacity: 0.9;
-            padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%;
-            background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%);
-            box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2);
-        }
+        #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 20px 0; perspective: 1000px; }
+        .card-back { width: 60px; height: 100px; background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%); border: 2px solid #c6a87c; outline: 1px solid #1a2f23; outline-offset: -4px; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1); overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .card-back::after { content: '培癒\A試驗室'; white-space: pre; font-family: 'Noto Serif TC', 'Shippori Mincho', serif; color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center; line-height: 1.4; letter-spacing: 2px; text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); opacity: 0.9; padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%; background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%); box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2); }
         .card-back:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); border-color: #e0c8a0; z-index: 100; }
-
-        .result-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center;
-            z-index: 2000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.5s;
-        }
+        .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.5s; }
         .result-overlay.active { display: flex; opacity: 1; }
-
-        .card-reveal {
-            position: relative; width: 320px; height: 550px; background: #fff;
-            border-radius: 20px; overflow: hidden;
-            box-shadow: 0 0 50px rgba(198, 168, 124, 0.6);
-            transform: scale(0.8); opacity: 0;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s;
-        }
+        .card-reveal { position: relative; width: 320px; height: 550px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(198, 168, 124, 0.6); transform: scale(0.8); opacity: 0; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s; }
         .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
-
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
-
-        .retry-btn {
-            position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%);
-            padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px;
-            font-weight: bold; cursor: pointer; font-size: 16px;
-            box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s;
-        }
+        .retry-btn { position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%); padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s; }
         .retry-btn:hover { background: #d4b585; transform: translateX(-50%) scale(1.05); }
 
-        @media (max-width: 600px) { .card-back { width: 45px; height: 75px; outline-offset: -3px; } .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; } .card-reveal { width: 300px; height: 515px; } }
+        @media (max-width: 768px) {
+            .hero-section { flex-direction: column-reverse; text-align: center; margin-top: 20px; gap: 20px; }
+            .hero-text h1 { font-size: 2.2rem; }
+            .hero-img { margin-bottom: 20px; }
+            .card-back { width: 45px; height: 75px; outline-offset: -3px; }
+            .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; }
+            .card-reveal { width: 300px; height: 515px; } 
+        }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="logo" onclick="showSection('home')">🕯️ 培癒試驗室</div>
+    <div class="logo-area" onclick="showSection('home')">
+        <img src="logo.png" alt="Logo" class="logo-img" id="site-logo">
+        <img src="logoA.png" alt="培癒試驗室" class="logo-text-img" id="site-logo-text">
+    </div>
     <div class="nav-links">
         <button onclick="showSection('home')" id="nav-home" class="active">首頁</button>
-        <button onclick="showSection('soliloquy')" id="nav-soliloquy">自言自語</button>
+        <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
         <button onclick="showSection('knowledge')" id="nav-knowledge">知識庫</button>
         <button onclick="showSection('draw')" id="nav-draw">能量抽卡</button>
-        <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
         <button onclick="showSection('member')" id="nav-member">個案專區</button>
     </div>
 </nav>
 
-<div id="home" class="section active" style="text-align:center; padding-top:100px;">
-    <h1 style="color: var(--forest); font-size: 3.5rem; letter-spacing: 5px; margin-bottom: 20px;">培癒試驗室</h1>
-    <p style="font-size: 1.2rem; color: #666; margin-bottom: 50px;">找回本該屬於你的能量流動。</p>
-    <button class="btn-primary" style="width:auto; padding: 15px 60px; border-radius:30px;" onclick="showSection('booking-step-1')">開始調頻預約</button>
+<div id="home" class="section active">
+    
+    <div class="hero-section">
+        <div class="hero-text">
+            <h1>歡迎來到<br>「培癒試驗室」</h1>
+            <h2>我是此空間創辦人培培</h2>
+            <button class="btn-primary" onclick="showSection('booking-step-1')">立即預約調頻</button>
+        </div>
+        <div class="hero-img">
+            <img src="logohuman.png" alt="培培" id="site-hero">
+        </div>
+    </div>
+
+    <div class="story-section">
+        <h3>為什麼選擇人類圖做靈擺項目調整？</h3>
+        <div class="story-content">
+            <p>在2024年我被迫離開工作，這段期間不停思索我能做什麼？想做什麼？</p>
+            <p>人類圖在我極度自我內耗時來到我面前，我的空白能量中心是吸收跟放大器，但我唯一兩個被點亮的能量中心，好像也沒有正常運作，我基本上所有能量中心都卡在了『非自己』跟『被制約』。</p>
+            <p>我透過自己學習理解人類圖之後，順利解決了我的自我內耗之路。</p>
+            <br>
+            <p><strong>所以我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。</strong></p>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card" onclick="showSection('booking-step-1')">
+            <div class="feature-icon">💎</div>
+            <div class="feature-title">能量中心調整</div>
+            <div class="feature-desc">靈擺暨人類圖能量中心調整。<br>找回你的原廠設定。</div>
+            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去預約 &rarr;</div>
+        </div>
+        <div class="feature-card" onclick="showSection('knowledge')">
+            <div class="feature-icon">📚</div>
+            <div class="feature-title">實驗紀錄筆記</div>
+            <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。(皆為自我學習)</div>
+            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">看筆記 &rarr;</div>
+        </div>
+        <div class="feature-card" onclick="showSection('draw')">
+            <div class="feature-icon">🃏</div>
+            <div class="feature-title">64 閘門能量指引</div>
+            <div class="feature-desc">我將 64 個閘門轉換成圖片配上文字。<br>建議每天抽一張即可。</div>
+            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去抽卡 &rarr;</div>
+        </div>
+    </div>
+
+    <div class="disclaimer-box">
+        <div class="disclaimer-text">
+            如果內容有誤，歡迎協助我修正，或是提供我免費課程🤭。<br>
+            如果只是看了不開心，請按下關閉，謝謝掰掰👋
+        </div>
+    </div>
+
 </div>
 
 <div id="booking-step-1" class="section"><div class="card"><h2>📂 選擇服務類型</h2><p style="color:#666;">請根據您的需求選擇主要服務領域：</p><div id="category-list">載入資料中...</div></div></div>
@@ -188,9 +232,30 @@
 
     window.onload = async () => {
         try {
-            await Promise.all([initBookingData(), initDrawData()]);
+            await Promise.all([initBookingData(), initDrawData(), loadSiteAssets()]);
         } catch (e) { console.error("Init Error:", e); }
     };
+
+    // 🌟 [新增] 動態載入網站素材 (Logo & 形象照)
+    async function loadSiteAssets() {
+        const { data, error } = await myDB.from('site_content').select('*').eq('category', 'site_asset');
+        if (data) {
+            data.forEach(item => {
+                if (item.title === 'logo') {
+                    const el = document.getElementById('site-logo');
+                    if (el) el.src = item.image_url;
+                }
+                if (item.title === 'logoA') {
+                    const el = document.getElementById('site-logo-text');
+                    if (el) el.src = item.image_url;
+                }
+                if (item.title === 'logohuman') {
+                    const el = document.getElementById('site-hero');
+                    if (el) el.src = item.image_url;
+                }
+            });
+        }
+    }
 
     async function initBookingData() {
         const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
@@ -213,8 +278,11 @@
         document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
         document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
-        const activeBtn = document.getElementById('nav-'+id.split('-')[0]);
+        
+        const baseId = id.split('-')[0]; 
+        const activeBtn = document.getElementById('nav-'+baseId);
         if(activeBtn) activeBtn.classList.add('active');
+        
         window.scrollTo(0,0); 
     }
 
@@ -346,6 +414,7 @@
         let t = 0; document.querySelectorAll('input[name="svc"]:checked').forEach(el => t += parseInt(el.dataset.price || 0)); document.getElementById('total-price').innerText = t;
     }
 
+    // 🌟 [最終確認版] doSubmit 防呆邏輯
     async function doSubmit() {
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
@@ -374,12 +443,13 @@
             if (!file) { alert("⚠️ 請上傳人類圖截圖"); return; }
         }
 
-        // 🌟 [修正] 5. 條件式問答檢查 (只針對「睡眠」必填)
+        // 🌟 5. 條件式問答檢查 (只針對「睡眠」必填)
         const qVal = document.getElementById('q-val') ? document.getElementById('q-val').value.trim() : '';
         if (activeCat && activeCat.question_type === 'sleep') {
             if (!qVal) { alert("⚠️ 請填寫「預計睡眠/休息時段」以利老師進行遠端作業"); return; }
         }
 
+        // --- 檢查通過，開始送出 ---
         const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
         
         let finalDataInfo = "";
@@ -417,7 +487,12 @@
             wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}` 
         }]);
 
-        if(!error) { alert("🎉 預約成功！"); location.reload(); } else { alert("❌ 預約失敗：" + error.message); btn.disabled = false; btn.innerText = "確認送出預約資料"; }
+        if(!error) { 
+            alert("🎉 預約成功！"); location.reload(); 
+        } else { 
+            alert("❌ 預約失敗：" + error.message); 
+            btn.disabled = false; btn.innerText = "確認送出預約資料"; 
+        }
     }
 
     async function doLogin() {

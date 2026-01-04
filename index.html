@@ -7,44 +7,44 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;900&family=ZCOOL+XiaoWei&family=Shippori+Mincho&display=swap" rel="stylesheet">
     
-<style>
+    <style>
         :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --text: #2c3e50; --shopee: #ff5722; --error: #e74c3c; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--cream); margin: 0; color: var(--text); line-height: 1.6; }
         
-        /* === 導航列 === */
+        /* === 導航列 (V40 修改：單一橫向 Logo) === */
         nav { background: var(--forest); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); overflow: hidden; }
-        .logo-area { display: flex; align-items: center; gap: 10px; cursor: pointer; height: 100%; }
-        .logo-img { max-height: 45px; width: auto; object-fit: contain; } 
-        .logo-text-img { max-height: 30px; width: auto; object-fit: contain; } 
+        
+        .logo-area { display: flex; align-items: center; cursor: pointer; height: 100%; }
+        
+        /* 🌟 [修改] Logo 設定：讓長條圖可以自然伸展 */
+        .logo-img { 
+            max-height: 55px; /* 高度給稍微大一點，讓字清楚 */
+            width: auto;      /* 寬度自動，不會變形 */
+            object-fit: contain; 
+            margin-top: 4px;  /* 微調垂直位置 */
+        } 
         
         .nav-links button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-size: 15px; color: #ccc; transition: 0.3s; font-weight: 500; }
         .nav-links button.active { color: var(--accent); font-weight: bold; border-bottom: 2px solid var(--accent); }
         .nav-links button:hover { color: white; }
 
         /* === 通用區塊 === */
-        /* 🌟 padding-top 改為 0，讓第一屏內容直接頂上去 */
         .section { display: none; padding: 0 20px 40px 20px; max-width: 1200px; margin: 0 auto; min-height: calc(100vh - 70px); animation: fadeIn 0.5s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* === 首頁 Hero 區塊 (V37 重點修改：極致緊湊) === */
-        /* 🌟 padding-bottom: 0 (下方無留白) */
-        /* 🌟 padding-top: 20px (上方稍微留一點點呼吸，不然太壓迫) */
-        /* 🌟 gap: 20px (文字跟圖片靠得非常近) */
-        .hero-section { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 0; }
+        /* === 首頁 Hero 區塊 === */
+        .hero-section { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 0; }
         
         .hero-text { flex: 0 1 auto; max-width: 500px; text-align: left; }
-        /* 🌟 margin-bottom: 5px (縮減標題跟副標題的距離) */
         .hero-text h1 { font-family: 'Noto Serif TC', serif; font-size: 3rem; color: var(--forest); margin-bottom: 5px; line-height: 1.2; margin-top: 0; }
         .hero-text h2 { font-size: 1.3rem; color: #555; margin-bottom: 20px; font-weight: normal; margin-top: 0; }
         
         .hero-img { flex: 0 1 auto; max-width: 400px; text-align: center; }
-        /* 🌟 vertical-align: bottom (解決圖片下方莫名多出 4px 空白的 bug) */
-        .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; /* 讓圖片稍微壓線，減少下方空白 */ }
+        .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; }
 
         /* === Story 區塊 === */
-        /* 🌟 padding-top: 30px (讓它跟上面的虛線近一點) */
         .story-section { padding: 30px 0; text-align: center; max-width: 900px; margin: 0 auto; }
         .story-section h3 { font-family: 'Noto Serif TC', serif; font-size: 2rem; color: var(--forest); margin-bottom: 20px; position: relative; display: inline-block; margin-top: 0; }
         .story-section h3::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--accent); }
@@ -118,8 +118,7 @@
 
 <nav>
     <div class="logo-area" onclick="showSection('home')">
-        <img src="logo.png" alt="Logo" class="logo-img" id="site-logo">
-        <img src="logoA.png" alt="培癒試驗室" class="logo-text-img" id="site-logo-text">
+        <img src="logo.png" alt="培癒試驗室" class="logo-img" id="site-logo">
     </div>
     <div class="nav-links">
         <button onclick="showSection('home')" id="nav-home" class="active">首頁</button>
@@ -134,7 +133,7 @@
     
     <div class="hero-section">
         <div class="hero-text">
-            <h1>歡迎來到<br>「培癒試驗室」</h1>
+            <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
             <button class="btn-primary" onclick="showSection('booking-step-1')">立即預約調頻</button>
         </div>
@@ -236,7 +235,7 @@
         } catch (e) { console.error("Init Error:", e); }
     };
 
-    // 🌟 [新增] 動態載入網站素材 (Logo & 形象照)
+    // 🌟 [V40 新增] 動態載入網站素材 (只找 ID=logo 和 logohuman)
     async function loadSiteAssets() {
         const { data, error } = await myDB.from('site_content').select('*').eq('category', 'site_asset');
         if (data) {
@@ -245,10 +244,7 @@
                     const el = document.getElementById('site-logo');
                     if (el) el.src = item.image_url;
                 }
-                if (item.title === 'logoA') {
-                    const el = document.getElementById('site-logo-text');
-                    if (el) el.src = item.image_url;
-                }
+                // 🌟 logoA 已經不需要了
                 if (item.title === 'logohuman') {
                     const el = document.getElementById('site-hero');
                     if (el) el.src = item.image_url;
@@ -259,7 +255,6 @@
 
     async function initBookingData() {
         const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
-        // 🌟 排序修正
         const { data: i } = await myDB.from('services').select('*').order('sort_order', {ascending: true}); items = i || [];
         const { data: posts } = await myDB.from('site_content').select('*').order('created_at', {ascending:false});
         renderCats();
@@ -361,7 +356,6 @@
                 const opts = i.sub_options.split(/[,，]/);
                 subHtml = `<div class="sub-check-grid">` + opts.map(opt => `<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${opt.trim()}"> ${opt.trim()}</label>`).join('') + `</div>`;
             }
-            // 🌟 修正：一律使用 checkbox + data-is-main 控制互斥
             const isMain = i.is_main ? 'true' : 'false';
             return `<div class="service-card" id="card-${i.id}">
                 <div class="service-header">
@@ -391,14 +385,12 @@
         calcTotal(); showSection('booking-step-2');
     }
 
-    // 🌟 修正：主項目互斥邏輯
     function handleServiceCheck(el) {
         const isMain = el.dataset.isMain === 'true';
         if (isMain) {
             const allMainInputs = document.querySelectorAll('input[name="svc"][data-is-main="true"]');
             allMainInputs.forEach(input => {
                 if (input !== el) {
-                    // 如果自己被勾選，其他人就 disable
                     input.disabled = el.checked; 
                     const card = document.getElementById(`card-${input.value}`);
                     if(card) {
@@ -414,24 +406,18 @@
         let t = 0; document.querySelectorAll('input[name="svc"]:checked').forEach(el => t += parseInt(el.dataset.price || 0)); document.getElementById('total-price').innerText = t;
     }
 
-    // 🌟 [最終確認版] doSubmit 防呆邏輯
     async function doSubmit() {
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
         const checkedSvcs = document.querySelectorAll('input[name="svc"]:checked');
         
-        // 1. 基本資料檢查
         if (!name || !phone || !email) { alert("⚠️ 請完整填寫姓名、電話與 Email"); return; }
-        
-        // 2. 服務方案檢查
         if (checkedSvcs.length === 0) { alert("⚠️ 請至少選擇一項服務方案"); return; }
         
-        // 3. 付款方式檢查
         const payType = document.getElementById('pay-status').value;
         if (payType === 'shopee' && !document.getElementById('shopee-id').value.trim()) { alert("⚠️ 選擇「蝦皮付款」時，請務必填寫訂單編號"); return; }
         
-        // 4. 出生資料/圖片上傳檢查
         const flow = document.getElementById('data-flow').value;
         if (flow === 'data') {
             const bDate = document.getElementById('b-date').value;
@@ -443,13 +429,11 @@
             if (!file) { alert("⚠️ 請上傳人類圖截圖"); return; }
         }
 
-        // 🌟 5. 條件式問答檢查 (只針對「睡眠」必填)
         const qVal = document.getElementById('q-val') ? document.getElementById('q-val').value.trim() : '';
         if (activeCat && activeCat.question_type === 'sleep') {
             if (!qVal) { alert("⚠️ 請填寫「預計睡眠/休息時段」以利老師進行遠端作業"); return; }
         }
 
-        // --- 檢查通過，開始送出 ---
         const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
         
         let finalDataInfo = "";

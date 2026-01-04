@@ -489,5 +489,55 @@
         } else { alert("帳密錯誤"); }
     }
 </script>
+<audio id="bgMusic" loop preload="auto" muted>
+  <source src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/magic.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  // 確保在腳本最開頭定義，避免引用錯誤
+  const music = document.getElementById('bgMusic');
+
+  // 解鎖與漸強函式
+  const startMagic = () => {
+    // 只要互動發生，就嘗試解除靜音並播放
+    music.muted = false;
+    
+    music.play().then(() => {
+      console.log("🌲 森林魔法解鎖成功！");
+      
+      // 優雅漸強
+      music.volume = 0;
+      let vol = 0;
+      const fade = setInterval(() => {
+        if (vol < 0.15) {
+          vol += 0.005;
+          music.volume = vol;
+        } else {
+          clearInterval(fade);
+        }
+      }, 100);
+
+      // 成功解鎖後，移除所有監聽器，避免重複執行
+      ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => {
+        window.removeEventListener(evt, startMagic);
+      });
+    }).catch(err => {
+      // 如果還是失敗，代表互動程度不足，保留監聽器等待下次互動
+      console.log("魔法啟動受阻，等待更明顯的互動...", err);
+    });
+  };
+
+  // 監聽所有可能的「進入狀況」動作
+  ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => {
+    window.addEventListener(evt, startMagic, { once: true });
+  });
+
+  // 初始化設定
+  window.addEventListener('load', () => {
+    music.load();
+    // 嘗試靜音預跑（部分瀏覽器允許靜音自動播放，這有助於緩存）
+    music.play().catch(() => console.log("等待用戶解鎖音訊..."));
+  });
+</script>
 </body>
 </html>

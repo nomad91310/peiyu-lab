@@ -126,6 +126,7 @@
         <button onclick="showSection('knowledge')" id="nav-knowledge">知識庫</button>
         <button onclick="showSection('draw')" id="nav-draw">能量抽卡</button>
         <button onclick="showSection('member')" id="nav-member">個案專區</button>
+        <button onclick="window.open('https://peiyu-lab.vercel.app/peiyu_admin.html')" style="padding:10px; font-size:16px; opacity:0.7;" title="前往後台">⚙️</button>
     </div>
 </nav>
 
@@ -156,14 +157,14 @@
     <div class="features-grid">
         <div class="feature-card" onclick="showSection('booking-step-1')">
             <div class="feature-icon">💎</div>
-            <div class="feature-title">能量中心調整</div>
+            <div class="feature-title">服務預約</div>
             <div class="feature-desc">靈擺暨人類圖能量中心調整。<br>找回你的原廠設定。</div>
             <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去預約 &rarr;</div>
         </div>
         <div class="feature-card" onclick="showSection('knowledge')">
             <div class="feature-icon">📚</div>
             <div class="feature-title">實驗紀錄筆記</div>
-            <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。(皆為自我學習)</div>
+            <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。(所有內容皆為自我學習)</div>
             <div style="margin-top:15px; color:var(--accent); font-weight:bold;">看筆記 &rarr;</div>
         </div>
         <div class="feature-card" onclick="showSection('draw')">
@@ -212,7 +213,18 @@
     </div>
 </div>
 
-<div id="member" class="section"><h2>👤 個案專區</h2><div class="card" id="login-box"><input type="tel" id="l-phone" placeholder="手機"><input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;"><button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button></div><div id="dash" style="display:none;"></div></div>
+<div id="member" class="section">
+    <h2>👤 個案專區</h2>
+    <div class="card" id="login-box">
+        <input type="tel" id="l-phone" placeholder="手機">
+        <input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;">
+        <button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button>
+        <div style="text-align:center; margin-top:20px;">
+            <a href="https://peiyu-lab.vercel.app/peiyu_admin.html" target="_blank" style="color:#ccc; font-size:12px; text-decoration:none;">🔗 管理員後台入口</a>
+        </div>
+    </div>
+    <div id="dash" style="display:none;"></div>
+</div>
 
 <script>
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
@@ -472,7 +484,31 @@
         }]);
 
         if(!error) { 
-            alert("🎉 預約成功！"); location.reload(); 
+            // 🌟 整合你的 Deno 通知功能 (不影響原有邏輯，僅在成功時觸發)
+            // ⚠️ 請修改下方的 URL 為你的 Function URL
+            const functionUrl = "https://geyrpowhaqfhnxghpokr.supabase.co/functions/v1/line-notify"; 
+            
+           // 🌟 修正後的 LINE 通知呼叫 (使用 Supabase SDK)
+            const notifyPayload = {
+                name: name,
+                phone: phone,
+                service: `${activeCat.name} - ${details.join(', ')}`,
+                note: `付款: ${payType} ${document.getElementById('shopee-id').value ? '('+document.getElementById('shopee-id').value+')' : ''} / 來源: ${document.getElementById('client-source').value}`
+            };
+
+            // 直接呼叫你剛佈署好的 'line-notify'
+            const { error: funcError } = await myDB.functions.invoke('line-notify', {
+                body: notifyPayload
+            });
+
+            if (funcError) {
+                console.error("LINE 通知發送失敗:", funcError);
+                // 不阻擋使用者流程，僅在 Console 紀錄錯誤
+            } else {
+                console.log("LINE 通知已發送");
+            }
+
+            alert("🎉 預約成功！"); location.reload();
         } else { 
             alert("❌ 預約失敗：" + error.message); 
             btn.disabled = false; btn.innerText = "確認送出預約資料"; 

@@ -12,11 +12,46 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--cream); margin: 0; color: var(--text); line-height: 1.6; }
         
-        /* === 導航列 === */
-        nav { background: var(--forest); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); overflow: hidden; }
-        .logo-area { display: flex; align-items: center; cursor: pointer; height: 100%; }
+        /* === 導航列 (Navbar) === */
+        nav { 
+            background: var(--forest); 
+            padding: 0 20px; 
+            display: flex; 
+            align-items: center; 
+            height: 70px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+            /* 電腦版設定：左右撐開 */
+            justify-content: space-between; 
+        }
+
+        .logo-area { 
+            display: flex; 
+            align-items: center; 
+            cursor: pointer; 
+            height: 100%; 
+            flex-shrink: 0; /* Logo 不准被壓縮 */
+        }
         .logo-img { max-height: 55px; width: auto; object-fit: contain; margin-top: 4px; } 
-        .nav-links button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-size: 15px; color: #ccc; transition: 0.3s; font-weight: 500; }
+
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-links button { 
+            background: none; 
+            border: none; 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            color: #ccc; 
+            transition: 0.3s; 
+            font-weight: 500; 
+            white-space: nowrap; /* 禁止文字換行 */
+        }
         .nav-links button.active { color: var(--accent); font-weight: bold; border-bottom: 2px solid var(--accent); }
         .nav-links button:hover { color: white; }
 
@@ -43,7 +78,6 @@
         }
         .result-overlay.active { display: flex; opacity: 1; }
 
-        /* 文字內容專用彈窗 (故事/守則) */
         .text-modal-card { 
             position: relative; width: 90%; max-width: 600px; max-height: 85vh; 
             background: #fff; border-radius: 15px; overflow-y: auto; 
@@ -55,7 +89,6 @@
         .text-modal-card h3 { color: var(--forest); text-align: center; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin-top: 0; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px dashed #ccc; }
         .modal-tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-1deg); width: 160px; height: 35px; background: rgba(198, 168, 124, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; }
 
-        /* 守則與故事樣式 */
         .rule-item { margin-bottom: 25px; }
         .rule-head { color: var(--accent); font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; font-weight: bold; }
         .rule-num { background: var(--forest); color: var(--accent); width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; font-weight: bold; flex-shrink: 0; }
@@ -73,10 +106,9 @@
         .feature-title { font-size: 1.5rem; font-weight: bold; color: var(--forest); margin-bottom: 10px; font-family: 'Noto Serif TC', serif; }
         .feature-desc { color: #666; font-size: 1rem; line-height: 1.5; }
 
-        /* === 培癒寶典 (Knowledge Base) 專用樣式 === */
+        /* === 培癒寶典 (Knowledge Base) === */
         .kb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .kb-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--forest); margin: 0; }
-        /* 修正返回按鈕樣式，確保在同一行 */
         .kb-back-btn { background: white; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: 0.3s; display: none; font-weight: bold; white-space: nowrap; }
         .kb-back-btn:hover { background: var(--accent); color: white; }
         
@@ -86,7 +118,6 @@
         .kb-card h3 { margin: 0 0 10px 0; color: var(--forest); font-size: 1.4rem; }
         .kb-card span { color: #888; font-size: 0.9rem; }
 
-        /* 手風琴列表 */
         .kb-accordion-group { display: flex; flex-direction: column; gap: 15px; animation: slideUp 0.3s ease; }
         details.kb-mid-cat { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
         summary.kb-mid-header { padding: 20px; cursor: pointer; font-weight: bold; font-size: 1.1rem; color: var(--forest); list-style: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
@@ -99,7 +130,6 @@
         .kb-article-link:hover { background: #eef5e9; color: var(--forest); padding-left: 45px; }
         .kb-article-link::before { content: "📄"; position: absolute; left: 15px; opacity: 0.5; }
 
-        /* 文章閱讀 */
         .kb-article-view { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeIn 0.5s ease; }
         .kb-meta { color: #999; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
         .kb-body { line-height: 1.8; color: #333; font-size: 1.05rem; }
@@ -113,7 +143,6 @@
         .btn-secondary { padding: 10px 25px; background: white; color: var(--forest); border: 2px solid var(--forest); border-radius: 25px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 5px;}
         .close-modal-btn { display: block; width: 100%; max-width: 200px; margin: 30px auto 0 auto; padding: 12px 0; background: var(--error); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        /* 預約表單通用 */
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
@@ -154,10 +183,44 @@
         /* 動畫 */
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* === 📱 手機版 RWD 修正 === */
         @media (max-width: 768px) {
+            /* 導航列修正：靠左對齊，用 gap 隔開 */
+            nav { 
+                justify-content: flex-start; 
+                gap: 15px; 
+                padding: 0 15px;
+            }
+            
+            /* Logo 縮小一點，避免太佔位 */
+            .logo-img { max-height: 40px; }
+            
+            /* 導航連結變成「橫向捲軸」 */
+            .nav-links {
+                display: flex;
+                overflow-x: auto; /* 允許橫向滑動 */
+                flex: 1; /* 佔據剩餘寬度 */
+                width: 100%;
+                padding-right: 10px; /* 給最後一個按鈕一點呼吸空間 */
+                
+                /* 隱藏捲軸但保留功能 */
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; /* Firefox */
+            }
+            .nav-links::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+            
+            .nav-links button {
+                padding: 0 12px; /* 縮小按鈕間距 */
+                font-size: 14px;
+                flex-shrink: 0; /* 禁止按鈕被壓縮 */
+            }
+
+            /* 修正 Hero 區塊間距 */
             .hero-section { flex-direction: column-reverse; text-align: center; margin-top: 20px; gap: 20px; }
             .hero-text h1 { font-size: 2.2rem; }
             .hero-img { margin-bottom: 20px; }
+            
+            /* 修正卡片與彈窗大小 */
             .card-reveal { width: 300px; height: 515px; } 
             .text-modal-card { width: 95%; padding: 30px 20px; }
         }
@@ -365,7 +428,6 @@
         <button class="close-modal-btn" onclick="closeModal('rules-overlay')">關閉守則</button>
     </div>
 </div>
-
 
 <script>
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";

@@ -21,7 +21,7 @@
         .nav-links button:hover { color: white; }
 
         /* === 通用區塊 === */
-        .section { display: none; padding: 0 20px 40px 20px; max-width: 1200px; margin: 0 auto; min-height: calc(100vh - 70px); animation: fadeIn 0.5s ease; }
+        .section { display: none; padding: 0 20px 80px 20px; max-width: 1000px; margin: 0 auto; min-height: calc(100vh - 70px); animation: fadeIn 0.5s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -33,7 +33,7 @@
         .hero-img { flex: 0 1 auto; max-width: 400px; text-align: center; }
         .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; }
 
-        /* === 彈窗樣式 (保證抽卡跟故事都能用) === */
+        /* === 彈窗樣式 === */
         .result-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.85); display: none; 
@@ -55,15 +55,11 @@
         .text-modal-card h3 { color: var(--forest); text-align: center; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin-top: 0; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px dashed #ccc; }
         .modal-tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-1deg); width: 160px; height: 35px; background: rgba(198, 168, 124, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; }
 
-        /* 守則樣式 */
+        /* 守則與故事樣式 */
         .rule-item { margin-bottom: 25px; }
         .rule-head { color: var(--accent); font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; font-weight: bold; }
         .rule-num { background: var(--forest); color: var(--accent); width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; font-weight: bold; flex-shrink: 0; }
         .rule-body { font-size: 15px; color: #555; line-height: 1.8; margin-left: 42px; }
-        .rule-list { color: #666; font-size: 14px; background: #fdfaf1; padding: 15px 20px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 10px 0; }
-        .rule-list li { margin-bottom: 5px; }
-
-        /* 故事樣式 */
         .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 15px; }
         .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.1); padding: 5px 10px; border-radius: 5px; border-left: 4px solid var(--accent); }
         .hd-chart-container { text-align: center; margin: 20px 0; }
@@ -77,41 +73,65 @@
         .feature-title { font-size: 1.5rem; font-weight: bold; color: var(--forest); margin-bottom: 10px; font-family: 'Noto Serif TC', serif; }
         .feature-desc { color: #666; font-size: 1rem; line-height: 1.5; }
 
-        /* === Disclaimer 區塊 === */
-        .disclaimer-box { background: #1a2f23; color: var(--cream); padding: 30px; border-radius: 15px; margin-top: 40px; margin-bottom: 40px; text-align: center; position: relative; overflow: hidden; }
-        .disclaimer-box::before { content: '⚠️'; position: absolute; top: -10px; left: 20px; font-size: 5rem; opacity: 0.1; }
-        .disclaimer-text { font-size: 1.1rem; font-weight: bold; line-height: 1.8; }
+        /* === 培癒寶典 (Knowledge Base) 專用樣式 === */
+        .kb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .kb-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--forest); margin: 0; }
+        /* 修正返回按鈕樣式，確保在同一行 */
+        .kb-back-btn { background: white; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: 0.3s; display: none; font-weight: bold; white-space: nowrap; }
+        .kb-back-btn:hover { background: var(--accent); color: white; }
+        
+        .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; animation: slideUp 0.4s ease; }
+        .kb-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; border-left: 5px solid var(--accent); }
+        .kb-card:hover { transform: translateY(-5px); background: #fffbf5; }
+        .kb-card h3 { margin: 0 0 10px 0; color: var(--forest); font-size: 1.4rem; }
+        .kb-card span { color: #888; font-size: 0.9rem; }
 
-        /* === 按鈕樣式 === */
+        /* 手風琴列表 */
+        .kb-accordion-group { display: flex; flex-direction: column; gap: 15px; animation: slideUp 0.3s ease; }
+        details.kb-mid-cat { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+        summary.kb-mid-header { padding: 20px; cursor: pointer; font-weight: bold; font-size: 1.1rem; color: var(--forest); list-style: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        summary.kb-mid-header:hover { background: #fdfaf1; }
+        summary.kb-mid-header::-webkit-details-marker { display: none; }
+        .kb-arrow { transition: transform 0.3s; color: var(--accent); }
+        details[open] summary .kb-arrow { transform: rotate(180deg); }
+        .kb-article-list { border-top: 1px solid #eee; background: #fafafa; }
+        .kb-article-link { display: block; padding: 15px 20px 15px 40px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; transition: 0.2s; position: relative; }
+        .kb-article-link:hover { background: #eef5e9; color: var(--forest); padding-left: 45px; }
+        .kb-article-link::before { content: "📄"; position: absolute; left: 15px; opacity: 0.5; }
+
+        /* 文章閱讀 */
+        .kb-article-view { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeIn 0.5s ease; }
+        .kb-meta { color: #999; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .kb-body { line-height: 1.8; color: #333; font-size: 1.05rem; }
+        .kb-body img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
+        .kb-body h1, .kb-body h2 { color: var(--forest); margin-top: 1.5em; }
+
+        /* === 按鈕與表單樣式 === */
         .btn-primary { padding: 15px 40px; background: var(--forest); color: var(--cream); border: none; border-radius: 30px; font-size: 1.2rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-block; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.3); }
         .btn-primary:hover { background: #2c4739; transform: scale(1.05); }
         .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
-        
         .btn-secondary { padding: 10px 25px; background: white; color: var(--forest); border: 2px solid var(--forest); border-radius: 25px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 5px;}
-        .btn-secondary:hover { background: var(--forest); color: white; transform: translateY(-2px); }
-
         .close-modal-btn { display: block; width: 100%; max-width: 200px; margin: 30px auto 0 auto; padding: 12px 0; background: var(--error); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .close-modal-btn:hover { transform: scale(1.05); background: #c0392b; }
-
-        /* === 預約系統 === */
+        
+        /* 預約表單通用 */
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
         input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); }
         .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
-        .service-card:hover { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .service-card:hover { border-color: var(--accent); }
         .service-card.disabled-card { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); }
         .service-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
         .service-info { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; cursor: pointer; flex: 1; }
-        .service-info input { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; margin: 0; }
-        .price-badge { background: var(--forest); color: white; padding: 3px 10px; border-radius: 6px; font-size: 13px; flex-shrink: 0; }
+        .service-info input { width: 20px; height: 20px; margin: 0; }
+        .price-badge { background: var(--forest); color: white; padding: 3px 10px; border-radius: 6px; font-size: 13px; }
         .service-desc { font-size: 14px; color: #777; margin-left: 32px; padding-top: 8px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
         .sub-check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; margin-left: 32px; padding: 15px; background: #f4f7f5; border-radius: 10px; border: 1px solid #e0e0e0; }
         .sub-opt-label { font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); margin-bottom: 0; }
         .sub-opt-label input { margin: 0; width: 16px; height: 16px; }
-        .agree-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-size: 14px; color: var(--text); }
-        .agree-wrapper input { width: 18px; height: 18px; margin: 0; cursor: pointer; flex-shrink: 0; }
+        .agree-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-size: 14px; }
+        .agree-wrapper input { width: 18px; height: 18px; margin: 0; }
         #terms-box { font-size: 13px; height: 120px; overflow-y: auto; background: white; padding: 15px; border: 1px solid #eee; color: #666; border-radius: 8px; }
         .total-box { text-align: right; font-size: 26px; font-weight: bold; color: #d35400; border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; }
         .cat-card { border: 2px solid #eee; padding: 25px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; background: white; transition: 0.3s; }
@@ -120,26 +140,25 @@
 
         /* === 抽卡功能樣式 === */
         #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 20px 0; perspective: 1000px; }
-        .card-back { width: 60px; height: 100px; background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%); border: 2px solid #c6a87c; outline: 1px solid #1a2f23; outline-offset: -4px; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1); overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .card-back::after { content: '培癒\A試驗室'; white-space: pre; font-family: 'Noto Serif TC', 'Shippori Mincho', serif; color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center; line-height: 1.4; letter-spacing: 2px; text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); opacity: 0.9; padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%; background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%); box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2); }
-        .card-back:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); border-color: #e0c8a0; z-index: 100; }
+        .card-back { width: 60px; height: 100px; background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%); border: 2px solid #c6a87c; outline: 1px solid #1a2f23; outline-offset: -4px; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.4s, box-shadow 0.4s; box-shadow: 0 4px 8px rgba(0,0,0,0.4); overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .card-back::after { content: '培癒\A試驗室'; white-space: pre; font-family: 'Noto Serif TC', serif; color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center; line-height: 1.4; letter-spacing: 2px; opacity: 0.9; padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%; background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%); }
+        .card-back:hover { transform: translateY(-12px) scale(1.05); z-index: 100; }
         
-        .card-reveal { position: relative; width: 320px; height: 550px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(198, 168, 124, 0.6); transform: scale(0.8); opacity: 0; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s; }
+        .card-reveal { position: relative; width: 320px; height: 550px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(198, 168, 124, 0.6); transform: scale(0.8); opacity: 0; transition: transform 0.6s, opacity 0.6s; }
         .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
-        
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
         .retry-btn { position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%); padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s; }
         .retry-btn:hover { background: #d4b585; transform: translateX(-50%) scale(1.05); }
 
+        /* 動畫 */
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
         @media (max-width: 768px) {
             .hero-section { flex-direction: column-reverse; text-align: center; margin-top: 20px; gap: 20px; }
             .hero-text h1 { font-size: 2.2rem; }
             .hero-img { margin-bottom: 20px; }
-            .card-back { width: 45px; height: 75px; outline-offset: -3px; }
-            .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; }
             .card-reveal { width: 300px; height: 515px; } 
-            .hd-chart-container img { width: 100%; height: auto; }
             .text-modal-card { width: 95%; padding: 30px 20px; }
         }
     </style>
@@ -153,30 +172,22 @@
     <div class="nav-links">
         <button onclick="showSection('home')" id="nav-home" class="active">首頁</button>
         <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
-        <button onclick="showSection('knowledge')" id="nav-knowledge">知識庫</button>
+        <button onclick="showSection('knowledge')" id="nav-knowledge">培癒寶典</button>
         <button onclick="showSection('draw')" id="nav-draw">能量抽卡</button>
         <button onclick="showSection('member')" id="nav-member">個案專區</button>
     </div>
 </nav>
 
 <div id="home" class="section active">
-    
     <div class="hero-section">
         <div class="hero-text">
             <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
-            
             <button class="btn-primary" onclick="showSection('booking-step-1')">立即預約調頻</button>
-
             <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: flex-start;">
-                <button class="btn-secondary" onclick="openModal('story-overlay')">
-                    📖 我的故事
-                </button>
-                <button class="btn-secondary" onclick="openModal('rules-overlay')">
-                    👑 空間守則
-                </button>
+                <button class="btn-secondary" onclick="openModal('story-overlay')">📖 我的故事</button>
+                <button class="btn-secondary" onclick="openModal('rules-overlay')">👑 空間守則</button>
             </div>
-            
             <p style="color:#888; font-size:0.9rem; margin-top:10px;">點擊上方按鈕閱讀故事與守則 ↑</p>
         </div>
         <div class="hero-img">
@@ -192,8 +203,8 @@
             <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去預約 &rarr;</div>
         </div>
         <div class="feature-card" onclick="showSection('knowledge')">
-            <div class="feature-icon">📚</div>
-            <div class="feature-title">實驗紀錄筆記</div>
+            <div class="feature-icon">📘</div>
+            <div class="feature-title">培癒寶典</div>
             <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。(所有內容皆為自我學習)</div>
             <div style="margin-top:15px; color:var(--accent); font-weight:bold;">看筆記 &rarr;</div>
         </div>
@@ -205,27 +216,56 @@
         </div>
     </div>
 
-    <div class="disclaimer-box">
+    <div class="disclaimer-box" style="background:var(--forest); color:var(--cream); padding:30px; border-radius:15px; margin:40px 0; text-align:center;">
         <div class="disclaimer-text">
             如果內容有誤，歡迎協助我修正，或是提供我免費課程🤭。<br>
             如果只是看了不開心，請按下關閉，謝謝掰掰👋
         </div>
     </div>
-
 </div>
 
-<div id="booking-step-1" class="section"><div class="card"><h2>📂 選擇服務類型</h2><p style="color:#666;">請根據您的需求選擇主要服務領域：</p><div id="category-list">載入資料中...</div></div></div>
-<div id="booking-step-2" class="section"><div class="card"><button onclick="showSection('booking-step-1')" style="background:none; border:none; color:#999; cursor:pointer; margin-bottom:15px; padding:0;">← 返回</button><h2 id="active-cat-name" style="color:var(--forest);">服務詳情</h2><div style="background:#e0f7fa; padding:20px; border-radius:12px; margin-bottom:25px; border:1px solid #4dd0e1;"><div class="form-group"><label>🔶 付款狀態選擇</label><select id="pay-status" onchange="toggleShopee()"><option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option><option value="shopee">🦐 我已在蝦皮付款 (請提供訂單編號)</option></select></div><div id="shopee-area" style="display:none;"><label style="color:var(--shopee);">蝦皮訂單編號 (必填)</label><input type="text" id="shopee-id" placeholder="請貼上訂單編號供核對"></div></div><div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div><div class="form-group"><label class="required">手機號碼 (將作為登入帳號)</label><input type="tel" id="c-phone" placeholder="09xxxxxxxx"></div><div class="form-group"><label class="required">E-mail (接收報告通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div><div class="form-group"><label>🔶 您是從哪裡認識培癒試驗室的？</label><select id="client-source"><option value="Threads">Threads</option><option value="IG">Instagram</option><option value="Shopee">蝦皮</option><option value="Friend">朋友介紹</option><option value="Other">其他</option></select></div><hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;"><label style="font-size:18px; margin-bottom:15px;">1. 選擇方案內容與加購</label><div id="items-area" style="margin-bottom:30px;"></div><div id="conditional-question" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border-left:5px solid var(--accent);"></div><div class="form-group"><label>🔶 出生年月日資料提供</label><select id="data-flow" onchange="toggleFlow()"><option value="data">提供出生日期時間</option><option value="upload">直接上傳人類圖截圖</option></select></div><div id="flow-data" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div><div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00" onchange="timeHint()"><small id="t-hint" style="color:#d32f2f; display:block; margin-top:5px;">✅ 目前選擇：中午 12 點</small></div><div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div></div><div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><label>上傳人類圖截圖</label><input type="file" id="c-file" accept="image/*"></div><div class="card" style="background:#fdf9f0; border-top:none; padding:20px; margin-bottom:0;"><label>📜 服務規範</label><div id="terms-box"></div><label class="agree-wrapper"><input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)"><span>我已詳細閱讀並同意</span></label></div><div class="total-box">應付總額：$<span id="total-price">0</span></div><button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button></div></div>
+<div id="booking-step-1" class="section">
+    <div class="card"><h2>📂 選擇服務類型</h2><p style="color:#666;">請根據您的需求選擇主要服務領域：</p><div id="category-list">載入資料中...</div></div>
+</div>
 
-<div id="soliloquy" class="section"><h2>🕯️ 自言自語</h2><div id="sol-list"></div></div>
-<div id="knowledge" class="section"><h2>📚 能量知識庫</h2><div id="kno-list"></div></div>
+<div id="booking-step-2" class="section">
+    <div class="card">
+        <button onclick="showSection('booking-step-1')" style="background:none; border:none; color:#999; cursor:pointer; margin-bottom:15px; padding:0; font-size:0.9rem;">← 返回類別</button>
+        <h2 id="active-cat-name" style="color:var(--forest); margin-top:0;">服務詳情</h2>
+        <div style="background:#e0f7fa; padding:20px; border-radius:12px; margin-bottom:25px; border:1px solid #4dd0e1;">
+            <div class="form-group"><label>🔶 付款狀態選擇</label><select id="pay-status" onchange="toggleShopee()"><option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option><option value="shopee">🦐 我已在蝦皮付款 (請提供訂單編號)</option></select></div>
+            <div id="shopee-area" style="display:none;"><label style="color:var(--shopee);">蝦皮訂單編號 (必填)</label><input type="text" id="shopee-id" placeholder="請貼上訂單編號供核對"></div>
+        </div>
+        <div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div>
+        <div class="form-group"><label class="required">手機號碼 (將作為登入帳號)</label><input type="tel" id="c-phone" placeholder="09xxxxxxxx"></div>
+        <div class="form-group"><label class="required">E-mail (接收報告通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div>
+        <div class="form-group"><label>🔶 您是從哪裡認識培癒試驗室的？</label><select id="client-source"><option value="Threads">Threads</option><option value="IG">Instagram</option><option value="Shopee">蝦皮</option><option value="Friend">朋友介紹</option><option value="Other">其他</option></select></div>
+        <hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;">
+        <label style="font-size:18px; margin-bottom:15px;">1. 選擇方案內容與加購</label><div id="items-area" style="margin-bottom:30px;"></div>
+        <div id="conditional-question" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border-left:5px solid var(--accent);"></div>
+        <div class="form-group"><label>🔶 出生年月日資料提供</label><select id="data-flow" onchange="toggleFlow()"><option value="data">提供出生日期時間</option><option value="upload">直接上傳人類圖截圖</option></select></div>
+        <div id="flow-data" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div><div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00" onchange="timeHint()"><small id="t-hint" style="color:#d32f2f; display:block; margin-top:5px;">✅ 目前選擇：中午 12 點</small></div><div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div></div>
+        <div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><label>上傳人類圖截圖</label><input type="file" id="c-file" accept="image/*"></div>
+        <div class="card" style="background:#fdf9f0; border-top:none; padding:20px; margin-bottom:0;"><label>📜 服務規範</label><div id="terms-box"></div><label class="agree-wrapper"><input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)"><span>我已詳細閱讀並同意</span></label></div>
+        <div class="total-box">應付總額：$<span id="total-price">0</span></div>
+        <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button>
+    </div>
+</div>
+
+<div id="knowledge" class="section">
+    <div class="kb-header">
+        <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回上一層</button>
+        <h2 class="kb-title">📘 培癒寶典</h2>
+        <div style="width:70px;"></div> </div>
+    <div id="kb-container">載入中...</div>
+</div>
 
 <div id="draw" class="section">
     <div style="text-align:center; margin-bottom:20px;">
         <h2>🃏 64 閘門能量指引</h2>
         <p style="color:#666;">深呼吸，在心中默想你的問題，憑直覺選一張牌。</p>
     </div>
-    <div id="draw-area" class="card-table">
+    <div id="draw-area">
         <div style="color:#666;">正在洗牌中...</div>
     </div>
 </div>
@@ -276,7 +316,7 @@
                 我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。
             </p>
             <p style="font-size:0.9rem; color:#888;">
-                (至於靈擺是什麼，請到知識庫探索)
+                (至於靈擺是什麼，請到培癒寶典探索)
             </p>
         </div>
         <button class="close-modal-btn" onclick="closeModal('story-overlay')">關閉故事</button>
@@ -292,7 +332,7 @@
             <h4 class="rule-head"><span class="rule-num">1</span> 初心者指南</h4>
             <p class="rule-body">
                 如果你剛來到這個空間，對這一切感到好奇，歡迎先領取我為你準備的 「入門禮物🎁」。<br>
-                請前往【知識庫】探索，或透過【能量抽卡】感受你最近的狀態指引。
+                請前往【培癒寶典】探索，或透過【能量抽卡】感受你最近的狀態指引。
             </p>
         </div>
 
@@ -332,25 +372,152 @@
     const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
 
+    // 預約系統變數
     let cats = [], items = [], activeCat = null;
+    // 抽卡變數
     let allCards = [];
+    const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
-    const defaultStyle = {
-        gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" },
-        info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 },
-        zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" },
-        quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 }
-    };
+    // 知識庫 (培癒寶典) 變數
+    let kbTree = {};
+    let kbState = { level: 0, selectedBig: null, selectedMid: null, selectedArticleId: null };
 
-    // 🌟 [修正] 分開執行，避免其中一個失敗導致全部卡住
     window.onload = async () => {
         initBookingData().catch(e => console.error("Booking Err:", e));
         initDrawData().catch(e => console.error("Draw Err:", e));
+        initKbData().catch(e => console.error("KB Err:", e)); 
         loadSiteAssets().catch(e => console.error("Asset Err:", e));
     };
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    /* ================= 培癒寶典 (知識庫) 邏輯 ================= */
+    async function initKbData() {
+        const { data, error } = await myDB
+            .from('kb_articles')
+            .select('id, title, big_category, mid_category, created_at')
+            .eq('is_published', true)
+            .order('created_at', {ascending: false});
+
+        if(error) {
+            document.getElementById('kb-container').innerHTML = `<p style="text-align:center;color:red;">寶典讀取失敗：${error.message}</p>`;
+            return;
+        }
+
+        kbTree = {};
+        data.forEach(item => {
+            if(!kbTree[item.big_category]) kbTree[item.big_category] = {};
+            if(!kbTree[item.big_category][item.mid_category]) kbTree[item.big_category][item.mid_category] = [];
+            kbTree[item.big_category][item.mid_category].push(item);
+        });
+        
+        renderKbHome();
+    }
+
+    // Level 0: 知識庫首頁 (卡片)
+    function renderKbHome() {
+        kbState = { level: 0, selectedBig: null, selectedMid: null, selectedArticleId: null };
+        updateKbUI("培癒寶典");
+        
+        const container = document.getElementById('kb-container');
+        let html = '<div class="kb-grid">';
+        Object.keys(kbTree).forEach(bigCat => {
+            let count = 0;
+            Object.values(kbTree[bigCat]).forEach(arr => count += arr.length);
+            html += `
+                <div class="kb-card" onclick="enterKbBigCat('${bigCat}')">
+                    <h3>📂 ${bigCat}</h3>
+                    <span>${count} 篇文章</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // Level 1: 大分類內頁 (手風琴列表)
+    // 這裡我加了一個 activeMid 參數，這是為了「返回」時能自動展開你剛剛看的分類！
+    function enterKbBigCat(bigCat, activeMid = null) {
+        kbState = { level: 1, selectedBig: bigCat, selectedMid: activeMid, selectedArticleId: null };
+        updateKbUI(bigCat);
+        
+        const container = document.getElementById('kb-container');
+        const mids = kbTree[bigCat];
+        let html = '<div class="kb-accordion-group">';
+        
+        Object.entries(mids).forEach(([midCat, articles]) => {
+            // 自動判斷是否要展開
+            const isOpen = (activeMid === midCat) ? 'open' : '';
+            
+            html += `
+                <details class="kb-mid-cat" ${isOpen}>
+                    <summary class="kb-mid-header" onclick="kbState.selectedMid = '${midCat}'">
+                        <span>📌 ${midCat} <small style="color:#999; font-weight:normal;">(${articles.length})</small></span>
+                        <span class="kb-arrow">▼</span>
+                    </summary>
+                    <div class="kb-article-list">
+                        ${articles.map(art => `
+                            <div class="kb-article-link" onclick="readKbArticle('${art.id}', '${midCat}')">
+                                ${art.title}
+                            </div>
+                        `).join('')}
+                    </div>
+                </details>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        if(!activeMid) window.scrollTo(0,0);
+    }
+
+    // Level 2: 閱讀文章
+    async function readKbArticle(id, midCat) {
+        const container = document.getElementById('kb-container');
+        container.innerHTML = '<div style="text-align:center; padding:50px; color:#999;">正在讀取卷軸...</div>';
+        
+        const prevBig = kbState.selectedBig;
+        // 這裡我們把 midCat 存進去，確保等等按返回鍵知道要展開誰
+        kbState = { level: 2, selectedBig: prevBig, selectedMid: midCat, selectedArticleId: id };
+        updateKbUI("閱讀模式");
+
+        const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
+        if (error) { container.innerHTML = '讀取失敗'; return; }
+
+        container.innerHTML = `
+            <div class="kb-article-view">
+                <h1 style="margin-top:0; color:var(--forest);">${data.title}</h1>
+                <div class="kb-meta">
+                    分類：${data.big_category} > ${data.mid_category} | 
+                    日期：${new Date(data.created_at).toLocaleDateString()}
+                </div>
+                <div class="kb-body">${data.body}</div>
+            </div>
+        `;
+        window.scrollTo(0,0);
+    }
+
+    function updateKbUI(titleText) {
+        document.querySelector('.kb-title').innerText = titleText;
+        const btn = document.getElementById('kb-back-btn');
+        if (kbState.level > 0) {
+            btn.style.display = 'block';
+            btn.innerText = (kbState.level === 2) ? '← 返回目錄' : '← 返回首頁';
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    function kbGoBack() {
+        if (kbState.level === 2) {
+            // 返回時，把「剛剛看的分類」傳進去，讓它保持展開
+            enterKbBigCat(kbState.selectedBig, kbState.selectedMid);
+        } else if (kbState.level === 1) {
+            renderKbHome();
+        }
+    }
+
+    /* ================= 其他原有邏輯 (資源、預約、抽卡) ================= */
 
     async function loadSiteAssets() {
         const { data, error } = await myDB.from('site_content').select('*').eq('category', 'site_asset');
@@ -375,19 +542,13 @@
     async function initBookingData() {
         const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
         const { data: i } = await myDB.from('services').select('*').order('sort_order', {ascending: true}); items = i || [];
-        const { data: posts } = await myDB.from('site_content').select('*').order('created_at', {ascending:false});
         renderCats();
-        if(posts) {
-            document.getElementById('sol-list').innerHTML = posts.filter(p=>p.category==='soliloquy').map(p=>`<div class="card"><h3>${p.title}</h3><p>${p.body}</p></div>`).join('');
-            document.getElementById('kno-list').innerHTML = posts.filter(p=>p.category==='knowledge').map(p=>`<div class="card"><h3>${p.title}</h3><p>${p.body}</p></div>`).join('');
-        }
     }
 
-    // 🌟 [修正] 確保抽卡資料庫讀取失敗也能顯示基本牌
     async function initDrawData() {
         const { data, error } = await myDB.from('card_pool').select('*');
         if(!error && data) { allCards = data; }
-        renderDrawTable(); // 強制渲染，不論有無資料
+        renderDrawTable();
     }
 
     function showSection(id) { 
@@ -402,6 +563,7 @@
         window.scrollTo(0,0); 
     }
 
+    // 抽卡渲染
     function renderDrawTable() {
         const table = document.getElementById('draw-area'); table.innerHTML = '';
         const deck = allCards.length > 0 ? allCards : Array.from({length:64}, (_, i) => ({ gate_id: i+1 }));
@@ -416,7 +578,6 @@
 
     function openCard(card) {
         if (!card.gate_id) return alert("資料庫讀取中...");
-        // 🌟 [修正] 拿掉那個掛掉的 placeholder，改用空白字串避免報錯
         const bgUrl = card.image_url ? card.image_url : ''; 
         document.getElementById('p-bg').src = bgUrl + (bgUrl ? `?t=${new Date().getTime()}` : '');
         document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`;
@@ -442,9 +603,9 @@
         if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; }
         if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none';
     }
-
     function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); }, 500); }
 
+    // 預約表單
     function toggleFlow() { 
         const isD = document.getElementById('data-flow').value === 'data'; 
         document.getElementById('flow-data').style.display = isD ? 'block' : 'none'; 
@@ -597,22 +758,11 @@
             const functionUrl = "https://geyrpowhaqfhnxghpokr.supabase.co/functions/v1/line-notify"; 
             
             const notifyPayload = {
-                name: name,
-                phone: phone,
-                service: `${activeCat.name} - ${details.join(', ')}`,
+                name: name, phone: phone, service: `${activeCat.name} - ${details.join(', ')}`,
                 note: `付款: ${payType} ${document.getElementById('shopee-id').value ? '('+document.getElementById('shopee-id').value+')' : ''} / 來源: ${document.getElementById('client-source').value}`
             };
 
-            const { error: funcError } = await myDB.functions.invoke('line-notify', {
-                body: notifyPayload
-            });
-
-            if (funcError) {
-                console.error("LINE 通知發送失敗:", funcError);
-            } else {
-                console.log("LINE 通知已發送");
-            }
-
+            await myDB.functions.invoke('line-notify', { body: notifyPayload });
             alert("🎉 預約成功！"); location.reload();
         } else { 
             alert("❌ 預約失敗：" + error.message); 
@@ -630,45 +780,27 @@
         } else { alert("帳密錯誤"); }
     }
 </script>
+
 <audio id="bgMusic" loop preload="auto" muted>
   <source src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/magic.mp3" type="audio/mpeg">
 </audio>
 
 <script>
   const music = document.getElementById('bgMusic');
-
   const startMagic = () => {
     music.muted = false;
-    
     music.play().then(() => {
       console.log("🌲 森林魔法解鎖成功！");
       music.volume = 0;
       let vol = 0;
       const fade = setInterval(() => {
-        if (vol < 0.15) {
-          vol += 0.005;
-          music.volume = vol;
-        } else {
-          clearInterval(fade);
-        }
+        if (vol < 0.15) { vol += 0.005; music.volume = vol; } else { clearInterval(fade); }
       }, 100);
-
-      ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => {
-        window.removeEventListener(evt, startMagic);
-      });
-    }).catch(err => {
-      console.log("魔法啟動受阻，等待更明顯的互動...", err);
-    });
+      ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.removeEventListener(evt, startMagic); });
+    }).catch(err => { console.log("魔法啟動受阻...", err); });
   };
-
-  ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => {
-    window.addEventListener(evt, startMagic, { once: true });
-  });
-
-  window.addEventListener('load', () => {
-    music.load();
-    music.play().catch(() => console.log("等待用戶解鎖音訊..."));
-  });
+  ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.addEventListener(evt, startMagic, { once: true }); });
+  window.addEventListener('load', () => { music.load(); music.play().catch(() => console.log("等待用戶解鎖音訊...")); });
 </script>
 </body>
 </html>

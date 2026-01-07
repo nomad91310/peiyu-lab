@@ -26,38 +26,78 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* === 首頁 Hero 區塊 === */
-        .hero-section { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 0; }
+        .hero-section { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 30px; }
         .hero-text { flex: 0 1 auto; max-width: 500px; text-align: left; }
         .hero-text h1 { font-family: 'Noto Serif TC', serif; font-size: 3rem; color: var(--forest); margin-bottom: 5px; line-height: 1.2; margin-top: 0; }
         .hero-text h2 { font-size: 1.3rem; color: #555; margin-bottom: 20px; font-weight: normal; margin-top: 0; }
         .hero-img { flex: 0 1 auto; max-width: 400px; text-align: center; }
         .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; }
 
-        /* === Story 區塊 (新版樣式) === */
-        .story-section { padding: 40px 0; max-width: 900px; margin: 0 auto; }
-        .story-title { font-family: 'Noto Serif TC', serif; font-size: 2rem; color: var(--forest); margin-bottom: 30px; text-align: center; position: relative; }
-        .story-title::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--accent); }
-        .story-content { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .story-text p { font-size: 1.1rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
-        .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.1); padding: 5px 10px; border-radius: 5px; border-left: 4px solid var(--accent); }
+        /* === 🌟 [重要] 彈窗樣式 (保證按鈕不失效、樣式不跑版) === */
+        .result-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); /* 背景黑一點，凸顯內容 */
+            display: none; /* 預設隱藏，絕對不會擋到按鈕 */
+            justify-content: center; align-items: center; 
+            z-index: 2000; /* 確保蓋在所有東西上面 */
+            backdrop-filter: blur(5px); 
+            opacity: 0; transition: opacity 0.3s; 
+        }
+        .result-overlay.active { display: flex; opacity: 1; }
+
+        /* 文字內容專用彈窗卡片 */
+        .text-modal-card { 
+            position: relative; 
+            width: 90%; max-width: 600px; 
+            max-height: 85vh; /* 避免太高超出螢幕 */
+            background: #fff; 
+            border-radius: 15px; 
+            overflow-y: auto; /* 內容太長可以捲動 */
+            padding: 40px 30px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            transform: scale(0.9); opacity: 0; 
+            transition: transform 0.3s, opacity 0.3s;
+            border: 4px solid var(--forest); /* 加回原本卡片的邊框感 */
+        }
+        .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
+
+        /* 彈窗內的標題與裝飾 */
+        .text-modal-card h3 { color: var(--forest); text-align: center; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin-top: 0; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px dashed #ccc; }
+        .modal-tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-1deg); width: 160px; height: 35px; background: rgba(198, 168, 124, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+
+        /* === 🌟 [關鍵] 這裡是你最在意的守則樣式 (1.2.3 與 背景色) === */
+        /* 確保在彈窗(.text-modal-card)裡面，這些樣式依然生效 */
+        .rule-item { margin-bottom: 25px; }
+        .rule-head { color: var(--accent); font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; font-weight: bold; }
         
-        .hd-chart-container { text-align: center; margin: 30px 0; }
-        .hd-chart-container img { max-width: 100%; width: auto; max-height: 600px; border-radius: 10px; border: 1px solid #ddd; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .hd-caption { font-size: 0.9rem; color: #888; margin-top: 5px; font-style: italic; }
+        /* 漂亮的數字圓圈 */
+        .rule-num { 
+            background: var(--forest); color: var(--accent); 
+            width: 30px; height: 30px; 
+            border-radius: 50%; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            margin-right: 12px; font-size: 16px; font-weight: bold; flex-shrink: 0; 
+        }
+        
+        .rule-body { font-size: 15px; color: #555; line-height: 1.8; margin-left: 42px; }
+        
+        /* 那個好看的淺色文字網底框 */
+        .rule-list { 
+            color: #666; font-size: 14px; 
+            background: #fdfaf1; /* 這是那個米色底 */
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--accent); /* 左邊那條線 */
+            margin: 10px 0; 
+        }
+        
+        .rule-list li { margin-bottom: 5px; }
 
-        .service-bridge { margin-top: 40px; padding-top: 30px; border-top: 1px dashed #ccc; text-align: center; }
-        .service-bridge h4 { color: var(--forest); font-size: 1.4rem; margin-bottom: 15px; }
-
-        /* === 空間守則區塊樣式 (貼紙風) === */
-        .rules-card { max-width: 800px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 15px; border: 1px solid #e0e0e0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; }
-        .tape-effect { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 150px; height: 35px; background: rgba(198, 168, 124, 0.2); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .rules-title { text-align:center; color:var(--forest); font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin-top: 10px; margin-bottom: 30px; border-bottom: 1px dashed #ddd; padding-bottom: 15px; }
-        .rule-item { margin-bottom: 30px; }
-        .rule-head { color:var(--accent); font-size: 1.2rem; margin-bottom: 10px; display:flex; align-items:center; }
-        .rule-num { background:var(--accent); color:white; width:25px; height:25px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; font-size:14px; }
-        .rule-body { font-size:15px; color:#555; line-height: 1.8; margin-left: 35px; }
-        .rule-list { color:#666; font-size:14px; background: #fafafa; padding: 15px 15px 15px 35px; border-radius: 8px; border-left: 3px solid #ccc; margin: 10px 0; }
-        .link-btn { background:none; border:none; color:var(--forest); font-weight:bold; cursor:pointer; padding:0; text-decoration:underline; font-size:15px; }
+        /* 故事區塊樣式 */
+        .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 15px; }
+        .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.1); padding: 5px 10px; border-radius: 5px; border-left: 4px solid var(--accent); }
+        .hd-chart-container { text-align: center; margin: 20px 0; }
+        .hd-chart-container img { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd; }
 
         /* === Features 區塊 === */
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 30px 0; }
@@ -72,18 +112,29 @@
         .disclaimer-box::before { content: '⚠️'; position: absolute; top: -10px; left: 20px; font-size: 5rem; opacity: 0.1; }
         .disclaimer-text { font-size: 1.1rem; font-weight: bold; line-height: 1.8; }
 
-        /* === 按鈕樣式 (含禁用狀態) === */
+        /* === 按鈕樣式 === */
         .btn-primary { padding: 15px 40px; background: var(--forest); color: var(--cream); border: none; border-radius: 30px; font-size: 1.2rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-block; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.3); }
         .btn-primary:hover { background: #2c4739; transform: scale(1.05); }
         .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
         
-        /* === 預約系統相關樣式 (保留功能) === */
+        /* 次要按鈕 (給故事和守則用) */
+        .btn-secondary { padding: 10px 25px; background: white; color: var(--forest); border: 2px solid var(--forest); border-radius: 25px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 5px;}
+        .btn-secondary:hover { background: var(--forest); color: white; transform: translateY(-2px); }
+
+        /* 關閉按鈕 (固定在彈窗下方) */
+        .close-modal-btn { 
+            display: block; width: 100%; max-width: 200px; margin: 30px auto 0 auto;
+            padding: 12px 0; background: var(--error); color: white; border: none; border-radius: 50px; 
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+        }
+        .close-modal-btn:hover { transform: scale(1.05); background: #c0392b; }
+
+        /* === 預約系統與其他功能 (維持不變) === */
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
         input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-        
         .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
         .service-card:hover { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .service-card.disabled-card { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); }
@@ -103,15 +154,12 @@
         .cat-card:hover { border-color: var(--accent); background: #fdf9f0; transform: translateY(-2px); }
         .required::after { content: " *"; color: var(--error); }
 
-        /* === 抽卡功能相關樣式 (保留功能) === */
+        /* === 抽卡樣式 === */
         #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 20px 0; perspective: 1000px; }
         .card-back { width: 60px; height: 100px; background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%); border: 2px solid #c6a87c; outline: 1px solid #1a2f23; outline-offset: -4px; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 10px rgba(198, 168, 124, 0.1); overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .card-back::after { content: '培癒\A試驗室'; white-space: pre; font-family: 'Noto Serif TC', 'Shippori Mincho', serif; color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center; line-height: 1.4; letter-spacing: 2px; text-shadow: 0 0 5px rgba(198, 168, 124, 0.6); opacity: 0.9; padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%; background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%); box-shadow: inset 0 0 5px rgba(198, 168, 124, 0.2); }
         .card-back:hover { transform: translateY(-12px) scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(198, 168, 124, 0.4); border-color: #e0c8a0; z-index: 100; }
-        .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.5s; }
-        .result-overlay.active { display: flex; opacity: 1; }
         .card-reveal { position: relative; width: 320px; height: 550px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(198, 168, 124, 0.6); transform: scale(0.8); opacity: 0; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s; }
-        .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
         .retry-btn { position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%); padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s; }
@@ -125,6 +173,7 @@
             .card-back::after { font-size: 10px; padding: 8px 4px; letter-spacing: 1px; }
             .card-reveal { width: 300px; height: 515px; } 
             .hd-chart-container img { width: 100%; height: auto; }
+            .text-modal-card { width: 95%; padding: 30px 20px; }
         }
     </style>
 </head>
@@ -149,80 +198,22 @@
         <div class="hero-text">
             <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
-            <p style="color:#888; font-size:0.9rem; margin-top:10px;">往下探索我的故事與空間守則 ↓</p>
+            
+            <button class="btn-primary" onclick="showSection('booking-step-1')">立即預約調頻</button>
+
+            <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: flex-start;">
+                <button class="btn-secondary" onclick="openModal('story-overlay')">
+                    📖 我的故事
+                </button>
+                <button class="btn-secondary" onclick="openModal('rules-overlay')">
+                    👑 空間守則
+                </button>
+            </div>
+            
+            <p style="color:#888; font-size:0.9rem; margin-top:10px;">點擊上方按鈕閱讀故事與守則 ↑</p>
         </div>
         <div class="hero-img">
             <img src="logohuman.png" alt="培培" id="site-hero">
-        </div>
-    </div>
-
-    <div class="story-section">
-        <h3 class="story-title">從內耗到原廠設定</h3>
-        
-        <div class="story-content">
-            <div class="story-text">
-                <p>在 2024 年底我被迫離開當時的工作，這段期間不停思索我能做什麼？想做什麼？</p>
-                <p>找工作處處碰壁且開始自我內耗，基本上我處在動彈不得的狀態。我開始尋求心理相關及身心靈領域方面，雖然有緩解但我又疑惑自己是不是飄在半空。</p>
-                <p>就在我一直持續內耗和猶豫不定之時，人類圖在我面前出現了。</p>
-                
-                <p class="highlight-text">
-                    我必須先聲明一開始看到自己的人類圖我極度厭惡，但現在對於我自己的原廠設定非常滿意。
-                </p>
-            </div>
-
-            <div class="hd-chart-container">
-                <img src="./my_hd_chart.png" id="hd-chart-img" alt="培培的人類圖">
-                <div class="hd-caption">▲ 如圖所示，我的空白能量中心曾是我最大的困擾</div>
-            </div>
-
-            <div class="story-text">
-                <p>圖上空白的能量中心是吸收他人能量與能量放大器，但我唯一兩個有顏色的能量中心也沒有正常運作，我基本上所有能量中心都卡在了『非自己』跟『被制約』的狀態。</p>
-                <p>我透過自己學習並理解人類圖之後，順利解決了我的自我內耗之路。</p>
-            </div>
-  <p class="highlight-text">
-                    我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。
-                </p>
-
-                <p style="font-size:0.9rem; color:#888;">
-                    至於靈擺是什麼，請到<button class="link-btn" onclick="showSection('knowledge')">【知識庫】</button>探索
-                </p>
-           
-        </div>
-    </div>
-
-    <div class="rules-card">
-        <div class="tape-effect"></div>
-
-        <h3 class="rules-title">👑 空間守則｜Space Rules</h3>
-
-        <div class="rule-item">
-            <h4 class="rule-head"><span class="rule-num">1</span> 初心者指南</h4>
-            <p class="rule-body">
-                如果你剛來到這個空間，對這一切感到好奇，歡迎先領取我為你準備的 「入門禮物🎁」。<br>
-                請前往 <button class="link-btn" onclick="showSection('knowledge')">【知識庫】</button> 探索，或透過 <button class="link-btn" onclick="showSection('draw')">【能量抽卡】</button> 感受你最近的狀態指引。
-            </p>
-        </div>
-
-        <div class="rule-item">
-            <h4 class="rule-head"><span class="rule-num">2</span> 預約前的校準建議</h4>
-            <div class="rule-body">
-                <p>對於已有經驗的朋友，在點選預約前，我希望你先思考目前的狀態。若你正處於以下階段：</p>
-                <ul class="rule-list">
-                    <li>找尋能快速獲利的「靈性工具」</li>
-                    <li>找尋能幫你做未來決定的「代行人」</li>
-                    <li>處於多方嘗試、尚未打算落地的階段</li>
-                </ul>
-                <p>為了確保諮詢能帶給你真正的價值，我不建議你直接點選預約。你可以先與培癒師聊聊看，確認目前的頻率是否適合進行深度試驗。</p>
-            </div>
-        </div>
-
-        <div class="rule-item">
-            <h4 class="rule-head"><span class="rule-num">3</span> 啟動你的原廠設定</h4>
-            <p class="rule-body">
-                若你真心想了解自己的原廠設計，或感受到能量堵塞且決定不再逃避。。<br>
-                <strong style="color:var(--forest);">表示你已經準備好為自己的人生負責，這份決心就是進入本試驗室最珍貴的通行證。</strong>
-            </p>
-            
         </div>
     </div>
 
@@ -272,6 +263,16 @@
     </div>
 </div>
 
+<div id="member" class="section">
+    <h2>👤 個案專區</h2>
+    <div class="card" id="login-box">
+        <input type="tel" id="l-phone" placeholder="手機">
+        <input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;">
+        <button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button>
+    </div>
+    <div id="dash" style="display:none;"></div>
+</div>
+
 <div id="overlay" class="result-overlay">
     <div style="position:relative;">
         <div id="final-card" class="card-reveal">
@@ -285,18 +286,79 @@
     </div>
 </div>
 
-<div id="member" class="section">
-    <h2>👤 個案專區</h2>
-    <div class="card" id="login-box">
-        <input type="tel" id="l-phone" placeholder="手機">
-        <input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;">
-        <button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button>
-        <div style="text-align:center; margin-top:20px;">
-            <a href="https://peiyu-lab.vercel.app/peiyu_admin.html" target="_blank" style="color:#ccc; font-size:12px; text-decoration:none;">🔗 管理員後台入口</a>
+<div id="story-overlay" class="result-overlay">
+    <div class="text-modal-card">
+        <div class="modal-tape">MY STORY</div>
+        <h3>從內耗到原廠設定</h3>
+        <div class="story-text">
+            <p>在 2024 年底我被迫離開當時的工作，這段期間不停思索我能做什麼？想做什麼？</p>
+            <p>找工作處處碰壁且開始自我內耗，基本上我處在動彈不得的狀態。我開始尋求心理相關及身心靈領域方面，雖然有緩解但我又疑惑自己是不是飄在半空。</p>
+            <p>就在我一直猶豫不定時，人類圖在面前出現了。</p>
+            <p class="highlight-text">
+                我必須先聲明，我一開始看到我的人類圖，我極度厭惡，但我現在是對於我的原廠設計非常滿意。
+            </p>
         </div>
+        <div class="hd-chart-container">
+            <img src="./my_hd_chart.png" id="hd-chart-img" alt="培培的人類圖">
+            <div class="hd-caption">▲ 如圖所示，我的空白能量中心曾是我最大的困擾</div>
+        </div>
+        <div class="story-text">
+            <p>圖上空白的能量中心是吸收他人能量與能量放大器，但我唯一兩個有顏色的能量中心也沒有正常運作，我基本上所有能量中心都卡在了『非自己』跟『被制約』的狀態。</p>
+            <p>我透過自己學習並理解人類圖之後，順利解決了我的自我內耗之路。</p>
+            <p class="highlight-text">
+                我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。
+            </p>
+            <p style="font-size:0.9rem; color:#888;">
+                (至於靈擺是什麼，請到知識庫探索)
+            </p>
+        </div>
+        <button class="close-modal-btn" onclick="closeModal('story-overlay')">關閉故事</button>
     </div>
-    <div id="dash" style="display:none;"></div>
 </div>
+
+<div id="rules-overlay" class="result-overlay">
+    <div class="text-modal-card">
+        <div class="modal-tape">RULES</div>
+        <h3>👑 空間守則</h3>
+
+        <div class="rule-item">
+            <h4 class="rule-head"><span class="rule-num">1</span> 初心者指南</h4>
+            <p class="rule-body">
+                如果你剛來到這個空間，對這一切感到好奇，歡迎先領取我為你準備的 「入門禮物🎁」。<br>
+                請前往【知識庫】探索，或透過【能量抽卡】感受你最近的狀態指引。
+            </p>
+        </div>
+
+        <div class="rule-item">
+            <h4 class="rule-head"><span class="rule-num">2</span> 預約前的校準建議</h4>
+            <div class="rule-body">
+                <p>對於已有經驗的朋友，在點選預約前，我希望你先思考目前的狀態。若你正處於以下階段：</p>
+                <ul class="rule-list">
+                    <li>找尋能快速獲利的「靈性工具」</li>
+                    <li>找尋能幫你做未來決定的「代行人」</li>
+                    <li>處於多方嘗試、尚未打算落地的階段</li>
+                </ul>
+                <p>為了確保諮詢能帶給你真正的價值，我不建議你直接點選預約。你可以先與培癒師聊聊看，確認目前的頻率是否適合進行深度試驗。</p>
+            </div>
+        </div>
+
+        <div class="rule-item">
+            <h4 class="rule-head"><span class="rule-num">3</span> 啟動你的原廠設定</h4>
+            <p class="rule-body">
+                若你真心想了解自己的原廠設計，或感受到能量堵塞且決定不再逃避。<br>
+                <strong style="color:var(--forest);">表示你已經準備好為自己的人生負責，這份決心就是進入本試驗室最珍貴的通行證。</strong>
+            </p>
+            <div style="text-align:center; margin-top:20px;">
+                <button class="btn-primary" onclick="closeModal('rules-overlay'); showSection('booking-step-1');">
+                    ➔ 我已準備好，點選預約
+                </button>
+            </div>
+        </div>
+        
+        <button class="close-modal-btn" onclick="closeModal('rules-overlay')">關閉守則</button>
+    </div>
+</div>
+
 
 <script>
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
@@ -318,6 +380,14 @@
             await Promise.all([initBookingData(), initDrawData(), loadSiteAssets()]);
         } catch (e) { console.error("Init Error:", e); }
     };
+
+    // 🌟 彈窗控制邏輯
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
 
     // 🌟 [JS 更新] 增加讀取 my_hd_chart 的邏輯
     async function loadSiteAssets() {

@@ -914,78 +914,95 @@
         } 
     }
 
-    function renderDashboard(user) { 
-        document.getElementById('dash-welcome').innerText = `您好，${user.full_name}`; 
-        const allBookings = user.bookings.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)); 
-        let historyHtml = "<div style='color:#666;padding:10px;'>目前尚無預約紀錄</div>"; 
+   function renderDashboard(user) {
+        document.getElementById('dash-welcome').innerText = `您好，${user.full_name}`;
         
-        if(allBookings.length > 0) { 
-            historyHtml = allBookings.map(b => { 
-                const dateStr = new Date(b.created_at).toLocaleDateString(); 
-                const title = b.service_item || '服務預約'; 
-                const stMap = { 'pending': '<span style="color:red">未付款</span>', 'paid': '<span style="color:green">已付款</span>', 'completed': '<span style="color:#333">已結案</span>' }; 
-                const statusBadge = stMap[b.status] || b.status; 
-                const rawDetail = b.service_detail || ""; 
-                const details = rawDetail.split('|').map(s => s.trim().split('(')[0].trim()).join(' + '); 
+        // 排序訂單：由新到舊
+        const allBookings = user.bookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        let historyHtml = "<div style='color:#666;padding:10px;'>目前尚無預約紀錄</div>";
+
+        if (allBookings.length > 0) {
+            historyHtml = allBookings.map(b => {
+                const dateStr = new Date(b.created_at).toLocaleDateString();
+                const title = b.service_item || '服務預約';
                 
-                let originalPrice = 0; 
-                const matches = rawDetail.match(/\$(\d+)/g); 
-                if(matches) matches.forEach(m => originalPrice += parseInt(m.replace('$',''))); 
-                if(originalPrice < b.price || originalPrice === 0) originalPrice = b.price; 
+                // 狀態顯示設定
+                const stMap = { 
+                    'pending': '<span style="color:red">未付款</span>', 
+                    'paid': '<span style="color:green">已付款</span>', 
+                    'completed': '<span style="color:#333">已結案</span>' 
+                };
+                const statusBadge = stMap[b.status] || b.status;
                 
-                let priceInfoHtml = b.coupon_info ? 
-                    `<div style="font-size:12px;color:#999;margin-top:5px;">原價 <span style="text-decoration:line-through;">$${originalPrice}</span></div><div style="font-size:12px;color:#27ae60;">🎟️ ${b.coupon_info}</div><div style="font-weight:bold;color:#d35400;">實付 $${b.price}</div>` : 
-                    `<div style="font-weight:bold;color:#333;margin-top:5px;">$${b.price}</div>`; 
-                
-                // --- 🌟 關鍵邏輯修改開始 🌟 ---
-                const reportMatch = (b.wish_detail||"").match(/\[報告已生成 ID:(.*?)\]/); 
-                const currentReportId = reportMatch ? reportMatch[1] : null; 
-                
+                const rawDetail = b.service_detail || "";
+                const details = rawDetail.split('|').map(s => s.trim().split('(')[0].trim()).join(' + ');
+
+                // 計算原價與顯示實付
+                let originalPrice = 0;
+                const priceMatches = rawDetail.match(/\$(\d+)/g);
+                if (priceMatches) priceMatches.forEach(m => originalPrice += parseInt(m.replace('$', '')));
+                if (originalPrice < b.price || originalPrice === 0) originalPrice = b.price;
+
+                let priceInfoHtml = b.coupon_info ?
+                    `<div style="font-size:12px;color:#999;margin-top:5px;">原價 <span style="text-decoration:line-through;">$${originalPrice}</span></div><div style="font-size:12px;color:#27ae60;">🎟️ ${b.coupon_info}</div><div style="font-weight:bold;color:#d35400;">實付 $${b.price}</div>` :
+                    `<div style="font-weight:bold;color:#333;margin-top:5px;">$${b.price}</div>`;
+
+                // --- 🌟 關鍵報告與排程顯示邏輯 ---
+                const reportMatch = (b.wish_detail || "").match(/\[報告已生成 ID:(.*?)\]/);
+                const currentReportId = reportMatch ? reportMatch[1] : null;
+
                 let scheduleHtml = "";
+                let btnHtml = `<div style="font-size:12px; margin-top:5px;">${statusBadge}</div>`;
+
                 if (currentReportId) {
-                    // 如果有報告，顯示已完成
+                    // A. 已有報告：顯示「已完成」並動態生成安全連結
                     scheduleHtml = `<div style="color:var(--success); font-weight:bold; font-size:13px; margin-top:4px; background:#e8f5e9; padding:3px 6px; border-radius:4px; display:inline-block;">✨ 服務已完成</div>`;
+
+                    // 尋找對應的服務模板
+                    const matchedCat = cats.find(c => b.service_item === c.name);
+                    const specificSvc = items.find(s => s.category_id === matchedCat?.id && b.service_detail.includes(s.title) && s.is_main);
+                    const templateFile = (specificSvc && specificSvc.report_template) ? specificSvc.report_template : "srt_report.html";
+                    
+                    // 安全的 View URL
+                    let targetUrl = `${templateFile}?id=${currentReportId}&mode=view`;
+                    btnHtml = `<button class="btn-primary" style="font-size:13px;padding:6px 15px;height:fit-content;" onclick="window.open('${targetUrl}')">查看報告</button>`;
+
                 } else if (b.scheduled_at) {
-                    // 沒報告但有排程，顯示時間
+                    // B. 沒報告但有排程：顯示預計時間
                     const t = new Date(b.scheduled_at);
-                    const timeStr = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+                    const timeStr = `${t.getFullYear()}/${t.getMonth() + 1}/${t.getDate()} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`;
                     scheduleHtml = `<div style="color:#6a1b9a; font-weight:bold; font-size:13px; margin-top:4px; background:#f3e5f5; padding:3px 6px; border-radius:4px; display:inline-block;">🕒 預計服務：${timeStr}</div>`;
                 }
-                // --- 🌟 關鍵邏輯修改結束 🌟 ---
 
-                let btnHtml = `<div style="font-size:12px; margin-top:5px;">${statusBadge}</div>`; 
-                if (currentReportId) { 
-                    const targetReport = user.reports.find(r => r.id === currentReportId); 
-                    let targetUrl = `viewer.html?id=${currentReportId}`; 
-                    if (targetReport && targetReport.raw_data && (targetReport.raw_data.centers || Array.isArray(targetReport.raw_data))) { 
-                        targetUrl = `srt_report.html?id=${currentReportId}&mode=view`; 
-                    } 
-                    btnHtml = `<button class="btn-primary" style="font-size:13px;padding:6px 15px;height:fit-content;" onclick="window.open('${targetUrl}')">查看報告</button>`; 
-                } 
-                
-                return `<div style="border-bottom:1px solid #eee;padding:15px 10px;display:flex;justify-content:space-between;align-items:flex-start;">
+                return `
+                <div style="border-bottom:1px solid #eee;padding:15px 10px;display:flex;justify-content:space-between;align-items:flex-start;">
                     <div style="flex:1;padding-right:10px;">
                         <span style="font-weight:bold;font-size:15px;display:block;color:var(--forest);">${title}</span>
                         <small style="color:#666;display:block;margin-top:2px;">${details}</small>
-                        ${scheduleHtml} 
+                        ${scheduleHtml}
                         <small style="color:#999; display:block; margin-top:5px;">下單日：${dateStr}</small>
                         ${priceInfoHtml}
                     </div>
                     <div style="text-align:right">${btnHtml}</div>
-                </div>`; 
-            }).join(''); 
-        } 
-        
-        document.getElementById('dash-history').innerHTML = historyHtml; 
-        document.getElementById('c-name').value = user.full_name; 
-        document.getElementById('c-phone').value = user.phone; 
-        document.getElementById('c-email').value = user.email || ""; 
-        document.getElementById('c-phone').disabled = true; 
-        document.getElementById('c-name').style.backgroundColor = "#e8f5e9"; 
-        const statusEl = document.getElementById('phone-status'); 
-        if(statusEl) statusEl.innerHTML = ""; 
-        const phoneInput = document.getElementById('c-phone'); 
-        if(phoneInput) { phoneInput.style.borderColor = "#ddd"; phoneInput.style.backgroundColor = "#eee"; } 
+                </div>`;
+            }).join('');
+        }
+
+        // 更新 UI
+        document.getElementById('dash-history').innerHTML = historyHtml;
+        document.getElementById('c-name').value = user.full_name;
+        document.getElementById('c-phone').value = user.phone;
+        document.getElementById('c-email').value = user.email || "";
+        document.getElementById('c-phone').disabled = true;
+        document.getElementById('c-name').style.backgroundColor = "#e8f5e9";
+
+        const statusEl = document.getElementById('phone-status');
+        if (statusEl) statusEl.innerHTML = "";
+        const phoneInput = document.getElementById('c-phone');
+        if (phoneInput) {
+            phoneInput.style.borderColor = "#ddd";
+            phoneInput.style.backgroundColor = "#eee";
+        }
     }
 
     function doLogout() { 

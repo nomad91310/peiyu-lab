@@ -4,226 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>培癒試驗室 | 能量與人類圖導引</title>
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;900&family=ZCOOL+XiaoWei&family=Shippori+Mincho&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --text: #2c3e50; --shopee: #ff5722; --error: #e74c3c; }
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--cream); margin: 0; color: var(--text); line-height: 1.6; }
+        /* ================= V34 美感核心 ================= */
+        :root { 
+            --forest: #1a2f23; --forest-light: #2a4032;
+            --cream: #f9f7f2; --white: #ffffff;
+            --accent: #c6a87c; --accent-hover: #b09060;
+            --text-main: #2c3e50; --text-light: #666;
+            --shopee: #ff5722; --error: #d32f2f; --success: #2e7d32;
+            --shadow-soft: 0 10px 30px rgba(26, 47, 35, 0.08);
+            --shadow-hover: 0 15px 40px rgba(26, 47, 35, 0.15);
+        }
         
-        /* === 導航列 (Navbar) === */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; 
+            background-color: var(--cream); margin: 0; 
+            color: var(--text-main); line-height: 1.7; letter-spacing: 0.02em;
+        }
+
+        h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
+        
+        /* === 導航列 === */
         nav { 
-            background: var(--forest); 
-            padding: 0 20px; 
-            display: flex; 
-            align-items: center; 
-            height: 70px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
-            /* 電腦版設定：左右撐開 */
-            justify-content: space-between; 
+            background: var(--forest); padding: 0 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            height: 80px; position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25); border-bottom: 3px solid var(--accent);
         }
+        .logo-area { display: flex; align-items: center; cursor: pointer; height: 100%; }
+        .logo-img { max-height: 60px; width: auto; transition: transform 0.3s; } 
+        .logo-img:hover { transform: scale(1.05); }
 
-        .logo-area { 
-            display: flex; 
-            align-items: center; 
-            cursor: pointer; 
-            height: 100%; 
-            flex-shrink: 0; /* Logo 不准被壓縮 */
-        }
-        .logo-img { max-height: 55px; width: auto; object-fit: contain; margin-top: 4px; } 
-
-        .nav-links {
-            display: flex;
-            gap: 5px;
-        }
-
+        .nav-links { display: flex; gap: 20px; }
         .nav-links button { 
-            background: none; 
-            border: none; 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            font-size: 15px; 
-            color: #ccc; 
-            transition: 0.3s; 
-            font-weight: 500; 
-            white-space: nowrap; /* 禁止文字換行 */
+            background: none; border: none; padding: 8px 0; cursor: pointer; 
+            font-size: 16px; color: rgba(255,255,255,0.7); transition: 0.3s; 
+            font-family: 'Noto Serif TC', serif; letter-spacing: 1px; position: relative;
         }
-        .nav-links button.active { color: var(--accent); font-weight: bold; border-bottom: 2px solid var(--accent); }
-        .nav-links button:hover { color: white; }
+        .nav-links button::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0;
+            background-color: var(--accent); transition: width 0.3s;
+        }
+        .nav-links button:hover { color: var(--accent); }
+        .nav-links button:hover::after { width: 100%; }
+        .nav-links button.active { color: var(--white); font-weight: bold; }
+        .nav-links button.active::after { width: 100%; background-color: var(--white); }
 
-        /* === 通用區塊 === */
-        .section { display: none; padding: 0 20px 80px 20px; max-width: 1000px; margin: 0 auto; min-height: calc(100vh - 70px); animation: fadeIn 0.5s ease; }
+        /* === 內容容器與動畫 === */
+        .section { 
+            display: none; padding: 40px 20px 100px 20px; 
+            max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 80px); 
+            animation: fadeSlideUp 0.6s ease-out; 
+        }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeSlideUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
-        /* === 首頁 Hero 區塊 === */
-        .hero-section { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px 0 0 0; border-bottom: 2px dashed #e0e0e0; margin-top: 0; margin-bottom: 30px; }
-        .hero-text { flex: 0 1 auto; max-width: 500px; text-align: left; }
-        .hero-text h1 { font-family: 'Noto Serif TC', serif; font-size: 3rem; color: var(--forest); margin-bottom: 5px; line-height: 1.2; margin-top: 0; }
-        .hero-text h2 { font-size: 1.3rem; color: #555; margin-bottom: 20px; font-weight: normal; margin-top: 0; }
-        .hero-img { flex: 0 1 auto; max-width: 400px; text-align: center; }
-        .hero-img img { width: 100%; max-width: 280px; drop-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 20px; vertical-align: bottom; margin-bottom: -10px; }
+        /* === Hero 區塊 === */
+        .hero-section { 
+            display: flex; align-items: center; justify-content: center; 
+            gap: 60px; padding: 40px 0 60px 0; 
+            border-bottom: 1px solid rgba(26, 47, 35, 0.1); margin-bottom: 40px; 
+        }
+        .hero-text { flex: 1; max-width: 550px; text-align: left; }
+        .hero-text h1 { 
+            font-size: 3.5rem; color: var(--forest); margin: 0 0 10px 0; 
+            line-height: 1.1; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2);
+        }
+        .hero-text h2 { 
+            font-size: 1.4rem; color: var(--text-light); margin: 0 0 30px 0; 
+            font-weight: normal; letter-spacing: 0.1em; 
+        }
+        .hero-img { flex: 0 0 400px; text-align: center; position: relative; }
+        .hero-img img { 
+            width: 100%; max-width: 350px; border-radius: 20px; 
+            box-shadow: 20px 20px 0px var(--accent); transition: transform 0.5s ease;
+        }
+        .hero-img img:hover { transform: translateY(-10px); }
 
-        /* === 彈窗樣式 === */
+        /* === 特色卡片 === */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px 0; }
+        .feature-card { 
+            background: var(--white); padding: 40px 30px; border-radius: 16px; 
+            box-shadow: var(--shadow-soft); text-align: center; cursor: pointer; 
+            border: 1px solid transparent; transition: all 0.3s ease; 
+            position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; 
+            background: var(--forest); transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
+        .feature-card:hover::before { transform: scaleX(1); }
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .feature-title { font-size: 1.6rem; color: var(--forest); margin-bottom: 15px; }
+        .feature-desc { color: var(--text-light); font-size: 1.05rem; }
+
+        /* === 通用卡片容器 === */
+        .card { 
+            background: var(--white); padding: 40px; border-radius: 20px; 
+            box-shadow: var(--shadow-soft); border: 1px solid #eee; 
+            margin-bottom: 30px; position: relative;
+        }
+        .card h2, .card h3 { 
+            color: var(--forest); margin-top: 0; 
+            border-left: 5px solid var(--accent); padding-left: 15px;
+        }
+
+        /* === 表單元件 === */
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
+        label.required::after { content: " *"; color: var(--error); }
+        
+        input:not([type="checkbox"]):not([type="radio"]), select, textarea { 
+            width: 100%; padding: 14px 18px; border: 1px solid #ddd; border-radius: 10px; 
+            font-size: 16px; outline: none; transition: 0.3s; background: #fafafa;
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--accent); background: var(--white); 
+            box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); 
+        }
+        input:disabled { background: #eee; cursor: not-allowed; color: #999; }
+
+        /* === 按鈕 === */
+        .btn-primary { 
+            padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
+            color: var(--white); border: none; border-radius: 50px; 
+            font-size: 1.1rem; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 5px 15px rgba(26, 47, 35, 0.3); transition: all 0.3s ease; 
+            display: inline-block; letter-spacing: 1px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.4); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-secondary { 
+            padding: 10px 25px; background: transparent; color: var(--forest); 
+            border: 2px solid var(--forest); border-radius: 50px; 
+            font-size: 1rem; font-weight: bold; cursor: pointer; 
+            transition: 0.3s; margin-right: 10px;
+        }
+        .btn-secondary:hover { background: var(--forest); color: var(--white); }
+
+        /* === 服務列表 & 加購 === */
+        .cat-card {
+            border: 1px solid #eee; padding: 25px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; background: var(--white); transition: 0.3s;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .cat-card:hover { border-color: var(--accent); background: #fdfcf9; transform: translateX(5px); }
+        .cat-card h3 { margin: 0; border: none; padding: 0; font-size: 1.3rem; }
+
+        .service-card { 
+            background: #fafbfc; border: 1px solid #eee; padding: 20px; 
+            border-radius: 12px; margin-bottom: 15px; transition: 0.2s; 
+        }
+        .service-card:hover { border-color: var(--accent); background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .service-card.disabled-card { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+        
+        .service-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .service-info { display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; }
+        .service-info input { width: 22px; height: 22px; cursor: pointer; accent-color: var(--forest); }
+        .price-badge { background: var(--forest); color: var(--white); padding: 5px 12px; border-radius: 6px; font-size: 14px; font-weight: normal; }
+        .service-desc { font-size: 1rem; color: #777; margin-left: 38px; padding-top: 8px; line-height: 1.5; }
+        
+        .sub-check-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; 
+            margin-top: 15px; padding: 15px; background: #f0f4f1; border-radius: 10px; 
+        }
+        .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); }
+        .sub-opt-label input { width: 18px; height: 18px; margin: 0; }
+
+        .total-box { 
+            text-align: right; font-size: 1.8rem; font-weight: bold; color: #d35400; 
+            border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; font-family: 'Cinzel', serif; 
+        }
+
+        /* === 優惠券 === */
+        .coupon-box { 
+            background: #fdfbf5; padding: 20px; border-radius: 10px; border: 1px dashed var(--accent); 
+            margin-top: 25px; display: flex; gap: 15px; align-items: center; 
+        }
+        .coupon-msg { font-size: 14px; font-weight: bold; margin-top: 8px; }
+        .coupon-msg.success { color: var(--success); }
+        .coupon-msg.error { color: var(--error); }
+
+        /* === 彈窗 (Modals) === */
         .result-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); display: none; 
-            justify-content: center; align-items: center; 
-            z-index: 2000; backdrop-filter: blur(5px); 
-            opacity: 0; transition: opacity 0.3s; 
+            background: rgba(26, 47, 35, 0.9); 
+            display: none; justify-content: center; align-items: center; 
+            z-index: 2000; backdrop-filter: blur(8px); 
+            opacity: 0; transition: opacity 0.4s; 
         }
         .result-overlay.active { display: flex; opacity: 1; }
 
         .text-modal-card { 
-            position: relative; width: 90%; max-width: 600px; max-height: 85vh; 
-            background: #fff; border-radius: 15px; overflow-y: auto; 
-            padding: 40px 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-            transform: scale(0.9); opacity: 0; transition: transform 0.3s, opacity 0.3s;
-            border: 4px solid var(--forest);
+            position: relative; width: 90%; max-width: 650px; max-height: 85vh; 
+            background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+            transform: scale(0.95); opacity: 0; transition: all 0.4s ease;
         }
         .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
-        .text-modal-card h3 { color: var(--forest); text-align: center; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin-top: 0; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px dashed #ccc; }
-        .modal-tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-1deg); width: 160px; height: 35px; background: rgba(198, 168, 124, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-
-        .rule-item { margin-bottom: 25px; }
-        .rule-head { color: var(--accent); font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; font-weight: bold; }
-        .rule-num { background: var(--forest); color: var(--accent); width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; font-weight: bold; flex-shrink: 0; }
-        .rule-body { font-size: 15px; color: #555; line-height: 1.8; margin-left: 42px; }
-        .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 15px; }
-        .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.1); padding: 5px 10px; border-radius: 5px; border-left: 4px solid var(--accent); }
-        .hd-chart-container { text-align: center; margin: 20px 0; }
-        .hd-chart-container img { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd; }
-
-        /* === Features 區塊 === */
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 30px 0; }
-        .feature-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: 0.3s; cursor: pointer; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: space-between; }
-        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-color: var(--accent); }
-        .feature-icon { font-size: 3rem; margin-bottom: 15px; }
-        .feature-title { font-size: 1.5rem; font-weight: bold; color: var(--forest); margin-bottom: 10px; font-family: 'Noto Serif TC', serif; }
-        .feature-desc { color: #666; font-size: 1rem; line-height: 1.5; }
-
-        /* === 培癒寶典 (Knowledge Base) === */
-        .kb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .kb-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--forest); margin: 0; }
-        .kb-back-btn { background: white; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: 0.3s; display: none; font-weight: bold; white-space: nowrap; }
-        .kb-back-btn:hover { background: var(--accent); color: white; }
         
-        .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; animation: slideUp 0.4s ease; }
-        .kb-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; border-left: 5px solid var(--accent); }
-        .kb-card:hover { transform: translateY(-5px); background: #fffbf5; }
-        .kb-card h3 { margin: 0 0 10px 0; color: var(--forest); font-size: 1.4rem; }
-        .kb-card span { color: #888; font-size: 0.9rem; }
+        .text-modal-card h3 { 
+            text-align: center; color: var(--forest); margin-top: 10px; margin-bottom: 25px; 
+            font-size: 2rem; border: none; padding: 0;
+            background: linear-gradient(to right, transparent, rgba(198, 168, 124, 0.2), transparent);
+            padding: 10px 0;
+        }
 
-        .kb-accordion-group { display: flex; flex-direction: column; gap: 15px; animation: slideUp 0.3s ease; }
-        details.kb-mid-cat { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
-        summary.kb-mid-header { padding: 20px; cursor: pointer; font-weight: bold; font-size: 1.1rem; color: var(--forest); list-style: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
-        summary.kb-mid-header:hover { background: #fdfaf1; }
-        summary.kb-mid-header::-webkit-details-marker { display: none; }
-        .kb-arrow { transition: transform 0.3s; color: var(--accent); }
-        details[open] summary .kb-arrow { transform: rotate(180deg); }
-        .kb-article-list { border-top: 1px solid #eee; background: #fafafa; }
-        .kb-article-link { display: block; padding: 15px 20px 15px 40px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; transition: 0.2s; position: relative; }
-        .kb-article-link:hover { background: #eef5e9; color: var(--forest); padding-left: 45px; }
-        .kb-article-link::before { content: "📄"; position: absolute; left: 15px; opacity: 0.5; }
+        .close-modal-btn { 
+            display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; 
+            padding: 14px 0; background: var(--text-main); color: white; 
+            border: none; border-radius: 50px; font-weight: bold; 
+            cursor: pointer; font-size: 1rem; transition: 0.2s; 
+        }
+        .close-modal-btn:hover { background: var(--error); }
 
-        .kb-article-view { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeIn 0.5s ease; }
-        .kb-meta { color: #999; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        .kb-body { line-height: 1.8; color: #333; font-size: 1.05rem; }
-        .kb-body img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
-        .kb-body h1, .kb-body h2 { color: var(--forest); margin-top: 1.5em; }
-
-        /* === 按鈕與表單樣式 === */
-        .btn-primary { padding: 15px 40px; background: var(--forest); color: var(--cream); border: none; border-radius: 30px; font-size: 1.2rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-block; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.3); }
-        .btn-primary:hover { background: #2c4739; transform: scale(1.05); }
-        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
-        .btn-secondary { padding: 10px 25px; background: white; color: var(--forest); border: 2px solid var(--forest); border-radius: 25px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 5px;}
-        .close-modal-btn { display: block; width: 100%; max-width: 200px; margin: 30px auto 0 auto; padding: 12px 0; background: var(--error); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        /* === 培癒寶典 (知識庫) === */
+        .kb-card { 
+            border-left: 6px solid var(--accent); padding: 30px; 
+            transition: 0.3s; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-soft); cursor: pointer;
+        }
+        .kb-card:hover { transform: translateY(-5px) scale(1.02); background: #fffcf5; box-shadow: var(--shadow-hover); }
+        .kb-card h3 { font-size: 1.5rem; margin-bottom: 10px; color: var(--forest); border: none; padding: 0; }
         
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--forest); margin-bottom: 25px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--forest); }
-        input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-        .service-card { background: #fafafa; border: 1px solid #eee; padding: 18px; border-radius: 12px; margin-bottom: 15px; position: relative; transition: 0.2s; }
-        .service-card:hover { border-color: var(--accent); }
-        .service-card.disabled-card { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); }
-        .service-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
-        .service-info { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; cursor: pointer; flex: 1; }
-        .service-info input { width: 20px; height: 20px; margin: 0; }
-        .price-badge { background: var(--forest); color: white; padding: 3px 10px; border-radius: 6px; font-size: 13px; }
-        .service-desc { font-size: 14px; color: #777; margin-left: 32px; padding-top: 8px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
-        .sub-check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; margin-left: 32px; padding: 15px; background: #f4f7f5; border-radius: 10px; border: 1px solid #e0e0e0; }
-        .sub-opt-label { font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); margin-bottom: 0; }
-        .sub-opt-label input { margin: 0; width: 16px; height: 16px; }
-        .agree-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-size: 14px; }
-        .agree-wrapper input { width: 18px; height: 18px; margin: 0; }
-        #terms-box { font-size: 13px; height: 120px; overflow-y: auto; background: white; padding: 15px; border: 1px solid #eee; color: #666; border-radius: 8px; }
-        .total-box { text-align: right; font-size: 26px; font-weight: bold; color: #d35400; border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; }
-        .cat-card { border: 2px solid #eee; padding: 25px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; background: white; transition: 0.3s; }
-        .cat-card:hover { border-color: var(--accent); background: #fdf9f0; transform: translateY(-2px); }
-        .required::after { content: " *"; color: var(--error); }
+        details.kb-mid-cat { margin-bottom: 15px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #fff; }
+        summary.kb-mid-header { background: #fafafa; padding: 18px; font-size: 1.1rem; color: var(--forest); transition: 0.2s; }
+        summary.kb-mid-header:hover { background: #f0f0f0; }
+        .kb-article-link { padding: 15px 25px; border-bottom: 1px solid #f0f0f0; cursor: pointer; color: #555; position: relative; transition: 0.2s; }
+        .kb-article-link:hover { background: #eef5e9; color: var(--forest); padding-left: 35px; }
+        .kb-article-link::before { content: '📄'; position: absolute; left: 10px; opacity: 0; transition: 0.2s; }
+        .kb-article-link:hover::before { opacity: 1; }
 
-        /* === 抽卡功能樣式 === */
-        #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 20px 0; perspective: 1000px; }
-        .card-back { width: 60px; height: 100px; background: radial-gradient(circle at center, #1a2f23 0%, #0d1812 100%); border: 2px solid #c6a87c; outline: 1px solid #1a2f23; outline-offset: -4px; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.4s, box-shadow 0.4s; box-shadow: 0 4px 8px rgba(0,0,0,0.4); overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .card-back::after { content: '培癒\A試驗室'; white-space: pre; font-family: 'Noto Serif TC', serif; color: #c6a87c; font-size: 12px; font-weight: 900; text-align: center; line-height: 1.4; letter-spacing: 2px; opacity: 0.9; padding: 12px 8px; border: 1px solid rgba(198, 168, 124, 0.5); border-radius: 50% / 30%; background: radial-gradient(circle, rgba(198, 168, 124, 0.1) 0%, transparent 70%); }
-        .card-back:hover { transform: translateY(-12px) scale(1.05); z-index: 100; }
+        /* === 抽卡背面 === */
+        #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 40px 0; perspective: 1000px; }
+        .card-back { 
+            width: 60px; height: 100px; 
+            background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png');
+            background-repeat: no-repeat; background-position: center; background-size: cover; 
+            border-radius: 8px; cursor: pointer; position: relative; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .card-back:hover { 
+            transform: translateY(-15px) scale(1.03); z-index: 100; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(198, 168, 124, 0.4); 
+        }
         
-        .card-reveal { position: relative; width: 320px; height: 550px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(198, 168, 124, 0.6); transform: scale(0.8); opacity: 0; transition: transform 0.6s, opacity 0.6s; }
-        .result-overlay.active .card-reveal { transform: scale(1); opacity: 1; }
+        .card-reveal { 
+            position: relative; width: 340px; height: 580px; 
+            background: #fff; border-radius: 24px; overflow: hidden; 
+            box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); 
+            transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
+        
+        .retry-btn { 
+            position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); 
+            padding: 12px 35px; background: var(--accent); color: #000; border: none; 
+            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; 
+            box-shadow: 0 0 20px rgba(198, 168, 124, 0.6); transition: 0.3s; 
+        }
+        .retry-btn:hover { background: #e0c8a0; transform: translateX(-50%) scale(1.1); }
+        
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
-        .retry-btn { position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%); padding: 12px 30px; background: #c6a87c; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 0 15px rgba(198, 168, 124, 0.4); transition: 0.2s; }
-        .retry-btn:hover { background: #d4b585; transform: translateX(-50%) scale(1.05); }
 
-        /* 動畫 */
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* === 📱 手機版 RWD 修正 === */
         @media (max-width: 768px) {
-            /* 導航列修正：靠左對齊，用 gap 隔開 */
-            nav { 
-                justify-content: flex-start; 
-                gap: 15px; 
-                padding: 0 15px;
-            }
-            
-            /* Logo 縮小一點，避免太佔位 */
-            .logo-img { max-height: 40px; }
-            
-            /* 導航連結變成「橫向捲軸」 */
-            .nav-links {
-                display: flex;
-                overflow-x: auto; /* 允許橫向滑動 */
-                flex: 1; /* 佔據剩餘寬度 */
-                width: 100%;
-                padding-right: 10px; /* 給最後一個按鈕一點呼吸空間 */
-                
-                /* 隱藏捲軸但保留功能 */
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none; /* Firefox */
-            }
-            .nav-links::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
-            
-            .nav-links button {
-                padding: 0 12px; /* 縮小按鈕間距 */
-                font-size: 14px;
-                flex-shrink: 0; /* 禁止按鈕被壓縮 */
-            }
-
-            /* 修正 Hero 區塊間距 */
-            .hero-section { flex-direction: column-reverse; text-align: center; margin-top: 20px; gap: 20px; }
-            .hero-text h1 { font-size: 2.2rem; }
-            .hero-img { margin-bottom: 20px; }
-            
-            /* 修正卡片與彈窗大小 */
-            .card-reveal { width: 300px; height: 515px; } 
-            .text-modal-card { width: 95%; padding: 30px 20px; }
+            nav { padding: 0 20px; justify-content: flex-start; gap: 15px; }
+            .nav-links { overflow-x: auto; width: 100%; padding-right: 20px; }
+            .nav-links button { white-space: nowrap; flex-shrink: 0; font-size: 15px; }
+            .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .card { padding: 25px; }
+            .text-modal-card { width: 92%; padding: 40px 25px; }
         }
+
+        @keyframes cardShuffleIn {
+            from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
+            to { opacity: 1; transform: translateX(0) rotateY(0); }
+        }
+        .card-back { animation: cardShuffleIn 0.5s ease-out forwards; opacity: 0; }
     </style>
 </head>
 <body>
@@ -246,12 +316,11 @@
         <div class="hero-text">
             <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
-            <button class="btn-primary" onclick="showSection('booking-step-1')">立即預約調頻</button>
-            <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: flex-start;">
-                <button class="btn-secondary" onclick="openModal('story-overlay')">📖 我的故事</button>
-                <button class="btn-secondary" onclick="openModal('rules-overlay')">👑 空間守則</button>
+            <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start;">
+                <button class="btn-primary" onclick="openModal('story-overlay')">📖 我的故事</button>
+                <button class="btn-primary" onclick="openModal('rules-overlay')">👑 空間守則</button>
             </div>
-            <p style="color:#888; font-size:0.9rem; margin-top:10px;">點擊上方按鈕閱讀故事與守則 ↑</p>
+            <p style="color:#999; font-size:0.9rem; margin-top:15px; font-style:italic;">點擊上方按鈕閱讀故事與守則 ↑</p>
         </div>
         <div class="hero-img">
             <img src="logohuman.png" alt="培培" id="site-hero">
@@ -263,24 +332,24 @@
             <div class="feature-icon">💎</div>
             <div class="feature-title">服務預約</div>
             <div class="feature-desc">靈擺暨人類圖能量中心調整。<br>找回你的原廠設定。</div>
-            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去預約 &rarr;</div>
+            <div style="margin-top:20px; color:var(--accent); font-weight:bold; letter-spacing:1px;">前往預約 &rarr;</div>
         </div>
         <div class="feature-card" onclick="showSection('knowledge')">
             <div class="feature-icon">📘</div>
             <div class="feature-title">培癒寶典</div>
-            <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。(所有內容皆為自我學習)</div>
-            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">看筆記 &rarr;</div>
+            <div class="feature-desc">非專業知識庫，陪我走過內耗之路的工具或系統簡介。</div>
+            <div style="margin-top:20px; color:var(--accent); font-weight:bold; letter-spacing:1px;">閱讀筆記 &rarr;</div>
         </div>
         <div class="feature-card" onclick="showSection('draw')">
             <div class="feature-icon">🃏</div>
             <div class="feature-title">64 閘門能量指引</div>
-            <div class="feature-desc">我將 64 個閘門轉換成圖片配上文字。<br>建議每天抽一張即可。</div>
-            <div style="margin-top:15px; color:var(--accent); font-weight:bold;">去抽卡 &rarr;</div>
+            <div class="feature-desc">將 64 個閘門轉換成圖片配上文字。<br>建議每天抽一張即可。</div>
+            <div style="margin-top:20px; color:var(--accent); font-weight:bold; letter-spacing:1px;">開始抽卡 &rarr;</div>
         </div>
     </div>
-
-    <div class="disclaimer-box" style="background:var(--forest); color:var(--cream); padding:30px; border-radius:15px; margin:40px 0; text-align:center;">
-        <div class="disclaimer-text">
+    
+    <div class="disclaimer-box" style="background:var(--forest); color:var(--cream); padding:40px; border-radius:20px; margin:60px 0; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <div class="disclaimer-text" style="font-size:1.1rem; line-height:1.8;">
             如果內容有誤，歡迎協助我修正，或是提供我免費課程🤭。<br>
             如果只是看了不開心，請按下關閉，謝謝掰掰👋
         </div>
@@ -288,59 +357,135 @@
 </div>
 
 <div id="booking-step-1" class="section">
-    <div class="card"><h2>📂 選擇服務類型</h2><p style="color:#666;">請根據您的需求選擇主要服務領域：</p><div id="category-list">載入資料中...</div></div>
+    <div class="card">
+        <h2>📂 選擇服務類型</h2>
+        <p style="color:#666; margin-bottom:20px;">請根據您的需求選擇主要服務領域：</p>
+        <div id="category-list">載入資料中...</div>
+    </div>
 </div>
 
 <div id="booking-step-2" class="section">
     <div class="card">
-        <button onclick="showSection('booking-step-1')" style="background:none; border:none; color:#999; cursor:pointer; margin-bottom:15px; padding:0; font-size:0.9rem;">← 返回類別</button>
-        <h2 id="active-cat-name" style="color:var(--forest); margin-top:0;">服務詳情</h2>
-        <div style="background:#e0f7fa; padding:20px; border-radius:12px; margin-bottom:25px; border:1px solid #4dd0e1;">
-            <div class="form-group"><label>🔶 付款狀態選擇</label><select id="pay-status" onchange="toggleShopee()"><option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option><option value="shopee">🦐 我已在蝦皮付款 (請提供訂單編號)</option></select></div>
-            <div id="shopee-area" style="display:none;"><label style="color:var(--shopee);">蝦皮訂單編號 (必填)</label><input type="text" id="shopee-id" placeholder="請貼上訂單編號供核對"></div>
+        <button onclick="showSection('booking-step-1')" style="background:none; border:none; color:#999; cursor:pointer; margin-bottom:15px; padding:0; font-size:0.9rem; display:flex; align-items:center; gap:5px;">← 返回類別</button>
+        <h2 id="active-cat-name" style="margin-top:0;">服務詳情</h2>
+        
+        <div style="background:#e0f7fa; padding:25px; border-radius:12px; margin-bottom:30px; border-left:5px solid #26c6da;">
+            <div class="form-group" style="margin-bottom:15px;">
+                <label>🔶 付款狀態選擇</label>
+                <select id="pay-status" onchange="toggleOTA()"> 
+                    <option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option>
+                    <option value="ota">🛒 我已於其他網路平台付款</option> 
+                </select>
+            </div>
+            
+            <div id="ota-area" style="display:none; border-top:1px dashed #26c6da; padding-top:15px; margin-top:10px;">
+                <div class="form-group">
+                    <label style="color:#006064;">選擇付款平台</label>
+                    <select id="ota-source-select" style="background:white; border:1px solid #26c6da;"></select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label style="color:#006064;">訂單編號 (必填)</label>
+                    <input type="text" id="ota-order-id" placeholder="請貼上該平台的訂單編號" style="background:white; border:1px solid #26c6da;">
+                </div>
+            </div>
         </div>
+
         <div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div>
-        <div class="form-group"><label class="required">手機號碼 (將作為登入帳號)</label><input type="tel" id="c-phone" placeholder="09xxxxxxxx"></div>
+        <div class="form-group">
+            <label class="required">手機號碼 (將作為登入帳號)</label>
+            <input type="tel" id="c-phone" onblur="checkPhoneMembership()" placeholder="09xxxxxxxx (需10碼數字)">
+            <small id="phone-status" style="display:block; margin-top:8px; font-weight:bold;"></small>
+        </div>
         <div class="form-group"><label class="required">E-mail (接收報告通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div>
-        <div class="form-group"><label>🔶 您是從哪裡認識培癒試驗室的？</label><select id="client-source"><option value="Threads">Threads</option><option value="IG">Instagram</option><option value="Shopee">蝦皮</option><option value="Friend">朋友介紹</option><option value="Other">其他</option></select></div>
-        <hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;">
-        <label style="font-size:18px; margin-bottom:15px;">1. 選擇方案內容與加購</label><div id="items-area" style="margin-bottom:30px;"></div>
-        <div id="conditional-question" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border-left:5px solid var(--accent);"></div>
+                
+        <hr style="border:0; border-top:1px dashed #ddd; margin: 40px 0;">
+        
+        <label style="font-size:1.4rem; color:var(--forest); margin-bottom:20px;">1. 選擇方案內容與加購</label>
+        <div id="items-area" style="margin-bottom:40px;"></div>
+        
+        <div class="coupon-box">
+            <input type="text" id="coupon-code" placeholder="輸入優惠代碼" style="flex:1; border:1px solid #ccc; background:#fff;">
+            <button class="btn-secondary" onclick="verifyCoupon()" style="margin:0; padding:12px 25px;">套用</button>
+        </div>
+        <div id="coupon-msg" class="coupon-msg"></div>
+
+        <div id="conditional-question" style="background:#fcf8f2; padding:30px; border-radius:15px; margin:30px 0; border:1px solid #eee;"></div>
+        
         <div class="form-group"><label>🔶 出生年月日資料提供</label><select id="data-flow" onchange="toggleFlow()"><option value="data">提供出生日期時間</option><option value="upload">直接上傳人類圖截圖</option></select></div>
-        <div id="flow-data" style="background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div><div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00" onchange="timeHint()"><small id="t-hint" style="color:#d32f2f; display:block; margin-top:5px;">✅ 目前選擇：中午 12 點</small></div><div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div></div>
-        <div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px;"><label>上傳人類圖截圖</label><input type="file" id="c-file" accept="image/*"></div>
-        <div class="card" style="background:#fdf9f0; border-top:none; padding:20px; margin-bottom:0;"><label>📜 服務規範</label><div id="terms-box"></div><label class="agree-wrapper"><input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)"><span>我已詳細閱讀並同意</span></label></div>
-        <div class="total-box">應付總額：$<span id="total-price">0</span></div>
-        <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button>
+        
+        <div id="flow-data" style="background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
+            <div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div>
+            <div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00"><small style="color:#d32f2f; display:block; margin-top:5px;">✅ 請確認是上午或下午</small></div>
+            <div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div>
+        </div>
+        
+        <div id="flow-upload" style="display:none; background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
+            <div style="margin-bottom: 20px; border-left: 4px solid var(--accent); padding-left: 15px;">
+                <p style="margin:0; font-weight:bold; color:var(--forest);">第一步：取得圖檔</p>
+                <p style="margin:5px 0 0 0; font-size:0.95rem;">請前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:var(--shopee); text-decoration:underline; font-weight:bold;">亞洲人類圖學院 (點擊前往)</a></p>
+            </div>
+            <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳剛才下載的圖檔</label>
+            <input type="file" id="c-file" accept="image/*" style="background:#fff; border:1px solid #ccc; width:100%; padding:10px; border-radius:8px;">
+        </div>
+        
+        <div class="card" style="background:#fffcf5; border-top:none; padding:30px; margin-bottom:0; border:1px solid #fae1c3;">
+            <label>📜 服務規範</label>
+            <div id="terms-box" style="height:150px; overflow-y:auto; border:1px solid #e0e0e0; padding:15px; font-size:14px; background:#fff; border-radius:8px; line-height:1.8;"></div>
+            <label class="agree-wrapper" style="margin-top:20px; font-size:1.1rem;">
+                <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)">
+                <span>我已詳細閱讀並同意</span>
+            </label>
+        </div>
+        
+        <div class="total-box">
+            <div id="original-price-row" style="font-size:1rem; color:#999; text-decoration:line-through; display:none; margin-bottom:5px;">原價: $<span id="original-price">0</span></div>
+            應付總額：$<span id="total-price">0</span>
+        </div>
+        <div style="text-align:right; margin-top:20px;">
+            <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button>
+        </div>
     </div>
 </div>
 
 <div id="knowledge" class="section">
     <div class="kb-header">
-        <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回上一層</button>
+        <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回</button>
         <h2 class="kb-title">📘 培癒寶典</h2>
-        <div style="width:70px;"></div> </div>
+        <div style="width:70px;"></div> 
+    </div>
     <div id="kb-container">載入中...</div>
 </div>
 
 <div id="draw" class="section">
-    <div style="text-align:center; margin-bottom:20px;">
-        <h2>🃏 64 閘門能量指引</h2>
-        <p style="color:#666;">深呼吸，在心中默想你的問題，憑直覺選一張牌。</p>
+    <div style="text-align:center; margin-bottom:40px;">
+        <h2 style="font-size:2.5rem; margin-bottom:10px;">🃏 64 閘門能量指引</h2>
+        <p style="color:#666; font-size:1.1rem;">深呼吸，在心中默想你的問題，憑直覺選一張牌。</p>
     </div>
-    <div id="draw-area">
-        <div style="color:#666;">正在洗牌中...</div>
-    </div>
+    <div id="draw-area"><div style="color:#666;">正在洗牌中...</div></div>
 </div>
 
 <div id="member" class="section">
-    <h2>👤 個案專區</h2>
-    <div class="card" id="login-box">
-        <input type="tel" id="l-phone" placeholder="手機">
-        <input type="password" id="l-pass" placeholder="密碼" style="margin-top:10px;">
-        <button class="btn-primary" onclick="doLogin()" style="margin-top:20px;">登入系統</button>
+    <div class="card" id="login-box" style="max-width:500px; margin:50px auto;">
+        <h3 style="margin-top:0; text-align:center;">👤 會員登入</h3>
+        <div style="margin-top:30px;">
+            <input type="tel" id="l-phone" placeholder="手機 (帳號)" style="margin-bottom:15px;">
+            <input type="password" id="l-pass" placeholder="密碼" style="margin-bottom:25px;">
+            <button class="btn-primary" onclick="doLogin()" style="width:100%;">登入系統</button>
+        </div>
     </div>
-    <div id="dash" style="display:none;"></div>
+    <div id="dash" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h3 id="dash-welcome" style="margin:0;"></h3>
+            <div>
+                <button class="btn-secondary" style="font-size:14px;" onclick="openEditProfile()">修改資料</button>
+                <button class="btn-secondary" style="font-size:14px; border-color:#999; color:#999;" onclick="doLogout()">登出</button>
+            </div>
+        </div>
+        <div class="card" style="background:#f1f8e9; border:1px solid #c8e6c9;">
+            <h4 style="margin-top:0; color:#2e7d32;">📋 您的服務報告 (已結案)</h4>
+            <div id="dash-history" style="max-height:500px; overflow-y:auto; margin-top:15px;"></div>
+        </div>
+    </div>
 </div>
 
 <div id="overlay" class="result-overlay">
@@ -358,29 +503,22 @@
 
 <div id="story-overlay" class="result-overlay">
     <div class="text-modal-card">
-        <div class="modal-tape">MY STORY</div>
         <h3>從內耗到原廠設定</h3>
         <div class="story-text">
             <p>在 2024 年底我被迫離開當時的工作，這段期間不停思索我能做什麼？想做什麼？</p>
             <p>找工作處處碰壁且開始自我內耗，基本上我處在動彈不得的狀態。我開始尋求心理相關及身心靈領域方面，雖然有緩解但我又疑惑自己是不是飄在半空。</p>
             <p>就在我一直猶豫不定時，人類圖在面前出現了。</p>
-            <p class="highlight-text">
-                我必須先聲明，我一開始看到我的人類圖，我極度厭惡，但我現在是對於我的原廠設計非常滿意。
-            </p>
+            <p class="highlight-text">我必須先聲明，我一開始看到我的人類圖，我極度厭惡，但我現在是對於我的原廠設計非常滿意。</p>
         </div>
         <div class="hd-chart-container">
-            <img src="./my_hd_chart.png" id="hd-chart-img" alt="培培的人類圖">
+            <img src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/my_hd_chart.png" id="hd-chart-img" alt="培培的人類圖">
             <div class="hd-caption">▲ 如圖所示，我的空白能量中心曾是我最大的困擾</div>
         </div>
         <div class="story-text">
             <p>圖上空白的能量中心是吸收他人能量與能量放大器，但我唯一兩個有顏色的能量中心也沒有正常運作，我基本上所有能量中心都卡在了『非自己』跟『被制約』的狀態。</p>
             <p>我透過自己學習並理解人類圖之後，順利解決了我的自我內耗之路。</p>
-            <p class="highlight-text">
-                我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。
-            </p>
-            <p style="font-size:0.9rem; color:#888;">
-                (至於靈擺是什麼，請到培癒寶典探索)
-            </p>
+            <p class="highlight-text">我想用靈擺協助來到這個空間的你，做一次人類圖能量中心的調整，讓你回到你自己的人生原廠設定。</p>
+            <p style="font-size:0.9rem; color:#888; margin-top:20px;">(至於靈擺是什麼，請到培癒寶典探索)</p>
         </div>
         <button class="close-modal-btn" onclick="closeModal('story-overlay')">關閉故事</button>
     </div>
@@ -388,22 +526,16 @@
 
 <div id="rules-overlay" class="result-overlay">
     <div class="text-modal-card">
-        <div class="modal-tape">RULES</div>
         <h3>👑 空間守則</h3>
-
         <div class="rule-item">
             <h4 class="rule-head"><span class="rule-num">1</span> 初心者指南</h4>
-            <p class="rule-body">
-                如果你剛來到這個空間，對這一切感到好奇，歡迎先領取我為你準備的 「入門禮物🎁」。<br>
-                請前往【培癒寶典】探索，或透過【能量抽卡】感受你最近的狀態指引。
-            </p>
+            <p class="rule-body">如果你剛來到這個空間，對這一切感到好奇，歡迎先領取我為你準備的 「入門禮物🎁」。<br>請前往【培癒寶典】探索，或透過【能量抽卡】感受你最近的狀態指引。</p>
         </div>
-
         <div class="rule-item">
             <h4 class="rule-head"><span class="rule-num">2</span> 預約前的校準建議</h4>
             <div class="rule-body">
                 <p>對於已有經驗的朋友，在點選預約前，我希望你先思考目前的狀態。若你正處於以下階段：</p>
-                <ul class="rule-list">
+                <ul class="rule-list" style="margin:10px 0 15px 20px; padding:0; color:#555; list-style-type: square;">
                     <li>找尋能快速獲利的「靈性工具」</li>
                     <li>找尋能幫你做未來決定的「代行人」</li>
                     <li>處於多方嘗試、尚未打算落地的階段</li>
@@ -411,21 +543,28 @@
                 <p>為了確保諮詢能帶給你真正的價值，我不建議你直接點選預約。你可以先與培癒師聊聊看，確認目前的頻率是否適合進行深度試驗。</p>
             </div>
         </div>
-
         <div class="rule-item">
             <h4 class="rule-head"><span class="rule-num">3</span> 啟動你的原廠設定</h4>
-            <p class="rule-body">
-                若你真心想了解自己的原廠設計，或感受到能量堵塞且決定不再逃避。<br>
-                <strong style="color:var(--forest);">表示你已經準備好為自己的人生負責，這份決心就是進入本試驗室最珍貴的通行證。</strong>
-            </p>
-            <div style="text-align:center; margin-top:20px;">
-                <button class="btn-primary" onclick="closeModal('rules-overlay'); showSection('booking-step-1');">
-                    ➔ 我已準備好，點選預約
-                </button>
+            <p class="rule-body">若你真心想了解自己的原廠設計，或感受到能量堵塞且決定不再逃避。<br><strong style="color:var(--forest);">表示你已經準備好為自己的人生負責，這份決心就是進入本試驗室最珍貴的通行證。</strong></p>
+            <div style="text-align:center; margin-top:30px;">
+                <button class="btn-primary" onclick="closeModal('rules-overlay'); showSection('booking-step-1');">➔ 我已準備好，點選預約</button>
             </div>
         </div>
-        
         <button class="close-modal-btn" onclick="closeModal('rules-overlay')">關閉守則</button>
+    </div>
+</div>
+
+<div id="edit-profile-overlay" class="result-overlay">
+    <div class="text-modal-card" style="max-width:450px; padding:30px;">
+        <h3 style="margin-top:0;">✏️ 修改會員資料</h3>
+        <label>手機 (帳號不可修改)</label><input type="text" id="ep-phone" disabled style="background:#eee; color:#666;">
+        <label style="margin-top:15px;">姓名</label><input type="text" id="ep-name">
+        <label style="margin-top:15px;">Email</label><input type="email" id="ep-email">
+        <label style="margin-top:15px;">新密碼 (不改請留空)</label><input type="password" id="ep-pass" placeholder="輸入新密碼">
+        <div style="margin-top:30px; display:flex; gap:15px;">
+            <button class="btn-secondary" onclick="closeModal('edit-profile-overlay')" style="flex:1; justify-content:center;">取消</button>
+            <button class="btn-primary" onclick="saveProfile()" style="flex:1; padding:10px 0; font-size:1rem;">儲存</button>
+        </div>
     </div>
 </div>
 
@@ -434,435 +573,482 @@
     const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
 
-    // 預約系統變數
-    let cats = [], items = [], activeCat = null;
-    // 抽卡變數
-    let allCards = [];
+    let cats = [], items = [], activeCat = null, allCards = [], kbTree = {}, kbState = { level: 0 }, otas = [];
+    let currentCoupon = null; 
+    let currentUser = null; 
+    let isMemberBlocked = false; 
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
-
-    // 知識庫 (培癒寶典) 變數
-    let kbTree = {};
-    let kbState = { level: 0, selectedBig: null, selectedMid: null, selectedArticleId: null };
-
-    window.onload = async () => {
-        initBookingData().catch(e => console.error("Booking Err:", e));
-        initDrawData().catch(e => console.error("Draw Err:", e));
-        initKbData().catch(e => console.error("KB Err:", e)); 
-        loadSiteAssets().catch(e => console.error("Asset Err:", e));
-    };
-
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-    /* ================= 培癒寶典 (知識庫) 邏輯 ================= */
-    async function initKbData() {
-        const { data, error } = await myDB
-            .from('kb_articles')
-            .select('id, title, big_category, mid_category, created_at')
-            .eq('is_published', true)
-            .order('created_at', {ascending: false});
-
-        if(error) {
-            document.getElementById('kb-container').innerHTML = `<p style="text-align:center;color:red;">寶典讀取失敗：${error.message}</p>`;
-            return;
-        }
-
-        kbTree = {};
-        data.forEach(item => {
-            if(!kbTree[item.big_category]) kbTree[item.big_category] = {};
-            if(!kbTree[item.big_category][item.mid_category]) kbTree[item.big_category][item.mid_category] = [];
-            kbTree[item.big_category][item.mid_category].push(item);
-        });
-        
-        renderKbHome();
-    }
-
-    // Level 0: 知識庫首頁 (卡片)
-    function renderKbHome() {
-        kbState = { level: 0, selectedBig: null, selectedMid: null, selectedArticleId: null };
-        updateKbUI("培癒寶典");
-        
-        const container = document.getElementById('kb-container');
-        let html = '<div class="kb-grid">';
-        Object.keys(kbTree).forEach(bigCat => {
-            let count = 0;
-            Object.values(kbTree[bigCat]).forEach(arr => count += arr.length);
-            html += `
-                <div class="kb-card" onclick="enterKbBigCat('${bigCat}')">
-                    <h3>📂 ${bigCat}</h3>
-                    <span>${count} 篇文章</span>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    }
-
-    // Level 1: 大分類內頁 (手風琴列表)
-    // 這裡我加了一個 activeMid 參數，這是為了「返回」時能自動展開你剛剛看的分類！
-    function enterKbBigCat(bigCat, activeMid = null) {
-        kbState = { level: 1, selectedBig: bigCat, selectedMid: activeMid, selectedArticleId: null };
-        updateKbUI(bigCat);
-        
-        const container = document.getElementById('kb-container');
-        const mids = kbTree[bigCat];
-        let html = '<div class="kb-accordion-group">';
-        
-        Object.entries(mids).forEach(([midCat, articles]) => {
-            // 自動判斷是否要展開
-            const isOpen = (activeMid === midCat) ? 'open' : '';
-            
-            html += `
-                <details class="kb-mid-cat" ${isOpen}>
-                    <summary class="kb-mid-header" onclick="kbState.selectedMid = '${midCat}'">
-                        <span>📌 ${midCat} <small style="color:#999; font-weight:normal;">(${articles.length})</small></span>
-                        <span class="kb-arrow">▼</span>
-                    </summary>
-                    <div class="kb-article-list">
-                        ${articles.map(art => `
-                            <div class="kb-article-link" onclick="readKbArticle('${art.id}', '${midCat}')">
-                                ${art.title}
-                            </div>
-                        `).join('')}
-                    </div>
-                </details>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-        if(!activeMid) window.scrollTo(0,0);
-    }
-
-    // Level 2: 閱讀文章
-    async function readKbArticle(id, midCat) {
-        const container = document.getElementById('kb-container');
-        container.innerHTML = '<div style="text-align:center; padding:50px; color:#999;">正在讀取卷軸...</div>';
-        
-        const prevBig = kbState.selectedBig;
-        // 這裡我們把 midCat 存進去，確保等等按返回鍵知道要展開誰
-        kbState = { level: 2, selectedBig: prevBig, selectedMid: midCat, selectedArticleId: id };
-        updateKbUI("閱讀模式");
-
-        const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
-        if (error) { container.innerHTML = '讀取失敗'; return; }
-
-        container.innerHTML = `
-            <div class="kb-article-view">
-                <h1 style="margin-top:0; color:var(--forest);">${data.title}</h1>
-                <div class="kb-meta">
-                    分類：${data.big_category} > ${data.mid_category} | 
-                    日期：${new Date(data.created_at).toLocaleDateString()}
-                </div>
-                <div class="kb-body">${data.body}</div>
-            </div>
-        `;
-        window.scrollTo(0,0);
-    }
-
-    function updateKbUI(titleText) {
-        document.querySelector('.kb-title').innerText = titleText;
-        const btn = document.getElementById('kb-back-btn');
-        if (kbState.level > 0) {
-            btn.style.display = 'block';
-            btn.innerText = (kbState.level === 2) ? '← 返回目錄' : '← 返回首頁';
-        } else {
-            btn.style.display = 'none';
-        }
-    }
-
-    function kbGoBack() {
-        if (kbState.level === 2) {
-            // 返回時，把「剛剛看的分類」傳進去，讓它保持展開
-            enterKbBigCat(kbState.selectedBig, kbState.selectedMid);
-        } else if (kbState.level === 1) {
-            renderKbHome();
-        }
-    }
-
-    /* ================= 其他原有邏輯 (資源、預約、抽卡) ================= */
-
-    async function loadSiteAssets() {
-        const { data, error } = await myDB.from('site_content').select('*').eq('category', 'site_asset');
-        if (data) {
-            data.forEach(item => {
-                if (item.title === 'logo') {
-                    const el = document.getElementById('site-logo');
-                    if (el) el.src = item.image_url;
-                }
-                if (item.title === 'logohuman') {
-                    const el = document.getElementById('site-hero');
-                    if (el) el.src = item.image_url;
-                }
-                if (item.title === 'my_hd_chart') {
-                    const el = document.getElementById('hd-chart-img');
-                    if (el) el.src = item.image_url;
-                }
-            });
-        }
-    }
-
-    async function initBookingData() {
-        const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
-        const { data: i } = await myDB.from('services').select('*').order('sort_order', {ascending: true}); items = i || [];
-        renderCats();
-    }
-
-    async function initDrawData() {
-        const { data, error } = await myDB.from('card_pool').select('*');
-        if(!error && data) { allCards = data; }
-        renderDrawTable();
-    }
 
     function showSection(id) { 
         document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
         document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
-        
         const baseId = id.split('-')[0]; 
-        const activeBtn = document.getElementById('nav-'+baseId);
-        if(activeBtn) activeBtn.classList.add('active');
-        
+        const navBtn = document.getElementById('nav-' + baseId);
+        if(navBtn) navBtn.classList.add('active');
         window.scrollTo(0,0); 
     }
 
-    // 抽卡渲染
-    function renderDrawTable() {
-        const table = document.getElementById('draw-area'); table.innerHTML = '';
-        const deck = allCards.length > 0 ? allCards : Array.from({length:64}, (_, i) => ({ gate_id: i+1 }));
-        const shuffled = deck.sort(() => Math.random() - 0.5);
-        shuffled.forEach((card, index) => {
-            const el = document.createElement('div'); el.className = 'card-back';
-            el.style.animation = `fadeIn 0.5s ease ${index * 0.02}s backwards`;
-            el.onclick = () => openCard(card);
-            table.appendChild(el);
-        });
+    window.onload = async () => {
+        await initBookingData(); 
+        initDrawData(); 
+        initKbData(); 
+        loadSiteAssets();
+        checkSession(); 
+    };
+
+    function checkSession() {
+        const saved = localStorage.getItem('peiyu_user');
+        if (saved) {
+            try {
+                const { phone, pass } = JSON.parse(saved);
+                document.getElementById('l-phone').value = phone;
+                document.getElementById('l-pass').value = pass;
+                doLogin(); 
+            } catch (e) {
+                console.log("自動登入失效");
+                localStorage.removeItem('peiyu_user');
+            }
+        }
     }
 
-    function openCard(card) {
-        if (!card.gate_id) return alert("資料庫讀取中...");
-        const bgUrl = card.image_url ? card.image_url : ''; 
-        document.getElementById('p-bg').src = bgUrl + (bgUrl ? `?t=${new Date().getTime()}` : '');
-        document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`;
-        document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`;
-        document.getElementById('p-zodiac').innerText = card.zodiac || '';
-        document.getElementById('p-quote').innerText = card.quote || '';
-        const style = card.style_config || defaultStyle;
-        applyStyle('gate', style.gate || defaultStyle.gate);
-        applyStyle('info', style.info || defaultStyle.info);
-        applyStyle('zodiac', style.zodiac || defaultStyle.zodiac);
-        applyStyle('quote', style.quote || defaultStyle.quote);
-        document.getElementById('overlay').classList.add('active');
+    async function checkPhoneMembership() {
+        const phone = document.getElementById('c-phone').value.trim();
+        const statusEl = document.getElementById('phone-status');
+        const submitBtn = document.getElementById('sub-btn');
+
+        if (!phone || currentUser) return;
+        if (!/^09\d{8}$/.test(phone)) {
+            statusEl.innerHTML = "❌ 格式錯誤 (需10碼)"; statusEl.style.color = "red"; submitBtn.disabled = true; return;
+        }
+
+        statusEl.innerHTML = "🔍 檢查中...";
+        const { data } = await myDB.from('profiles').select('id').eq('phone', phone).single();
+
+        if (data) {
+            isMemberBlocked = true;
+            statusEl.innerHTML = `⚠️ 此號碼已註冊！請先 <a href="#" onclick="showSection('member'); return false;" style="color:red;font-weight:bold;text-decoration:underline;">登入會員</a>`;
+            statusEl.style.color = "red"; submitBtn.disabled = true; submitBtn.innerText = "請先登入會員";
+        } else {
+            isMemberBlocked = false;
+            statusEl.innerHTML = "✅ 新朋友歡迎你";
+            statusEl.style.color = "green";
+            toggleSubmitBtn(document.getElementById('agree-check').checked);
+        }
     }
 
-    function applyStyle(id, s) {
-        const el = document.getElementById(`p-${id}`); const def = defaultStyle[id];
-        const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop];
-        el.style.left = val('x') + '%'; el.style.top = val('y') + '%';
-        el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color');
-        const str = val('stroke');
-        el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none';
-        if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px';
-        if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; }
-        if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none';
-    }
-    function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); }, 500); }
+    async function verifyCoupon() {
+        const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+        const msgEl = document.getElementById('coupon-msg');
+        const phone = document.getElementById('c-phone').value.trim();
 
-    // 預約表單
-    function toggleFlow() { 
-        const isD = document.getElementById('data-flow').value === 'data'; 
-        document.getElementById('flow-data').style.display = isD ? 'block' : 'none'; 
-        document.getElementById('flow-upload').style.display = isD ? 'none' : 'block'; 
+        if (!phone && !currentUser) { alert("⚠️ 請先輸入手機號碼或登入會員，才能驗證優惠券資格！"); return; }
+        if (!code) { msgEl.innerText = ""; currentCoupon = null; calcTotal(); return; }
+
+        msgEl.className = "coupon-msg"; msgEl.innerText = "查詢中...";
+
+        const { data: coupon, error } = await myDB.from('coupons').select('*').eq('code', code).single();
+
+        if (error || !coupon) {
+            msgEl.className = "coupon-msg error"; msgEl.innerText = "❌ 無效的優惠代碼";
+            currentCoupon = null;
+        } else {
+            if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+                msgEl.className = "coupon-msg error"; msgEl.innerText = "⚠️ 此代碼已過期";
+                currentCoupon = null;
+            } else {
+                let isMember = false;
+                let searchUserId = null;
+
+                if (currentUser) {
+                    isMember = true;
+                    searchUserId = currentUser.id;
+                } else {
+                    const { data: profile } = await myDB.from('profiles').select('id').eq('phone', phone).single();
+                    if (profile) { isMember = true; searchUserId = profile.id; }
+                }
+
+                if (isMember && !coupon.allow_member) {
+                    msgEl.className = "coupon-msg error"; msgEl.innerText = "❌ 此優惠券僅限【新朋友/訪客】使用";
+                    currentCoupon = null; calcTotal(); return;
+                } else if (!isMember && !coupon.allow_guest) {
+                    msgEl.className = "coupon-msg error"; msgEl.innerText = "❌ 此優惠券僅限【會員】使用 (請註冊/登入)";
+                    currentCoupon = null; calcTotal(); return;
+                }
+
+                if (searchUserId) {
+                    const { data: history } = await myDB.from('bookings').select('id').eq('user_id', searchUserId).ilike('coupon_info', `%Code:${code}%`).limit(1);
+                    if (history && history.length > 0) {
+                        msgEl.className = "coupon-msg error"; msgEl.innerText = "❌ 您已使用過此優惠券 (限用一次)";
+                        currentCoupon = null; calcTotal(); return;
+                    }
+                }
+
+                currentCoupon = coupon;
+                let desc = coupon.discount_type === 'percentage' ? `打 ${coupon.discount_value < 10 ? coupon.discount_value*10 : coupon.discount_value} 折` : `折抵 $${coupon.discount_value}`;
+                msgEl.className = "coupon-msg success"; msgEl.innerText = `✅ 套用成功：${coupon.name} (${desc})`;
+            }
+        }
+        calcTotal(); 
     }
-    function toggleShopee() { document.getElementById('shopee-area').style.display = (document.getElementById('pay-status').value === 'shopee') ? 'block' : 'none'; }
-    function toggleSubmitBtn(checked) { const btn = document.getElementById('sub-btn'); btn.disabled = !checked; btn.innerText = checked ? "確認送出預約資料" : "請先勾選同意規範"; }
-    function timeHint() { const t = document.getElementById('b-time').value; if(!t) return; const h = parseInt(t.split(':')[0]); document.getElementById('t-hint').innerText = "✅ 已選：" + (h===0?"凌晨 0 點":h===12?"中午 12 點":h<12?"上午 "+h+" 點":"下午 "+(h-12)+" 點"); }
-    
-    function renderCats() {
+
+    async function initBookingData() {
+        const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
+        const { data: i } = await myDB.from('services').select('*').order('sort_order'); items = i || [];
+        const { data: o } = await myDB.from('ota_settings').select('*'); otas = o || [];
+        
+        const otaSelect = document.getElementById('ota-source-select');
+        if(otaSelect) otaSelect.innerHTML = otas.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
+
         document.getElementById('category-list').innerHTML = cats.map(c => `
             <div class="cat-card" onclick="selectCat('${c.id}')">
                 <h3>${c.name}</h3>
-                <small>${c.description || '點擊查看詳情'}</small>
+                <span style="font-size:1.5rem; color:var(--accent);">➔</span>
             </div>`).join('');
     }
 
     function selectCat(id) {
         activeCat = cats.find(x => x.id === id);
-        if(!activeCat) return;
         document.getElementById('active-cat-name').innerText = activeCat.name;
-        document.getElementById('terms-box').innerText = activeCat.terms || "請詳閱並遵守相關服務規範。";
+        document.getElementById('terms-box').innerText = activeCat.terms || "請遵守規範。";
         document.getElementById('agree-check').checked = false; toggleSubmitBtn(false);
+        document.getElementById('coupon-code').value = ""; document.getElementById('coupon-msg').innerText = ""; currentCoupon = null;
+
         const sub = items.filter(x => x.category_id === id);
-        const isSleepMode = activeCat.question_type === 'sleep'; 
-        const listArea = document.getElementById('items-area');
-        
-        listArea.innerHTML = sub.map(i => {
-            let subHtml = "";
-            if (i.sub_options) {
-                const opts = i.sub_options.split(/[,，]/);
-                subHtml = `<div class="sub-check-grid">` + opts.map(opt => `<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${opt.trim()}"> ${opt.trim()}</label>`).join('') + `</div>`;
-            }
-            const isMain = i.is_main ? 'true' : 'false';
-            return `<div class="service-card" id="card-${i.id}">
-                <div class="service-header">
-                    <label class="service-info">
-                        <input type="checkbox" name="svc" value="${i.id}" 
-                               data-price="${i.price}" 
-                               data-title="${i.title}" 
-                               data-is-main="${isMain}"
-                               ${i.is_auto_check?'checked disabled':''} 
-                               onchange="handleServiceCheck(this)">
-                        <span>${i.title}</span>
-                    </label>
-                    <span class="price-badge">$${i.price}</span>
-                </div>
-                ${i.description ? `<div class="service-desc">${i.description}</div>` : ''}
-                ${subHtml}
-                ${i.has_text_input ? `<input type="text" class="addon-note" data-id="${i.id}" placeholder="請簡述您的需求..." style="margin-top:10px;">` : ''}
-            </div>`;
+        document.getElementById('items-area').innerHTML = sub.map(i => {
+            let subHtml = i.sub_options ? `<div class="sub-check-grid">${i.sub_options.split(/[,，]/).map(o=>`<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${o.trim()}"> ${o.trim()}</label>`).join('')}</div>` : '';
+            return `<div class="service-card" id="card-${i.id}"><div class="service-header"><label class="service-info"><input type="checkbox" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" data-is-main="${i.is_main}" onchange="handleServiceCheck(this)"> <span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div>${subHtml}</div>`;
         }).join('');
         
-        const qArea = document.getElementById('conditional-question');
-        if (isSleepMode) {
-            qArea.innerHTML = `<label>🌙 請填寫您的「預計睡眠/休息時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">老師將於您休息時進行遠端能量調整，請提供您通常的作息時間。</div><input type="text" id="q-val" placeholder="例如：每天 23:30 ~ 07:00">`;
-        } else {
-            qArea.innerHTML = `<label>📅 請填寫您「希望預約的諮詢時段」 (必填)</label><div style="font-size:12px; color:#666; margin-bottom:5px;">請提供 2-3 個方便的時間，後續將由專人確認最終排程。</div><input type="text" id="q-val" placeholder="例如：平日晚上 8 點後、12/25 下午">`;
-        }
+        document.getElementById('conditional-question').innerHTML = activeCat.question_type === 'sleep' ? `<label>🌙 睡眠時間</label><input type="text" id="q-val" placeholder="例如：23:30 ~ 07:00">` : `<label>📅 希望諮詢時間</label><input type="text" id="q-val" placeholder="例如：平日晚上">`;
         calcTotal(); showSection('booking-step-2');
     }
 
     function handleServiceCheck(el) {
-        const isMain = el.dataset.isMain === 'true';
-        if (isMain) {
-            const allMainInputs = document.querySelectorAll('input[name="svc"][data-is-main="true"]');
-            allMainInputs.forEach(input => {
-                if (input !== el) {
-                    input.disabled = el.checked; 
-                    const card = document.getElementById(`card-${input.value}`);
-                    if(card) {
-                        card.classList.toggle('disabled-card', el.checked);
-                    }
-                }
+        if (el.dataset.isMain === 'true') {
+            document.querySelectorAll('input[name="svc"][data-is-main="true"]').forEach(i => {
+                if (i !== el) { i.disabled = el.checked; if(document.getElementById(`card-${i.value}`)) document.getElementById(`card-${i.value}`).classList.toggle('disabled-card', el.checked); }
             });
         }
         calcTotal();
     }
 
     function calcTotal() {
-        let t = 0; document.querySelectorAll('input[name="svc"]:checked').forEach(el => t += parseInt(el.dataset.price || 0)); document.getElementById('total-price').innerText = t;
+        let t = 0;
+        document.querySelectorAll('input[name="svc"]:checked').forEach(el => t += parseInt(el.dataset.price || 0));
+        const originalPrice = t;
+        let finalPrice = t;
+        if (currentCoupon) {
+            if (currentCoupon.discount_type === 'percentage') finalPrice = Math.round(originalPrice * (currentCoupon.discount_value / 100));
+            else finalPrice = originalPrice - currentCoupon.discount_value;
+            if (finalPrice < 0) finalPrice = 0;
+            document.getElementById('original-price').innerText = originalPrice;
+            document.getElementById('original-price-row').style.display = 'block';
+            document.getElementById('total-price').style.color = '#27ae60';
+        } else {
+            document.getElementById('original-price-row').style.display = 'none';
+            document.getElementById('total-price').style.color = '#d35400';
+        }
+        document.getElementById('total-price').innerText = finalPrice;
+        return finalPrice;
+    }
+
+    function compressImage(file) {
+        return new Promise((resolve, reject) => {
+            const maxWidth = 1600; const quality = 0.7; const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image(); img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width; let height = img.height;
+                    if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; }
+                    const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => { if (!blob) return reject(new Error("壓縮失敗")); resolve(blob); }, 'image/jpeg', quality);
+                }; img.onerror = (err) => reject(err);
+            }; reader.onerror = (err) => reject(err);
+        });
     }
 
     async function doSubmit() {
+        if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「個案專區」登入！");
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
-        const checkedSvcs = document.querySelectorAll('input[name="svc"]:checked');
+        if (!name || !phone || !email) return alert("請填寫完整基本資料");
+        if (!/^09\d{8}$/.test(phone)) return alert("手機格式錯誤 (需10碼)");
         
-        if (!name || !phone || !email) { alert("⚠️ 請完整填寫姓名、電話與 Email"); return; }
-        if (checkedSvcs.length === 0) { alert("⚠️ 請至少選擇一項服務方案"); return; }
-        
-        const payType = document.getElementById('pay-status').value;
-        if (payType === 'shopee' && !document.getElementById('shopee-id').value.trim()) { alert("⚠️ 選擇「蝦皮付款」時，請務必填寫訂單編號"); return; }
-        
+        const finalPrice = calcTotal();
+        if (finalPrice === 0 && document.querySelectorAll('input[name="svc"]:checked').length === 0) return alert("請至少選擇一項服務");
+
+        const payStatus = document.getElementById('pay-status').value;
+        const otaSource = document.getElementById('ota-source-select').value;
+        const otaOrderId = document.getElementById('ota-order-id').value.trim();
+        if (payStatus === 'ota' && !otaOrderId) return alert("❌ 請填寫訂單編號");
+
+        const qVal = document.getElementById('q-val').value.trim();
+        if (!qVal) return alert("❌ 請回答時間相關問題");
+
         const flow = document.getElementById('data-flow').value;
-        if (flow === 'data') {
-            const bDate = document.getElementById('b-date').value;
-            const bTime = document.getElementById('b-time').value;
-            const bPlace = document.getElementById('b-place').value.trim();
-            if (!bDate || !bTime || !bPlace) { alert("⚠️ 請完整填寫出生日期、時間與地點"); return; }
-        } else {
-            const file = document.getElementById('c-file').files[0];
-            if (!file) { alert("⚠️ 請上傳人類圖截圖"); return; }
-        }
-
-        const qVal = document.getElementById('q-val') ? document.getElementById('q-val').value.trim() : '';
-        if (activeCat && activeCat.question_type === 'sleep') {
-            if (!qVal) { alert("⚠️ 請填寫「預計睡眠/休息時段」以利老師進行遠端作業"); return; }
-        }
-
-        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
-        
         let finalDataInfo = "";
-        if(flow === 'upload') {
-            const file = document.getElementById('c-file').files[0];
-            let chartUrl = "";
-            if(file) {
-                const fName = `HD_${phone}_${Date.now()}.png`;
-                const { error: uploadErr } = await myDB.storage.from('case-charts').upload(fName, file);
-                if(uploadErr) { alert("❌ 圖片上傳失敗: " + uploadErr.message); btn.disabled = false; btn.innerText = "確認送出預約資料"; return; }
-                const { data } = myDB.storage.from('case-charts').getPublicUrl(fName); chartUrl = data.publicUrl;
+        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
+
+        try {
+            if (flow === 'upload') {
+                const fileInput = document.getElementById('c-file');
+                if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
+                let fileToUpload = fileInput.files[0];
+                if (fileToUpload.size > 1024 * 1024) fileToUpload = await compressImage(fileToUpload);
+                const fName = `HD_${phone}_${Date.now()}.jpg`;
+                const { error: uploadErr } = await myDB.storage.from('case-charts').upload(fName, fileToUpload, { contentType: 'image/jpeg' });
+                if (uploadErr) throw uploadErr;
+                const { data } = myDB.storage.from('case-charts').getPublicUrl(fName);
+                finalDataInfo = `截圖: ${data.publicUrl}`;
+            } else {
+                const bDate = document.getElementById('b-date').value;
+                const bTime = document.getElementById('b-time').value;
+                const bPlace = document.getElementById('b-place').value.trim();
+                if (!bDate || !bTime || !bPlace) throw new Error("❌ 請完整填寫出生資料");
+                finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;
             }
-            finalDataInfo = `截圖已上傳 ( <a href="${chartUrl}" target="_blank">點擊查看圖片</a> )`;
-        } else {
-            const bDate = document.getElementById('b-date').value; 
-            const bTime = document.getElementById('b-time').value; 
-            const bPlace = document.getElementById('b-place').value;
-            finalDataInfo = `出生日期: ${bDate} | 時間: ${bTime} | 地點: ${bPlace}`;
+
+            let details = [];
+            document.querySelectorAll('input[name="svc"]:checked').forEach(el => {
+                let txt = `${el.dataset.title} ($${el.dataset.price})`;
+                let subs = Array.from(document.querySelectorAll(`.sub-opt-item[data-parent-id="${el.value}"]:checked`)).map(s=>s.value);
+                if(subs.length) txt += ` [${subs.join('、')}]`;
+                details.push(txt);
+            });
+
+            let couponInfoText = null;
+            if (currentCoupon) {
+                let desc = currentCoupon.discount_type === 'percentage' ? `${currentCoupon.discount_value}折` : `折$${currentCoupon.discount_value}`;
+                couponInfoText = `${currentCoupon.name} (${desc}) [Code:${currentCoupon.code}]`;
+                await myDB.from('coupons').update({ usage_count: currentCoupon.usage_count + 1 }).eq('id', currentCoupon.id);
+            }
+
+            const { error } = await myDB.from('bookings').insert([{
+                booking_id: "OD" + Date.now(), temp_phone: phone, status: 'pending', price: finalPrice,
+                service_item: activeCat.name, service_detail: details.join(' | '),
+                ota_source: payStatus === 'ota' ? otaSource : null,
+                ota_order_id: payStatus === 'ota' ? otaOrderId : null,
+                payment_method: payStatus, sleep_time: qVal,
+                wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}`,
+                coupon_info: couponInfoText, user_id: currentUser ? currentUser.id : null
+            }]);
+
+            if(!error) { 
+                await myDB.functions.invoke('line-notify', { body: { name, phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}` } });
+                
+                alert("🎉 預約成功！"); 
+
+                if(currentUser) {
+                    const { data: newBookings } = await myDB.from('bookings').select('*').eq('user_id', currentUser.id);
+                    const { data: newReports } = await myDB.from('reports').select('*').eq('user_id', currentUser.id);
+                    currentUser.bookings = newBookings || [];
+                    currentUser.reports = newReports || [];
+                    renderDashboard(currentUser); 
+                    showSection('member');
+                } else {
+                    location.reload(); 
+                }
+
+            } else { 
+                throw error; 
+            }
+
+        } catch (err) { 
+            alert(err.message || "發生錯誤"); 
+            btn.disabled = false; 
+            btn.innerText = "送出預約"; 
         }
+    }
 
-        let details = [];
-        checkedSvcs.forEach(el => {
-            let txt = `${el.dataset.title} ($${el.dataset.price})`; 
-            let subs = Array.from(document.querySelectorAll(`.sub-opt-item[data-parent-id="${el.value}"]:checked`)).map(s=>s.value);
-            if(subs.length > 0) txt += ` [${subs.join('、')}]`;
-            let noteInput = document.querySelector(`.addon-note[data-id="${el.value}"]`);
-            if(noteInput && noteInput.value) txt += ` (備註: ${noteInput.value})`;
-            details.push(txt);
-        });
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function toggleOTA() { const isOTA = document.getElementById('pay-status').value === 'ota'; document.getElementById('ota-area').style.display = isOTA ? 'block' : 'none'; }
+    function toggleFlow() { const isD=document.getElementById('data-flow').value==='data'; document.getElementById('flow-data').style.display=isD?'block':'none'; document.getElementById('flow-upload').style.display=isD?'none':'block'; }
+    function toggleSubmitBtn(c) { if(isMemberBlocked) return; document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
 
-        const { error } = await myDB.from('bookings').insert([{
-            booking_id: "OD" + Date.now(), temp_phone: phone, status: 'pending', price: parseInt(document.getElementById('total-price').innerText),
-            service_item: activeCat.name, service_detail: details.join(' | '), client_source: document.getElementById('client-source').value, 
-            shopee_order_id: document.getElementById('shopee-id').value, payment_method: payType, sleep_time: qVal,
-            wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}` 
-        }]);
-
-        if(!error) { 
-            const functionUrl = "https://geyrpowhaqfhnxghpokr.supabase.co/functions/v1/line-notify"; 
+    // --- KB, Draw, Login ---
+    async function initKbData() { const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published',true); if(data) { kbTree={}; data.forEach(i=>{ if(!kbTree[i.big_category])kbTree[i.big_category]={}; if(!kbTree[i.big_category][i.mid_category])kbTree[i.big_category][i.mid_category]=[]; kbTree[i.big_category][i.mid_category].push(i); }); renderKbHome(); } }
+    function renderKbHome() { document.getElementById('kb-container').innerHTML = `<div class="kb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">${Object.keys(kbTree).map(b=>`<div class="kb-card" onclick="enterKb('${b}')"><h3>📂 ${b}</h3><span>${Object.values(kbTree[b]).flat().length} 篇</span></div>`).join('')}</div>`; document.querySelector('.kb-title').innerText="培癒寶典"; document.getElementById('kb-back-btn').style.display='none'; }
+    function enterKb(big) { kbState = { level: 1, big }; document.getElementById('kb-container').innerHTML = Object.entries(kbTree[big]).map(([mid, arts]) => `<details class="kb-mid-cat"><summary class="kb-mid-header">${mid} ▼</summary>${arts.map(a=>`<div class="kb-article-link" onclick="readArt('${a.id}')">${a.title}</div>`).join('')}</details>`).join(''); document.querySelector('.kb-title').innerText=big; document.getElementById('kb-back-btn').style.display='block'; }
+    async function readArt(id) { const { data } = await myDB.from('kb_articles').select('*').eq('id', id).single(); document.getElementById('kb-container').innerHTML = `<div class="kb-article-view"><h1>${data.title}</h1><div style="border-bottom:1px solid #eee;padding-bottom:10px;color:#999;">${data.big_category} > ${data.mid_category}</div><div style="margin-top:20px;">${data.body}</div></div>`; kbState.level = 2; document.getElementById('kb-back-btn').innerText="← 返回列表"; }
+    function kbGoBack() { if(kbState.level===2) enterKb(kbState.big); else renderKbHome(); }
+    async function initDrawData() { const { data } = await myDB.from('card_pool').select('*'); allCards = data || []; renderDrawTable(); }
+    function renderDrawTable() { const table = document.getElementById('draw-area'); if (!table) return; table.innerHTML = ''; const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); const shuffled = deck.sort(() => Math.random() - 0.5); shuffled.forEach((card, index) => { const el = document.createElement('div'); el.className = 'card-back'; el.style.animationDelay = (index * 0.015) + 's'; el.onclick = () => drawCard(card); table.appendChild(el); }); }
+    async function drawCard(card) { document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; document.getElementById('p-zodiac').innerText = card.zodiac || ''; document.getElementById('p-quote').innerText = card.quote || ''; if (card.image_url) { document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; } const style = card.style_config || defaultStyle; applyStyle('gate', style.gate || defaultStyle.gate); applyStyle('info', style.info || defaultStyle.info); applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); applyStyle('quote', style.quote || defaultStyle.quote); document.getElementById('overlay').classList.add('active'); }
+    function applyStyle(id, s) { const el = document.getElementById(`p-${id}`); const def = defaultStyle[id]; const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; el.style.left = val('x') + '%'; el.style.top = val('y') + '%'; el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color'); const str = val('stroke'); el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; }
+    function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); document.getElementById('p-bg').src = ""; }, 500); }
+    async function loadSiteAssets() { const { data } = await myDB.from('site_content').select('*').eq('category', 'site_asset'); if (data) { data.forEach(item => { if (item.title === 'logo') document.getElementById('site-logo').src = item.image_url; if (item.title === 'logohuman') document.getElementById('site-hero').src = item.image_url; if (item.title === 'my_hd_chart') document.getElementById('hd-chart-img').src = item.image_url; }); } }
+    
+    async function doLogin() { 
+        const phone = document.getElementById('l-phone').value.trim(); 
+        const pass = document.getElementById('l-pass').value.trim(); 
+        if(!phone || !pass) return alert("請輸入帳號密碼"); 
+        
+        try { 
+            const { data: user, error: userErr } = await myDB.from('profiles').select('*').eq('phone', phone).eq('password', pass).single(); 
+            if (userErr || !user) throw new Error("帳號或密碼錯誤"); 
             
-            const notifyPayload = {
-                name: name, phone: phone, service: `${activeCat.name} - ${details.join(', ')}`,
-                note: `付款: ${payType} ${document.getElementById('shopee-id').value ? '('+document.getElementById('shopee-id').value+')' : ''} / 來源: ${document.getElementById('client-source').value}`
-            };
+            const { data: bookings } = await myDB.from('bookings').select('*').eq('user_id', user.id); 
+            const { data: reports } = await myDB.from('reports').select('*').eq('user_id', user.id); 
+            
+            user.bookings = bookings || []; 
+            user.reports = reports || []; 
+            
+            currentUser = user; 
+            isMemberBlocked = false; 
 
-            await myDB.functions.invoke('line-notify', { body: notifyPayload });
-            alert("🎉 預約成功！"); location.reload();
+            // 👇 登入成功時，存入 LocalStorage
+            localStorage.setItem('peiyu_user', JSON.stringify({ phone: phone, pass: pass }));
+            
+            document.getElementById('login-box').style.display = 'none'; 
+            document.getElementById('dash').style.display = 'block'; 
+            
+            renderDashboard(currentUser); 
+        } catch (err) { 
+            console.error(err); 
+            alert("登入發生錯誤：" + err.message); 
+        } 
+    }
+
+    function renderDashboard(user) { 
+        document.getElementById('dash-welcome').innerText = `您好，${user.full_name}`; 
+        const allBookings = user.bookings.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)); 
+        let historyHtml = "<div style='color:#666;padding:10px;'>目前尚無預約紀錄</div>"; 
+        
+        if(allBookings.length > 0) { 
+            historyHtml = allBookings.map(b => { 
+                const dateStr = new Date(b.created_at).toLocaleDateString(); 
+                const title = b.service_item || '服務預約'; 
+                const stMap = { 'pending': '<span style="color:red">未付款</span>', 'paid': '<span style="color:green">已付款</span>', 'completed': '<span style="color:#333">已結案</span>' }; 
+                const statusBadge = stMap[b.status] || b.status; 
+                const rawDetail = b.service_detail || ""; 
+                const details = rawDetail.split('|').map(s => s.trim().split('(')[0].trim()).join(' + '); 
+                
+                let originalPrice = 0; 
+                const matches = rawDetail.match(/\$(\d+)/g); 
+                if(matches) matches.forEach(m => originalPrice += parseInt(m.replace('$',''))); 
+                if(originalPrice < b.price || originalPrice === 0) originalPrice = b.price; 
+                
+                let priceInfoHtml = b.coupon_info ? 
+                    `<div style="font-size:12px;color:#999;margin-top:5px;">原價 <span style="text-decoration:line-through;">$${originalPrice}</span></div><div style="font-size:12px;color:#27ae60;">🎟️ ${b.coupon_info}</div><div style="font-weight:bold;color:#d35400;">實付 $${b.price}</div>` : 
+                    `<div style="font-weight:bold;color:#333;margin-top:5px;">$${b.price}</div>`; 
+                
+                // --- 🌟 關鍵邏輯修改開始 🌟 ---
+                const reportMatch = (b.wish_detail||"").match(/\[報告已生成 ID:(.*?)\]/); 
+                const currentReportId = reportMatch ? reportMatch[1] : null; 
+                
+                let scheduleHtml = "";
+                if (currentReportId) {
+                    // 如果有報告，顯示已完成
+                    scheduleHtml = `<div style="color:var(--success); font-weight:bold; font-size:13px; margin-top:4px; background:#e8f5e9; padding:3px 6px; border-radius:4px; display:inline-block;">✨ 服務已完成</div>`;
+                } else if (b.scheduled_at) {
+                    // 沒報告但有排程，顯示時間
+                    const t = new Date(b.scheduled_at);
+                    const timeStr = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+                    scheduleHtml = `<div style="color:#6a1b9a; font-weight:bold; font-size:13px; margin-top:4px; background:#f3e5f5; padding:3px 6px; border-radius:4px; display:inline-block;">🕒 預計服務：${timeStr}</div>`;
+                }
+                // --- 🌟 關鍵邏輯修改結束 🌟 ---
+
+                let btnHtml = `<div style="font-size:12px; margin-top:5px;">${statusBadge}</div>`; 
+                if (currentReportId) { 
+                    const targetReport = user.reports.find(r => r.id === currentReportId); 
+                    let targetUrl = `viewer.html?id=${currentReportId}`; 
+                    if (targetReport && targetReport.raw_data && (targetReport.raw_data.centers || Array.isArray(targetReport.raw_data))) { 
+                        targetUrl = `srt_report.html?id=${currentReportId}&mode=view`; 
+                    } 
+                    btnHtml = `<button class="btn-primary" style="font-size:13px;padding:6px 15px;height:fit-content;" onclick="window.open('${targetUrl}')">查看報告</button>`; 
+                } 
+                
+                return `<div style="border-bottom:1px solid #eee;padding:15px 10px;display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div style="flex:1;padding-right:10px;">
+                        <span style="font-weight:bold;font-size:15px;display:block;color:var(--forest);">${title}</span>
+                        <small style="color:#666;display:block;margin-top:2px;">${details}</small>
+                        ${scheduleHtml} 
+                        <small style="color:#999; display:block; margin-top:5px;">下單日：${dateStr}</small>
+                        ${priceInfoHtml}
+                    </div>
+                    <div style="text-align:right">${btnHtml}</div>
+                </div>`; 
+            }).join(''); 
+        } 
+        
+        document.getElementById('dash-history').innerHTML = historyHtml; 
+        document.getElementById('c-name').value = user.full_name; 
+        document.getElementById('c-phone').value = user.phone; 
+        document.getElementById('c-email').value = user.email || ""; 
+        document.getElementById('c-phone').disabled = true; 
+        document.getElementById('c-name').style.backgroundColor = "#e8f5e9"; 
+        const statusEl = document.getElementById('phone-status'); 
+        if(statusEl) statusEl.innerHTML = ""; 
+        const phoneInput = document.getElementById('c-phone'); 
+        if(phoneInput) { phoneInput.style.borderColor = "#ddd"; phoneInput.style.backgroundColor = "#eee"; } 
+    }
+
+    function doLogout() { 
+        currentUser = null; 
+        localStorage.removeItem('peiyu_user'); // 👇 登出刪除紀錄
+        document.getElementById('login-box').style.display = 'block'; 
+        document.getElementById('dash').style.display = 'none'; 
+        document.getElementById('c-name').value = ""; 
+        document.getElementById('c-phone').value = ""; 
+        document.getElementById('c-email').value = ""; 
+        document.getElementById('c-phone').disabled = false; 
+        document.getElementById('c-name').style.backgroundColor = ""; 
+        alert("已登出"); 
+    }
+
+    function openEditProfile() { 
+        if(!currentUser) return; 
+        document.getElementById('ep-phone').value = currentUser.phone; 
+        document.getElementById('ep-name').value = currentUser.full_name; 
+        document.getElementById('ep-email').value = currentUser.email || ""; 
+        document.getElementById('ep-pass').value = ""; 
+        openModal('edit-profile-overlay'); 
+    }
+
+    async function saveProfile() { 
+        if(!currentUser) return; 
+        const newName = document.getElementById('ep-name').value; 
+        const newEmail = document.getElementById('ep-email').value; 
+        const newPass = document.getElementById('ep-pass').value; 
+        
+        const updateData = { full_name: newName, email: newEmail }; 
+        if(newPass) updateData.password = newPass; 
+        
+        const { error } = await myDB.from('profiles').update(updateData).eq('id', currentUser.id); 
+        
+        if(error) { 
+            alert("更新失敗: " + error.message); 
         } else { 
-            alert("❌ 預約失敗：" + error.message); 
-            btn.disabled = false; btn.innerText = "確認送出預約資料"; 
-        }
+            alert("✅ 資料已更新！"); 
+            currentUser.full_name = newName; 
+            currentUser.email = newEmail; 
+            document.getElementById('dash-welcome').innerText = `您好，${newName}`; 
+            document.getElementById('c-name').value = newName; 
+            document.getElementById('c-email').value = newEmail; 
+            closeModal('edit-profile-overlay'); 
+        } 
     }
 
-    async function doLogin() {
-        const phone = document.getElementById('l-phone').value; const pass = document.getElementById('l-pass').value;
-        if(!phone || !pass) return alert("請輸入帳號密碼");
-        const { data } = await myDB.from('profiles').select('*, reports(*)').eq('phone', phone).eq('password', pass).single();
-        if(data) {
-            document.getElementById('login-box').style.display = 'none'; document.getElementById('dash').style.display = 'block';
-            document.getElementById('dash').innerHTML = `<h3>您好，${data.full_name}</h3><p>您的歷史報告：</p>${data.reports.length > 0 ? data.reports.map(r=>`<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>📅 ${r.service_date}</span><button onclick="window.open('viewer.html?id=${r.id}')" style="padding:5px 15px; cursor:pointer;">查看報表</button></div>`).join('') : "<div class='card'>目前尚無已完成的報告</div>"}`;
-        } else { alert("帳密錯誤"); }
-    }
-</script>
-
-<audio id="bgMusic" loop preload="auto" muted>
-  <source src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/magic.mp3" type="audio/mpeg">
-</audio>
-
-<script>
-  const music = document.getElementById('bgMusic');
-  const startMagic = () => {
-    music.muted = false;
-    music.play().then(() => {
-      console.log("🌲 森林魔法解鎖成功！");
-      music.volume = 0;
-      let vol = 0;
-      const fade = setInterval(() => {
-        if (vol < 0.15) { vol += 0.005; music.volume = vol; } else { clearInterval(fade); }
-      }, 100);
-      ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.removeEventListener(evt, startMagic); });
-    }).catch(err => { console.log("魔法啟動受阻...", err); });
-  };
-  ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.addEventListener(evt, startMagic, { once: true }); });
-  window.addEventListener('load', () => { music.load(); music.play().catch(() => console.log("等待用戶解鎖音訊...")); });
+    // --- 音效魔法 ---
+    const music = new Audio("https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/magic.mp3"); 
+    music.loop = true; 
+    
+    const startMagic = () => { 
+        music.play().then(() => { 
+            music.volume = 0; 
+            let vol = 0; 
+            const fade = setInterval(() => { 
+                if (vol < 0.15) { vol += 0.005; music.volume = vol; } else { clearInterval(fade); } 
+            }, 100); 
+            ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.removeEventListener(evt, startMagic); }); 
+        }).catch(err => { console.log("魔法啟動受阻...", err); }); 
+    }; 
+    ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.addEventListener(evt, startMagic, { once: true }); });
 </script>
 </body>
 </html>

@@ -356,15 +356,54 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        @media (max-width: 768px) {
-            nav { padding: 0 20px; justify-content: flex-start; gap: 15px; }
-            .nav-links { overflow-x: auto; width: 100%; padding-right: 20px; }
-            .nav-links button { white-space: nowrap; flex-shrink: 0; font-size: 15px; }
-            .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
-            .hero-text h1 { font-size: 2.5rem; }
-            .card { padding: 25px; }
-            .text-modal-card { width: 92%; padding: 40px 25px; }
+        /* === 手機版響應式設計 (修改後) === */
+    .hamburger-btn { display: none; } /* 電腦版隱藏 */
+
+    @media (max-width: 768px) {
+        nav { padding: 0 20px; }
+        
+        /* 顯示漢堡按鈕 */
+        .hamburger-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 5px;
         }
+
+        /* 選單預設隱藏，變成下拉式 */
+        .nav-links {
+            display: none; /* 預設隱藏 */
+            position: absolute;
+            top: 80px; /* 接在導航列下方 */
+            left: 0;
+            width: 100%;
+            background: var(--forest); /* 深綠色背景 */
+            flex-direction: column;
+            padding: 20px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* 當選單被打開時 */
+        .nav-links.active { display: flex; }
+
+        .nav-links button {
+            text-align: center;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        /* 其他手機版調整維持原樣 */
+        .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
+        .hero-text h1 { font-size: 2.5rem; }
+        .card { padding: 25px; }
+        .text-modal-card { width: 92%; padding: 40px 25px; }
+    }
 
         @keyframes cardShuffleIn {
             from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
@@ -379,7 +418,10 @@
     <div class="logo-area" onclick="showSection('home')">
         <img src="logo.png" alt="培癒試驗室" class="logo-img" id="site-logo">
     </div>
-    <div class="nav-links">
+    
+    <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+
+    <div class="nav-links" id="nav-menu">
         <button onclick="showSection('home')" id="nav-home" class="active">首頁</button>
         <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
         <button onclick="showSection('knowledge')" id="nav-knowledge">培癒寶典</button>
@@ -387,7 +429,6 @@
         <button onclick="showSection('member')" id="nav-member">個案專區</button>
     </div>
 </nav>
-
 <div id="home" class="section active">
     <div class="hero-section">
         <div class="hero-text">
@@ -657,12 +698,17 @@
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
     function showSection(id) { 
-        document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); 
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
-        document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+        
         const baseId = id.split('-')[0]; 
         const navBtn = document.getElementById('nav-' + baseId);
         if(navBtn) navBtn.classList.add('active');
+        
+        // 新增：切換頁面後自動關閉手機選單
+        document.getElementById('nav-menu').classList.remove('active');
+        
         window.scrollTo(0,0); 
     }
 
@@ -673,7 +719,12 @@
         loadSiteAssets();
         checkSession(); 
     };
-
+	
+	// 手機版選單開關
+    function toggleMenu() {
+        const menu = document.getElementById('nav-menu');
+        menu.classList.toggle('active');
+    }
     function checkSession() {
         const saved = localStorage.getItem('peiyu_user');
         if (saved) {

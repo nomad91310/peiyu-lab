@@ -24,7 +24,25 @@
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* 左側導航欄 */
-        .sidebar { width: 240px; background: var(--forest); height: 100%; color: white; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; }
+        /* 左側導航欄 (修改版：加入滑動效果) */
+        .sidebar { 
+            width: 240px; 
+            background: var(--forest); 
+            height: 100%; 
+            color: white; 
+            flex-shrink: 0; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto; 
+            
+            transition: width 0.3s ease; 
+            overflow-x: hidden; 
+            white-space: nowrap; 
+        }
+
+        body.hide-nav .sidebar {
+            width: 0;
+        }
         .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; }
         .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
         .sidebar button:hover { background: #2a3f33; color: white; }
@@ -74,10 +92,15 @@
         .finance-nav button.active { background: var(--forest); color: white; }
 
         /* ========== 知識庫 V15 復刻樣式 (重點修改區) ========== */
-        .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); }
+        .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); transition: all 0.3s ease; }
         
+	.kb-layout.collapsed {
+   	 grid-template-columns: 0 1fr; 
+  	 gap: 0;
+	}
         /* 深色側邊樹狀目錄 */
-        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; }
+        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; 
+    white-space: nowrap; }
         .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
         .kb-tree-content { padding: 10px; flex: 1; }
 
@@ -95,9 +118,40 @@
         .article-item.draft { color: #e74c3c; } 
         .article-item.draft::before { content: '🔴 '; font-size: 10px; }
 
-        /* 編輯器 */
-        #editor-container { height: 500px; display: flex; flex-direction: column; background: white; margin-bottom: 10px; }
-        #editor { flex: 1; font-size: 16px; }
+        /* 編輯器容器：改為自動彈性高度 (flex: 1) */
+        #editor-container { 
+            flex: 1; 
+            min-height: 200px; /* 設個最小高度保險 */
+            
+            display: flex; 
+            flex-direction: column; 
+            background: white; 
+            margin-bottom: 0; /* 底部不需要留白了 */
+            border: 1px solid #ccc; 
+            overflow: hidden; /* 確保內容溢出時是內部捲動，不是撐開容器 */
+        }
+
+        /* 確保 Quill 的編輯區塊可以捲動 */
+        .ql-container {
+            flex: 1; /* 佔滿編輯器容器剩下的空間 (扣除工具列後) */
+            overflow-y: auto; /* 內容多時出現卷軸 */
+            font-size: 16px;
+        }
+	/* === 📝 編輯器字體修復補丁 === */
+        
+        /* 1. 預設編輯器內容使用黑體 */
+        .ql-container { font-family: "Microsoft JhengHei", sans-serif; }
+
+        /* 2. 當選取 'Serif' 時，強制使用 Noto Serif TC (宋體) */
+        .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
+        
+        /* 3. 當選取 'Monospace' 時，使用等寬字體 */
+        .ql-font-monospace { font-family: 'Courier New', monospace !important; }
+
+        /* 4. 讓下拉選單裡的選項也顯示正確的字體樣子 */
+        .ql-picker-item[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
+        .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
+        .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
 
         /* ========== 圖庫 Modal ========== */
         .gallery-box { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
@@ -180,6 +234,20 @@ th, td {
 .dashboard-layout {
     grid-template-columns: 3fr 1fr !important; /* 給左邊表格更多空間 */
 }
+	/* 排序按鈕群組 */
+.sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
+.btn-sort-arrow { 
+    background: transparent; border: 1px solid rgba(255,255,255,0.2); 
+    color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; 
+    border-radius: 3px; line-height: 1.2; 
+}
+.btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* 讓文章列表也能顯示排序按鈕 */
+.article-item { display: flex; align-items: center; }
+.article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
+.article-item:hover .sort-actions { opacity: 1; }
+.article-title-span { flex: 1; }
     </style>
 </head>
 <body>
@@ -222,7 +290,9 @@ th, td {
 </div>
 
 <div class="main">
-    
+    <button class="btn btn-outline" onclick="toggleMainSidebar()" style="margin-bottom: 15px; padding: 5px 10px;">
+        ☰ 選單開關
+    </button>
     <div id="tab-bks" class="tab-content active">
         <div class="dashboard-layout" style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;">
             <div>
@@ -387,7 +457,8 @@ th, td {
                 <div id="kb-tree" class="kb-tree-content"></div>
             </div>
 
-            <div class="card" style="display:flex; flex-direction:column; overflow-y:auto; height:100%;">
+           <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%;">
+                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h2 id="mode-title" style="margin:0; color:var(--dark);">新增文章</h2>
                     <button class="btn btn-purple" onclick="openGallery()">🖼️ 開啟圖庫</button>
@@ -410,24 +481,25 @@ th, td {
                     </div>
                 </div>
 
-                <div id="editor-container"><div id="editor"></div></div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#f1f8e9; padding:10px; border-radius:8px;">
                     <div>
-                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold;">
-                            <input type="checkbox" id="kb-pub" checked style="width:auto;"> 前台顯示
+                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;">
+                            <input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示
                         </label>
                     </div>
                     <div style="display:flex; gap:10px;">
                         <input type="hidden" id="kb-id">
-                        <button class="btn btn-danger" onclick="delArticle()" style="display:none;" id="btn-kb-del">刪除文章</button>
+                        <button class="btn btn-danger" onclick="delArticle()" style="display:none;" id="btn-kb-del">刪除</button>
                         <button class="btn btn-info" onclick="previewArticle()">👁️ 預覽</button>
-                        <button class="btn btn-forest" onclick="saveArticle()">💾 儲存變更</button>
+                        <button class="btn btn-forest" onclick="saveArticle()">💾 儲存文章</button>
                     </div>
                 </div>
+
+                <div id="editor-container">
+                    <div id="editor"></div>
+                </div>
+
             </div>
-        </div>
-    </div>
 
     <div id="tab-menu" class="tab-content">
         <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;">
@@ -500,11 +572,14 @@ th, td {
 </div>
 
 <script>
-    // 🌟 全域工具
+    // 🌟 1. 初始化 Supabase 與 全域工具
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
-    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r"; 
+    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
+
     const cleanPhone = (p) => p ? p.replace(/\D/g, '') : '';
+    
+    // 👇 這個就是剛才報錯缺少的變數
     const STATUS_MAP = {
         'paid': '<span class="tag tag-paid">已付款</span>',
         'pending': '<span class="tag tag-wait">未付款</span>',
@@ -513,7 +588,7 @@ th, td {
         'completed': '<span class="tag" style="background:#333">已結案</span>'
     };
 
-    // Quill Image Blot
+    // 🌟 2. Quill Image Blot (圖片縮放核心，不能少)
     const BaseImage = Quill.import('formats/image');
     const ATTRIBUTES = ['alt', 'height', 'width', 'style', 'class'];
     class CustomImage extends BaseImage {
@@ -521,16 +596,92 @@ th, td {
         format(name, value) { if (ATTRIBUTES.indexOf(name) > -1) { if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name); } else super.format(name, value); }
     }
     Quill.register({ 'formats/image': CustomImage }, true);
+	var Font = Quill.import('formats/font');
+    Font.whitelist = ['serif', 'sans-serif', 'monospace']; // 定義允許的字體代號
+    Quill.register(Font, true);
+    // 🌟 3. 初始化 Quill 編輯器 (含字體與大小)
     var quill = new Quill('#editor', {
         theme: 'snow',
-        modules: { imageResize: { displaySize: true }, toolbar: [['bold', 'italic', 'underline', 'strike'], [{'header': [1, 2, 3, false]}], [{'color': []}, {'background': []}], ['link', 'image'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] }
+        modules: { 
+            imageResize: { displaySize: true }, 
+            toolbar: [
+                [{ 'font': [] }], 
+                [{ 'size': ['small', false, 'large', 'huge'] }], 
+                ['bold', 'italic', 'underline', 'strike'], 
+                [{ 'header': [1, 2, 3, false] }], 
+                [{ 'color': [] }, { 'background': [] }], 
+                ['link', 'image'], 
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }], 
+                ['clean']
+            ] 
+        },
+        placeholder: '盡情揮灑你的創意...'
     });
 
+    // 🌟 4. 定義全域變數 (狀態與快取)
     let cache = { bks:[], pros:[], cats:[], svcs:[], slots:[], otas:[], coupons:[], articles:[] };
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth() + 1;
     let selectedDateStr = "";
     let currentBucket = 'kb-images';
+    let kbCatOrder = { big: [], mid: {} }; // 存放分類排序設定
+
+    // 🌟 5. 核心讀取函式 (修復文章消失 + 排序功能)
+    async function fetchAll() {
+        try {
+            // A. 嘗試讀取資料 (含 sort_order)
+            let ar = await myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published, sort_order').order('sort_order');
+            
+            // 🚨 自動修復機制：如果讀取失敗(通常是因為缺欄位)，就改用舊方法讀取
+            if (ar.error) {
+                console.warn("排序欄位讀取失敗，降級為普通讀取:", ar.error.message);
+                ar = await myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published').order('created_at', {ascending:false});
+            }
+
+            // B. 讀取其他所有資料
+            const [b, p, c, s, sl, o, cp, cfg] = await Promise.all([
+                myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
+                myDB.from('profiles').select('*').order('created_at', {ascending:false}),
+                myDB.from('service_categories').select('*').order('created_at'),
+                myDB.from('services').select('*').order('sort_order'),
+                myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time'),
+                myDB.from('ota_settings').select('*'),
+                myDB.from('coupons').select('*').order('created_at', {ascending:false}),
+                myDB.from('site_content').select('content').eq('title', 'kb_category_order').single()
+            ]);
+
+            const bookingsWithProfile = (b.data || []).map(bk => {
+                const profile = (p.data || []).find(pr => pr.id === bk.user_id);
+                return { ...bk, profiles: profile || null };
+            });
+
+            // C. 更新全域變數
+            // 確保分類設定存在，如果沒有就用預設空物件，防止之後報錯
+            if (cfg.data && cfg.data.content) {
+                kbCatOrder = cfg.data.content;
+            } else {
+                kbCatOrder = { big: [], mid: {} };
+            }
+
+            cache = { 
+                bks: bookingsWithProfile, pros: p.data||[], cats: c.data||[], 
+                svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
+                coupons: cp.data||[], 
+                articles: ar.data||[] // 這裡一定會有資料了
+            };
+            
+            // 同步分類 (即使設定檔是空的，也會自動補上現有文章分類)
+            if(typeof syncKbOrderKeys === 'function') {
+                syncKbOrderKeys();
+            }
+
+            // D. 渲染畫面
+            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); 
+            if(typeof renderKbTree === 'function') renderKbTree(); 
+            render7DaySchedule();
+            
+        } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
+    }
 
     function checkAdmin() {
         if(document.getElementById('admin-pwd').value === "admin888") { 
@@ -542,7 +693,8 @@ th, td {
 
     async function fetchAll() {
         try {
-            const [b, p, c, s, sl, o, cp, ar] = await Promise.all([
+            // 1. 讀取所有資料
+            const [b, p, c, s, sl, o, cp, ar, cfg] = await Promise.all([
                 myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
                 myDB.from('profiles').select('*').order('created_at', {ascending:false}),
                 myDB.from('service_categories').select('*').order('created_at'),
@@ -550,7 +702,8 @@ th, td {
                 myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time'),
                 myDB.from('ota_settings').select('*'),
                 myDB.from('coupons').select('*').order('created_at', {ascending:false}),
-                myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published')
+                myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published, sort_order').order('sort_order'),
+                myDB.from('site_content').select('content').eq('title', 'kb_category_order').single()
             ]);
 
             const bookingsWithProfile = (b.data || []).map(bk => {
@@ -558,16 +711,34 @@ th, td {
                 return { ...bk, profiles: profile || null };
             });
 
+            // 2. 初始化全域快取
             cache = { 
                 bks: bookingsWithProfile, pros: p.data||[], cats: c.data||[], 
                 svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
                 coupons: cp.data||[], articles: ar.data||[] 
             };
+
+            // 3. 處理 KB 排序邏輯 (關鍵修復點)
+            // 如果有讀到設定檔，就用設定檔
+            if (cfg.data && cfg.data.content) {
+                kbCatOrder = cfg.data.content;
+            }
             
-            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); renderKbTree(); render7DaySchedule();
+            // 無論有沒有設定檔，都要執行同步檢查
+            // 這樣即使設定檔是空的，也會自動把現有文章的分類抓進去，文章就不會消失了
+            syncKbOrderKeys();
+
+            // 4. 渲染畫面
+            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); 
+            renderKbTree(); 
+            render7DaySchedule();
             
         } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
     }
+	// 切換列表顯示/隱藏
+function toggleKbSidebar() {
+    document.querySelector('.kb-layout').classList.toggle('collapsed');
+}
 
     // --- 1. 預約看板 ---
     function renderBks() {
@@ -648,6 +819,10 @@ th, td {
             <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>
         `;
         document.getElementById('modal').style.display = 'flex';
+    }
+// 切換主側邊欄顯示/隱藏
+    function toggleMainSidebar() {
+        document.body.classList.toggle('hide-nav');
     }
 
     function loadSlotsForBooking(date) {
@@ -856,28 +1031,152 @@ th, td {
         loadGalleryImages();
     }
 
-    function renderKbTree() { 
-        const tree={};
-        const bigSet = new Set(), midSet = new Set();
-        cache.articles.forEach(a=>{
-            bigSet.add(a.big_category); midSet.add(a.mid_category);
-            if(!tree[a.big_category])tree[a.big_category]=[];
-            if(!tree[a.big_category][a.mid_category])tree[a.big_category][a.mid_category]=[];
-            tree[a.big_category][a.mid_category].push(a);
+    // ================= KB 排序系統核心 (V45 修復版) =================
+
+    // 1. 同步檢查：確保新分類有被加入排序設定
+    function syncKbOrderKeys() {
+        let changed = false;
+        // 建立目前的分類結構
+        const currentTree = {};
+        cache.articles.forEach(a => {
+            if(!currentTree[a.big_category]) currentTree[a.big_category] = new Set();
+            currentTree[a.big_category].add(a.mid_category);
+        });
+
+        const currentBigs = Object.keys(currentTree);
+        
+        // 補齊大分類
+        currentBigs.forEach(b => {
+            if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); changed = true; }
         });
         
-        document.getElementById('kb-big-list').innerHTML = [...bigSet].map(v=>`<option value="${v}">`).join('');
-        document.getElementById('kb-mid-list').innerHTML = [...midSet].map(v=>`<option value="${v}">`).join('');
+        // 補齊中分類
+        currentBigs.forEach(b => {
+            if (!kbCatOrder.mid[b]) { kbCatOrder.mid[b] = []; }
+            const mids = Array.from(currentTree[b]);
+            mids.forEach(m => {
+                if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); changed = true; }
+            });
+        });
 
-        document.getElementById('kb-tree').innerHTML=Object.entries(tree).map(([b,mids])=>`
-            <details class="big-cat" open><summary>📂 ${b}</summary>
-            ${Object.entries(mids).map(([m,arts])=>`
-                <details class="mid-cat" open><summary>└ ${m}</summary>
-                ${arts.map(a=>`<div class="article-item ${a.is_published?'':'draft'}" onclick="editKb('${a.id}')">📄 ${a.title}</div>`).join('')}
-                </details>
-            `).join('')}
-            </details>
-        `).join(''); 
+        // 移除不存在的分類 (選用，目前先保留以免誤刪)
+        if (changed) saveKbOrderConfig();
+    }
+
+    // 2. 渲染樹狀圖 (支援排序按鈕)
+    function renderKbTree() { 
+        // 重建文章樹 (每次渲染都要重整，因為文章可能被移動)
+        const tree = {};
+        cache.articles.forEach(a => {
+            if (!tree[a.big_category]) tree[a.big_category] = {};
+            if (!tree[a.big_category][a.mid_category]) tree[a.big_category][a.mid_category] = [];
+            tree[a.big_category][a.mid_category].push(a);
+        });
+
+        // 依照設定檔順序渲染
+        const sortedBigs = kbCatOrder.big.filter(b => tree[b]); // 只顯示有文章的
+
+        document.getElementById('kb-tree').innerHTML = sortedBigs.map(b => {
+            const sortedMids = (kbCatOrder.mid[b] || []).filter(m => tree[b][m]);
+
+            const midHtml = sortedMids.map(m => {
+                const arts = tree[b][m]; // 文章已在 SQL 用 sort_order 排好
+                const artHtml = arts.map(a => `
+                    <div class="article-item ${a.is_published?'':'draft'}">
+                        <div class="sort-actions">
+                            <button class="btn-sort-arrow" onclick="moveArt('${a.id}', -1, event)">▲</button>
+                            <button class="btn-sort-arrow" onclick="moveArt('${a.id}', 1, event)">▼</button>
+                        </div>
+                        <span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <details class="mid-cat" open>
+                        <summary>
+                            <div class="sort-actions">
+                                <button class="btn-sort-arrow" onclick="moveMid('${b}', '${m}', -1, event)">▲</button>
+                                <button class="btn-sort-arrow" onclick="moveMid('${b}', '${m}', 1, event)">▼</button>
+                            </div>
+                            └ ${m}
+                        </summary>
+                        ${artHtml}
+                    </details>`;
+            }).join('');
+
+            return `
+                <details class="big-cat" open>
+                    <summary>
+                        <div class="sort-actions">
+                            <button class="btn-sort-arrow" onclick="moveBig('${b}', -1, event)">▲</button>
+                            <button class="btn-sort-arrow" onclick="moveBig('${b}', 1, event)">▼</button>
+                        </div>
+                        📂 ${b}
+                    </summary>
+                    ${midHtml}
+                </details>`;
+        }).join(''); 
+        
+        // 更新下拉選單
+        document.getElementById('kb-big-list').innerHTML = kbCatOrder.big.map(v=>`<option value="${v}">`).join('');
+        const allMids = new Set();
+        Object.values(kbCatOrder.mid).forEach(arr => arr.forEach(m => allMids.add(m)));
+        document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v=>`<option value="${v}">`).join('');
+    }
+
+    // --- 動作：移動大分類 ---
+    async function moveBig(name, dir, e) {
+        e.stopPropagation();
+        const idx = kbCatOrder.big.indexOf(name);
+        if (idx === -1 || idx + dir < 0 || idx + dir >= kbCatOrder.big.length) return;
+        [kbCatOrder.big[idx], kbCatOrder.big[idx+dir]] = [kbCatOrder.big[idx+dir], kbCatOrder.big[idx]];
+        renderKbTree(); await saveKbOrderConfig();
+    }
+
+    // --- 動作：移動中分類 ---
+    async function moveMid(bigName, midName, dir, e) {
+        e.stopPropagation();
+        const arr = kbCatOrder.mid[bigName];
+        const idx = arr.indexOf(midName);
+        if (idx === -1 || idx + dir < 0 || idx + dir >= arr.length) return;
+        [arr[idx], arr[idx+dir]] = [arr[idx+dir], arr[idx]];
+        renderKbTree(); await saveKbOrderConfig();
+    }
+
+    // --- 動作：移動文章 ---
+    async function moveArt(id, dir, e) {
+        e.stopPropagation();
+        // 1. 找出這篇文章目前在哪個陣列中
+        const art = cache.articles.find(a => a.id === id);
+        if (!art) return;
+        
+        // 篩選出同分類的文章 (依照目前顯示順序)
+        const siblings = cache.articles.filter(a => a.big_category === art.big_category && a.mid_category === art.mid_category);
+        const idx = siblings.findIndex(a => a.id === id);
+        
+        if (idx === -1 || idx + dir < 0 || idx + dir >= siblings.length) return;
+
+        // 2. 在記憶體中交換順序 (利用 sort_order)
+        const target = siblings[idx + dir];
+        const tempOrder = art.sort_order;
+        art.sort_order = target.sort_order; // 交換數值
+        target.sort_order = tempOrder;
+
+        // 重新整理 cache 陣列以反映新順序 (因為 fetchAll 是 order by sort_order)
+        cache.articles.sort((a,b) => a.sort_order - b.sort_order);
+        renderKbTree();
+
+        // 3. 寫入 DB
+        // 為了保險，重寫該分類所有文章的 sort_order (0, 1, 2...)
+        const updates = siblings.map((a, i) => ({ id: a.id, sort_order: i }));
+        await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' });
+    }
+
+    // --- 工具：儲存分類設定到 DB ---
+    async function saveKbOrderConfig() {
+        const { data } = await myDB.from('site_content').select('id').eq('title', 'kb_category_order').single();
+        if (data) await myDB.from('site_content').update({ content: kbCatOrder }).eq('id', data.id);
+        else await myDB.from('site_content').insert([{ category: 'system_config', title: 'kb_category_order', content: kbCatOrder }]);
     }
     async function editKb(id){const{data}=await myDB.from('kb_articles').select('*').eq('id',id).single();document.getElementById('kb-id').value=data.id;document.getElementById('kb-title').value=data.title;document.getElementById('kb-big').value=data.big_category;document.getElementById('kb-mid').value=data.mid_category;document.getElementById('kb-pub').checked=data.is_published;quill.root.innerHTML=data.body||'';document.getElementById('btn-kb-del').style.display='inline-block';document.getElementById('mode-title').innerText="編輯文章";}
     function resetKbForm(){document.getElementById('kb-id').value='';document.getElementById('kb-title').value='';quill.root.innerHTML='';document.getElementById('btn-kb-del').style.display='none';document.getElementById('mode-title').innerText="新增文章";}

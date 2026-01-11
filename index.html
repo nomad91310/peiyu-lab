@@ -344,7 +344,49 @@
             transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
+        /* 🆕 右上角關閉按鈕 (X) */
+        .close-card-btn {
+            position: absolute;
+            top: -60px;   /* 位於卡片上方 */
+            right: -20px; /* 位於卡片右側 */
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5); /* 半透明黑底 */
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            color: white;
+            font-size: 32px;
+            line-height: 46px; /* 垂直置中 */
+            text-align: center;
+            cursor: pointer;
+            z-index: 2001;
+            transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center; /* 確保 X 置中 */
+            padding: 0;
+        }
+
+        .close-card-btn:hover {
+            background: var(--accent); /* 滑鼠移過去變金色 */
+            color: var(--forest);
+            transform: rotate(90deg); /* 增加一點旋轉互動感 */
+            border-color: var(--forest);
+        }
+
+        /* 📱 手機版優化：固定在螢幕右上角，確保手指好按 */
+        @media (max-width: 768px) {
+            .close-card-btn {
+                position: fixed; /* 強制固定在視窗 */
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.7); /* 手機版底色深一點，防背景干擾 */
+                width: 45px;
+                height: 45px;
+                font-size: 28px;
+                line-height: 42px;
+            }
+        }
         
+        /* 🗑️ (選用) 如果不想留著舊的 retry-btn 樣式代碼，可以去刪掉它，不刪也沒關係 */
         .retry-btn { 
             position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); 
             padding: 12px 35px; background: var(--accent); color: #000; border: none; 
@@ -608,6 +650,8 @@
 
 <div id="overlay" class="result-overlay">
     <div style="position:relative;">
+        <button class="close-card-btn" onclick="closeResult()">×</button>
+        
         <div id="final-card" class="card-reveal">
             <img id="p-bg" class="layer-bg" src="">
             <div id="p-gate" class="layer-text"></div>
@@ -615,8 +659,8 @@
             <div id="p-zodiac" class="layer-text"></div>
             <div id="p-quote" class="layer-text"></div>
         </div>
-        <button class="retry-btn" onclick="closeResult()">再次抽卡</button>
-    </div>
+        
+        </div>
 </div>
 
 <div id="story-overlay" class="result-overlay">

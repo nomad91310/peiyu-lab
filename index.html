@@ -344,45 +344,44 @@
             transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
-        /* 🆕 右上角關閉按鈕 (X) */
+        /* 🆕 右上角關閉按鈕 (X) - 修正版 */
+       /* 🆕 右上角關閉按鈕 (X) - 燈箱模式版 */
         .close-card-btn {
-            position: absolute;
-            top: -60px;   /* 位於卡片上方 */
-            right: -20px; /* 位於卡片右側 */
+            /* 關鍵修正：從 absolute 改為 fixed，讓它固定在螢幕上，而不是卡片上 */
+            position: fixed; 
+            top: 30px;    /* 距離螢幕上方 30px */
+            right: 30px;  /* 距離螢幕右方 30px */
+            
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5); /* 半透明黑底 */
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.6); /* 深色半透明底，比較有質感 */
+            border: 2px solid rgba(255, 255, 255, 0.5);
             color: white;
-            font-size: 32px;
-            line-height: 46px; /* 垂直置中 */
-            text-align: center;
+            font-size: 30px;
+            
+            display: flex; justify-content: center; align-items: center;
             cursor: pointer;
-            z-index: 2001;
+            z-index: 2002; /* 確保在最上層 */
             transition: all 0.3s ease;
-            display: flex; justify-content: center; align-items: center; /* 確保 X 置中 */
-            padding: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
         .close-card-btn:hover {
-            background: var(--accent); /* 滑鼠移過去變金色 */
+            background: var(--accent); 
             color: var(--forest);
-            transform: rotate(90deg); /* 增加一點旋轉互動感 */
+            transform: rotate(90deg); 
             border-color: var(--forest);
         }
 
-        /* 📱 手機版優化：固定在螢幕右上角，確保手指好按 */
+        /* 📱 手機版微調：稍微縮小一點，靠邊一點 */
         @media (max-width: 768px) {
             .close-card-btn {
-                position: fixed; /* 強制固定在視窗 */
                 top: 20px;
                 right: 20px;
-                background: rgba(0, 0, 0, 0.7); /* 手機版底色深一點，防背景干擾 */
-                width: 45px;
-                height: 45px;
-                font-size: 28px;
-                line-height: 42px;
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
             }
         }
         

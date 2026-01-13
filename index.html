@@ -1077,8 +1077,7 @@
 
     async function initDrawData() { const { data } = await myDB.from('card_pool').select('*'); allCards = data || []; renderDrawTable(); }
     
-    // 抽卡核心邏輯 (動畫修正版)
-    // 抽卡核心邏輯 (手機版排他修正)
+   // 抽卡核心邏輯 (含 0.8秒 安全鎖)
     function renderDrawTable() { 
         const table = document.getElementById('draw-area'); 
         if (!table) return; 
@@ -1090,25 +1089,39 @@
         // 判定裝置
         const isDesktop = window.matchMedia('(hover: hover)').matches || !('ontouchstart' in window);
 
+        // 🔥 1. 設定安全鎖：預設為「鎖住」，防止鬼影點擊
+        let isInputLocked = true;
+
+        // 🔥 2. 設定解鎖時間：0.8秒後才允許點擊 (剛好等發牌動畫跑完)
+        setTimeout(() => {
+            isInputLocked = false;
+        }, 800);
+
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
             el.className = 'card-back'; 
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
             el.onclick = function() { 
+                // 🔥 3. 第一關：如果還在鎖定時間，直接無視任何點擊
+                if (isInputLocked) return;
+
                 // === 情況 1: 直接抽取 ===
                 // (電腦版) 或 (手機版且這張牌已經凸起來了) -> 執行抽取
                 if (isDesktop || el.classList.contains('is-selected')) {
                     
                     el.classList.remove('is-selected');
                     el.classList.add('is-drawing'); 
+                    
+                    // 鎖住點擊，避免重複觸發
+                    isInputLocked = true; 
+                    
                     setTimeout(() => { drawCard(card); }, 600); 
 
                 } 
                 // === 情況 2: 切換選取 (手機版點第一下) ===
                 else {
-                    // 🔥 暴力清場：不管誰是 is-selected，通通移除
-                    // 使用 Array.from 強制轉成陣列處理，確保一個都不漏
+                    // 🔥 暴力清場：不管誰是 is-selected，通通移除 (避免同時浮兩張)
                     Array.from(document.querySelectorAll('.card-back.is-selected')).forEach(activeCard => {
                         activeCard.classList.remove('is-selected');
                     });

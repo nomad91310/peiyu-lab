@@ -281,47 +281,62 @@
         .kb-article-link::before { content: '📄'; position: absolute; left: 10px; opacity: 0; transition: 0.2s; }
         .kb-article-link:hover::before { opacity: 1; }
 
-        /* === 抽卡區佈局 === */
+       /* === 抽卡區佈局 (電腦版) === */
         #draw-area { 
             display: grid;
-            grid-template-columns: repeat(16, 1fr); /* 電腦 16 欄 */
-            gap: 25px 0; /* 這裡維持您要的電腦版行距 */
+            grid-template-columns: repeat(16, 1fr); /* 16 欄 */
+            gap: 25px 0; /* 電腦版行距 */
             padding: 40px 0; 
             perspective: 1000px;
             width: 100%;
-            max-width: 800px; 
+            max-width: 800px; /* 限制寬度讓卡片精緻 */
             margin: 0 auto;
             justify-content: center;
         }
 
         /* === 卡背基礎設定 === */
         .card-back { 
-            width: 130%; 
+            width: 130%; /* 重疊寬度 */
             justify-self: center;
             aspect-ratio: 3/5; 
             height: auto;
+            
             background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png');
-            background-repeat: no-repeat; background-position: center; background-size: cover; 
-            border-radius: 4px; cursor: pointer; position: relative; 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: cover; 
+            
+            border-radius: 4px; 
+            cursor: pointer; 
+            position: relative; 
+            
             box-shadow: -2px 0 6px rgba(0,0,0,0.3); 
             z-index: 1;
 
-            /* 🔥 關鍵優化：告訴瀏覽器這東西會變形，請準備好 GPU 加速 (解決手機卡頓) */
+            /* 優化效能 */
             will-change: transform; 
             transition: transform 0.2s ease-out; 
+            
+            /* 🔥 整合：初始狀態設為透明，等待 JS 觸發發牌動畫 */
+            opacity: 0; 
         }
 
+        /* === 發牌進場動畫 (從左邊飛入) === */
+        @keyframes cardShuffleIn {
+            from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
+            to { opacity: 1; transform: translateX(0) rotateY(0); }
+        }
 
-        /* 1. 電腦版滑鼠滑過 (Hover)：一定要加 !important 才能破解進場動畫的鎖定 */
+        /* === 1. 電腦版滑鼠滑過 (Hover) === */
+        /* 加上 !important 以破解進場動畫的鎖定 */
         .card-back:not(.is-drawing):not(.is-selected):hover { 
-            /* 🔥🔥🔥 這裡就是關鍵！加上 !important 之後，滑鼠一上去絕對會彈起來 */
             transform: translateY(-40px) !important; 
             z-index: 100; 
             box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
             transition: transform 0.2s ease-out;
         }
 
-        /* 2. 手機版被點選 (Selected)：也要加 !important */
+        /* === 2. 手機版被點選 (Selected) === */
         .card-back.is-selected {
             transform: translateY(-40px) !important; 
             z-index: 100 !important; 
@@ -329,7 +344,7 @@
             filter: brightness(1.1); 
         }
 
-        /* 3. 抽取動畫 */
+        /* === 3. 抽取動畫 (往上飛) === */
         @keyframes cardDrawUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); }
@@ -341,7 +356,7 @@
             pointer-events: none;
         }
 
-        
+        /* === 彈窗相關 === */
         .card-reveal { 
             position: relative; width: 340px; height: 580px; 
             background: #fff; border-radius: 24px; overflow: hidden; 
@@ -350,7 +365,6 @@
         }
         .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
         
-        /* 關閉按鈕 */
         .close-card-btn {
             position: fixed; top: 30px; right: 30px; 
             width: 50px; height: 50px; border-radius: 50%;
@@ -367,10 +381,11 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版 RWD === */
+        /* === 📱 手機版響應式設計 (RWD) - 密集防爆版 === */
         @media (max-width: 768px) {
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
+
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
@@ -378,28 +393,32 @@
             }
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            
             .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
             .hero-text h1 { font-size: 2.5rem; }
             .hero-img { margin-left: 0; }
+            
             .card { padding: 25px; }
             .text-modal-card { width: 92%; padding: 40px 25px; }
 
-            /* 手機版抽卡區設定 */
+            /* === 👇 抽卡區密集設定 === */
             #draw-area {
+                /* 手機 8 欄 */
                 grid-template-columns: repeat(8, 1fr); 
-                gap: 5px 0; /* 手機版窄行距 */
+                /* 極致密集行距 */
+                gap: 3px 0; 
+                /* 防止破版 */
+                width: 94%;
+                margin: 0 auto;
+                padding: 10px 0;
             }
             .card-back {
-                width: 115%; /* 手機版小卡片 */
+                /* 收斂寬度，避免撐爆 */
+                width: 110%; 
             }
+            
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
-
-        @keyframes cardShuffleIn {
-            from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
-            to { opacity: 1; transform: translateX(0) rotateY(0); }
-        }
-        .card-back { animation: cardShuffleIn 0.5s ease-out forwards; opacity: 0; }
     </style>
 </head>
 <body>

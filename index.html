@@ -281,83 +281,60 @@
         .kb-article-link::before { content: '📄'; position: absolute; left: 10px; opacity: 0; transition: 0.2s; }
         .kb-article-link:hover::before { opacity: 1; }
 
-        /* === 抽卡區 (Grid 佈局) === */
+        /* === 抽卡區佈局 === */
         #draw-area { 
             display: grid;
-            /* 16 欄 */
-            grid-template-columns: repeat(16, 1fr);
-            
-            /* 🔥🔥🔥 關鍵修正：行距加大到 70px！ */
-            /* 之前只有 15px，所以卡片往上推會撞車。現在給它 70px 的空間 */
-            gap: 25px 0; 
-            
-            padding: 50px 0; /* 上下留白也加大 */
+            grid-template-columns: repeat(16, 1fr); /* 電腦 16 欄 */
+            gap: 25px 0; /* 這裡維持您要的電腦版行距 */
+            padding: 40px 0; 
             perspective: 1000px;
-            
             width: 100%;
-            max-width: 700px; 
+            max-width: 900px; 
             margin: 0 auto;
             justify-content: center;
         }
 
-        /* === 卡背 (重疊設定) === */
+        /* === 卡背基礎設定 === */
         .card-back { 
-            /* 寬度 130%：維持妳要的左右重疊感 */
             width: 130%; 
             justify-self: center;
-            
             aspect-ratio: 3/5; 
             height: auto;
-            
             background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png');
-            background-repeat: no-repeat; 
-            background-position: center; 
-            background-size: cover; 
-            
-            border-radius: 4px; 
-            cursor: pointer; 
-            position: relative; 
-            
-            /* 陰影 */
+            background-repeat: no-repeat; background-position: center; background-size: cover; 
+            border-radius: 4px; cursor: pointer; position: relative; 
             box-shadow: -2px 0 6px rgba(0,0,0,0.3); 
-            
-            /* 🔥 動畫速度加快到 0.2s，這樣手指滑過去反應才快，像撥牌一樣 */
-            transition: all 0.2s ease-out; 
-            z-index: 1; 
-        }
-        
+            z-index: 1;
 
-    /* === 滑鼠滑過：強制往上推 (加了 !important 才能破解動畫鎖死) === */
-        /* === 滑鼠滑過：往上推 (高度修正版) === */
-        .card-back:not(.is-drawing):hover { 
-            /* 🔥 修正：從 -80px 改成 -40px (這樣就不會太高，剛好凸出來) */
-            /* !important 還是要留著，不然會動不了 */
-            transform: translateY(-40px) !important; 
-            
-            /* 確保浮在最上面 */
-            z-index: 1000; 
-            
-            /* 陰影稍微收斂一點 */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); 
+            /* 🔥 關鍵優化：告訴瀏覽器這東西會變形，請準備好 GPU 加速 (解決手機卡頓) */
+            will-change: transform; 
+            transition: transform 0.2s ease-out; 
         }
-        /* === 🆕 新增：被選中的牌 (第一次點擊) === */
-        /* 效果跟 Hover 一樣，往上推 40px，表示「我選了這張」 */
-        .card-back.is-selected {
-            transform: translateY(-40px) !important; /* 強制凸起 */
-            z-index: 100; /* 浮在最上層 */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        /* === 點擊抽取動畫 === */
-        @keyframes cardDrawUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { 
-                /* 點擊後再往上抽更高 (180px)，做確認 */
-                transform: translateY(-180px) scale(1.1); 
-                opacity: 1; 
-                box-shadow: 0 0 30px var(--accent); 
+
+        /* === 💻 電腦版專用：滑鼠滑過才凸起 (手機會忽略這段) === */
+        @media (hover: hover) {
+            .card-back:not(.is-drawing):not(.is-selected):hover { 
+                transform: translateY(-40px); 
+                z-index: 100; 
+                box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
             }
         }
-        
+
+        /* === 📱 手機/電腦通用：被選中時強制凸起 (JS 控制) === */
+        .card-back.is-selected {
+            /* 🔥 強制執行，不需滑動立刻生效 */
+            transform: translateY(-40px) !important; 
+            z-index: 100 !important; 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            /* 加一個顯眼的框線，讓手機版更清楚知道選到了 */
+            filter: brightness(1.1); 
+        }
+
+        /* === 抽取動畫 === */
+        @keyframes cardDrawUp {
+            0% { transform: translateY(-40px); opacity: 1; } /* 從凸起的位置開始 */
+            100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); }
+        }
         .card-back.is-drawing {
             animation: cardDrawUp 0.6s ease-out forwards;
             z-index: 999 !important;
@@ -390,11 +367,10 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版響應式設計 (RWD) === */
+        /* === 📱 手機版 RWD === */
         @media (max-width: 768px) {
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
-
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
@@ -402,27 +378,20 @@
             }
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            
             .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
             .hero-text h1 { font-size: 2.5rem; }
             .hero-img { margin-left: 0; }
-            
             .card { padding: 25px; }
             .text-modal-card { width: 92%; padding: 40px 25px; }
 
-            /* === 👇 這裡控制手機版抽卡區 === */
+            /* 手機版抽卡區設定 */
             #draw-area {
-                /* 維持 8 欄 */
                 grid-template-columns: repeat(8, 1fr); 
-                /* 維持窄行距 */
-                gap: 15px 0;
+                gap: 15px 0; /* 手機版窄行距 */
             }
             .card-back {
-                /* 🔥 關鍵修改：從 145% 改為 115% */
-                /* 這樣卡片本體會變小，看起來比較不擁擠 */
-                width: 115%; 
+                width: 115%; /* 手機版小卡片 */
             }
-            
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
 
@@ -1101,33 +1070,27 @@
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
             el.className = 'card-back'; 
-            
-            // 進場發牌動畫
+            // 進場動畫
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
-            // === 🌟 關鍵修改：二次確認邏輯 ===
+            // === 二次確認邏輯 ===
             el.onclick = function() { 
-                // 1. 檢查：如果這張牌已經是「選中狀態 (is-selected)」--> 代表這是第二次點擊
+                // 檢查：如果已經凸起來了 (有 is-selected) --> 代表是第二次點擊 (確認抽取)
                 if (this.classList.contains('is-selected')) {
-                    
-                    // 執行抽取：移除選取標籤，加上抽取動畫標籤
                     this.classList.remove('is-selected');
-                    this.classList.add('is-drawing');
+                    this.classList.add('is-drawing'); // 執行飛出動畫
 
-                    // 等待動畫跑完再開彈窗
                     setTimeout(() => {
                         drawCard(card); 
-                    }, 600);
+                    }, 600); // 等動畫播完開獎
 
                 } else {
-                    // 2. 如果這張牌還沒被選中 --> 代表這是第一次點擊
+                    // 代表是第一次點擊 (想選這張)
                     
-                    // 先把「所有牌」的選中狀態取消 (讓之前凸起來的牌縮回去)
-                    document.querySelectorAll('.card-back').forEach(c => {
-                        c.classList.remove('is-selected');
-                    });
+                    // 1. 把其他人壓回去 (移除其他人的 is-selected)
+                    document.querySelectorAll('.card-back').forEach(c => c.classList.remove('is-selected'));
 
-                    // 只讓「自己」凸起來
+                    // 2. 讓自己凸起來
                     this.classList.add('is-selected');
                 }
             }; 

@@ -72,21 +72,65 @@
         /* === Hero 區塊 === */
         .hero-section { 
             display: flex; align-items: center; justify-content: center; 
-            gap: 60px; padding: 40px 0 60px 0; 
+            gap: 0px; padding: 40px 0 60px 0; 
             border-bottom: 1px solid rgba(26, 47, 35, 0.1); margin-bottom: 40px; 
         }
-        .hero-text { flex: 1; max-width: 550px; text-align: left; }
+        /* 1. 文字區塊容器：取消統一對齊，讓裡面各自為政 */
+        /* === 左側文字區塊 (藍框容器) === */
+        .hero-text { 
+            flex: 1; 
+            max-width: 550px; 
+            z-index: 2; 
+            
+            /* 🔥 關鍵：啟用 Flexbox 直向排列，讓內部物件乖乖排隊 */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 預設讓大家通通「置中」 (解決標題跟按鈕) */
+        }
+
+        /* 標題與副標 */
         .hero-text h1 { 
-            font-size: 3.5rem; color: var(--forest); margin: 0 0 10px 0; 
-            line-height: 1.1; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2);
+            font-size: 3.5rem; 
+            color: var(--forest); 
+            margin: 0 0 10px 0; 
+            line-height: 1.1; 
+            text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2);
+            text-align: center; 
+            width: 100%; /* 撐滿寬度，確保置中 */
         }
         .hero-text h2 { 
-            font-size: 1.4rem; color: var(--text-light); margin: 0 0 30px 0; 
-            font-weight: normal; letter-spacing: 0.1em; 
+            font-size: 1.4rem; 
+            color: var(--text-light); 
+            margin: 0 0 30px 0; 
+            font-weight: normal; 
+            letter-spacing: 0.1em; 
+            text-align: center;
+            width: 100%;
         }
-        .hero-img { flex: 0 0 400px; text-align: center; position: relative; }
+        /* 底部提示語：唯一要「靠左」的叛逆份子 */
+        /* 底部提示語：改回置中 */
+        .hero-text p {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-style: italic;
+            
+            width: 100%;
+            /* 👇 修改這裡：改回 center，並把 padding 歸零 */
+            text-align: center !important;   
+            padding-left: 0;  
+        }
+        /* 右邊圖片區 */
+        .hero-img { 
+            flex: 0 0 auto; 
+            text-align: center; 
+            position: relative; 
+            
+            /* 👇 修改這裡：數字越負，靠越近 (原本 -20px，改成 -60px 試試) */
+            margin-left: -20px; 
+        }
         .hero-img img { 
-            width: 100%; max-width: 350px; border-radius: 20px; 
+            width: 100%; max-width: 200px; border-radius: 20px; 
             box-shadow: 20px 20px 0px var(--accent); transition: transform 0.5s ease;
         }
         .hero-img img:hover { transform: translateY(-10px); }
@@ -475,7 +519,8 @@
         <div class="hero-text">
             <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
-            <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: flex-start;">
+            <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%;">
+            
                 <button class="btn-primary" onclick="openModal('story-overlay')">📖 我的故事</button>
                 <button class="btn-primary" onclick="openModal('rules-overlay')">👑 空間守則</button>
             </div>
@@ -579,10 +624,19 @@
         </div>
         
         <div id="flow-upload" style="display:none; background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
-            <div style="margin-bottom: 20px; border-left: 4px solid var(--accent); padding-left: 15px;">
+            
+            <div style="margin-bottom: 15px; border-left: 4px solid var(--accent); padding-left: 15px;">
                 <p style="margin:0; font-weight:bold; color:var(--forest);">第一步：取得圖檔</p>
                 <p style="margin:5px 0 0 0; font-size:0.95rem;">請前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:var(--shopee); text-decoration:underline; font-weight:bold;">亞洲人類圖學院 (點擊前往)</a></p>
             </div>
+
+            <div style="margin-bottom: 20px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; padding: 15px; text-align: center;">
+                <p style="margin:0 0 10px 0; font-weight:bold; color:#555; font-size:14px;">👀 上傳範本參考 (網站可直接下載圖檔)</p>
+                <img src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/my_hd_chart.png" 
+                     alt="截圖範本" 
+                     style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain; border: 1px solid #eee;">
+            </div>
+
             <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳剛才下載的圖檔</label>
             <input type="file" id="c-file" accept="image/*" style="background:#fff; border:1px solid #ccc; width:100%; padding:10px; border-radius:8px;">
         </div>

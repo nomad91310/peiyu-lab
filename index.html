@@ -289,7 +289,7 @@
             padding: 40px 0; 
             perspective: 1000px;
             width: 100%;
-            max-width: 900px; 
+            max-width: 800px; 
             margin: 0 auto;
             justify-content: center;
         }
@@ -311,32 +311,27 @@
             transition: transform 0.2s ease-out; 
         }
 
-       /* === 互動設定 (電腦/手機分流) === */
 
-        /* 1. 電腦版專用：滑鼠滑過 (Hover) 就凸起來 */
-        /* @media (hover: hover) 代表「有滑鼠的裝置」 */
-        @media (hover: hover) {
-            .card-back:not(.is-drawing):hover { 
-                transform: translateY(-40px); /* 凸起高度 */
-                z-index: 100; 
-                box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
-                transition: transform 0.2s ease-out;
-            }
+        /* 1. 電腦版滑鼠滑過 (Hover)：一定要加 !important 才能破解進場動畫的鎖定 */
+        .card-back:not(.is-drawing):not(.is-selected):hover { 
+            /* 🔥🔥🔥 這裡就是關鍵！加上 !important 之後，滑鼠一上去絕對會彈起來 */
+            transform: translateY(-40px) !important; 
+            z-index: 100; 
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
+            transition: transform 0.2s ease-out;
         }
 
-        /* 2. 手機版專用：被點選 (Selected) 才凸起來 */
-        /* 手機沒有 hover，所以靠 JS 加這個 class 來控制 */
+        /* 2. 手機版被點選 (Selected)：也要加 !important */
         .card-back.is-selected {
-            transform: translateY(-40px) !important; /* 強制凸起 */
+            transform: translateY(-40px) !important; 
             z-index: 100 !important; 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-            filter: brightness(1.1); /* 加亮一點，更清楚 */
+            filter: brightness(1.1); 
         }
 
-        /* 3. 抽取動畫 (兩者通用) */
+        /* 3. 抽取動畫 */
         @keyframes cardDrawUp {
             0% { transform: translateY(0); opacity: 1; }
-            /* 如果是從凸起狀態開始抽，這裡可以設 translateY(-40px) */
             100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); }
         }
         
@@ -581,10 +576,10 @@
 
 <div id="draw" class="section">
     <div style="text-align:center; margin-bottom:40px;">
-        <h2 style="font-size:2.5rem; margin-bottom:10px;">🃏 64 閘門能量指引</h2>
-        <p style="color:#666; font-size:1.1rem;">深呼吸，在心中默想你的問題，憑直覺選一張牌。</p>
+        <h2 style="font-size:2rem; margin-bottom:10px;">🃏64閘門指引神諭卡</h2>
+        <p style="color:#666; font-size:1.1rem;">【默想你的問題，憑直覺選一張牌】</p>
     </div>
-    <div id="draw-area"><div style="color:#666;">正在洗牌中...</div></div>
+    <div id="draw-area"><div style="color:#666;"></div></div>
 </div>
 
 <div id="member" class="section">

@@ -379,15 +379,13 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版 RWD (大張重疊修正版) === */
+        /* === 📱 手機版 RWD (防切邊修正版) === */
         @media (max-width: 768px) {
-            /* 1. 介面基礎 */
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
             .hero-section { flex-direction: column-reverse; gap: 30px; }
             .hero-img { margin-left: 0; }
             
-            /* 2. 導航選單 */
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
@@ -396,30 +394,29 @@
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-            /* 3. 🔥 抽卡區：回歸大氣排版 */
+            /* 🔥 修正重點：抽卡區 */
             #draw-area {
                 grid-template-columns: repeat(8, 1fr); 
                 
-                /* 行距：12px (比之前的 3px 寬鬆，比較不像磁磚，有層次感) */
+                /* 維持寬鬆行距 */
                 gap: 12px 0; 
                 
-                /* 寬度：96% (稍微再寬一點點，視覺更滿，但留邊以防破版) */
-                width: 96%; 
+                /* 🔥 關鍵修正：縮小容器寬度到 88% */
+                /* 因為卡片是 135% 寬，會往左右凸出，所以容器要縮小，留白邊給卡片凸，才不會被切掉 */
+                width: 88%; 
                 margin: 0 auto;
-                padding: 20px 0;
+                padding: 20px 5px; /* 再補一點左右內距當保險 */
             }
 
             .card-back {
-                /* 🔥 關鍵：改回 135% */
-                /* 這樣卡片會比格子大，自然就會產生「左右重疊」的效果 */
+                /* 維持大張重疊 */
                 width: 135%; 
             }
             
-            /* 4. 手機版選中時的浮起高度 */
             .card-back.is-selected {
                 transform: translateY(-30px) !important;
                 z-index: 200 !important;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.5); /* 陰影加深，立體感更強 */
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5);
                 filter: brightness(1.1);
             }
 

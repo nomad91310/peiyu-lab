@@ -1078,6 +1078,7 @@
     async function initDrawData() { const { data } = await myDB.from('card_pool').select('*'); allCards = data || []; renderDrawTable(); }
     
     // 抽卡核心邏輯 (動畫修正版)
+    // 抽卡核心邏輯 (手機版排他修正)
     function renderDrawTable() { 
         const table = document.getElementById('draw-area'); 
         if (!table) return; 
@@ -1086,8 +1087,8 @@
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
-        // 偵測是否為電腦 (支援 Hover 的裝置)
-        const isDesktop = window.matchMedia('(hover: hover)').matches;
+        // 寬鬆判定：有滑鼠 OR 沒觸控 = 電腦
+        const isDesktop = window.matchMedia('(hover: hover)').matches || !('ontouchstart' in window);
 
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
@@ -1095,28 +1096,26 @@
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
             el.onclick = function() { 
-                
-                // === 判斷邏輯開始 ===
-                
-                // 情況 A: 是電腦版 OR (是手機版且已經選中這張牌) -> 執行抽取
-                if (isDesktop || this.classList.contains('is-selected')) {
+                // 1. 判斷是否要直接開獎
+                // (是電腦版) 或 (這張牌已經被選中/凸起來了)
+                if (isDesktop || el.classList.contains('is-selected')) {
                     
-                    // 移除選取狀態，開始執行動畫
-                    this.classList.remove('is-selected');
-                    this.classList.add('is-drawing');
-
-                    setTimeout(() => {
-                        drawCard(card); 
-                    }, 600); // 等動畫跑完開獎
-
+                    el.classList.remove('is-selected');
+                    el.classList.add('is-drawing'); // 飛升動畫
+                    
+                    setTimeout(() => { drawCard(card); }, 600); 
                 } 
-                // 情況 B: 是手機版 且 還沒選中 -> 執行選取 (凸起來)
+                // 2. 手機版第一次點擊 -> 單純選取 (凸起來)
                 else {
-                    // 把其他牌壓回去
-                    document.querySelectorAll('.card-back').forEach(c => c.classList.remove('is-selected'));
-                    
-                    // 把這張牌凸起來
-                    this.classList.add('is-selected');
+                    // 🔥 關鍵修正：使用最嚴格的方式，把「檯面上所有牌」的 is-selected 全部拔掉
+                    // 確保舊的牌一定會縮回去
+                    const allActive = document.querySelectorAll('.card-back.is-selected');
+                    for (let i = 0; i < allActive.length; i++) {
+                        allActive[i].classList.remove('is-selected');
+                    }
+
+                    // 只有「現在點的這一張」加上選取狀態
+                    el.classList.add('is-selected');
                 }
             }; 
             

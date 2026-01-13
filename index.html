@@ -1087,7 +1087,7 @@
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
-        // 寬鬆判定：有滑鼠 OR 沒觸控 = 電腦
+        // 判定裝置
         const isDesktop = window.matchMedia('(hover: hover)').matches || !('ontouchstart' in window);
 
         shuffled.forEach((card, index) => { 
@@ -1096,25 +1096,24 @@
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
             el.onclick = function() { 
-                // 1. 判斷是否要直接開獎
-                // (是電腦版) 或 (這張牌已經被選中/凸起來了)
+                // === 情況 1: 直接抽取 ===
+                // (電腦版) 或 (手機版且這張牌已經凸起來了) -> 執行抽取
                 if (isDesktop || el.classList.contains('is-selected')) {
                     
                     el.classList.remove('is-selected');
-                    el.classList.add('is-drawing'); // 飛升動畫
-                    
+                    el.classList.add('is-drawing'); 
                     setTimeout(() => { drawCard(card); }, 600); 
-                } 
-                // 2. 手機版第一次點擊 -> 單純選取 (凸起來)
-                else {
-                    // 🔥 關鍵修正：使用最嚴格的方式，把「檯面上所有牌」的 is-selected 全部拔掉
-                    // 確保舊的牌一定會縮回去
-                    const allActive = document.querySelectorAll('.card-back.is-selected');
-                    for (let i = 0; i < allActive.length; i++) {
-                        allActive[i].classList.remove('is-selected');
-                    }
 
-                    // 只有「現在點的這一張」加上選取狀態
+                } 
+                // === 情況 2: 切換選取 (手機版點第一下) ===
+                else {
+                    // 🔥 暴力清場：不管誰是 is-selected，通通移除
+                    // 使用 Array.from 強制轉成陣列處理，確保一個都不漏
+                    Array.from(document.querySelectorAll('.card-back.is-selected')).forEach(activeCard => {
+                        activeCard.classList.remove('is-selected');
+                    });
+
+                    // 只有「現在點的這張」可以加上標籤
                     el.classList.add('is-selected');
                 }
             }; 

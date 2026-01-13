@@ -381,42 +381,49 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版響應式設計 (RWD) - 密集防爆版 === */
+        /* === 📱 手機版響應式設計 (RWD) - 最終修正版 === */
         @media (max-width: 768px) {
+            /* 1. 介面基礎調整 */
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
-
+            .hero-section { flex-direction: column-reverse; gap: 30px; }
+            .hero-img { margin-left: 0; }
+            
+            /* 2. 導航選單 */
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
                 box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1);
             }
             .nav-links.active { display: flex; }
-            .nav-links button { text-align: center; padding: 15px 0; width: 100%; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            
-            .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
-            .hero-text h1 { font-size: 2.5rem; }
-            .hero-img { margin-left: 0; }
-            
-            .card { padding: 25px; }
-            .text-modal-card { width: 92%; padding: 40px 25px; }
+            .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-            /* === 👇 抽卡區密集設定 === */
+            /* 3. 🔥 抽卡區關鍵修正：防爆版 🔥 */
             #draw-area {
-                /* 手機 8 欄 */
                 grid-template-columns: repeat(8, 1fr); 
-                /* 極致密集行距 */
-                gap: 3px 0; 
-                /* 防止破版 */
-                width: 94%;
+                
+                /* 行距縮到極小 (5px)，讓上下排緊緊黏在一起 */
+                gap: 5px 2px; 
+                
+                /* 強制寬度 95%，左右留一點邊，絕對不超出螢幕 */
+                width: 95%; 
                 margin: 0 auto;
                 padding: 10px 0;
             }
+
             .card-back {
-                /* 收斂寬度，避免撐爆 */
-                width: 110%; 
+                /* 卡片寬度剛好填滿格子即可，不要過度放大撐壞版面 */
+                width: 100%; 
             }
             
+            /* 4. 手機版選中時：往上推的距離稍微縮小，避免蓋到太上面 */
+            .card-back.is-selected {
+                transform: translateY(-30px) !important;
+                z-index: 200 !important;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                filter: brightness(1.1);
+            }
+
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
     </style>
@@ -1086,16 +1093,12 @@
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
-        // 判定裝置
+        // 判定裝置：有滑鼠或是非觸控裝置，視為電腦
         const isDesktop = window.matchMedia('(hover: hover)').matches || !('ontouchstart' in window);
 
-        // 🔥 1. 設定安全鎖：預設為「鎖住」，防止鬼影點擊
+        // 🔥 安全鎖：前 0.8 秒禁止任何點擊 (防鬼影手)
         let isInputLocked = true;
-
-        // 🔥 2. 設定解鎖時間：0.8秒後才允許點擊 (剛好等發牌動畫跑完)
-        setTimeout(() => {
-            isInputLocked = false;
-        }, 800);
+        setTimeout(() => { isInputLocked = false; }, 800);
 
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
@@ -1103,11 +1106,11 @@
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
             el.onclick = function() { 
-                // 🔥 3. 第一關：如果還在鎖定時間，直接無視任何點擊
+                // 1. 如果還在鎖定時間，完全無視
                 if (isInputLocked) return;
 
-                // === 情況 1: 直接抽取 ===
-                // (電腦版) 或 (手機版且這張牌已經凸起來了) -> 執行抽取
+                // === 邏輯分流 ===
+                // A. 直接開獎：是電腦版 OR 手機版且已經選中這張
                 if (isDesktop || el.classList.contains('is-selected')) {
                     
                     el.classList.remove('is-selected');
@@ -1119,14 +1122,15 @@
                     setTimeout(() => { drawCard(card); }, 600); 
 
                 } 
-                // === 情況 2: 切換選取 (手機版點第一下) ===
+                // B. 手機選取：是手機版 且 第一次點
                 else {
-                    // 🔥 暴力清場：不管誰是 is-selected，通通移除 (避免同時浮兩張)
-                    Array.from(document.querySelectorAll('.card-back.is-selected')).forEach(activeCard => {
-                        activeCard.classList.remove('is-selected');
-                    });
+                    // 強制把「所有」已選中的牌縮回去
+                    const allSelected = document.querySelectorAll('.card-back.is-selected');
+                    for(let i=0; i<allSelected.length; i++) {
+                        allSelected[i].classList.remove('is-selected');
+                    }
 
-                    // 只有「現在點的這張」可以加上標籤
+                    // 只有自己凸起來
                     el.classList.add('is-selected');
                 }
             }; 

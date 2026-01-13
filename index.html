@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ================= V36 最終修正版 ================= */
         :root { 
@@ -27,6 +27,9 @@
             font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; 
             background-color: var(--cream); margin: 0; 
             color: var(--text-main); line-height: 1.7; letter-spacing: 0.02em;
+        }
+        #home {
+            padding-bottom: 220px; 
         }
 
         h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
@@ -272,7 +275,48 @@
         }
         .kb-card:hover { transform: translateY(-5px) scale(1.02); background: #fffcf5; box-shadow: var(--shadow-hover); }
         .kb-card h3 { font-size: 1.5rem; margin-bottom: 10px; color: var(--forest); border: none; padding: 0; }
+        /* === 免責聲明提示框 (俏皮版) === */
+        .disclaimer-box {
+            background-color: #fffcf5; /* 很淡的米黃色底，看起來很舒服 */
+            border: 2px dashed var(--accent); /* 金色虛線邊框 */
+            border-radius: 8px; /* 圓角 */
+            padding: 15px 20px; /* 內距 */
+            margin: 20px auto 30px auto; /* 上下留白，左右置中 */
+            text-align: center; 
+            max-width: 90%; /* 手機版不滿版，比較精緻 */
+            width: 600px; /* 電腦版最大寬度 */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(198, 168, 124, 0.15); /* 淡淡的陰影 */
+        }
+
+        /* 左邊加一條實線，增加設計感 */
+        .disclaimer-box::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            background-color: var(--accent);
+        }
+
+        .disclaimer-box p {
+            margin: 5px 0; /* 文字間距 */
+            color: var(--forest); /* 深綠色文字 */
+            font-weight: bold; /* 加粗 */
+            font-size: 1rem;
+            line-height: 1.6;
+        }
         
+        /* 手機版字體稍微縮小一點點 */
+        @media (max-width: 768px) {
+            .disclaimer-box {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            .disclaimer-box p {
+                font-size: 0.95rem;
+            }
+        }
         details.kb-mid-cat { margin-bottom: 15px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #fff; }
         summary.kb-mid-header { background: #fafafa; padding: 18px; font-size: 1.1rem; color: var(--forest); transition: 0.2s; }
         summary.kb-mid-header:hover { background: #f0f0f0; }
@@ -379,13 +423,17 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版 RWD (V41 微重疊修正版) === */
+       /* === 📱 手機版響應式設計 (RWD) - 整合版 === */
         @media (max-width: 768px) {
+            /* --- 1. 導航與基礎佈局 --- */
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
             .hero-section { flex-direction: column-reverse; gap: 30px; }
             .hero-img { margin-left: 0; }
             
+            /* 歡迎詞優化 (避免太擠) */
+            .hero-text h1 { font-size: 1.8rem; line-height: 1.4; margin-bottom: 15px; }
+
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
@@ -394,13 +442,11 @@
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-            /* 🔥 抽卡區設定 */
+            /* --- 2. 抽卡區設定 (V41 微重疊黃金比例) --- */
             #draw-area {
                 grid-template-columns: repeat(8, 1fr); 
-                
                 /* 行距：6px (緊湊但分明) */
                 gap: 6px 0; 
-                
                 /* 容器寬度：92% (大方展示，兩邊留 4% 緩衝絕對夠) */
                 width: 92%; 
                 margin: 0 auto;
@@ -408,9 +454,7 @@
             }
 
             .card-back {
-                /* 🔥 關鍵寬度：115% */
-                /* 這就是您要的「大一點點 + 微微重疊」 */
-                /* 既有層次感，又不會因為太寬而被切到 */
+                /* 關鍵寬度：115% (大一點點 + 微微重疊) */
                 width: 115%; 
             }
             
@@ -423,6 +467,72 @@
             }
 
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
+
+            /* --- 3. 底部固定 Banner 微調 --- */
+            .footer-banner {
+                padding-bottom: 30px; /* 底部留一點空間給手機的 Home Bar (小白條) */
+            }
+            .social-grid {
+                gap: 8px; /* 按鈕間距縮小 */
+            }
+            .social-btn {
+                flex: 1 1 40%; /* 讓按鈕變成兩排 (田字型)，比較好按 */
+                font-size: 0.85rem; /* 字稍微小一點 */
+            }
+        }
+        /* === V6 首頁置底 Banner (極簡單行版) === */
+        .footer-banner {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%; z-index: 1000;
+            
+            /* 外觀設定：深綠底 + 頂部金線 */
+            background-color: var(--forest);
+            border-top: 3px solid var(--accent);
+            padding: 10px 0; /* 上下內距很小，讓它變細 */
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 內容容器：彈性佈局 (Flex) 讓東西排成一行 */
+        .footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 0 15px;
+            display: flex;
+            align-items: center; /* 垂直置中 */
+            justify-content: center; /* 水平置中 */
+            gap: 20px; /* 按鈕區跟版權區的距離 */
+            flex-wrap: wrap; /* 手機不夠寬時會自動換行 */
+        }
+
+        /* 按鈕群組 */
+        .social-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* 按鈕樣式 (縮小版) */
+        .social-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 12px; /* 按鈕做很扁 */
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem; /* 字縮小 */
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+
+        .social-btn:hover {
+            background: var(--accent);
+            color: var(--forest);
+            border-color: var(--accent);
+        }
+
+        /* 版權文字 (簡化) */
+        .copyright {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            white-space: nowrap; /* 不准換行 */
         }
     </style>
 </head>
@@ -480,11 +590,31 @@
             <div style="margin-top:20px; color:var(--accent); font-weight:bold; letter-spacing:1px;">開始抽卡 &rarr;</div>
         </div>
     </div>
-    
-    <div class="disclaimer-box" style="background:var(--forest); color:var(--cream); padding:40px; border-radius:20px; margin:60px 0; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <div class="disclaimer-text" style="font-size:1.1rem; line-height:1.8;">
-            如果內容有誤，歡迎協助我修正，或是提供我免費課程🤭。<br>
-            如果只是看了不開心，請按下關閉，謝謝掰掰👋
+      <div class="footer-banner">
+        <div class="footer-content">
+            
+            <div class="social-group">
+                <a href="https://line.me/R/ti/p/@927ctmwa" target="_blank" class="social-btn">
+                    <i class="fa-brands fa-line" style="font-size: 1.2rem;"></i> LINE
+                </a>
+                
+                <a href="https://instagram.com/nomad91310" target="_blank" class="social-btn">
+                    <i class="fa-brands fa-instagram" style="font-size: 1.2rem;"></i> IG
+                </a>
+
+                <a href="https://facebook.com/妳的粉專" target="_blank" class="social-btn">
+                    <i class="fa-brands fa-facebook-f" style="font-size: 1.1rem;"></i> FB
+                </a>
+
+                <a href="https://www.threads.net/@nomad91310" target="_blank" class="social-btn">
+                    <i class="fa-brands fa-threads" style="font-size: 1.1rem;"></i> Threads
+                </a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2026 培癒試驗室
+            </div>
+            
         </div>
     </div>
 </div>
@@ -592,11 +722,18 @@
 <div id="knowledge" class="section">
     <div class="kb-header">
         <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回</button>
-        <h2 class="kb-title">📘 培癒寶典</h2>
+        <h2 class="kb-title">📘 11111培癒寶典</h2>
         <div style="width:70px;"></div> 
     </div>
+
     <div id="kb-container">載入中...</div>
-</div>
+
+    <div class="disclaimer-box" style="margin-top: 50px;">
+        <p>如果內容有誤，歡迎協助我修正，或是提供我免費課程 🤭。</p>
+        <p>如果只是看了不開心，請按下關閉，謝謝掰掰 👋</p>
+    </div>
+
+</div> 
 
 <div id="draw" class="section">
     <div style="text-align:center; margin-bottom:40px;">
@@ -1043,7 +1180,7 @@
         kbState.activeMid = null; 
         
         document.getElementById('kb-container').innerHTML = `<div class="kb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">${Object.keys(kbTree).map(b=>`<div class="kb-card" onclick="enterKb('${b}')"><h3>📂 ${b}</h3><span>${Object.values(kbTree[b]).flat().length} 篇</span></div>`).join('')}</div>`;
-        document.querySelector('.kb-title').innerText = "培癒寶典";
+        document.querySelector('.kb-title').innerText = "📘 培癒寶典";
         document.getElementById('kb-back-btn').style.display = 'none';
     }
 

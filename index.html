@@ -379,7 +379,7 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版 RWD (防切邊修正版) === */
+        /* === 📱 手機版 RWD (V41 微重疊修正版) === */
         @media (max-width: 768px) {
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
@@ -394,29 +394,31 @@
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-            /* 🔥 修正重點：抽卡區 */
+            /* 🔥 抽卡區設定 */
             #draw-area {
                 grid-template-columns: repeat(8, 1fr); 
                 
-                /* 維持寬鬆行距 */
-                gap: 12px 0; 
+                /* 行距：6px (緊湊但分明) */
+                gap: 6px 0; 
                 
-                /* 🔥 關鍵修正：縮小容器寬度到 88% */
-                /* 因為卡片是 135% 寬，會往左右凸出，所以容器要縮小，留白邊給卡片凸，才不會被切掉 */
-                width: 88%; 
+                /* 容器寬度：92% (大方展示，兩邊留 4% 緩衝絕對夠) */
+                width: 92%; 
                 margin: 0 auto;
-                padding: 20px 5px; /* 再補一點左右內距當保險 */
+                padding: 15px 0;
             }
 
             .card-back {
-                /* 維持大張重疊 */
-                width: 135%; 
+                /* 🔥 關鍵寬度：115% */
+                /* 這就是您要的「大一點點 + 微微重疊」 */
+                /* 既有層次感，又不會因為太寬而被切到 */
+                width: 115%; 
             }
             
+            /* 選中時往上浮起 */
             .card-back.is-selected {
                 transform: translateY(-30px) !important;
                 z-index: 200 !important;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.5);
                 filter: brightness(1.1);
             }
 

@@ -284,23 +284,22 @@
        /* === 抽卡區佈局 (電腦版) === */
         #draw-area { 
             display: grid;
-            grid-template-columns: repeat(16, 1fr); /* 16 欄 */
+            grid-template-columns: repeat(16, 1fr); /* 電腦 16 欄 */
             gap: 25px 0; /* 電腦版行距 */
             padding: 40px 0; 
             perspective: 1000px;
             width: 100%;
-            max-width: 800px; /* 限制寬度讓卡片精緻 */
+            max-width: 800px; 
             margin: 0 auto;
             justify-content: center;
         }
 
-        /* === 卡背基礎設定 === */
+        /* 2. 卡背基礎樣式 */
         .card-back { 
-            width: 130%; /* 重疊寬度 */
+            width: 130%; 
             justify-self: center;
             aspect-ratio: 3/5; 
             height: auto;
-            
             background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png');
             background-repeat: no-repeat; 
             background-position: center; 
@@ -309,42 +308,42 @@
             border-radius: 4px; 
             cursor: pointer; 
             position: relative; 
-            
             box-shadow: -2px 0 6px rgba(0,0,0,0.3); 
             z-index: 1;
 
-            /* 優化效能 */
+            /* 動畫效能優化 */
             will-change: transform; 
             transition: transform 0.2s ease-out; 
-            
-            /* 🔥 整合：初始狀態設為透明，等待 JS 觸發發牌動畫 */
-            opacity: 0; 
         }
 
-        /* === 發牌進場動畫 (從左邊飛入) === */
+        /* 3. 發牌進場動畫 */
         @keyframes cardShuffleIn {
             from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
             to { opacity: 1; transform: translateX(0) rotateY(0); }
         }
 
-        /* === 1. 電腦版滑鼠滑過 (Hover) === */
-        /* 加上 !important 以破解進場動畫的鎖定 */
-        .card-back:not(.is-drawing):not(.is-selected):hover { 
-            transform: translateY(-40px) !important; 
-            z-index: 100; 
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
-            transition: transform 0.2s ease-out;
+        /* ================= 互動邏輯 (這裡改最多！) ================= */
+
+        /* 🔥 重點修正 A：只有「電腦螢幕 (寬度大於 1025px)」才允許滑鼠滑過的效果 */
+        /* 手機版完全看不到這段，所以絕對不會有「幽靈懸浮」的問題 */
+        @media (min-width: 1025px) {
+            .card-back:not(.is-drawing):not(.is-selected):hover { 
+                transform: translateY(-40px) !important; 
+                z-index: 100; 
+                box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
+            }
         }
 
-        /* === 2. 手機版被點選 (Selected) === */
+        /* 🔥 重點修正 B：手機版/電腦版共用的「被選中」狀態 */
+        /* 手機只能靠這個 (JS控制) 讓牌浮起來 */
         .card-back.is-selected {
-            transform: translateY(-40px) !important; 
-            z-index: 100 !important; 
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(-30px) !important; 
+            z-index: 200 !important; 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             filter: brightness(1.1); 
         }
 
-        /* === 3. 抽取動畫 (往上飛) === */
+        /* 4. 抽取飛昇動畫 */
         @keyframes cardDrawUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); }
@@ -355,7 +354,6 @@
             z-index: 999 !important;
             pointer-events: none;
         }
-
         /* === 彈窗相關 === */
         .card-reveal { 
             position: relative; width: 340px; height: 580px; 
@@ -383,13 +381,12 @@
 
         /* === 📱 手機版響應式設計 (RWD) - 最終修正版 === */
         @media (max-width: 768px) {
-            /* 1. 介面基礎調整 */
+            /* 導航與介面修正 */
             nav { padding: 0 20px; }
             .hamburger-btn { display: block !important; }
             .hero-section { flex-direction: column-reverse; gap: 30px; }
             .hero-img { margin-left: 0; }
             
-            /* 2. 導航選單 */
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
                 background: var(--forest); flex-direction: column; padding: 20px 0;
@@ -398,32 +395,19 @@
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-            /* 3. 🔥 抽卡區關鍵修正：防爆版 🔥 */
+            /* 🔥 這裡就是讓手機版變整齊的關鍵！ */
             #draw-area {
-                grid-template-columns: repeat(8, 1fr); 
-                
-                /* 行距縮到極小 (5px)，讓上下排緊緊黏在一起 */
-                gap: 5px 2px; 
-                
-                /* 強制寬度 95%，左右留一點邊，絕對不超出螢幕 */
-                width: 95%; 
+                grid-template-columns: repeat(8, 1fr); /* 8 欄 */
+                gap: 5px 2px; /* 很小的間距，讓牌黏在一起 */
+                width: 95%; /* 限制寬度，絕對不超出螢幕 */
                 margin: 0 auto;
                 padding: 10px 0;
             }
 
             .card-back {
-                /* 卡片寬度剛好填滿格子即可，不要過度放大撐壞版面 */
-                width: 100%; 
+                width: 100%; /* 乖乖填滿格子就好，不要變大 */
             }
             
-            /* 4. 手機版選中時：往上推的距離稍微縮小，避免蓋到太上面 */
-            .card-back.is-selected {
-                transform: translateY(-30px) !important;
-                z-index: 200 !important;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-                filter: brightness(1.1);
-            }
-
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
     </style>
@@ -1093,10 +1077,10 @@
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
-        // 判定裝置：有滑鼠或是非觸控裝置，視為電腦
-        const isDesktop = window.matchMedia('(hover: hover)').matches || !('ontouchstart' in window);
+        // 判定：只有支援 hover 的才算電腦 (這樣最準)
+        const isDesktop = window.matchMedia('(hover: hover)').matches;
 
-        // 🔥 安全鎖：前 0.8 秒禁止任何點擊 (防鬼影手)
+        // 安全鎖
         let isInputLocked = true;
         setTimeout(() => { isInputLocked = false; }, 800);
 
@@ -1106,31 +1090,23 @@
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
             el.onclick = function() { 
-                // 1. 如果還在鎖定時間，完全無視
                 if (isInputLocked) return;
 
-                // === 邏輯分流 ===
-                // A. 直接開獎：是電腦版 OR 手機版且已經選中這張
+                // === 情況 A: 電腦版 (直接抽) OR 手機版確認抽取 ===
                 if (isDesktop || el.classList.contains('is-selected')) {
-                    
                     el.classList.remove('is-selected');
                     el.classList.add('is-drawing'); 
-                    
-                    // 鎖住點擊，避免重複觸發
                     isInputLocked = true; 
-                    
                     setTimeout(() => { drawCard(card); }, 600); 
-
                 } 
-                // B. 手機選取：是手機版 且 第一次點
+                // === 情況 B: 手機版選取 ===
                 else {
-                    // 強制把「所有」已選中的牌縮回去
-                    const allSelected = document.querySelectorAll('.card-back.is-selected');
-                    for(let i=0; i<allSelected.length; i++) {
-                        allSelected[i].classList.remove('is-selected');
-                    }
+                    // 🩸 止血鉗：先把所有其他的 is-selected 全部移除！
+                    // 這行會強制把上一張「幽靈懸停」的牌壓下去
+                    const allActive = document.querySelectorAll('.card-back.is-selected');
+                    allActive.forEach(c => c.classList.remove('is-selected'));
 
-                    // 只有自己凸起來
+                    // 只讓現在這張浮起來
                     el.classList.add('is-selected');
                 }
             }; 

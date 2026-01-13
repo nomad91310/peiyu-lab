@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ================= V34 美感核心 ================= */
+        /* ================= V36 最終修正版 ================= */
         :root { 
             --forest: #1a2f23; --forest-light: #2a4032;
             --cream: #f9f7f2; --white: #ffffff;
@@ -57,6 +57,9 @@
         .nav-links button.active { color: var(--white); font-weight: bold; }
         .nav-links button.active::after { width: 100%; background-color: var(--white); }
 
+        /* 漢堡按鈕 (電腦版預設隱藏) */
+        .hamburger-btn { display: none; background: none; border: none; color: var(--white); font-size: 28px; cursor: pointer; padding: 5px; }
+
         /* === 內容容器與動畫 === */
         .section { 
             display: none; padding: 40px 20px 100px 20px; 
@@ -69,65 +72,36 @@
             to { opacity: 1; transform: translateY(0); } 
         }
 
-        /* === Hero 區塊 === */
+        /* === Hero 區塊 (修正版) === */
         .hero-section { 
             display: flex; align-items: center; justify-content: center; 
-            gap: 0px; padding: 40px 0 60px 0; 
+            gap: 0px; 
+            padding: 40px 0 60px 0; 
             border-bottom: 1px solid rgba(26, 47, 35, 0.1); margin-bottom: 40px; 
         }
-        /* 1. 文字區塊容器：取消統一對齊，讓裡面各自為政 */
-        /* === 左側文字區塊 (藍框容器) === */
+        /* 左側文字區 (藍框)：垂直排列 + 置中 */
         .hero-text { 
-            flex: 1; 
-            max-width: 550px; 
-            z-index: 2; 
-            
-            /* 🔥 關鍵：啟用 Flexbox 直向排列，讓內部物件乖乖排隊 */
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* 預設讓大家通通「置中」 (解決標題跟按鈕) */
+            flex: 1; max-width: 550px; z-index: 2; 
+            display: flex; flex-direction: column; align-items: center; 
         }
-
-        /* 標題與副標 */
         .hero-text h1 { 
-            font-size: 3.5rem; 
-            color: var(--forest); 
-            margin: 0 0 10px 0; 
-            line-height: 1.1; 
-            text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2);
-            text-align: center; 
-            width: 100%; /* 撐滿寬度，確保置中 */
+            font-size: 3.5rem; color: var(--forest); margin: 0 0 10px 0; 
+            line-height: 1.1; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2);
+            text-align: center; width: 100%; 
         }
         .hero-text h2 { 
-            font-size: 1.4rem; 
-            color: var(--text-light); 
-            margin: 0 0 30px 0; 
-            font-weight: normal; 
-            letter-spacing: 0.1em; 
-            text-align: center;
-            width: 100%;
+            font-size: 1.4rem; color: var(--text-light); margin: 0 0 30px 0; 
+            font-weight: normal; letter-spacing: 0.1em; 
+            text-align: center; width: 100%;
         }
-        /* 底部提示語：唯一要「靠左」的叛逆份子 */
-        /* 底部提示語：改回置中 */
         .hero-text p {
-            color: #999;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            font-style: italic;
-            
-            width: 100%;
-            /* 👇 修改這裡：改回 center，並把 padding 歸零 */
-            text-align: center !important;   
-            padding-left: 0;  
+            color: #999; font-size: 0.9rem; margin-top: 15px; font-style: italic;
+            width: 100%; text-align: center; padding-left: 0;  
         }
-        /* 右邊圖片區 */
+        /* 右邊圖片區 (粉紅框)：向左拉近 */
         .hero-img { 
-            flex: 0 0 auto; 
-            text-align: center; 
-            position: relative; 
-            
-            /* 👇 修改這裡：數字越負，靠越近 (原本 -20px，改成 -60px 試試) */
-            margin-left: -20px; 
+            flex: 0 0 auto; text-align: center; position: relative; 
+            margin-left: -60px; /* 控制圖片與文字的距離 */
         }
         .hero-img img { 
             width: 100%; max-width: 200px; border-radius: 20px; 
@@ -168,14 +142,12 @@
         .form-group { margin-bottom: 25px; }
         label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
         label.required::after { content: " *"; color: var(--error); }
-        
         input:not([type="checkbox"]):not([type="radio"]), select, textarea { 
             width: 100%; padding: 14px 18px; border: 1px solid #ddd; border-radius: 10px; 
             font-size: 16px; outline: none; transition: 0.3s; background: #fafafa;
         }
         input:focus, select:focus, textarea:focus { 
-            border-color: var(--accent); background: var(--white); 
-            box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); 
+            border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); 
         }
         input:disabled { background: #eee; cursor: not-allowed; color: #999; }
 
@@ -251,105 +223,48 @@
         .result-overlay.active { display: flex; opacity: 1; }
 
         .text-modal-card { 
-            position: relative; 
-            width: 90%; 
-            max-width: 650px; /* 強制恢復原本大氣的寬度 */
-            max-height: 85vh; 
-            background: #fff; 
-            border-radius: 4px; 
-            overflow-y: auto; 
-            padding: 50px 40px; 
+            position: relative; width: 90%; max-width: 650px; max-height: 85vh; 
+            background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; 
             box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
             transform: scale(0.95); opacity: 0; transition: all 0.4s ease;
         }
         .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
         
         .text-modal-card h3 { 
-            text-align: center; 
-            color: var(--forest); 
-            margin-top: 10px; 
-            margin-bottom: 25px; 
-            font-size: 2rem; 
-            border: none; 
-            padding: 10px 0;
-            /* 恢復被弄丟的標題漸層效果 */
+            text-align: center; color: var(--forest); margin-top: 10px; margin-bottom: 25px; 
+            font-size: 2rem; border: none; padding: 10px 0;
             background: linear-gradient(to right, transparent, rgba(198, 168, 124, 0.2), transparent);
         }
 
         .close-modal-btn { 
-            display: block; 
-            width: 100%; 
-            max-width: 250px; 
-            margin: 40px auto 0 auto; 
-            padding: 14px 0; 
-            background: var(--text-main); 
-            color: white; 
-            border: none; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 1rem; 
-            transition: 0.2s; 
+            display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; padding: 14px 0; 
+            background: var(--text-main); color: white; border: none; border-radius: 50px; 
+            font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; 
         }
         .close-modal-btn:hover { background: var(--error); }
 
-        /* 確保故事與守則文字樣式同步還原 */
         .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
+        .highlight-text { 
+            color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); 
+            padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0;
+        }
+
         .rule-item { margin-bottom: 30px; }
         .rule-head { color: var(--accent); font-size: 1.3rem; margin-bottom: 12px; display: flex; align-items: center; font-weight: bold; }
-/* === 🌟 還原消失的文字底色與靈魂樣式 🌟 === */
-        .highlight-text { 
-            color: #a0522d; 
-            font-weight: bold; 
-            background: rgba(198, 168, 124, 0.15); /* 這是原本的淡土黃色底色 */
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            border-left: 4px solid var(--accent); 
-            margin: 20px 0;
-        }
-
-        .rule-item { margin-bottom: 30px; }
-        
-        .rule-head { 
-            color: var(--accent); 
-            font-size: 1.3rem; 
-            margin-bottom: 12px; 
-            display: flex; 
-            align-items: center; 
-            font-weight: bold; 
-        }
-
         .rule-num { 
-            background: var(--forest); /* 深綠色圓圈背景 */
-            color: var(--accent); 
-            width: 35px; 
-            height: 35px; 
-            border-radius: 50%; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin-right: 15px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            flex-shrink: 0; 
+            background: var(--forest); color: var(--accent); width: 35px; height: 35px; 
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
+            margin-right: 15px; font-size: 18px; font-weight: bold; flex-shrink: 0; 
         }
-
-        .rule-body { 
-            font-size: 1.05rem; 
-            color: #555; 
-            line-height: 1.8; 
-            margin-left: 50px; 
-        }
+        .rule-body { font-size: 1.05rem; color: #555; line-height: 1.8; margin-left: 50px; }
 
         .hd-chart-container { text-align: center; margin: 30px 0; }
         .hd-chart-container img { 
-            max-width: 100%; 
-            height: auto; 
-            border-radius: 12px; 
-            border: 1px solid #ddd; 
+            max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #ddd; 
             box-shadow: var(--shadow-soft); 
         }
         .hd-caption { font-size: 13px; color: #888; margin-top: 8px; font-style: italic; }
+        
         /* === 培癒寶典 (知識庫) === */
         .kb-card { 
             border-left: 6px solid var(--accent); padding: 30px; 
@@ -366,20 +281,81 @@
         .kb-article-link::before { content: '📄'; position: absolute; left: 10px; opacity: 0; transition: 0.2s; }
         .kb-article-link:hover::before { opacity: 1; }
 
-        /* === 抽卡背面 === */
-        #draw-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 40px 0; perspective: 1000px; }
+        /* === 抽卡區 (Grid 佈局) === */
+        #draw-area { 
+            display: grid;
+            /* 16 欄 */
+            grid-template-columns: repeat(16, 1fr);
+            
+            /* 🔥🔥🔥 關鍵修正：行距加大到 70px！ */
+            /* 之前只有 15px，所以卡片往上推會撞車。現在給它 70px 的空間 */
+            gap: 25px 0; 
+            
+            padding: 50px 0; /* 上下留白也加大 */
+            perspective: 1000px;
+            
+            width: 100%;
+            max-width: 700px; 
+            margin: 0 auto;
+            justify-content: center;
+        }
+
+        /* === 卡背 (重疊設定) === */
         .card-back { 
-            width: 60px; height: 100px; 
+            /* 寬度 130%：維持妳要的左右重疊感 */
+            width: 130%; 
+            justify-self: center;
+            
+            aspect-ratio: 3/5; 
+            height: auto;
+            
             background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png');
-            background-repeat: no-repeat; background-position: center; background-size: cover; 
-            border-radius: 8px; cursor: pointer; position: relative; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: cover; 
+            
+            border-radius: 4px; 
+            cursor: pointer; 
+            position: relative; 
+            
+            /* 陰影 */
+            box-shadow: -2px 0 6px rgba(0,0,0,0.3); 
+            
+            /* 🔥 動畫速度加快到 0.2s，這樣手指滑過去反應才快，像撥牌一樣 */
+            transition: all 0.2s ease-out; 
+            z-index: 1; 
         }
-        .card-back:hover { 
-            transform: translateY(-15px) scale(1.03); z-index: 100; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(198, 168, 124, 0.4); 
+
+    /* === 滑鼠滑過：強制往上推 (加了 !important 才能破解動畫鎖死) === */
+        /* === 滑鼠滑過：往上推 (高度修正版) === */
+        .card-back:not(.is-drawing):hover { 
+            /* 🔥 修正：從 -80px 改成 -40px (這樣就不會太高，剛好凸出來) */
+            /* !important 還是要留著，不然會動不了 */
+            transform: translateY(-40px) !important; 
+            
+            /* 確保浮在最上面 */
+            z-index: 1000; 
+            
+            /* 陰影稍微收斂一點 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); 
         }
+        /* === 點擊抽取動畫 === */
+        @keyframes cardDrawUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { 
+                /* 點擊後再往上抽更高 (180px)，做確認 */
+                transform: translateY(-180px) scale(1.1); 
+                opacity: 1; 
+                box-shadow: 0 0 30px var(--accent); 
+            }
+        }
+        
+        .card-back.is-drawing {
+            animation: cardDrawUp 0.6s ease-out forwards;
+            z-index: 999 !important;
+            pointer-events: none;
+        }
+
         
         .card-reveal { 
             position: relative; width: 340px; height: 580px; 
@@ -388,107 +364,63 @@
             transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
-        /* 🆕 右上角關閉按鈕 (X) - 修正版 */
-       /* 🆕 右上角關閉按鈕 (X) - 燈箱模式版 */
+        
+        /* 關閉按鈕 */
         .close-card-btn {
-            /* 關鍵修正：從 absolute 改為 fixed，讓它固定在螢幕上，而不是卡片上 */
-            position: fixed; 
-            top: 30px;    /* 距離螢幕上方 30px */
-            right: 30px;  /* 距離螢幕右方 30px */
-            
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.6); /* 深色半透明底，比較有質感 */
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-size: 30px;
-            
+            position: fixed; top: 30px; right: 30px; 
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white; font-size: 30px;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer;
-            z-index: 2002; /* 確保在最上層 */
-            transition: all 0.3s ease;
+            cursor: pointer; z-index: 2002; transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
-
         .close-card-btn:hover {
-            background: var(--accent); 
-            color: var(--forest);
-            transform: rotate(90deg); 
-            border-color: var(--forest);
+            background: var(--accent); color: var(--forest); transform: rotate(90deg); border-color: var(--forest);
         }
-
-        /* 📱 手機版微調：稍微縮小一點，靠邊一點 */
-        @media (max-width: 768px) {
-            .close-card-btn {
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-                font-size: 24px;
-            }
-        }
-        
-        /* 🗑️ (選用) 如果不想留著舊的 retry-btn 樣式代碼，可以去刪掉它，不刪也沒關係 */
-        .retry-btn { 
-            position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); 
-            padding: 12px 35px; background: var(--accent); color: #000; border: none; 
-            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; 
-            box-shadow: 0 0 20px rgba(198, 168, 124, 0.6); transition: 0.3s; 
-        }
-        .retry-btn:hover { background: #e0c8a0; transform: translateX(-50%) scale(1.1); }
         
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 手機版響應式設計 (修改後) === */
-    .hamburger-btn { display: none; } /* 電腦版隱藏 */
+        /* === 📱 手機版響應式設計 (RWD) - 最終整合版 === */
+        @media (max-width: 768px) {
+            /* 1. 導航與選單修正 */
+            nav { padding: 0 20px; }
+            .hamburger-btn { display: block !important; } /* 手機版強制顯示漢堡 */
 
-    @media (max-width: 768px) {
-        nav { padding: 0 20px; }
-        
-        /* 顯示漢堡按鈕 */
-        .hamburger-btn {
-            display: block;
-            background: none;
-            border: none;
-            color: var(--white);
-            font-size: 28px;
-            cursor: pointer;
-            padding: 5px;
+            .nav-links {
+                display: none; position: absolute; top: 80px; left: 0; width: 100%;
+                background: var(--forest); flex-direction: column; padding: 20px 0;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1);
+            }
+            .nav-links.active { display: flex; }
+            .nav-links button { text-align: center; padding: 15px 0; width: 100%; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            
+            /* 2. Hero 區塊修正 (垂直排列) */
+            .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .hero-img { margin-left: 0; } /* 手機版拿掉負邊距，因為是直排 */
+            
+            /* 3. 卡片容器與彈窗修正 */
+            .card { padding: 25px; }
+            .text-modal-card { width: 92%; padding: 40px 25px; }
+
+            /* 4. 抽卡區修正 (關鍵！) */
+            #draw-area {
+                /* 手機改為 8 欄 */
+                grid-template-columns: repeat(8, 1fr); 
+                
+                /* 🔥 這裡控制手機版行距：給 15px (窄一點，比較緊湊) */
+                gap: 15px 0;
+            }
+            .card-back {
+                /* 手機版因為格子少，讓它胖一點重疊比較好看 */
+                width: 145%; 
+            }
+            
+            /* 5. 關閉按鈕調整 */
+            .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
-
-        /* 選單預設隱藏，變成下拉式 */
-        .nav-links {
-            display: none; /* 預設隱藏 */
-            position: absolute;
-            top: 80px; /* 接在導航列下方 */
-            left: 0;
-            width: 100%;
-            background: var(--forest); /* 深綠色背景 */
-            flex-direction: column;
-            padding: 20px 0;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* 當選單被打開時 */
-        .nav-links.active { display: flex; }
-
-        .nav-links button {
-            text-align: center;
-            padding: 15px 0;
-            width: 100%;
-            font-size: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        /* 其他手機版調整維持原樣 */
-        .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
-        .hero-text h1 { font-size: 2.5rem; }
-        .card { padding: 25px; }
-        .text-modal-card { width: 92%; padding: 40px 25px; }
-    }
 
         @keyframes cardShuffleIn {
             from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); }
@@ -514,13 +446,13 @@
         <button onclick="showSection('member')" id="nav-member">個案專區</button>
     </div>
 </nav>
+
 <div id="home" class="section active">
     <div class="hero-section">
         <div class="hero-text">
             <h1>👋歡迎來到<br>「培癒試驗室」</h1>
             <h2>我是此空間創辦人培培</h2>
             <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%;">
-            
                 <button class="btn-primary" onclick="openModal('story-overlay')">📖 我的故事</button>
                 <button class="btn-primary" onclick="openModal('rules-overlay')">👑 空間守則</button>
             </div>
@@ -803,7 +735,7 @@
         const navBtn = document.getElementById('nav-' + baseId);
         if(navBtn) navBtn.classList.add('active');
         
-        // 新增：切換頁面後自動關閉手機選單
+        // 切換頁面後自動關閉手機選單
         document.getElementById('nav-menu').classList.remove('active');
         
         window.scrollTo(0,0); 
@@ -816,8 +748,8 @@
         loadSiteAssets();
         checkSession(); 
     };
-	
-	// 手機版選單開關
+    
+    // 手機版選單開關
     function toggleMenu() {
         const menu = document.getElementById('nav-menu');
         menu.classList.toggle('active');
@@ -1096,13 +1028,91 @@
     function toggleSubmitBtn(c) { if(isMemberBlocked) return; document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
 
     // --- KB, Draw, Login ---
-    async function initKbData() { const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published',true); if(data) { kbTree={}; data.forEach(i=>{ if(!kbTree[i.big_category])kbTree[i.big_category]={}; if(!kbTree[i.big_category][i.mid_category])kbTree[i.big_category][i.mid_category]=[]; kbTree[i.big_category][i.mid_category].push(i); }); renderKbHome(); } }
-    function renderKbHome() { document.getElementById('kb-container').innerHTML = `<div class="kb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">${Object.keys(kbTree).map(b=>`<div class="kb-card" onclick="enterKb('${b}')"><h3>📂 ${b}</h3><span>${Object.values(kbTree[b]).flat().length} 篇</span></div>`).join('')}</div>`; document.querySelector('.kb-title').innerText="培癒寶典"; document.getElementById('kb-back-btn').style.display='none'; }
-    function enterKb(big) { kbState = { level: 1, big }; document.getElementById('kb-container').innerHTML = Object.entries(kbTree[big]).map(([mid, arts]) => `<details class="kb-mid-cat"><summary class="kb-mid-header">${mid} ▼</summary>${arts.map(a=>`<div class="kb-article-link" onclick="readArt('${a.id}')">${a.title}</div>`).join('')}</details>`).join(''); document.querySelector('.kb-title').innerText=big; document.getElementById('kb-back-btn').style.display='block'; }
-    async function readArt(id) { const { data } = await myDB.from('kb_articles').select('*').eq('id', id).single(); document.getElementById('kb-container').innerHTML = `<div class="kb-article-view"><h1>${data.title}</h1><div style="border-bottom:1px solid #eee;padding-bottom:10px;color:#999;">${data.big_category} > ${data.mid_category}</div><div style="margin-top:20px;">${data.body}</div></div>`; kbState.level = 2; document.getElementById('kb-back-btn').innerText="← 返回列表"; }
-    function kbGoBack() { if(kbState.level===2) enterKb(kbState.big); else renderKbHome(); }
+    async function initKbData() {
+        const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true);
+        if (data) {
+            kbTree = {};
+            data.forEach(i => {
+                if (!kbTree[i.big_category]) kbTree[i.big_category] = {};
+                if (!kbTree[i.big_category][i.mid_category]) kbTree[i.big_category][i.mid_category] = [];
+                kbTree[i.big_category][i.mid_category].push(i);
+            });
+            renderKbHome();
+        }
+    }
+
+    function renderKbHome() {
+        // 回到首頁時，清空記憶
+        kbState.activeMid = null; 
+        
+        document.getElementById('kb-container').innerHTML = `<div class="kb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">${Object.keys(kbTree).map(b=>`<div class="kb-card" onclick="enterKb('${b}')"><h3>📂 ${b}</h3><span>${Object.values(kbTree[b]).flat().length} 篇</span></div>`).join('')}</div>`;
+        document.querySelector('.kb-title').innerText = "培癒寶典";
+        document.getElementById('kb-back-btn').style.display = 'none';
+    }
+
+    function enterKb(big) {
+        kbState.level = 1;
+        kbState.big = big;
+        
+        document.getElementById('kb-container').innerHTML = Object.entries(kbTree[big]).map(([mid, arts]) => {
+            const isOpen = (kbState.activeMid === mid) ? 'open' : ''; 
+            
+            return `<details class="kb-mid-cat" ${isOpen}>
+                <summary class="kb-mid-header">${mid} ▼</summary>
+                ${arts.map(a=>`<div class="kb-article-link" onclick="readArt('${a.id}')">${a.title}</div>`).join('')}
+            </details>`;
+        }).join('');
+        
+        document.querySelector('.kb-title').innerText = big;
+        document.getElementById('kb-back-btn').style.display = 'block';
+        document.getElementById('kb-back-btn').innerText = "← 返回"; 
+    }
+
+    async function readArt(id) {
+        const { data } = await myDB.from('kb_articles').select('*').eq('id', id).single();
+        
+        kbState.activeMid = data.mid_category;
+        
+        document.getElementById('kb-container').innerHTML = `<div class="kb-article-view"><h1>${data.title}</h1><div style="border-bottom:1px solid #eee;padding-bottom:10px;color:#999;">${data.big_category} > ${data.mid_category}</div><div style="margin-top:20px;">${data.body}</div></div>`;
+        kbState.level = 2;
+        document.getElementById('kb-back-btn').innerText = "← 返回列表";
+    }
+
+    function kbGoBack() {
+        if (kbState.level === 2) enterKb(kbState.big);
+        else renderKbHome();
+    }
+
     async function initDrawData() { const { data } = await myDB.from('card_pool').select('*'); allCards = data || []; renderDrawTable(); }
-    function renderDrawTable() { const table = document.getElementById('draw-area'); if (!table) return; table.innerHTML = ''; const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); const shuffled = deck.sort(() => Math.random() - 0.5); shuffled.forEach((card, index) => { const el = document.createElement('div'); el.className = 'card-back'; el.style.animationDelay = (index * 0.015) + 's'; el.onclick = () => drawCard(card); table.appendChild(el); }); }
+    
+    // 抽卡核心邏輯 (動畫修正版)
+    function renderDrawTable() { 
+        const table = document.getElementById('draw-area'); 
+        if (!table) return; 
+        table.innerHTML = ''; 
+        const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
+        const shuffled = deck.sort(() => Math.random() - 0.5); 
+        
+        shuffled.forEach((card, index) => { 
+            const el = document.createElement('div'); 
+            el.className = 'card-back'; 
+            // 發牌進場動畫
+            el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
+            
+            el.onclick = function() { 
+                // 1. 觸發往上抽出的 CSS 動畫
+                this.classList.add('is-drawing');
+
+                // 2. 等待動畫跑完 (0.6s) 再開彈窗
+                setTimeout(() => {
+                    drawCard(card); 
+                }, 600);
+            }; 
+            
+            table.appendChild(el); 
+        }); 
+    }
+
     async function drawCard(card) { document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; document.getElementById('p-zodiac').innerText = card.zodiac || ''; document.getElementById('p-quote').innerText = card.quote || ''; if (card.image_url) { document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; } const style = card.style_config || defaultStyle; applyStyle('gate', style.gate || defaultStyle.gate); applyStyle('info', style.info || defaultStyle.info); applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); applyStyle('quote', style.quote || defaultStyle.quote); document.getElementById('overlay').classList.add('active'); }
     function applyStyle(id, s) { const el = document.getElementById(`p-${id}`); const def = defaultStyle[id]; const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; el.style.left = val('x') + '%'; el.style.top = val('y') + '%'; el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color'); const str = val('stroke'); el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; }
     function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); document.getElementById('p-bg').src = ""; }, 500); }
@@ -1126,7 +1136,7 @@
             currentUser = user; 
             isMemberBlocked = false; 
 
-            // 👇 登入成功時，存入 LocalStorage
+            // 登入成功時，存入 LocalStorage
             localStorage.setItem('peiyu_user', JSON.stringify({ phone: phone, pass: pass }));
             
             document.getElementById('login-box').style.display = 'none'; 
@@ -1151,7 +1161,6 @@
                 const dateStr = new Date(b.created_at).toLocaleDateString();
                 const title = b.service_item || '服務預約';
                 
-                // 狀態顯示設定
                 const stMap = { 
                     'pending': '<span style="color:red">未付款</span>', 
                     'paid': '<span style="color:green">已付款</span>', 
@@ -1162,7 +1171,6 @@
                 const rawDetail = b.service_detail || "";
                 const details = rawDetail.split('|').map(s => s.trim().split('(')[0].trim()).join(' + ');
 
-                // 計算原價與顯示實付
                 let originalPrice = 0;
                 const priceMatches = rawDetail.match(/\$(\d+)/g);
                 if (priceMatches) priceMatches.forEach(m => originalPrice += parseInt(m.replace('$', '')));
@@ -1172,7 +1180,6 @@
                     `<div style="font-size:12px;color:#999;margin-top:5px;">原價 <span style="text-decoration:line-through;">$${originalPrice}</span></div><div style="font-size:12px;color:#27ae60;">🎟️ ${b.coupon_info}</div><div style="font-weight:bold;color:#d35400;">實付 $${b.price}</div>` :
                     `<div style="font-weight:bold;color:#333;margin-top:5px;">$${b.price}</div>`;
 
-                // --- 🌟 關鍵報告與排程顯示邏輯 ---
                 const reportMatch = (b.wish_detail || "").match(/\[報告已生成 ID:(.*?)\]/);
                 const currentReportId = reportMatch ? reportMatch[1] : null;
 
@@ -1180,20 +1187,13 @@
                 let btnHtml = `<div style="font-size:12px; margin-top:5px;">${statusBadge}</div>`;
 
                 if (currentReportId) {
-                    // A. 已有報告：顯示「已完成」並動態生成安全連結
                     scheduleHtml = `<div style="color:var(--success); font-weight:bold; font-size:13px; margin-top:4px; background:#e8f5e9; padding:3px 6px; border-radius:4px; display:inline-block;">✨ 服務已完成</div>`;
-
-                    // 尋找對應的服務模板
                     const matchedCat = cats.find(c => b.service_item === c.name);
                     const specificSvc = items.find(s => s.category_id === matchedCat?.id && b.service_detail.includes(s.title) && s.is_main);
                     const templateFile = (specificSvc && specificSvc.report_template) ? specificSvc.report_template : "srt_report.html";
-                    
-                    // 安全的 View URL
                     let targetUrl = `${templateFile}?id=${currentReportId}&mode=view`;
                     btnHtml = `<button class="btn-primary" style="font-size:13px;padding:6px 15px;height:fit-content;" onclick="window.open('${targetUrl}')">查看報告</button>`;
-
                 } else if (b.scheduled_at) {
-                    // B. 沒報告但有排程：顯示預計時間
                     const t = new Date(b.scheduled_at);
                     const timeStr = `${t.getFullYear()}/${t.getMonth() + 1}/${t.getDate()} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`;
                     scheduleHtml = `<div style="color:#6a1b9a; font-weight:bold; font-size:13px; margin-top:4px; background:#f3e5f5; padding:3px 6px; border-radius:4px; display:inline-block;">🕒 預計服務：${timeStr}</div>`;
@@ -1213,7 +1213,6 @@
             }).join('');
         }
 
-        // 更新 UI
         document.getElementById('dash-history').innerHTML = historyHtml;
         document.getElementById('c-name').value = user.full_name;
         document.getElementById('c-phone').value = user.phone;
@@ -1232,7 +1231,7 @@
 
     function doLogout() { 
         currentUser = null; 
-        localStorage.removeItem('peiyu_user'); // 👇 登出刪除紀錄
+        localStorage.removeItem('peiyu_user'); 
         document.getElementById('login-box').style.display = 'block'; 
         document.getElementById('dash').style.display = 'none'; 
         document.getElementById('c-name').value = ""; 
@@ -1275,23 +1274,6 @@
             closeModal('edit-profile-overlay'); 
         } 
     }
-
-    /* --- 音效魔法 ---
-    const music = new Audio("https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/magic.mp3"); 
-    music.loop = true; 
-    
-    const startMagic = () => { 
-        music.play().then(() => { 
-            music.volume = 0; 
-            let vol = 0; 
-            const fade = setInterval(() => { 
-                if (vol < 0.15) { vol += 0.005; music.volume = vol; } else { clearInterval(fade); } 
-            }, 100); 
-            ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.removeEventListener(evt, startMagic); }); 
-        }).catch(err => { console.log("魔法啟動受阻...", err); }); 
-    }; 
-    ['click', 'scroll', 'touchstart', 'wheel', 'mousedown'].forEach(evt => { window.addEventListener(evt, startMagic, { once: true }); });
- */
 </script>
 </body>
 </html>

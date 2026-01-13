@@ -325,6 +325,7 @@
             transition: all 0.2s ease-out; 
             z-index: 1; 
         }
+        
 
     /* === 滑鼠滑過：強制往上推 (加了 !important 才能破解動畫鎖死) === */
         /* === 滑鼠滑過：往上推 (高度修正版) === */
@@ -338,6 +339,13 @@
             
             /* 陰影稍微收斂一點 */
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); 
+        }
+        /* === 🆕 新增：被選中的牌 (第一次點擊) === */
+        /* 效果跟 Hover 一樣，往上推 40px，表示「我選了這張」 */
+        .card-back.is-selected {
+            transform: translateY(-40px) !important; /* 強制凸起 */
+            z-index: 100; /* 浮在最上層 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
         /* === 點擊抽取動畫 === */
         @keyframes cardDrawUp {
@@ -382,11 +390,10 @@
         .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
         .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-        /* === 📱 手機版響應式設計 (RWD) - 最終整合版 === */
+        /* === 📱 手機版響應式設計 (RWD) === */
         @media (max-width: 768px) {
-            /* 1. 導航與選單修正 */
             nav { padding: 0 20px; }
-            .hamburger-btn { display: block !important; } /* 手機版強制顯示漢堡 */
+            .hamburger-btn { display: block !important; }
 
             .nav-links {
                 display: none; position: absolute; top: 80px; left: 0; width: 100%;
@@ -396,29 +403,26 @@
             .nav-links.active { display: flex; }
             .nav-links button { text-align: center; padding: 15px 0; width: 100%; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
             
-            /* 2. Hero 區塊修正 (垂直排列) */
             .hero-section { flex-direction: column-reverse; text-align: center; gap: 30px; }
             .hero-text h1 { font-size: 2.5rem; }
-            .hero-img { margin-left: 0; } /* 手機版拿掉負邊距，因為是直排 */
+            .hero-img { margin-left: 0; }
             
-            /* 3. 卡片容器與彈窗修正 */
             .card { padding: 25px; }
             .text-modal-card { width: 92%; padding: 40px 25px; }
 
-            /* 4. 抽卡區修正 (關鍵！) */
+            /* === 👇 這裡控制手機版抽卡區 === */
             #draw-area {
-                /* 手機改為 8 欄 */
+                /* 維持 8 欄 */
                 grid-template-columns: repeat(8, 1fr); 
-                
-                /* 🔥 這裡控制手機版行距：給 15px (窄一點，比較緊湊) */
+                /* 維持窄行距 */
                 gap: 15px 0;
             }
             .card-back {
-                /* 手機版因為格子少，讓它胖一點重疊比較好看 */
-                width: 145%; 
+                /* 🔥 關鍵修改：從 145% 改為 115% */
+                /* 這樣卡片本體會變小，看起來比較不擁擠 */
+                width: 115%; 
             }
             
-            /* 5. 關閉按鈕調整 */
             .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
         }
 
@@ -1090,23 +1094,42 @@
         const table = document.getElementById('draw-area'); 
         if (!table) return; 
         table.innerHTML = ''; 
+        
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
             el.className = 'card-back'; 
-            // 發牌進場動畫
+            
+            // 進場發牌動畫
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
+            // === 🌟 關鍵修改：二次確認邏輯 ===
             el.onclick = function() { 
-                // 1. 觸發往上抽出的 CSS 動畫
-                this.classList.add('is-drawing');
+                // 1. 檢查：如果這張牌已經是「選中狀態 (is-selected)」--> 代表這是第二次點擊
+                if (this.classList.contains('is-selected')) {
+                    
+                    // 執行抽取：移除選取標籤，加上抽取動畫標籤
+                    this.classList.remove('is-selected');
+                    this.classList.add('is-drawing');
 
-                // 2. 等待動畫跑完 (0.6s) 再開彈窗
-                setTimeout(() => {
-                    drawCard(card); 
-                }, 600);
+                    // 等待動畫跑完再開彈窗
+                    setTimeout(() => {
+                        drawCard(card); 
+                    }, 600);
+
+                } else {
+                    // 2. 如果這張牌還沒被選中 --> 代表這是第一次點擊
+                    
+                    // 先把「所有牌」的選中狀態取消 (讓之前凸起來的牌縮回去)
+                    document.querySelectorAll('.card-back').forEach(c => {
+                        c.classList.remove('is-selected');
+                    });
+
+                    // 只讓「自己」凸起來
+                    this.classList.add('is-selected');
+                }
             }; 
             
             table.appendChild(el); 

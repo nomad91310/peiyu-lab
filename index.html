@@ -311,30 +311,35 @@
             transition: transform 0.2s ease-out; 
         }
 
-        /* === 💻 電腦版專用：滑鼠滑過才凸起 (手機會忽略這段) === */
+       /* === 互動設定 (電腦/手機分流) === */
+
+        /* 1. 電腦版專用：滑鼠滑過 (Hover) 就凸起來 */
+        /* @media (hover: hover) 代表「有滑鼠的裝置」 */
         @media (hover: hover) {
-            .card-back:not(.is-drawing):not(.is-selected):hover { 
-                transform: translateY(-40px); 
+            .card-back:not(.is-drawing):hover { 
+                transform: translateY(-40px); /* 凸起高度 */
                 z-index: 100; 
                 box-shadow: 0 -5px 15px rgba(0,0,0,0.3); 
+                transition: transform 0.2s ease-out;
             }
         }
 
-        /* === 📱 手機/電腦通用：被選中時強制凸起 (JS 控制) === */
+        /* 2. 手機版專用：被點選 (Selected) 才凸起來 */
+        /* 手機沒有 hover，所以靠 JS 加這個 class 來控制 */
         .card-back.is-selected {
-            /* 🔥 強制執行，不需滑動立刻生效 */
-            transform: translateY(-40px) !important; 
+            transform: translateY(-40px) !important; /* 強制凸起 */
             z-index: 100 !important; 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-            /* 加一個顯眼的框線，讓手機版更清楚知道選到了 */
-            filter: brightness(1.1); 
+            filter: brightness(1.1); /* 加亮一點，更清楚 */
         }
 
-        /* === 抽取動畫 === */
+        /* 3. 抽取動畫 (兩者通用) */
         @keyframes cardDrawUp {
-            0% { transform: translateY(-40px); opacity: 1; } /* 從凸起的位置開始 */
+            0% { transform: translateY(0); opacity: 1; }
+            /* 如果是從凸起狀態開始抽，這裡可以設 translateY(-40px) */
             100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); }
         }
+        
         .card-back.is-drawing {
             animation: cardDrawUp 0.6s ease-out forwards;
             z-index: 999 !important;
@@ -1067,30 +1072,36 @@
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
         
+        // 偵測是否為電腦 (支援 Hover 的裝置)
+        const isDesktop = window.matchMedia('(hover: hover)').matches;
+
         shuffled.forEach((card, index) => { 
             const el = document.createElement('div'); 
             el.className = 'card-back'; 
-            // 進場動畫
             el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
             
-            // === 二次確認邏輯 ===
             el.onclick = function() { 
-                // 檢查：如果已經凸起來了 (有 is-selected) --> 代表是第二次點擊 (確認抽取)
-                if (this.classList.contains('is-selected')) {
+                
+                // === 判斷邏輯開始 ===
+                
+                // 情況 A: 是電腦版 OR (是手機版且已經選中這張牌) -> 執行抽取
+                if (isDesktop || this.classList.contains('is-selected')) {
+                    
+                    // 移除選取狀態，開始執行動畫
                     this.classList.remove('is-selected');
-                    this.classList.add('is-drawing'); // 執行飛出動畫
+                    this.classList.add('is-drawing');
 
                     setTimeout(() => {
                         drawCard(card); 
-                    }, 600); // 等動畫播完開獎
+                    }, 600); // 等動畫跑完開獎
 
-                } else {
-                    // 代表是第一次點擊 (想選這張)
-                    
-                    // 1. 把其他人壓回去 (移除其他人的 is-selected)
+                } 
+                // 情況 B: 是手機版 且 還沒選中 -> 執行選取 (凸起來)
+                else {
+                    // 把其他牌壓回去
                     document.querySelectorAll('.card-back').forEach(c => c.classList.remove('is-selected'));
-
-                    // 2. 讓自己凸起來
+                    
+                    // 把這張牌凸起來
                     this.classList.add('is-selected');
                 }
             }; 

@@ -9,6 +9,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         /* ================= V36 最終修正版 ================= */
         :root { 
@@ -324,7 +325,100 @@
         .kb-article-link:hover { background: #eef5e9; color: var(--forest); padding-left: 35px; }
         .kb-article-link::before { content: '📄'; position: absolute; left: 10px; opacity: 0; transition: 0.2s; }
         .kb-article-link:hover::before { opacity: 1; }
+        /* 🔥🔥🔥 培癒寶典：列表美化整形 (雜誌卡片風) 🔥🔥🔥 */
+    
+    /* 文章列表容器：改成 Grid 排版，讓卡片整齊排列 */
+    .kb-list-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 自動適應寬度 */
+        gap: 20px;
+        padding: 10px 0;
+    }
 
+    /* 單篇文章卡片 */
+    .kb-article-card {
+        background: #ffffff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        border-left: 5px solid var(--forest); /* 左邊原本是深綠色 */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* 微微的陰影 */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 滑鼠移過去的效果：浮起來 + 變色 */
+    .kb-article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(26, 47, 35, 0.15);
+        border-left-color: var(--accent); /* 左邊變成金色 */
+    }
+
+    /* 標題文字美化 */
+    .kb-article-title {
+        font-family: 'Noto Serif TC', serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-main);
+        letter-spacing: 0.05em;
+    }
+
+    /* 標題中的數字特別美化 (例如 19-49) */
+    .kb-num-tag {
+        font-family: 'Cinzel', serif; /* 用比較歐風的字體 */
+        color: var(--accent);
+        font-weight: bold;
+        margin-right: 8px;
+        font-size: 1.2rem;
+    }
+
+    /* 右邊的小箭頭 */
+    .kb-arrow {
+        color: #ddd;
+        font-size: 1.2rem;
+        transition: 0.3s;
+    }
+    
+    .kb-article-card:hover .kb-arrow {
+        color: var(--accent);
+        transform: translateX(5px); /* 箭頭往右動一下 */
+    }
+
+    /* 分類標題美化 */
+    details.kb-mid-cat {
+        background: transparent;
+        border: none;
+        margin-bottom: 30px;
+    }
+    
+    summary.kb-mid-header {
+        font-size: 1.3rem;
+        color: var(--forest);
+        font-weight: 900;
+        padding: 10px 0;
+        border-bottom: 2px solid var(--accent);
+        margin-bottom: 20px;
+        background: transparent;
+        cursor: pointer;
+        list-style: none; /* 隱藏原本醜醜的三角形 */
+    }
+    
+    /* 自訂漂亮的三角形 */
+    summary.kb-mid-header::after {
+        content: '▼';
+        float: right;
+        font-size: 0.8rem;
+        color: var(--accent);
+        transition: 0.3s;
+    }
+    details[open] summary.kb-mid-header::after {
+        transform: rotate(180deg);
+    }
        /* === 抽卡區佈局 (電腦版) === */
         #draw-area { 
             display: grid;
@@ -359,6 +453,165 @@
             will-change: transform; 
             transition: transform 0.2s ease-out; 
         }
+        /* =========================================
+       🔥🔥🔥 1. 文章內文排版 (針對您的需求調整) 🔥🔥🔥
+       ========================================= */
+
+    /* =========================================
+       🔥🔥🔥 V70 前台 CSS：拿掉字體強制設定，只修排版 🔥🔥🔥
+       ========================================= */
+
+    /* =========================================
+       🔥🔥🔥 V72 前台：層級感修復 (親密性原則) 🔥🔥🔥
+       ========================================= */
+
+    /* 1. 容器設定 */
+    .ql-editor {
+        padding: 0;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.8;
+        font-family: sans-serif; /* 乾淨無襯線體 */
+    }
+
+    /* 2. 針對「點點標題 (・)」或「列表」 */
+    .ql-editor ul, .ql-editor ol {
+        padding-left: 1.5em;
+        margin-bottom: 0 !important; /* 🔥 改成 0，完全不留白 */
+        margin-top: 0;
+    }
+    .ql-editor li {
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+
+    /* 3. 針對「縮排說明文字」 */
+    .ql-editor .ql-indent-1 { 
+        padding-left: 2em; 
+        
+        /* 🔥🔥🔥 關鍵修改在這裡 🔥🔥🔥 */
+        margin-top: -1em !important;   /* 用負值強制往上拉，吃掉行高的空隙 */
+        /* 如果覺得太近，可以改成 -0.3em；覺得不夠近，改成 -0.8em */
+        
+        margin-bottom: 1em !important; /* 下面保持推開 */
+        color: #555;
+        display: block;
+    }
+    
+    /* 縮排層級 */
+    .ql-indent-2 { padding-left: 4em; margin-bottom: 2.5em !important; }
+    .ql-indent-3 { padding-left: 6em; margin-bottom: 2.5em !important; }
+
+    /* 4. 一般段落 (非列表、非縮排) */
+    .ql-editor p {
+        margin-bottom: 1em; /* 一般文字保持正常距離 */
+    }
+
+    /* 5. 標題樣式 (1-8 啟發的通道 那種大標) */
+    .ql-size-large {
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin-top: 40px; /* 大標題上方多留一點白 */
+        margin-bottom: 20px;
+        display: block;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+
+    /* 6. 黃色底色 */
+    strong[style*="background-color"] {
+        padding: 0 4px;
+        border-radius: 2px;
+    }
+    
+    /* 9. 圖片設定 (靠左) */
+    .ql-editor img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        
+        /* 🔥🔥🔥 關鍵修改在這裡 🔥🔥🔥 */
+        margin: 10px 0 !important;  /* 原本是 10px auto (置中)，改成 0 就會靠左 */
+        
+        border-radius: 4px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* 列表 (清單) */
+    .ql-editor ul, .ql-editor ol {
+        padding-left: 1.5em !important;
+        margin-bottom: 1.5em !important;
+        line-height: 1.8 !important;
+    }
+    .ql-editor li {
+        margin-bottom: 0.5em !important;
+    }
+
+    /* =========================================
+       🔥🔥🔥 2. 列表美化 (雜誌風卡片) 🔥🔥🔥
+       ========================================= */
+    
+    .kb-list-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* RWD 自動排版 */
+        gap: 20px;
+        padding: 10px 0;
+    }
+
+    .kb-article-card {
+        background: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        border-left: 6px solid var(--forest); /* 深綠色左邊條 */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .kb-article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(26, 47, 35, 0.15);
+        border-left-color: var(--accent); /* 滑鼠移上去變金色 */
+    }
+
+    /* 標題文字區 */
+    .kb-card-text {
+        flex: 1;
+    }
+
+    /* 如果標題有數字 (例如 19-49)，讓數字變大變漂亮 */
+    .kb-num-highlight {
+        display: block;
+        font-family: 'Cinzel', serif; /* 歐風字體 */
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: var(--accent); /* 金色 */
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+
+    .kb-title-text {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--text-main);
+        font-family: 'Noto Serif TC', serif;
+    }
+
+    .kb-arrow {
+        font-size: 1.5rem;
+        color: #eee;
+        margin-left: 15px;
+        transition: 0.3s;
+    }
+
+    .kb-article-card:hover .kb-arrow {
+        color: var(--accent);
+        transform: translateX(5px);
+    }
 
         /* 3. 發牌進場動畫 */
         @keyframes cardShuffleIn {
@@ -781,7 +1034,34 @@
         
         </div>
 </div>
+<div id="success-overlay" class="result-overlay">
+    <div class="text-modal-card" style="text-align:center; padding: 40px 30px;">
+        <h3 style="color:var(--forest); margin:0 0 10px 0;">🎉 預約成功！</h3>
+        <p style="color:#666; margin-bottom: 30px;">您的預約已送出，訂單編號如下：</p>
+        
+        <div id="success-order-id" style="background:#f1f8e9; color:var(--forest); padding:15px; border-radius:8px; font-weight:bold; font-size:1.2rem; margin-bottom:30px; border:1px dashed var(--forest);">
+            OD123456789
+        </div>
 
+        <p style="font-size:0.9rem; color:#d32f2f; font-weight:bold; margin-bottom:15px;">
+            ⚠️ 請務必點擊下方按鈕<br>傳送編號給我確認，才算完成喔！
+        </p>
+
+        <a id="line-super-btn" href="#" target="_blank" class="btn-primary" style="background:#06c755; box-shadow:0 5px 15px rgba(6,199,85,0.4); width:100%; display:flex; justify-content:center; align-items:center; text-decoration:none; line-height:50px; border-radius:30px;">
+            <i class="fa-brands fa-line" style="margin-right:8px; font-size:1.5rem;"></i> 
+            <span style="font-size:1.1rem;">傳送訂單編號 (LINE)</span>
+        </a>
+
+        <div style="margin-top:15px; background:#f5f5f5; color:#777; font-size:12px; padding:10px; border-radius:8px; line-height:1.6; border:1px solid #eee;">
+            🖥️ 電腦版用戶若沒安裝 LINE<br>
+            請直接搜尋 ID <b style="color:#333; user-select:all;">@927ctmwa</b> 並回傳訂單編號唷！
+        </div>
+
+        <button onclick="closeSuccessModal()" style="margin-top:25px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline; font-size:0.9rem;">
+            稍後再傳，先回首頁
+        </button>
+    </div>
+</div>
 <div id="story-overlay" class="result-overlay">
     <div class="text-modal-card">
         <h3>從內耗到原廠設定</h3>
@@ -876,11 +1156,25 @@
     }
 
     window.onload = async () => {
+        // 1. 初始化資料 (原本的邏輯)
         await initBookingData(); 
         initDrawData(); 
         initKbData(); 
         loadSiteAssets();
         checkSession(); 
+
+        // 🔥🔥🔥 新增：網址傳送門偵測雷達 🔥🔥🔥
+        // 取得網址參數 (例如: ?view=draw)
+        const params = new URLSearchParams(window.location.search);
+        const targetView = params.get('view');
+
+        // 如果網址有指定去哪一頁 (且該頁面 ID 存在)
+        if (targetView && document.getElementById(targetView)) {
+            showSection(targetView); // 直接切換過去
+        } else {
+            // 沒指定，或者亂打，就預設回首頁
+            showSection('home');
+        }
     };
     
     // 手機版選單開關
@@ -1061,7 +1355,7 @@
         });
     }
 
-    async function doSubmit() {
+   async function doSubmit() {
         if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「個案專區」登入！");
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
@@ -1085,6 +1379,7 @@
         const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
 
         try {
+            // --- (保留) 圖片上傳與出生資料邏輯 ---
             if (flow === 'upload') {
                 const fileInput = document.getElementById('c-file');
                 if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
@@ -1103,6 +1398,7 @@
                 finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;
             }
 
+            // --- (保留) 服務細項組裝 ---
             let details = [];
             document.querySelectorAll('input[name="svc"]:checked').forEach(el => {
                 let txt = `${el.dataset.title} ($${el.dataset.price})`;
@@ -1111,6 +1407,7 @@
                 details.push(txt);
             });
 
+            // --- (保留) 優惠券扣除次數 ---
             let couponInfoText = null;
             if (currentCoupon) {
                 let desc = currentCoupon.discount_type === 'percentage' ? `${currentCoupon.discount_value}折` : `折$${currentCoupon.discount_value}`;
@@ -1118,8 +1415,13 @@
                 await myDB.from('coupons').update({ usage_count: currentCoupon.usage_count + 1 }).eq('id', currentCoupon.id);
             }
 
+            // 🔥🔥🔥 關鍵修正 1：在這裡定義 myBookingId (在寫入資料庫之前) 🔥🔥🔥
+            const myBookingId = "OD" + Date.now(); 
+
+            // 寫入資料庫 (這裡會用到上面的 myBookingId)
             const { error } = await myDB.from('bookings').insert([{
-                booking_id: "OD" + Date.now(), temp_phone: phone, status: 'pending', price: finalPrice,
+                booking_id: myBookingId, // 👈 這裡不會再報錯了
+                temp_phone: phone, status: 'pending', price: finalPrice,
                 service_item: activeCat.name, service_detail: details.join(' | '),
                 ota_source: payStatus === 'ota' ? otaSource : null,
                 ota_order_id: payStatus === 'ota' ? otaOrderId : null,
@@ -1129,32 +1431,36 @@
             }]);
 
             if(!error) { 
-                await myDB.functions.invoke('line-notify', { body: { name, phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}` } });
+                // 🛑 測試模式
+                // ✅ 恢復功能：把前面的 // 拿掉，這行變回彩色就是成功了！
+                //await myDB.functions.invoke('line-notify', { body: { name, phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}` } });
+                console.log("假裝通知已發送 (測試中)..."); 
+                const shortId = myBookingId.slice(-6);
+                const myLineId = "@927ctmwa"; 
                 
-                alert("🎉 預約成功！"); 
+                // 這裡改成用 myBookingId
+                const message = encodeURIComponent(`我已完成服務預約，訂單編號是：${shortId}`);
+                const lineUrl = `https://line.me/R/oaMessage/${myLineId}/?${message}`;
+                
+                // 這裡也改成用 myBookingId
+                document.getElementById('success-order-id').innerText = myBookingId;
+                document.getElementById('line-super-btn').href = lineUrl;
 
-                if(currentUser) {
-                    const { data: newBookings } = await myDB.from('bookings').select('*').eq('user_id', currentUser.id);
-                    const { data: newReports } = await myDB.from('reports').select('*').eq('user_id', currentUser.id);
-                    currentUser.bookings = newBookings || [];
-                    currentUser.reports = newReports || [];
-                    renderDashboard(currentUser); 
-                    showSection('member');
-                } else {
-                    location.reload(); 
-                }
+                document.getElementById('sub-btn').disabled = false;
+                document.getElementById('sub-btn').innerText = "送出預約";
+                openModal('success-overlay');
 
             } else { 
                 throw error; 
             }
 
         } catch (err) { 
+            console.error(err); // 建議印出錯誤方便除錯
             alert(err.message || "發生錯誤"); 
             btn.disabled = false; 
             btn.innerText = "送出預約"; 
         }
     }
-
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function toggleOTA() { const isOTA = document.getElementById('pay-status').value === 'ota'; document.getElementById('ota-area').style.display = isOTA ? 'block' : 'none'; }
@@ -1163,7 +1469,7 @@
 
     // --- KB, Draw, Login ---
     async function initKbData() {
-        const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true);
+        const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true).order('sort_order', { ascending: true }); // ✅ 關鍵：加上這行，依照您後台排的順序讀取;
         if (data) {
             kbTree = {};
             data.forEach(i => {
@@ -1184,16 +1490,47 @@
         document.getElementById('kb-back-btn').style.display = 'none';
     }
 
+    // 🔥 美化版：進入大分類 (顯示中分類與文章卡片)
+    // 🔥 美化版：進入大分類 (顯示漂亮的卡片列表)
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
         
         document.getElementById('kb-container').innerHTML = Object.entries(kbTree[big]).map(([mid, arts]) => {
-            const isOpen = (kbState.activeMid === mid) ? 'open' : ''; 
+            // 預設展開全部，讓版面看起來比較豐富
+            const isOpen = 'open'; 
             
-            return `<details class="kb-mid-cat" ${isOpen}>
-                <summary class="kb-mid-header">${mid} ▼</summary>
-                ${arts.map(a=>`<div class="kb-article-link" onclick="readArt('${a.id}')">${a.title}</div>`).join('')}
+            // 產生卡片 HTML
+            const articlesHtml = arts.map(a => {
+                let titleHtml = `<div class="kb-title-text">${a.title}</div>`;
+                
+                // 🕵️‍♀️ 偵測標題是否以「數字/符號」開頭 (例如: 19-49 或 1-8)
+                // 如果是，就把數字拆出來變漂亮
+                const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+                if (match) {
+                    titleHtml = `
+                        <span class="kb-num-highlight">${match[1]}</span>
+                        <div class="kb-title-text">${match[2]}</div>
+                    `;
+                }
+
+                return `
+                <div class="kb-article-card" onclick="readArt('${a.id}')">
+                    <div class="kb-card-text">
+                        ${titleHtml}
+                    </div>
+                    <div class="kb-arrow">➔</div>
+                </div>`;
+            }).join('');
+
+            return `
+            <details class="kb-mid-cat" ${isOpen} style="border:none; background:transparent;">
+                <summary class="kb-mid-header" style="background:transparent; border-bottom:2px solid var(--accent); padding:10px 0; margin-bottom:20px; font-weight:900; font-size:1.3rem;">
+                    ${mid}
+                </summary>
+                <div class="kb-list-container">
+                    ${articlesHtml}
+                </div>
             </details>`;
         }).join('');
         
@@ -1202,14 +1539,28 @@
         document.getElementById('kb-back-btn').innerText = "← 返回"; 
     }
 
+    // 🔥 前台閱讀文章
+    // 🔥 前台閱讀文章 (載入內容並套用樣式)
     async function readArt(id) {
         const { data } = await myDB.from('kb_articles').select('*').eq('id', id).single();
         
         kbState.activeMid = data.mid_category;
         
-        document.getElementById('kb-container').innerHTML = `<div class="kb-article-view"><h1>${data.title}</h1><div style="border-bottom:1px solid #eee;padding-bottom:10px;color:#999;">${data.big_category} > ${data.mid_category}</div><div style="margin-top:20px;">${data.body}</div></div>`;
+        document.getElementById('kb-container').innerHTML = `
+            <div class="kb-article-view">
+                <h1 style="margin-bottom:5px;">${data.title}</h1>
+                <div style="border-bottom:1px solid #eee; padding-bottom:15px; color:#999; margin-bottom:20px; font-size:0.9rem;">
+                    ${data.big_category} > ${data.mid_category}
+                </div>
+                
+                <div class="ql-editor">
+                    ${data.body}
+                </div>
+            </div>`;
+            
         kbState.level = 2;
         document.getElementById('kb-back-btn').innerText = "← 返回列表";
+        window.scrollTo(0, 0); // 切換文章後自動捲到最上面
     }
 
     function kbGoBack() {

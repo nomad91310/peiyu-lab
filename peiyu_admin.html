@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>培癒中控室 V44 | KB美化修復版</title>
+    <title>培癒中控室 V60 | 穩定回歸版</title>
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         /* ================= 全域樣式 ================= */
@@ -23,39 +24,22 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* 左側導航欄 */
-        /* 左側導航欄 (修改版：加入滑動效果) */
-        .sidebar { 
-            width: 240px; 
-            background: var(--forest); 
-            height: 100%; 
-            color: white; 
-            flex-shrink: 0; 
-            display: flex; 
-            flex-direction: column; 
-            overflow-y: auto; 
-            
-            transition: width 0.3s ease; 
-            overflow-x: hidden; 
-            white-space: nowrap; 
-        }
-
-        body.hide-nav .sidebar {
-            width: 0;
-        }
+        /* 左側導航 */
+        .sidebar { width: 240px; background: var(--forest); height: 100%; color: white; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: width 0.3s ease; overflow-x: hidden; white-space: nowrap; }
+        body.hide-nav .sidebar { width: 0; }
         .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; }
         .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
         .sidebar button:hover { background: #2a3f33; color: white; }
         .sidebar button.active { background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); }
         
-        /* 主內容區 */
+        /* 主內容 */
         .main { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; position: relative; }
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 通用元件 */
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); }
+        /* 卡片與按鈕 */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
         .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; text-decoration: none; white-space:nowrap; }
         .btn:hover { opacity: 0.8; transform: translateY(-1px); }
         .btn-forest { background: var(--forest); color: white; }
@@ -68,9 +52,9 @@
         .btn-sort { background: #7f8c8d; padding: 4px 8px; font-size: 12px; color:white; line-height: 1; }
 
         /* 表格優化 */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
-        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap; }
-        td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; word-wrap: break-word; overflow-wrap: break-word; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: auto !important; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap !important; }
+        td { padding: 10px 8px !important; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; word-break: keep-all !important; white-space: nowrap !important; }
         tr:hover { background: #fdfaf1; }
 
         /* 標籤 */
@@ -82,78 +66,46 @@
         .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; border-radius: 4px; font-size:12px; }
         .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 4px; font-size:12px; }
 
-        /* 輸入框 */
         input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
         input:disabled { background: #eee; color: #999; cursor: not-allowed; }
-
-        /* 財務分頁導航 */
         .finance-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
         .finance-nav button { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; color: #666; transition: 0.2s; }
         .finance-nav button.active { background: var(--forest); color: white; }
 
-        /* ========== 知識庫 V15 復刻樣式 (重點修改區) ========== */
+        /* KB 樣式 */
         .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); transition: all 0.3s ease; }
-        
-	.kb-layout.collapsed {
-   	 grid-template-columns: 0 1fr; 
-  	 gap: 0;
-	}
-        /* 深色側邊樹狀目錄 */
-        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; 
-    white-space: nowrap; }
+        .kb-layout.collapsed { grid-template-columns: 0 1fr; gap: 0; }
+        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; white-space: nowrap; }
         .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
         .kb-tree-content { padding: 10px; flex: 1; }
-
-        /* 樹狀結構 */
         details.big-cat { margin-bottom: 5px; }
         details.big-cat > summary { padding: 10px; cursor: pointer; font-weight: bold; list-style: none; border-radius: 4px; color: #ecf0f1; }
         details.big-cat > summary:hover { background: rgba(255,255,255,0.1); }
         details.mid-cat { margin-left: 12px; border-left: 1px solid #555; }
         details.mid-cat > summary { padding: 8px; cursor: pointer; color: #ccc; font-size: 0.95rem; }
         details.mid-cat > summary:hover { color: #fff; }
-
-        .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: block; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; }
+        .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: block; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; display: flex; align-items: center; }
         .article-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
         .article-item.active { color: #fff; background: #c6a87c; font-weight: bold; }
         .article-item.draft { color: #e74c3c; } 
         .article-item.draft::before { content: '🔴 '; font-size: 10px; }
+        .sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
+        .btn-sort-arrow { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; border-radius: 3px; line-height: 1.2; }
+        .btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
+        .article-item:hover .sort-actions { opacity: 1; }
+        .article-title-span { flex: 1; }
 
-        /* 編輯器容器：改為自動彈性高度 (flex: 1) */
-        #editor-container { 
-            flex: 1; 
-            min-height: 200px; /* 設個最小高度保險 */
-            
-            display: flex; 
-            flex-direction: column; 
-            background: white; 
-            margin-bottom: 0; /* 底部不需要留白了 */
-            border: 1px solid #ccc; 
-            overflow: hidden; /* 確保內容溢出時是內部捲動，不是撐開容器 */
-        }
-
-        /* 確保 Quill 的編輯區塊可以捲動 */
-        .ql-container {
-            flex: 1; /* 佔滿編輯器容器剩下的空間 (扣除工具列後) */
-            overflow-y: auto; /* 內容多時出現卷軸 */
-            font-size: 16px;
-        }
-	/* === 📝 編輯器字體修復補丁 === */
-        
-        /* 1. 預設編輯器內容使用黑體 */
-        .ql-container { font-family: "Microsoft JhengHei", sans-serif; }
-
-        /* 2. 當選取 'Serif' 時，強制使用 Noto Serif TC (宋體) */
+        /* 編輯器容器 */
+        #editor-container { flex: 1; min-height: 200px; display: flex; flex-direction: column; background: white; margin-bottom: 0; border: 1px solid #ccc; overflow: hidden; }
+        .ql-container { flex: 1; overflow-y: auto; font-size: 16px; font-family: "Microsoft JhengHei", sans-serif; }
         .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
-        
-        /* 3. 當選取 'Monospace' 時，使用等寬字體 */
         .ql-font-monospace { font-family: 'Courier New', monospace !important; }
-
-        /* 4. 讓下拉選單裡的選項也顯示正確的字體樣子 */
         .ql-picker-item[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
         .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
         .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
 
-        /* ========== 圖庫 Modal ========== */
+        /* 圖庫與 Modals */
         .gallery-box { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
         .gallery-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .gallery-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 20px; background: #fff; }
@@ -161,16 +113,13 @@
         .gallery-item:hover { border-color: #3498db; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-
-        /* 其他 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
         .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
         
+        /* 鎖屏與其他 */
         #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
         #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
-
-        /* 排程表格 */
         .batch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
         .batch-slot { position: relative; }
         .batch-slot input { position: absolute; opacity: 0; cursor: pointer; }
@@ -186,74 +135,51 @@
         .compact-slot.free { background: #f0f7ff; color: #2980b9; border-color: #3498db; }
         .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
         .compact-slot:hover .compact-del { display: block; }
-        
-        /* 預約看板 */
-        .u-slot { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #f0f7ff; border: 1px solid #d6e9f9; color: #2980b9; }
+        .u-slot { display: inline-block !important; margin: 3px !important; padding: 4px 8px !important; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
         .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
         .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
         .admin-row:hover { background: #f0f7ff; }
-        .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; }
-        .code-block { background: #eee; padding: 5px; border-radius: 3px; font-family: monospace; display: block; margin-top: 5px; word-break: break-all; border: 1px solid #ccc; cursor: pointer; }
-/* ======= 🚑 緊急修復補丁 (針對截圖問題) ======= */
+        
+        /* SQL 複製區樣式 */
+        .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
+        .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
+        .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
 
-/* 1. 修復表格文字變成直排的問題 */
-table {
-    table-layout: auto !important; /* 取消固定寬度，讓表格自動撐開 */
-    width: 100%;
-}
-th, td {
-    white-space: nowrap !important; /* 強制文字不換行 */
-    word-break: keep-all !important; /* 禁止單字斷行 */
-    padding: 10px 8px !important;    /* 增加一點呼吸空間 */
-    vertical-align: middle;
-}
-/* 讓表格這張卡片可以左右滑動，避免撐爆版面 */
-.card {
-    overflow-x: auto; 
-}
-
-/* 2. 修復排程時間黏在一起 (13:0013:30...) 的問題 */
-.u-slot {
-    display: inline-block !important; /* 讓它變成方塊 */
-    margin: 3px !important;           /* 增加間距 */
-    padding: 4px 8px !important;      /* 內距 */
-    background: #f0f7ff;
-    border: 1px solid #d6e9f9;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #2980b9;
-}
-.u-slot.booked {
-    background: #fff5f5;
-    border-color: #e74c3c;
-    color: #c0392b;
-    text-decoration: line-through;
-}
-
-/* 3. 微調看板比例，讓左邊寬一點 */
-.dashboard-layout {
-    grid-template-columns: 3fr 1fr !important; /* 給左邊表格更多空間 */
-}
-	/* 排序按鈕群組 */
-.sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
-.btn-sort-arrow { 
-    background: transparent; border: 1px solid rgba(255,255,255,0.2); 
-    color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; 
-    border-radius: 3px; line-height: 1.2; 
-}
-.btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
-
-/* 讓文章列表也能顯示排序按鈕 */
-.article-item { display: flex; align-items: center; }
-.article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
-.article-item:hover .sort-actions { opacity: 1; }
-.article-title-span { flex: 1; }
+        .dashboard-layout { grid-template-columns: 3fr 1fr !important; }
+        /* 🔥 編輯器美化：橘色引用線 & 縮排設定 🔥 */
+        .ql-editor blockquote {
+        border-left: 5px solid #d35400 !important; /* 橘色粗線 */
+        background-color: #fffaf0 !important;      /* 淡米色底 */
+        padding: 10px 15px !important;             /* 內距 */
+        margin: 10px 0 !important;
+        color: #8a5a00;
+        font-weight: bold;
+        }
+    
+        /* 讓縮排 (Indent) 真的有效果 */
+        .ql-indent-1 { padding-left: 2em !important; }
+        .ql-indent-2 { padding-left: 4em !important; }
+        .ql-indent-3 { padding-left: 6em !important; }
+    
+        /* 讓對齊 (Align) 真的有效果 */
+        .ql-align-center { text-align: center !important; }
+        .ql-align-right { text-align: right !important; }
+        /* 🔥 格式刷游標樣式 🔥 */
+        .painter-active {
+            cursor: copy !important; /* 滑鼠變成複製圖示 */
+            user-select: none;
+         }
+        /* 讓格式刷按鈕被按下時有顏色 */
+        .ql-format-painter.active {
+            color: var(--forest) !important;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div id="admin-lock">
-    <h2 style="color:var(--accent);">🔒 培癒中控室 V44</h2>
+    <h2 style="color:var(--accent);">🔒 培癒中控室 V60</h2>
     <input type="password" id="admin-pwd" placeholder="請輸入密碼">
     <button class="btn btn-warning" onclick="checkAdmin()">進入系統</button>
 </div>
@@ -290,9 +216,8 @@ th, td {
 </div>
 
 <div class="main">
-    <button class="btn btn-outline" onclick="toggleMainSidebar()" style="margin-bottom: 15px; padding: 5px 10px;">
-        ☰ 選單開關
-    </button>
+    <button class="btn btn-outline" onclick="toggleMainSidebar()" style="margin-bottom: 15px; padding: 5px 10px;">☰ 選單開關</button>
+    
     <div id="tab-bks" class="tab-content active">
         <div class="dashboard-layout" style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;">
             <div>
@@ -301,7 +226,7 @@ th, td {
                         <h3>📋 近期預約清單</h3>
                         <button class="btn btn-outline" onclick="fetchAll()">🔄 刷新</button>
                     </div>
-                    <input type="text" id="search-key" placeholder="🔍 搜尋 姓名 / 手機 / 單號 / OTA..." style="margin-bottom:15px;" onkeyup="renderUI()">
+                    <input type="text" id="search-key" placeholder="🔍 搜尋 姓名 / 手機 / 單號 / OTA..." style="margin-bottom:15px;" onkeyup="renderBks()">
                     <table>
                         <thead><tr><th width="20%">單號/日期</th><th width="25%">個案資訊</th><th width="25%">服務內容</th><th width="10%">金額</th><th width="10%">狀態</th><th width="10%">操作</th></tr></thead>
                         <tbody id="bk-list"></tbody>
@@ -365,12 +290,7 @@ th, td {
             <input type="text" id="search-member" placeholder="🔍 搜尋姓名或手機..." onkeyup="renderPro()" style="margin-bottom:15px;">
             <div style="overflow-x: auto;">
                 <table>
-                    <thead>
-                        <tr>
-                            <th width="15%">姓名</th><th width="15%">手機</th><th width="20%">Email</th>
-                            <th width="15%">累積消費</th><th width="15%">最近預約</th><th width="20%">操作</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th width="15%">姓名</th><th width="15%">手機</th><th width="20%">Email</th><th width="15%">累積消費</th><th width="15%">最近預約</th><th width="20%">操作</th></tr></thead>
                     <tbody id="pro-list"></tbody>
                 </table>
             </div>
@@ -383,7 +303,6 @@ th, td {
                 <button onclick="switchFinanceSub('ota')" id="btn-sub-ota" class="active">💰 OTA 平台設定</button>
                 <button onclick="switchFinanceSub('coupon')" id="btn-sub-coupon">🎫 優惠券管理</button>
             </div>
-
             <div id="sub-ota">
                 <div style="background:#f9f9f9; padding:20px; border-radius:8px; margin-bottom:20px;">
                     <h4 style="margin-top:0; color:#555;">➕ 新增 / 修改平台</h4>
@@ -407,7 +326,7 @@ th, td {
 
             <div id="sub-coupon" style="display:none;">
                 <input type="hidden" id="cp-edit-id">
-                <div style="background:#fffcf5; padding:20px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#fffcf5; padding:20px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
                     <h4 style="margin-top:0; color:#e65100;">🎫 優惠券編輯器</h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                         <div><label>優惠券名稱</label><input type="text" id="cp-name" placeholder="例如：新春調頻 9 折"></div>
@@ -418,14 +337,14 @@ th, td {
                             <label>使用期限</label>
                             <div style="display:flex; gap:10px; align-items:center;">
                                 <input type="date" id="cp-exp">
-                                <label style="white-space:nowrap; font-size:14px; display:flex; align-items:center; cursor:pointer;"><input type="checkbox" id="cp-no-limit" onchange="toggleCpExp()" style="width:18px; height:18px; margin-right:5px;"> 無期限</label>
+                                <label style="white-space:nowrap; cursor:pointer;"><input type="checkbox" id="cp-no-limit" onchange="toggleCpExp()" style="margin-right:5px;"> 無期限</label>
                             </div>
                         </div>
                         <div>
                             <label>適用對象</label>
                             <div style="margin-top:10px; display:flex; gap:20px;">
-                                <label style="display:flex; align-items:center;"><input type="checkbox" id="cp-mem" checked style="width:auto; margin-right:5px;"> 需會員</label>
-                                <label style="display:flex; align-items:center;"><input type="checkbox" id="cp-guest" style="width:auto; margin-right:5px;"> 訪客可用</label>
+                                <label><input type="checkbox" id="cp-mem" checked style="margin-right:5px;"> 需會員</label>
+                                <label><input type="checkbox" id="cp-guest" style="margin-right:5px;"> 訪客可用</label>
                             </div>
                         </div>
                     </div>
@@ -435,14 +354,6 @@ th, td {
                     </div>
                 </div>
                 <table><thead><tr><th>名稱</th><th>代碼</th><th>內容</th><th>期限</th><th>對象</th><th>次數</th><th>操作</th></tr></thead><tbody id="cp-list"></tbody></table>
-                <div style="margin-top:30px; background:#f9f9f9; padding:15px; border-radius:8px;">
-                    <h4 style="margin-top:0;">🧪 優惠券試算</h4>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="test-cp-code" placeholder="輸入代碼" style="flex:1;">
-                        <input type="number" id="test-cp-price" placeholder="訂單原價" style="flex:1;">
-                        <button class="btn btn-info" onclick="testCoupon()">試算</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -456,37 +367,18 @@ th, td {
                 </div>
                 <div id="kb-tree" class="kb-tree-content"></div>
             </div>
-
-           <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%;">
-                
+            <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h2 id="mode-title" style="margin:0; color:var(--dark);">新增文章</h2>
                     <button class="btn btn-purple" onclick="openGallery()">🖼️ 開啟圖庫</button>
                 </div>
-
                 <div style="display:grid; grid-template-columns: 1fr 1fr 2fr; gap:15px; margin-bottom:15px;">
-                    <div>
-                        <label style="font-weight:bold;">大分類</label>
-                        <input list="kb-big-list" id="kb-big" placeholder="例: 人類圖">
-                        <datalist id="kb-big-list"></datalist>
-                    </div>
-                    <div>
-                        <label style="font-weight:bold;">中分類</label>
-                        <input list="kb-mid-list" id="kb-mid" placeholder="例: 通道">
-                        <datalist id="kb-mid-list"></datalist>
-                    </div>
-                    <div>
-                        <label style="font-weight:bold;">文章標題</label>
-                        <input type="text" id="kb-title" placeholder="輸入標題...">
-                    </div>
+                    <div><label style="font-weight:bold;">大分類</label><input list="kb-big-list" id="kb-big" placeholder="例: 人類圖"><datalist id="kb-big-list"></datalist></div>
+                    <div><label style="font-weight:bold;">中分類</label><input list="kb-mid-list" id="kb-mid" placeholder="例: 通道"><datalist id="kb-mid-list"></datalist></div>
+                    <div><label style="font-weight:bold;">文章標題</label><input type="text" id="kb-title" placeholder="輸入標題..."></div>
                 </div>
-
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#f1f8e9; padding:10px; border-radius:8px;">
-                    <div>
-                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;">
-                            <input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示
-                        </label>
-                    </div>
+                    <div><label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;"><input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示</label></div>
                     <div style="display:flex; gap:10px;">
                         <input type="hidden" id="kb-id">
                         <button class="btn btn-danger" onclick="delArticle()" style="display:none;" id="btn-kb-del">刪除</button>
@@ -494,12 +386,12 @@ th, td {
                         <button class="btn btn-forest" onclick="saveArticle()">💾 儲存文章</button>
                     </div>
                 </div>
-
                 <div id="editor-container">
                     <div id="editor"></div>
                 </div>
-
             </div>
+        </div>
+    </div>
 
     <div id="tab-menu" class="tab-content">
         <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;">
@@ -515,46 +407,40 @@ th, td {
                 </div>
                 <table id="cat-list" style="margin-top:15px;"></table>
             </div>
-            
             <div class="card" id="card-svc">
                 <h3>⚙️ 細項管理</h3>
+                
                 <div class="sql-hint-box">
-                    <strong>💡 系統提示：</strong> 若存檔失敗，請確認資料庫有 <code>report_template</code> 欄位。
+                    <strong>💡 SQL 補丁 (若無法新增請在 Supabase 執行)：</strong>
+                    <button class="btn btn-outline btn-copy-sql" onclick="copySqlCode()">📋 複製代碼</button>
+                    <div class="sql-code-area" id="sql-code-block">
+                        ALTER TABLE services ADD COLUMN IF NOT EXISTS report_template TEXT;
+                    </div>
                 </div>
 
                 <input type="hidden" id="svc-id-edit">
-                
-                <select id="svc-cat-filter" style="width:100%; margin-bottom:10px; padding:8px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()">
-                    <option value="">載入中...</option>
-                </select>
-
+                <select id="svc-cat-filter" style="width:100%; margin-bottom:10px; padding:8px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()"><option value="">載入中...</option></select>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="i-name" placeholder="項目名" style="flex:2;">
                     <input type="number" id="i-price" placeholder="價格" style="flex:1;">
                 </div>
-                
                 <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin:10px 0;">
                     <label style="display:flex; align-items:center; gap:5px; margin-bottom:10px; color:var(--danger); font-weight:bold; cursor:pointer;">
-                        <input type="checkbox" id="i-is-main" style="width:18px; height:18px;" onchange="toggleSubOptionInput()"> 
-                        設為主項目 (單選互斥，無子選項)
+                        <input type="checkbox" id="i-is-main" style="width:18px; height:18px;" onchange="toggleSubOptionInput()"> 設為主項目 (單選互斥，無子選項)
                     </label>
-
                     <div id="main-opt-wrapper" style="display:none;">
                         <input type="text" id="i-report-tpl" placeholder="對應報告檔案 (例: srt_report.html)">
                         <small style="color:var(--purple);">💡 若為主項目，請填寫此欄以連結報表。</small>
                     </div>
-
                     <div id="sub-opt-wrapper">
                         <input type="text" id="i-sub-opts" placeholder="子選項 (逗號隔開)">
                         <small style="color:#666;">💡 加購項目才需要</small>
                     </div>
                 </div>
-
                 <div style="display:flex; gap:10px; justify-content: flex-end;">
                     <button class="btn btn-outline" id="btn-svc-cancel" onclick="cancelEdit('svc')" style="display:none;">取消</button>
                     <button class="btn btn-forest" id="btn-svc-save" onclick="saveItem()">＋ 新增項目</button>
                 </div>
-                
                 <div style="max-height:400px; overflow-y:auto; margin-top:15px; border-top:1px solid #eee;" id="svc-list-container">
                     <p style="padding:10px; color:#999;">請先選擇上方的大類...</p>
                 </div>
@@ -572,14 +458,24 @@ th, td {
 </div>
 
 <script>
-    // 🌟 1. 初始化 Supabase 與 全域工具
+    // ==========================================
+    // 🚀 培癒中控室 V60 | 穩定回歸版
+    // ==========================================
+
+    // 1. 初始化 Supabase
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
     const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
-
     const cleanPhone = (p) => p ? p.replace(/\D/g, '') : '';
     
-    // 👇 這個就是剛才報錯缺少的變數
+    // 2. 定義全域變數 (最優先)
+    let cache = { bks:[], pros:[], cats:[], svcs:[], slots:[], otas:[], coupons:[], articles:[] };
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
+    let selectedDateStr = "";
+    let currentBucket = 'kb-images';
+    let kbCatOrder = { big: [], mid: {} };
+
     const STATUS_MAP = {
         'paid': '<span class="tag tag-paid">已付款</span>',
         'pending': '<span class="tag tag-wait">未付款</span>',
@@ -588,57 +484,154 @@ th, td {
         'completed': '<span class="tag" style="background:#333">已結案</span>'
     };
 
-    // 🌟 2. Quill Image Blot (圖片縮放核心，不能少)
+    // 3. 初始化 Quill 編輯器 (移除不穩定的表格外掛，保住資料)
+    // (A) 註冊圖片外掛
     const BaseImage = Quill.import('formats/image');
-    const ATTRIBUTES = ['alt', 'height', 'width', 'style', 'class'];
     class CustomImage extends BaseImage {
-        static formats(domNode) { return ATTRIBUTES.reduce((f, a) => { if (domNode.hasAttribute(a)) f[a] = domNode.getAttribute(a); return f; }, {}); }
-        format(name, value) { if (ATTRIBUTES.indexOf(name) > -1) { if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name); } else super.format(name, value); }
+        static formats(domNode) { return ['alt', 'height', 'width', 'style'].reduce((f, a) => { if (domNode.hasAttribute(a)) f[a] = domNode.getAttribute(a); return f; }, {}); }
+        format(name, value) { if (['alt', 'height', 'width', 'style'].indexOf(name) > -1) { if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name); } else super.format(name, value); }
     }
     Quill.register({ 'formats/image': CustomImage }, true);
-	var Font = Quill.import('formats/font');
-    Font.whitelist = ['serif', 'sans-serif', 'monospace']; // 定義允許的字體代號
+    
+    // (B) 註冊字體
+    var Font = Quill.import('formats/font');
+    Font.whitelist = ['serif', 'sans-serif', 'monospace'];
     Quill.register(Font, true);
-    // 🌟 3. 初始化 Quill 編輯器 (含字體與大小)
+
+   // (C) 註冊表格外掛 (防呆)
+    if (window.QuillBetterTable) {
+        Quill.register({ 'modules/better-table': window.QuillBetterTable }, true);
+    }
+
+    // 🔥 全域變數：儲存格式刷狀態
+    var painterFormat = null; // 存格式
+    var isPainterOn = false;  // 存開關狀態
+
+    // (D) 啟動編輯器 (V71：字型+大小+格式刷+排版工具 全開版)
     var quill = new Quill('#editor', {
         theme: 'snow',
         modules: { 
             imageResize: { displaySize: true }, 
-            toolbar: [
-                [{ 'font': [] }], 
-                [{ 'size': ['small', false, 'large', 'huge'] }], 
-                ['bold', 'italic', 'underline', 'strike'], 
-                [{ 'header': [1, 2, 3, false] }], 
-                [{ 'color': [] }, { 'background': [] }], 
-                ['link', 'image'], 
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }], 
-                ['clean']
-            ] 
+            table: false, 
+            'better-table': window.QuillBetterTable ? {
+                operationMenu: { items: { unmergeCells: { text: '取消合併' } }, color: { text: '背景顏色' } }
+            } : null,
+            keyboard: { 
+                bindings: Object.assign({}, 
+                    (window.QuillBetterTable ? window.QuillBetterTable.keyboardBindings : {}), 
+                    {
+                        'linebreak': {
+                            key: 13,
+                            shiftKey: true,
+                            handler: function() {
+                                const range = this.quill.getSelection();
+                                if (range) {
+                                    this.quill.insertText(range.index, '\n');
+                                    this.quill.setSelection(range.index + 1);
+                                }
+                                return false; 
+                            }
+                        },
+                        'exitPainter': {
+                            key: 27, // ESC 退出格式刷
+                            handler: function() {
+                                turnOffPainter();
+                                return true;
+                            }
+                        }
+                    }
+                )
+            },
+            toolbar: {
+                container: [
+                    // 👇👇👇 這裡！把遺失的字型與大小加回來了 👇👇👇
+                    [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }], 
+                    
+                    [{ 'header': [1, 2, 3, false] }], 
+                    ['bold', 'italic', 'underline', 'strike'], 
+                    [{ 'color': [] }, { 'background': [] }], 
+                    
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }], 
+                    [{ 'indent': '-1'}, { 'indent': '+1' }], 
+                    [{ 'align': [] }], 
+                    ['blockquote'], 
+
+                    ['format-painter'], // 格式刷
+
+                    ['link', 'image'], 
+                    window.QuillBetterTable ? ['table-btn'] : [], 
+                    ['clean']
+                ],
+                handlers: {
+                    'table-btn': function() {
+                        if(window.QuillBetterTable) this.quill.getModule('better-table').insertTable(3, 3);
+                    },
+                    'format-painter': function() {
+                        if (isPainterOn) {
+                            turnOffPainter();
+                        } else {
+                            var range = this.quill.getSelection();
+                            if (range) {
+                                painterFormat = this.quill.getFormat(range);
+                                isPainterOn = true;
+                                document.querySelector('.ql-editor').classList.add('painter-active');
+                                document.querySelector('.ql-format-painter').classList.add('active');
+                            }
+                        }
+                    }
+                }
+            }
         },
-        placeholder: '盡情揮灑你的創意...'
+        placeholder: '在此輸入內容...'
     });
 
-    // 🌟 4. 定義全域變數 (狀態與快取)
-    let cache = { bks:[], pros:[], cats:[], svcs:[], slots:[], otas:[], coupons:[], articles:[] };
-    let currentYear = new Date().getFullYear();
-    let currentMonth = new Date().getMonth() + 1;
-    let selectedDateStr = "";
-    let currentBucket = 'kb-images';
-    let kbCatOrder = { big: [], mid: {} }; // 存放分類排序設定
+    // 關閉格式刷的函式
+    function turnOffPainter() {
+        isPainterOn = false;
+        painterFormat = null;
+        document.querySelector('.ql-editor').classList.remove('painter-active');
+        document.querySelector('.ql-format-painter').classList.remove('active');
+    }
 
-    // 🌟 5. 核心讀取函式 (修復文章消失 + 排序功能)
+    // 🔥 監聽：滑鼠選字時，如果刷子是開的，就瘋狂套用格式
+    quill.on('selection-change', function(range, oldRange, source) {
+        if (source === 'user' && range && range.length > 0 && isPainterOn && painterFormat) {
+            // 套用格式
+            for (let format in painterFormat) {
+                quill.formatText(range.index, range.length, format, painterFormat[format]);
+            }
+            // ⚠️ 這裡拿掉了「關閉」的程式碼，所以它會一直開著，直到您手動關掉
+        }
+    });
+
+    // 補上圖示
+    setTimeout(() => {
+        if(window.QuillBetterTable) {
+            const btn = document.querySelector('.ql-table-btn');
+            if(btn) btn.innerHTML = '<i class="fa-solid fa-table"></i>';
+        }
+        const painterBtn = document.querySelector('.ql-format-painter');
+        if(painterBtn) {
+            painterBtn.innerHTML = '<i class="fa-solid fa-paint-roller"></i>';
+            painterBtn.title = "格式刷 (點一下鎖定，再點一下解除)";
+        }
+    }, 100);
+
+
+    // 🌟 4. 核心讀取函式 (select * 保證讀取 body)
     async function fetchAll() {
         try {
-            // A. 嘗試讀取資料 (含 sort_order)
-            let ar = await myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published, sort_order').order('sort_order');
+            console.log("🚀 正在讀取資料...");
+
+            // (A) 讀取文章 (優先 sort_order)
+            let ar = await myDB.from('kb_articles').select('*').order('sort_order');
             
-            // 🚨 自動修復機制：如果讀取失敗(通常是因為缺欄位)，就改用舊方法讀取
             if (ar.error) {
-                console.warn("排序欄位讀取失敗，降級為普通讀取:", ar.error.message);
-                ar = await myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published').order('created_at', {ascending:false});
+                console.warn("⚠️ 排序讀取失敗，切換舊模式...", ar.error.message);
+                ar = await myDB.from('kb_articles').select('*').order('created_at', {ascending:false});
             }
 
-            // B. 讀取其他所有資料
+            // (B) 讀取其他資料
             const [b, p, c, s, sl, o, cp, cfg] = await Promise.all([
                 myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
                 myDB.from('profiles').select('*').order('created_at', {ascending:false}),
@@ -655,92 +648,59 @@ th, td {
                 return { ...bk, profiles: profile || null };
             });
 
-            // C. 更新全域變數
-            // 確保分類設定存在，如果沒有就用預設空物件，防止之後報錯
-            if (cfg.data && cfg.data.content) {
-                kbCatOrder = cfg.data.content;
-            } else {
-                kbCatOrder = { big: [], mid: {} };
-            }
-
+            // (C) 寫入快取
             cache = { 
                 bks: bookingsWithProfile, pros: p.data||[], cats: c.data||[], 
                 svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
                 coupons: cp.data||[], 
-                articles: ar.data||[] // 這裡一定會有資料了
+                articles: ar.data||[] 
             };
-            
-            // 同步分類 (即使設定檔是空的，也會自動補上現有文章分類)
-            if(typeof syncKbOrderKeys === 'function') {
-                syncKbOrderKeys();
-            }
 
-            // D. 渲染畫面
-            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); 
+            // (D) 分類排序
+            if (cfg.data && cfg.data.content) { kbCatOrder = cfg.data.content; }
+            else { kbCatOrder = { big: [], mid: {} }; }
+            if(typeof syncKbOrderKeys === 'function') syncKbOrderKeys();
+
+            // (E) 渲染畫面
+            renderBks(); 
+            renderPro(); 
+            renderConfigTables(); 
+            renderCalendar(); 
+            renderFinance(); 
+            
             if(typeof renderKbTree === 'function') renderKbTree(); 
-            render7DaySchedule();
+            if(typeof render7DaySchedule === 'function') render7DaySchedule();
             
+            console.log("✅ 資料讀取成功！");
+
         } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
     }
 
-    function checkAdmin() {
-        if(document.getElementById('admin-pwd').value === "admin888") { 
-            document.getElementById('admin-lock').style.display = 'none';
-            document.querySelector('.main').style.display = 'block';
-            fetchAll(); renderTimeGrid();
-        } else { alert("密碼錯誤"); }
-    }
-
-    async function fetchAll() {
-        try {
-            // 1. 讀取所有資料
-            const [b, p, c, s, sl, o, cp, ar, cfg] = await Promise.all([
-                myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
-                myDB.from('profiles').select('*').order('created_at', {ascending:false}),
-                myDB.from('service_categories').select('*').order('created_at'),
-                myDB.from('services').select('*').order('sort_order'),
-                myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time'),
-                myDB.from('ota_settings').select('*'),
-                myDB.from('coupons').select('*').order('created_at', {ascending:false}),
-                myDB.from('kb_articles').select('id, title, big_category, mid_category, is_published, sort_order').order('sort_order'),
-                myDB.from('site_content').select('content').eq('title', 'kb_category_order').single()
-            ]);
-
-            const bookingsWithProfile = (b.data || []).map(bk => {
-                const profile = (p.data || []).find(pr => pr.id === bk.user_id);
-                return { ...bk, profiles: profile || null };
-            });
-
-            // 2. 初始化全域快取
-            cache = { 
-                bks: bookingsWithProfile, pros: p.data||[], cats: c.data||[], 
-                svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
-                coupons: cp.data||[], articles: ar.data||[] 
-            };
-
-            // 3. 處理 KB 排序邏輯 (關鍵修復點)
-            // 如果有讀到設定檔，就用設定檔
-            if (cfg.data && cfg.data.content) {
-                kbCatOrder = cfg.data.content;
+    // 🔒 登入驗證
+    async function checkAdmin() {
+        const pwd = document.getElementById('admin-pwd').value;
+        const btn = document.querySelector('#admin-lock button');
+        
+        if(pwd === "admin888") { 
+            btn.innerText = "讀取中...";
+            btn.disabled = true;
+            try {
+                await fetchAll(); 
+                document.getElementById('admin-lock').style.display = 'none';
+                document.querySelector('.main').style.display = 'block';
+                renderTimeGrid();
+            } catch (e) {
+                alert("載入失敗：" + e.message);
+                btn.innerText = "進入系統";
+                btn.disabled = false;
             }
-            
-            // 無論有沒有設定檔，都要執行同步檢查
-            // 這樣即使設定檔是空的，也會自動把現有文章的分類抓進去，文章就不會消失了
-            syncKbOrderKeys();
-
-            // 4. 渲染畫面
-            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); 
-            renderKbTree(); 
-            render7DaySchedule();
-            
-        } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
+        } else { 
+            alert("密碼錯誤"); 
+        }
     }
-	// 切換列表顯示/隱藏
-function toggleKbSidebar() {
-    document.querySelector('.kb-layout').classList.toggle('collapsed');
-}
 
-    // --- 1. 預約看板 ---
+    // ================= 遺失的關鍵函式 (renderBks) =================
+    
     function renderBks() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
         document.getElementById('bk-list').innerHTML = cache.bks.filter(x => 
@@ -773,435 +733,253 @@ function toggleKbSidebar() {
         if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
     }
 
+    function openCreateMemberModal(phone, bookingId) {
+        alert(`建立會員功能 (手機: ${phone}) \n請確認是否需要此功能的完整代碼？`);
+    }
+
+    // 🌟 4. 預約選單優化 (V48 美化版)
     function openBooking(id) {
         const b = cache.bks.find(x => x.id === id);
-        if(!b) { alert("找不到訂單"); return; }
+        if(!b) return alert("找不到訂單");
         
-        const cleanDetail = (b.wish_detail||'').replace(/\| \[付款碼.*?\]/g, '');
-        let extractName="未知", extractEmail="未知", extractData=cleanDetail;
-        const nm=cleanDetail.match(/姓名:(.*?) \|/), em=cleanDetail.match(/Email:(.*?) \|/), dt=cleanDetail.match(/數據:(.*)/);
-        if(nm) extractName=nm[1]; if(em) extractEmail=em[1]; if(dt) extractData=dt[1];
+        try {
+            const rawDetail = b.wish_detail || '';
+            const cleanDetail = rawDetail.replace(/\| \[付款碼.*?\]/g, '').replace(/\| \[QR已傳.*?\]/g, '');
+            const urlMatch = cleanDetail.match(/(https?:\/\/[^\s|]+)/); 
+            const screenshotUrl = urlMatch ? urlMatch[0] : null;
+            const screenshotBtn = screenshotUrl 
+                ? `<a href="${screenshotUrl}" target="_blank" class="btn btn-outline" style="color:#3498db; border-color:#3498db;">🖼️ 查看截圖證據</a>` 
+                : `<span style="color:#999; font-size:12px;">(無截圖)</span>`;
+            
+            let displayData = cleanDetail.replace(/(https?:\/\/[^\s|]+)/g, '').replace(/截圖[:：]\s*/g, '').replace(/\|? ?姓名:.*? \|/g, '').replace(/\|? ?Email:.*? \|/g, '').replace(/\|? ?數據: ?/g, '').trim();
+            let extractName = "未知", extractEmail = "未知";
+            const nm = rawDetail.match(/姓名:(.*?) \|/);
+            const em = rawDetail.match(/Email:(.*?) \|/);
+            if(nm) extractName = nm[1].trim(); 
+            if(em) extractEmail = em[1].trim();
 
-        const mainService = (cache.svcs || []).find(s => s.is_main && (b.service_detail||'').includes(s.title));
-        let reportTemplate = "srt_report.html", btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
-        if (mainService && mainService.report_template) {
-            reportTemplate = mainService.report_template;
-            btnLabel = `📄 生成 ${mainService.title} 報告`;
-        }
+            const mainService = (cache.svcs || []).find(s => s.is_main && (b.service_detail||'').includes(s.title));
+            let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
+            let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
+            
+            const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
+            const existingReportId = reportMatch ? reportMatch[1] : null;
+            
+            let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
+            if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
 
-        const reportMatch = (b.wish_detail||'').match(/\[報告已生成 ID:(.*?)\]/);
-        const existingReportId = reportMatch ? reportMatch[1] : null;
-        let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
-        if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
+            const couponBadge = b.coupon_info ? `<div style="display:inline-block; background:#fce4ec; color:#c2185b; font-size:12px; padding:2px 8px; border-radius:10px; margin-top:5px;">🎟️ ${b.coupon_info}</div>` : '';
 
-        let couponHtml = b.coupon_info ? `<div style="background:#fce4ec; color:#c2185b; padding:10px; border-radius:5px; margin-top:10px;">🎟️ <b>使用優惠券：</b> ${b.coupon_info}</div>` : '';
+            let scheduleBox = '';
+            if(b.scheduled_at) {
+                scheduleBox = `<div style="background:#f0f8ff; padding:12px; border-left:4px solid #3498db; border-radius:4px; margin-top:15px;"><div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#2980b9;">📅 已鎖定服務排程</strong><button class="btn btn-outline" style="font-size:12px; background:white;" onclick="document.getElementById('reschedule-area').style.display='block'; this.style.display='none';">✏️ 修改</button></div><div style="font-size:1.2rem; color:#2c3e50; margin-top:5px; font-weight:bold;">${new Date(b.scheduled_at).toLocaleString()}</div><div id="reschedule-area" style="display:none; margin-top:10px;"><div style="display:flex; gap:10px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認變更</button></div></div>`;
+            } else if(b.status === 'paid' || b.status === 'awaiting_service') {
+                scheduleBox = `<div style="background:#fff3e0; padding:12px; border-left:4px solid #f39c12; border-radius:4px; margin-top:15px;"><strong style="color:#e67e22;">⏳ 等待排程</strong><div style="display:flex; gap:10px; margin-top:5px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認鎖定時段</button></div>`;
+            }
 
-        let scheduleBox = '';
-        if(b.scheduled_at) {
-            scheduleBox = `<div style="color:var(--purple); font-weight:bold; margin-top:10px; font-size:1.1rem;">📅 已排程：${new Date(b.scheduled_at).toLocaleString()}</div>`;
-        } else if(b.status === 'paid' || b.status === 'awaiting_service') {
-            scheduleBox = `<div style="background:#e3f2fd; padding:10px; border-radius:5px; margin-top:10px;">
-                <label>1. 先選日期</label><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)">
-                <label style="margin-top:5px;">2. 再選時間</label><select id="book-slot"><option>請先選日期</option></select>
-                <button class="btn btn-purple" style="width:100%; margin-top:10px;" onclick="confirmSchedule('${b.id}')">確認排程</button></div>`;
-        } else {
-            scheduleBox = `<div style="color:#999; margin-top:10px;">(付款後可排程)</div>`;
-        }
+            const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
 
-        document.getElementById('m-title').innerText = "預約詳情";
-        document.getElementById('m-content').innerHTML = `
-            <div class="id-card"><b>${extractName}</b> <small>(${!!b.profiles?'會員':'訪客'})</small><br><small>${b.temp_phone} | ${extractEmail}</small></div>
-            <div style="margin-top:15px; background:#fafafa; padding:10px; border-radius:8px;"><b>${b.service_item}</b><br><small>${b.service_detail}</small></div>
-            ${couponHtml}
-            <div style="margin-top:15px; background:#fffdf0; padding:10px; border:1px solid #eee; border-radius:8px;">${extractData}<br><span style="color:#d35400;">💡 許願：${b.sleep_time || '無'}</span></div>
-            <div style="margin-top:15px; padding:15px; background:#f3e5f5; border-radius:8px;">${scheduleBox}</div>
-            ${b.status === 'awaiting_service' || b.status === 'completed' ? `<div style="margin-top:15px; padding:15px; background:#e8f5e9; border-radius:8px; text-align:center;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : ''}
-            <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>
-        `;
-        document.getElementById('modal').style.display = 'flex';
-    }
-// 切換主側邊欄顯示/隱藏
-    function toggleMainSidebar() {
-        document.body.classList.toggle('hide-nav');
-    }
-
-    function loadSlotsForBooking(date) {
-        const slots = cache.slots.filter(s => s.slot_date === date && !s.is_booked);
-        const sel = document.getElementById('book-slot');
-        sel.innerHTML = slots.length ? slots.map(s => `<option value="${s.id}" data-t="${s.slot_date} ${s.slot_time}">${s.slot_time.slice(0,5)}</option>`).join('') : '<option>無空檔</option>';
-    }
-    async function confirmSchedule(bid) {
-        const sel = document.getElementById('book-slot');
-        if(!sel.value || sel.value.includes("請先選")) return alert("請選擇時段");
-        const t = sel.options[sel.selectedIndex].dataset.t;
-        await myDB.from('bookings').update({scheduled_at: t, status: 'awaiting_service'}).eq('id', bid);
-        await myDB.from('schedule_slots').update({is_booked: true}).eq('id', sel.value);
-        alert("✅ 排程成功"); closeModal(); fetchAll();
-    }
-    async function deleteBooking(id) { if(confirm("確定刪除？")) { await myDB.from('bookings').delete().eq('id',id); fetchAll(); } }
-    async function sendPayLink(id) { if(confirm("確定發送？")) { const t = new Date().toLocaleString(); await myDB.from('bookings').update({ status: 'awaiting_payment', wish_detail: `${cache.bks.find(x=>x.id===id).wish_detail} | [QR已傳: ${t}]` }).eq('id', id); alert("OK"); closeModal(); fetchAll(); } }
-    function renderActionButtons(b) {
-        if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程</button>`;
-        if (b.status === 'awaiting_service') return `<button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`;
-        if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">已結案</button>`;
-        if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}')">📧 傳付款碼</button>`;
-        if (b.status === 'awaiting_payment' || b.payment_method === 'shopee' || b.ota_order_id) return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`;
-        return "";
+            document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;
+            document.getElementById('m-content').innerHTML = `
+                <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;"><div style="width:50px; height:50px; background:var(--forest); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px; font-weight:bold;">${extractName[0]}</div><div><div style="font-weight:bold; font-size:1.1rem;">${extractName}</div><div style="color:#666;">${b.temp_phone}</div><div style="color:#888; font-size:0.8rem;">${extractEmail}</div></div></div>
+                <div style="background:#fafafa; padding:15px; border-radius:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between;"><b>${b.service_item}</b><b style="color:#d35400;">$${b.price}</b></div><div style="color:#666; font-size:0.9rem;">${b.service_detail}</div>${couponBadge}</div>
+                <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;"><label style="color:#999; font-size:12px;">備註 / 許願</label><div style="margin-top:5px; line-height:1.5;">${displayData || '無'}</div><div style="margin-top:5px; font-weight:bold; color:#e67e22;">許願：${b.sleep_time || '無'}</div><div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">${screenshotBtn}</div></div>
+                ${scheduleBox}${reportArea}
+                <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>`;
+            document.getElementById('modal').style.display = 'flex';
+        } catch (e) { console.error(e); alert("詳情開啟失敗: " + e.message); }
     }
 
-    // --- 2. 會員 CRM ---
-    function renderPro() {
-        const key = document.getElementById('search-member').value.toLowerCase();
-        const list = cache.pros.filter(p => !key || (p.full_name && p.full_name.includes(key)) || p.phone.includes(key));
+    // ================= KB 功能 (修復編輯功能) =================
+    
+    function toggleKbSidebar() { document.querySelector('.kb-layout').classList.toggle('collapsed'); }
+
+    // 🔥 編輯文章 (修復版)
+    async function editKb(id) {
+        try {
+            const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single();
+            if(error || !data) { alert("讀取失敗"); return; }
+            document.getElementById('kb-id').value = data.id;
+            document.getElementById('kb-title').value = data.title;
+            document.getElementById('kb-big').value = data.big_category;
+            document.getElementById('kb-mid').value = data.mid_category;
+            document.getElementById('kb-pub').checked = data.is_published;
+            if(quill) { quill.root.innerHTML = data.body || ''; }
+            document.getElementById('btn-kb-del').style.display = 'inline-block';
+            document.getElementById('mode-title').innerText = "編輯文章";
+        } catch (e) { console.error(e); alert("開啟文章失敗: " + e.message); }
+    }
+
+    function resetKbForm(){ document.getElementById('kb-id').value=''; document.getElementById('kb-title').value=''; document.getElementById('kb-big').value=''; document.getElementById('kb-mid').value=''; if(quill) quill.root.innerHTML=''; document.getElementById('btn-kb-del').style.display='none'; document.getElementById('mode-title').innerText="新增文章"; }
+    async function saveArticle(){ const p={title:document.getElementById('kb-title').value,big_category:document.getElementById('kb-big').value,mid_category:document.getElementById('kb-mid').value,is_published:document.getElementById('kb-pub').checked,body:quill ? quill.root.innerHTML : ''}; const id=document.getElementById('kb-id').value; if(!p.title || !p.big_category){alert("標題/分類必填");return;} try { if(id) await myDB.from('kb_articles').update(p).eq('id',id); else { const {data}=await myDB.from('kb_articles').select('sort_order').order('sort_order',{ascending:false}).limit(1); p.sort_order=(data&&data.length)?data[0].sort_order+1:1; await myDB.from('kb_articles').insert([p]); } alert("✅ 已儲存"); fetchAll(); if(!id)resetKbForm(); } catch(e){ alert("儲存失敗: " + e.message); } }
+    async function delArticle(){ if(confirm("確定刪除？")) { await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value); alert("已刪除"); resetKbForm(); fetchAll(); } }
+    function previewArticle() { const title=document.getElementById('kb-title').value, html=quill ? quill.root.innerHTML : '', isPub=document.getElementById('kb-pub').checked; document.getElementById('m-title').innerText="前台預覽"; document.getElementById('m-content').innerHTML=`<div style="font-family:sans-serif;padding:10px;">${!isPub?'<div style="color:red">(隱藏)</div>':''}<h1>${title}</h1><div class="ql-editor" style="padding:0;">${html}</div></div>`; document.getElementById('modal').style.display='flex'; }
+
+    // 圖庫
+    async function openGallery(){document.getElementById('gallery-modal').style.display='flex';loadGalleryImages();}
+    function closeGallery(){document.getElementById('gallery-modal').style.display='none';}
+    function switchBucket(){currentBucket=document.getElementById('bucket-select').value;loadGalleryImages();}
+    async function loadGalleryImages(){const g=document.getElementById('gallery-content');g.innerHTML="讀取中...";const{data}=await myDB.storage.from(currentBucket).list('',{limit:100,sortBy:{column:'created_at',order:'desc'}});if(!data){g.innerHTML="失敗";return;}g.innerHTML=data.map(f=>{if(f.name==='.emptyFolderPlaceholder')return'';const u=myDB.storage.from(currentBucket).getPublicUrl(f.name).data.publicUrl;return `<div class="gallery-item" onclick="insertImageToEditor('${u}')"><img src="${u}"><div class="gallery-item-name">${f.name}</div></div>`;}).join('');}
+    function insertImageToEditor(u){if(quill){const r=quill.getSelection(true);quill.insertEmbed(r?r.index:quill.getLength(),'image',u);}closeGallery();}
+    async function uploadImage(){const f=document.getElementById('upload-input').files[0];if(!f)return;await myDB.storage.from(currentBucket).upload(`${Date.now()}_${f.name}`,f);loadGalleryImages();}
+
+    // 🔥 排序 (變數名修正 complete)
+    function syncKbOrderKeys(){let c=false;const ct={};cache.articles.forEach(a=>{if(!ct[a.big_category])ct[a.big_category]=new Set();ct[a.big_category].add(a.mid_category);});Object.keys(ct).forEach(b=>{if(!kbCatOrder.big.includes(b)){kbCatOrder.big.push(b);c=true;}});Object.keys(ct).forEach(b=>{if(!kbCatOrder.mid[b])kbCatOrder.mid[b]=[];[...ct[b]].forEach(m=>{if(!kbCatOrder.mid[b].includes(m)){kbCatOrder.mid[b].push(m);c=true;}});});if(c)saveKbOrderConfig();}
+    
+    function renderKbTree(){
+        const t={};
+        cache.articles.forEach(a=>{if(!t[a.big_category])t[a.big_category]={};if(!t[a.big_category][a.mid_category])t[a.big_category][a.mid_category]=[];t[a.big_category][a.mid_category].push(a);});
         
-        document.getElementById('pro-list').innerHTML = list.map(p => {
-            const userBks = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone));
-            const total = userBks.filter(b => b.status === 'paid' || b.status === 'completed').reduce((sum, b) => sum + (b.price || 0), 0);
-            const last = userBks.length > 0 ? userBks[0].created_at.slice(0, 10) : '<span style="color:#ccc">無</span>';
-
-            return `<tr>
-                <td><b>${p.full_name || '未命名'}</b></td>
-                <td>${p.phone}</td>
-                <td><small>${p.email || '-'}</small></td>
-                <td style="color:#d35400; font-weight:bold;">$${total.toLocaleString()}</td>
-                <td>${last}</td>
-                <td><button class="btn btn-forest" onclick="showHistory('${p.id}', '${p.full_name}')">📜 歷史</button><button class="btn btn-warning" onclick="editProfile('${p.id}')">✏️</button><button class="btn btn-danger" onclick="deleteMember('${p.id}', '${p.full_name}')">🗑️</button></td>
-            </tr>`;
-        }).join('');
-    }
-
-    function showHistory(uid, name) {
-        const p = cache.pros.find(x => x.id === uid);
-        const userBks = cache.bks.filter(b => b.user_id === uid || cleanPhone(b.temp_phone) === cleanPhone(p.phone));
-        let html = userBks.length === 0 ? "<p style='color:#999; text-align:center;'>無訂單紀錄</p>" : userBks.map(b => `
-            <div onclick="openBooking('${b.id}')" class="history-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <b style="color:var(--forest);">${b.service_item}</b>
-                    ${STATUS_MAP[b.status] || b.status}
-                </div>
-                <div style="font-size:12px; color:#666; margin-top:5px;">${b.created_at.slice(0,10)} | $${b.price}</div>
-            </div>
-        `).join('');
-        document.getElementById('m-title').innerText = `${name} 的歷史訂單`;
-        document.getElementById('m-content').innerHTML = `<div style="max-height:400px; overflow-y:auto;">${html}</div>`;
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    function editProfile(uid) {
-        const p = cache.pros.find(x => x.id === uid);
-        document.getElementById('m-title').innerText = "編輯會員";
-        document.getElementById('m-content').innerHTML = `
-            <label>姓名</label><input id="ep-n" value="${p.full_name}" style="margin-bottom:10px;">
-            <label>手機</label><input id="ep-p" value="${p.phone}" style="margin-bottom:10px;">
-            <label>Email</label><input id="ep-e" value="${p.email||''}" style="margin-bottom:15px;">
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-success" style="flex:1;" onclick="updPro('${p.id}')">💾 儲存變更</button>
-                <button class="btn btn-danger" style="flex:1;" onclick="resetMemberPassword('${p.id}', '${p.phone}')">🔑 重置密碼 (Guest+末4碼)</button>
-            </div>
-        `;
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    async function updPro(id) {
-        await myDB.from('profiles').update({ full_name: document.getElementById('ep-n').value, phone: document.getElementById('ep-p').value, email: document.getElementById('ep-e').value }).eq('id', id);
-        closeModal(); fetchAll(); alert("✅ 更新成功");
-    }
-
-    async function resetMemberPassword(uid, phone) {
-        if(!confirm(`確定要重置密碼嗎？\n預設密碼將變為：guest${phone.slice(-4)}`)) return;
-        const newPw = 'guest' + phone.slice(-4);
-        const { error } = await myDB.from('profiles').update({ password: newPw }).eq('id', uid);
-        if(error) alert("失敗: " + error.message); else alert("✅ 密碼已重置為: " + newPw);
-    }
-
-    async function deleteMember(uid, name) {
-        if(confirm(`⚠️ 確定刪除會員 ${name}？\n(歷史訂單將保留)`)) { await myDB.from('profiles').delete().eq('id', uid); fetchAll(); }
-    }
-
-    // --- 3. 財務專區 ---
-    function switchFinanceSub(tab) {
-        document.getElementById('sub-ota').style.display = tab==='ota' ? 'block' : 'none';
-        document.getElementById('sub-coupon').style.display = tab==='coupon' ? 'block' : 'none';
-        document.getElementById('btn-sub-ota').className = tab==='ota' ? 'active' : '';
-        document.getElementById('btn-sub-coupon').className = tab==='coupon' ? 'active' : '';
-    }
-
-    function renderFinance() {
-        document.getElementById('ota-list').innerHTML = cache.otas.map(o => `<tr><td>${o.name}</td><td>${o.code}</td><td>${o.commission_rate}%</td><td>${o.front_url?`<a href="${o.front_url}" target="_blank" class="btn btn-outline" style="font-size:10px;">前</a>`:''}${o.admin_url?`<a href="${o.admin_url}" target="_blank" class="btn btn-outline" style="font-size:10px;">後</a>`:''}</td><td><button class="btn btn-info" onclick="editOTA('${o.id}')" style="padding:2px 6px;">修</button><button class="btn btn-danger" onclick="delData('ota_settings', '${o.id}')" style="padding:2px 6px;">刪</button></td></tr>`).join('');
-        document.getElementById('cp-list').innerHTML = cache.coupons.map(c => `<tr><td>${c.name}</td><td>${c.code}</td><td>${c.discount_type==='percentage'?(c.discount_value%10===0?c.discount_value/10:c.discount_value)+'折':'-$'+c.discount_value}</td><td>${c.expires_at?c.expires_at.slice(0,10):'無'}</td><td>${c.allow_member?'會':''}${c.allow_guest?'訪':''}</td><td>${c.usage_count}</td><td><button class="btn btn-info" onclick="editCoupon('${c.id}')" style="padding:2px 6px;">修</button><button class="btn btn-danger" onclick="delData('coupons','${c.id}')" style="padding:2px 6px;">刪</button></td></tr>`).join('');
-    }
-
-    // OTA 修改功能
-    function editOTA(id) {
-        const o = cache.otas.find(x => x.id === id);
-        document.getElementById('ota-id').value = o.id;
-        document.getElementById('ota-name').value = o.name;
-        document.getElementById('ota-code').value = o.code;
-        document.getElementById('ota-rate').value = o.commission_rate;
-        document.getElementById('ota-front').value = o.front_url || '';
-        document.getElementById('ota-admin').value = o.admin_url || '';
-        document.getElementById('btn-ota-save').innerText = "更新平台";
-        document.getElementById('btn-ota-cancel').style.display = 'inline-block';
-    }
-    function cancelOTA() {
-        document.getElementById('ota-id').value = ''; document.getElementById('ota-name').value = '';
-        document.getElementById('ota-code').value = ''; document.getElementById('ota-front').value = '';
-        document.getElementById('ota-admin').value = ''; document.getElementById('btn-ota-save').innerText = "💾 儲存設定";
-        document.getElementById('btn-ota-cancel').style.display = 'none';
-    }
-    async function saveOTA() {
-        const id = document.getElementById('ota-id').value;
-        const p = { name: document.getElementById('ota-name').value, code: document.getElementById('ota-code').value, commission_rate: document.getElementById('ota-rate').value, front_url: document.getElementById('ota-front').value, admin_url: document.getElementById('ota-admin').value };
-        if(!p.name) return alert("名稱必填");
-        if(id) await myDB.from('ota_settings').update(p).eq('id', id); else await myDB.from('ota_settings').insert([p]);
-        cancelOTA(); fetchAll();
-    }
-
-    // 優惠券
-    function toggleCpExp() {
-        const noLimit = document.getElementById('cp-no-limit').checked;
-        const expInput = document.getElementById('cp-exp');
-        expInput.disabled = noLimit;
-        if(noLimit) expInput.value = '';
-    }
-    function updateCpHint() {
-        const type = document.getElementById('cp-type').value;
-        document.getElementById('cp-val-hint').innerText = type === 'percentage' ? "折扣數值 (90=9折)" : "折抵金額 (100=折100)";
-    }
-    async function saveCoupon() {
-        const id = document.getElementById('cp-edit-id').value;
-        const p = {
-            name: document.getElementById('cp-name').value, code: document.getElementById('cp-code').value,
-            discount_type: document.getElementById('cp-type').value, discount_value: document.getElementById('cp-val').value,
-            expires_at: document.getElementById('cp-no-limit').checked ? null : document.getElementById('cp-exp').value,
-            allow_member: document.getElementById('cp-mem').checked, allow_guest: document.getElementById('cp-guest').checked
-        };
-        if(!p.name || !p.code) return alert("資料不全");
-        if(id) await myDB.from('coupons').update(p).eq('id', id); else await myDB.from('coupons').insert([p]);
-        resetCouponForm(); fetchAll();
-    }
-    function editCoupon(id) {
-        const c = cache.coupons.find(x => x.id === id);
-        document.getElementById('cp-edit-id').value = c.id; document.getElementById('cp-name').value = c.name;
-        document.getElementById('cp-code').value = c.code; document.getElementById('cp-val').value = c.discount_value;
-        document.getElementById('cp-mem').checked = c.allow_member; document.getElementById('cp-guest').checked = c.allow_guest;
-        if(!c.expires_at) { document.getElementById('cp-no-limit').checked = true; document.getElementById('cp-exp').disabled = true; }
-        else { document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').value = c.expires_at.slice(0,10); document.getElementById('cp-exp').disabled = false; }
-        document.getElementById('btn-cp-save').innerText = "更新"; document.getElementById('btn-cp-cancel').style.display = "inline-block";
-    }
-    function resetCouponForm() {
-        document.getElementById('cp-edit-id').value = ''; document.getElementById('cp-name').value = '';
-        document.getElementById('cp-code').value = ''; document.getElementById('cp-val').value = '';
-        document.getElementById('cp-exp').value = ''; document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').disabled = false;
-        document.getElementById('btn-cp-save').innerText = "建立"; document.getElementById('btn-cp-cancel').style.display = "none";
-    }
-    async function testCoupon() {
-        const c = document.getElementById('test-cp-code').value; const p = document.getElementById('test-cp-price').value;
-        const { data } = await myDB.from('coupons').select('*').eq('code', c).single();
-        if(!data) return alert("無效代碼");
-        let f = p; if(data.discount_type === 'percentage') f = Math.round(p * (data.discount_value/100)); else f = p - data.discount_value;
-        alert(`原價 $${p} -> 折後 $${f}`);
-    }
-
-    // --- 5. 知識庫 (V15 邏輯修復) ---
-    async function openGallery() { document.getElementById('gallery-modal').style.display = 'flex'; loadGalleryImages(); }
-    function closeGallery() { document.getElementById('gallery-modal').style.display = 'none'; }
-    function switchBucket() { currentBucket = document.getElementById('bucket-select').value; loadGalleryImages(); }
-    async function loadGalleryImages() {
-        const grid = document.getElementById('gallery-content');
-        grid.innerHTML = "<p style='padding:20px; color:#666;'>讀取中...</p>";
-        const { data, error } = await myDB.storage.from(currentBucket).list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-        if(error || !data) { grid.innerHTML = "<p>讀取失敗</p>"; return; }
-        grid.innerHTML = data.map(f => {
-            if(f.name==='.emptyFolderPlaceholder') return '';
-            const url = myDB.storage.from(currentBucket).getPublicUrl(f.name).data.publicUrl;
-            return `<div class="gallery-item" onclick="insertImageToEditor('${url}')"><img src="${url}" loading="lazy"><div class="gallery-item-name">${f.name}</div></div>`;
-        }).join('');
-    }
-    function insertImageToEditor(url) {
-        const range = quill.getSelection(true);
-        if (range) quill.insertEmbed(range.index, 'image', url); else quill.insertEmbed(quill.getLength(), 'image', url);
-        closeGallery();
-    }
-    async function uploadImage() {
-        const file = document.getElementById('upload-input').files[0];
-        if(!file) return;
-        const fileName = `${Date.now()}_${file.name}`;
-        await myDB.storage.from(currentBucket).upload(fileName, file);
-        loadGalleryImages();
-    }
-
-    // ================= KB 排序系統核心 (V45 修復版) =================
-
-    // 1. 同步檢查：確保新分類有被加入排序設定
-    function syncKbOrderKeys() {
-        let changed = false;
-        // 建立目前的分類結構
-        const currentTree = {};
-        cache.articles.forEach(a => {
-            if(!currentTree[a.big_category]) currentTree[a.big_category] = new Set();
-            currentTree[a.big_category].add(a.mid_category);
-        });
-
-        const currentBigs = Object.keys(currentTree);
-        
-        // 補齊大分類
-        currentBigs.forEach(b => {
-            if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); changed = true; }
-        });
-        
-        // 補齊中分類
-        currentBigs.forEach(b => {
-            if (!kbCatOrder.mid[b]) { kbCatOrder.mid[b] = []; }
-            const mids = Array.from(currentTree[b]);
-            mids.forEach(m => {
-                if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); changed = true; }
-            });
-        });
-
-        // 移除不存在的分類 (選用，目前先保留以免誤刪)
-        if (changed) saveKbOrderConfig();
-    }
-
-    // 2. 渲染樹狀圖 (支援排序按鈕)
-    function renderKbTree() { 
-        // 重建文章樹 (每次渲染都要重整，因為文章可能被移動)
-        const tree = {};
-        cache.articles.forEach(a => {
-            if (!tree[a.big_category]) tree[a.big_category] = {};
-            if (!tree[a.big_category][a.mid_category]) tree[a.big_category][a.mid_category] = [];
-            tree[a.big_category][a.mid_category].push(a);
-        });
-
-        // 依照設定檔順序渲染
-        const sortedBigs = kbCatOrder.big.filter(b => tree[b]); // 只顯示有文章的
-
-        document.getElementById('kb-tree').innerHTML = sortedBigs.map(b => {
-            const sortedMids = (kbCatOrder.mid[b] || []).filter(m => tree[b][m]);
-
-            const midHtml = sortedMids.map(m => {
-                const arts = tree[b][m]; // 文章已在 SQL 用 sort_order 排好
-                const artHtml = arts.map(a => `
-                    <div class="article-item ${a.is_published?'':'draft'}">
-                        <div class="sort-actions">
-                            <button class="btn-sort-arrow" onclick="moveArt('${a.id}', -1, event)">▲</button>
-                            <button class="btn-sort-arrow" onclick="moveArt('${a.id}', 1, event)">▼</button>
-                        </div>
-                        <span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span>
-                    </div>
-                `).join('');
-
-                return `
-                    <details class="mid-cat" open>
-                        <summary>
-                            <div class="sort-actions">
-                                <button class="btn-sort-arrow" onclick="moveMid('${b}', '${m}', -1, event)">▲</button>
-                                <button class="btn-sort-arrow" onclick="moveMid('${b}', '${m}', 1, event)">▼</button>
-                            </div>
-                            └ ${m}
-                        </summary>
-                        ${artHtml}
-                    </details>`;
+        document.getElementById('kb-tree').innerHTML=kbCatOrder.big.filter(b=>t[b]).map(b=>{
+            const ms=(kbCatOrder.mid[b]||[]).filter(m=>t[b][m]).map(m=>{
+                const as=t[b][m].map(a=>`<div class="article-item ${a.is_published?'':'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
+                return`<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
             }).join('');
-
-            return `
-                <details class="big-cat" open>
-                    <summary>
-                        <div class="sort-actions">
-                            <button class="btn-sort-arrow" onclick="moveBig('${b}', -1, event)">▲</button>
-                            <button class="btn-sort-arrow" onclick="moveBig('${b}', 1, event)">▼</button>
-                        </div>
-                        📂 ${b}
-                    </summary>
-                    ${midHtml}
-                </details>`;
-        }).join(''); 
+            return`<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>📂 ${b}</summary>${ms}</details>`;
+        }).join('');
         
-        // 更新下拉選單
-        document.getElementById('kb-big-list').innerHTML = kbCatOrder.big.map(v=>`<option value="${v}">`).join('');
-        const allMids = new Set();
-        Object.values(kbCatOrder.mid).forEach(arr => arr.forEach(m => allMids.add(m)));
-        document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v=>`<option value="${v}">`).join('');
+        document.getElementById('kb-big-list').innerHTML=kbCatOrder.big.map(v=>`<option value="${v}">`).join('');
+        
+        // 🔥 變數名修正：使用 allMids 而不是 am
+        const allMids = new Set(); 
+        Object.values(kbCatOrder.mid).forEach(a=>a.forEach(m=>allMids.add(m)));
+        document.getElementById('kb-mid-list').innerHTML=[...allMids].map(v=>`<option value="${v}">`).join('');
     }
 
-    // --- 動作：移動大分類 ---
-    async function moveBig(name, dir, e) {
-        e.stopPropagation();
-        const idx = kbCatOrder.big.indexOf(name);
-        if (idx === -1 || idx + dir < 0 || idx + dir >= kbCatOrder.big.length) return;
-        [kbCatOrder.big[idx], kbCatOrder.big[idx+dir]] = [kbCatOrder.big[idx+dir], kbCatOrder.big[idx]];
-        renderKbTree(); await saveKbOrderConfig();
-    }
-
-    // --- 動作：移動中分類 ---
-    async function moveMid(bigName, midName, dir, e) {
-        e.stopPropagation();
-        const arr = kbCatOrder.mid[bigName];
-        const idx = arr.indexOf(midName);
-        if (idx === -1 || idx + dir < 0 || idx + dir >= arr.length) return;
-        [arr[idx], arr[idx+dir]] = [arr[idx+dir], arr[idx]];
-        renderKbTree(); await saveKbOrderConfig();
-    }
-
-    // --- 動作：移動文章 ---
+    async function moveBig(n,d,e){e.stopPropagation();const i=kbCatOrder.big.indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.big.length)return;[kbCatOrder.big[i],kbCatOrder.big[i+d]]=[kbCatOrder.big[i+d],kbCatOrder.big[i]];renderKbTree();await saveKbOrderConfig();}
+    async function moveMid(b,n,d,e){e.stopPropagation();const i=kbCatOrder.mid[b].indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.mid[b].length)return;[kbCatOrder.mid[b][i],kbCatOrder.mid[b][i+d]]=[kbCatOrder.mid[b][i+d],kbCatOrder.mid[b][i]];renderKbTree();await saveKbOrderConfig();}
+// 🔥 修復版：文章排序 (補上必填欄位，解決 SQL 報錯)
     async function moveArt(id, dir, e) {
         e.stopPropagation();
-        // 1. 找出這篇文章目前在哪個陣列中
+        
+        // 1. 找到目標文章
         const art = cache.articles.find(a => a.id === id);
         if (!art) return;
-        
-        // 篩選出同分類的文章 (依照目前顯示順序)
-        const siblings = cache.articles.filter(a => a.big_category === art.big_category && a.mid_category === art.mid_category);
+
+        // 2. 找出同分類的所有兄弟文章
+        const siblings = cache.articles.filter(a => 
+            a.big_category === art.big_category && 
+            a.mid_category === art.mid_category
+        );
+
+        // 3. 找到自己在兄弟中的位置
         const idx = siblings.findIndex(a => a.id === id);
         
+        // 防呆
         if (idx === -1 || idx + dir < 0 || idx + dir >= siblings.length) return;
 
-        // 2. 在記憶體中交換順序 (利用 sort_order)
-        const target = siblings[idx + dir];
-        const tempOrder = art.sort_order;
-        art.sort_order = target.sort_order; // 交換數值
-        target.sort_order = tempOrder;
+        // 4. 交換位置
+        const temp = siblings[idx];
+        siblings[idx] = siblings[idx + dir];
+        siblings[idx + dir] = temp;
 
-        // 重新整理 cache 陣列以反映新順序 (因為 fetchAll 是 order by sort_order)
-        cache.articles.sort((a,b) => a.sort_order - b.sort_order);
+        // 5. 🔥 關鍵修復：除了 sort_order，把必填欄位也帶上！
+        // 這樣 Supabase 就不會因為「缺少必填欄位」而報錯了
+        const updates = siblings.map((a, index) => {
+            a.sort_order = index; // 更新快取
+            return { 
+                id: a.id, 
+                sort_order: index,
+                // 👇 這三行是為了安撫資料庫的檢查機制 👇
+                title: a.title,
+                big_category: a.big_category,
+                mid_category: a.mid_category
+            }; 
+        });
+
+        // 6. 更新快取排序
+        cache.articles.sort((a, b) => a.sort_order - b.sort_order);
+
+        // 7. 渲染
         renderKbTree();
 
-        // 3. 寫入 DB
-        // 為了保險，重寫該分類所有文章的 sort_order (0, 1, 2...)
-        const updates = siblings.map((a, i) => ({ id: a.id, sort_order: i }));
-        await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' });
-    }
+        // 8. 寫入資料庫
+        try {
+            const { error } = await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' });
+            if (error) throw error;
+            console.log("✅ 排序已更新");
+        } catch (err) {
+            console.error(err);
+            alert("排序儲存失敗: " + err.message);
+        }
+    }    async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
 
-    // --- 工具：儲存分類設定到 DB ---
-    async function saveKbOrderConfig() {
-        const { data } = await myDB.from('site_content').select('id').eq('title', 'kb_category_order').single();
-        if (data) await myDB.from('site_content').update({ content: kbCatOrder }).eq('id', data.id);
-        else await myDB.from('site_content').insert([{ category: 'system_config', title: 'kb_category_order', content: kbCatOrder }]);
-    }
-    async function editKb(id){const{data}=await myDB.from('kb_articles').select('*').eq('id',id).single();document.getElementById('kb-id').value=data.id;document.getElementById('kb-title').value=data.title;document.getElementById('kb-big').value=data.big_category;document.getElementById('kb-mid').value=data.mid_category;document.getElementById('kb-pub').checked=data.is_published;quill.root.innerHTML=data.body||'';document.getElementById('btn-kb-del').style.display='inline-block';document.getElementById('mode-title').innerText="編輯文章";}
-    function resetKbForm(){document.getElementById('kb-id').value='';document.getElementById('kb-title').value='';quill.root.innerHTML='';document.getElementById('btn-kb-del').style.display='none';document.getElementById('mode-title').innerText="新增文章";}
-    async function saveArticle(){const p={title:document.getElementById('kb-title').value,big_category:document.getElementById('kb-big').value,mid_category:document.getElementById('kb-mid').value,is_published:document.getElementById('kb-pub').checked,body:quill.root.innerHTML};const id=document.getElementById('kb-id').value;if(id)await myDB.from('kb_articles').update(p).eq('id',id);else await myDB.from('kb_articles').insert([p]);alert("已儲存");fetchAll();}
-    async function delArticle(){if(confirm("刪除?"))await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value);resetKbForm();fetchAll();}
-    function previewArticle() {
-        const title = document.getElementById('kb-title').value;
-        const html = quill.root.innerHTML;
-        const isPub = document.getElementById('kb-pub').checked;
-        document.getElementById('m-title').innerText = "前台預覽";
-        document.getElementById('m-content').innerHTML = `<div style="font-family:sans-serif;line-height:1.6;padding:10px;">${!isPub?'<div style="color:red">(隱藏中)</div>':''}<h1>${title}</h1>${html}</div>`;
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    // --- 6. 服務配置 & 排程 ---
-    function renderConfigTables(){const s=document.getElementById('svc-cat-filter');s.innerHTML='<option value="">請選大類</option>'+cache.cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');document.getElementById('cat-list').innerHTML=cache.cats.map(c=>`<tr><td>${c.name}</td><td><button class="btn btn-outline" style="padding:2px 6px" onclick="editCat('${c.id}')">✏️</button></td></tr>`).join('');}
-    function filterServiceList(){const c=document.getElementById('svc-cat-filter').value;document.getElementById('svc-list-container').innerHTML=cache.svcs.filter(s=>s.category_id===c).map((s,i)=>`<div class="admin-row"><div style="display:flex;flex-direction:column;margin-right:10px"><button class="btn btn-outline" style="padding:0 5px" onclick="moveSvc('${s.id}',-1)" ${i===0?'disabled':''}>▲</button><button class="btn btn-outline" style="padding:0 5px" onclick="moveSvc('${s.id}',1)">▼</button></div><div style="flex:1"><b>${s.title}</b> $${s.price} ${s.is_main?'<span class="tag tag-main">主</span>':''} ${s.report_template?`<br><small style="color:purple">${s.report_template}</small>`:''} ${s.sub_options?`<div style="color:#666;font-size:12px;">└ ${s.sub_options}</div>`:''}</div><button class="btn btn-info" onclick="editSvc('${s.id}')">修</button><button class="btn btn-danger" onclick="delData('services','${s.id}')">刪</button></div>`).join('');}
-    async function moveSvc(id,dir){const c=document.getElementById('svc-cat-filter').value;const l=cache.svcs.filter(s=>s.category_id===c);const i=l.findIndex(s=>s.id===id);if(i===-1||i+dir<0||i+dir>=l.length)return;const t=l[i+dir];const tmp=l[i].sort_order;l[i].sort_order=t.sort_order;t.sort_order=tmp;await Promise.all([myDB.from('services').update({sort_order:l[i].sort_order}).eq('id',l[i].id),myDB.from('services').update({sort_order:t.sort_order}).eq('id',t.id)]);fetchAll();}
-    function editCat(id){const c=cache.cats.find(x=>x.id===id);document.getElementById('cat-id-edit').value=c.id;document.getElementById('cat-name').value=c.name;document.getElementById('cat-terms').value=c.terms;document.getElementById('btn-cat-save').innerText="儲存";document.getElementById('btn-cat-cancel').style.display="inline-block";}
-    function cancelEdit(t){if(t==='svc'){document.getElementById('svc-id-edit').value='';document.getElementById('i-name').value='';document.getElementById('btn-svc-save').innerText="＋ 新增";document.getElementById('btn-svc-cancel').style.display="none";}else{document.getElementById('cat-id-edit').value='';document.getElementById('cat-name').value='';document.getElementById('btn-cat-save').innerText="＋ 新增";document.getElementById('btn-cat-cancel').style.display="none";}}
-    async function saveCategory(){const id=document.getElementById('cat-id-edit').value,n=document.getElementById('cat-name').value,t=document.getElementById('cat-type').value,tm=document.getElementById('cat-terms').value;const q=id?myDB.from('service_categories').update({name:n,question_type:t,terms:tm}).eq('id',id):myDB.from('service_categories').insert([{name:n,question_type:t,terms:tm}]);await q;cancelEdit('cat');fetchAll();}
-    function toggleSubOptionInput(){const m=document.getElementById('i-is-main').checked;document.getElementById('main-opt-wrapper').style.display=m?'block':'none';document.getElementById('sub-opt-wrapper').style.display=m?'none':'block';}
-    function editSvc(id){const s=cache.svcs.find(x=>x.id===id);document.getElementById('svc-id-edit').value=s.id;document.getElementById('i-name').value=s.title;document.getElementById('i-price').value=s.price;document.getElementById('i-is-main').checked=s.is_main;document.getElementById('i-report-tpl').value=s.report_template||'';document.getElementById('i-sub-opts').value=s.sub_options||'';toggleSubOptionInput();document.getElementById('btn-svc-save').innerText="儲存";document.getElementById('btn-svc-cancel').style.display='inline-block';}
-    async function saveItem(){const id=document.getElementById('svc-id-edit').value,p={category_id:document.getElementById('svc-cat-filter').value,title:document.getElementById('i-name').value,price:document.getElementById('i-price').value,is_main:document.getElementById('i-is-main').checked,report_template:document.getElementById('i-report-tpl').value,sub_options:document.getElementById('i-sub-opts').value};if(!p.category_id)return alert("選大類");if(!id){const s=cache.svcs.filter(x=>x.category_id===p.category_id);p.sort_order=s.length?Math.max(...s.map(x=>x.sort_order))+1000:1000;}if(id)await myDB.from('services').update(p).eq('id',id);else await myDB.from('services').insert([p]);cancelEdit('svc');fetchAll();}
+    // 其他原有功能
+    function loadSlotsForBooking(date) { const slots = cache.slots.filter(s => s.slot_date === date && !s.is_booked); const sel = document.getElementById('book-slot'); sel.innerHTML = slots.length ? slots.map(s => `<option value="${s.id}" data-t="${s.slot_date} ${s.slot_time}">${s.slot_time.slice(0,5)}</option>`).join('') : '<option>無空檔</option>'; }
+    async function confirmSchedule(bid) { const sel = document.getElementById('book-slot'); if(!sel.value || sel.value.includes("先選")) return alert("請選擇時段"); const t = sel.options[sel.selectedIndex].dataset.t; await myDB.from('bookings').update({scheduled_at: t, status: 'awaiting_service'}).eq('id', bid); await myDB.from('schedule_slots').update({is_booked: true}).eq('id', sel.value); alert("✅ 排程成功"); closeModal(); fetchAll(); }
+    async function deleteBooking(id) { if(confirm("確定刪除？")) { await myDB.from('bookings').delete().eq('id',id); fetchAll(); } }
+    async function sendPayLink(id) { if(confirm("確定發送？")) { const t = new Date().toLocaleString(); await myDB.from('bookings').update({ status: 'awaiting_payment', wish_detail: `${cache.bks.find(x=>x.id===id).wish_detail} | [QR已傳: ${t}]` }).eq('id', id); alert("OK"); closeModal(); fetchAll(); } }
+    function renderActionButtons(b) { if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程</button>`; if (b.status === 'awaiting_service') return `<button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`; if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">已結案</button>`; if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}')">📧 傳付款碼</button>`; if (b.status === 'awaiting_payment' || b.payment_method === 'shopee' || b.ota_order_id) return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`; return ""; }
     
+    // 🔥 CRM: 補回歷史與刪除按鈕 🔥
+    function renderPro() { 
+        const k = document.getElementById('search-member').value.toLowerCase(); 
+        document.getElementById('pro-list').innerHTML = cache.pros.filter(p => !k || (p.full_name && p.full_name.includes(k)) || p.phone.includes(k)).map(p => { 
+            const ub = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); 
+            const t = ub.filter(b => b.status === 'paid' || b.status === 'completed').reduce((s, b) => s + (b.price || 0), 0); 
+            return `<tr>
+                <td><b>${p.full_name}</b></td>
+                <td>${p.phone}</td>
+                <td><small>${p.email||'-'}</small></td>
+                <td style="color:#d35400;">$${t.toLocaleString()}</td>
+                <td>${ub.length?ub[0].created_at.slice(0,10):'-'}</td>
+                <td>
+                    <button class="btn btn-forest" onclick="showHistory('${p.id}', '${p.full_name}')">📜</button>
+                    <button class="btn btn-warning" onclick="editProfile('${p.id}')">✏️</button>
+                    <button class="btn btn-danger" onclick="deleteMember('${p.id}', '${p.full_name}')">🗑️</button>
+                </td>
+            </tr>`; 
+        }).join(''); 
+    }
+    
+    function editProfile(uid) { const p = cache.pros.find(x => x.id === uid); document.getElementById('m-title').innerText = "編輯會員"; document.getElementById('m-content').innerHTML = `<label>姓名</label><input id="ep-n" value="${p.full_name}" style="margin-bottom:10px;"><label>手機</label><input id="ep-p" value="${p.phone}" style="margin-bottom:10px;"><label>Email</label><input id="ep-e" value="${p.email||''}" style="margin-bottom:15px;"><div style="display:flex; gap:10px;"><button class="btn btn-success" style="flex:1;" onclick="updPro('${p.id}')">💾 儲存變更</button><button class="btn btn-danger" style="flex:1;" onclick="resetMemberPassword('${p.id}', '${p.phone}')">🔑 重置密碼</button></div>`; document.getElementById('modal').style.display = 'flex'; }
+    async function updPro(id) { await myDB.from('profiles').update({ full_name: document.getElementById('ep-n').value, phone: document.getElementById('ep-p').value, email: document.getElementById('ep-e').value }).eq('id', id); closeModal(); fetchAll(); alert("✅ 更新成功"); }
+    async function resetMemberPassword(uid, phone) { if(!confirm(`確定要重置密碼嗎？\n預設為：guest${phone.slice(-4)}`)) return; const newPw = 'guest' + phone.slice(-4); const { error } = await myDB.from('profiles').update({ password: newPw }).eq('id', uid); if(error) alert("失敗: " + error.message); else alert("✅ 密碼已重置"); }
+    async function deleteMember(uid, name) { if(confirm(`⚠️ 確定刪除會員 ${name}？`)) { await myDB.from('profiles').delete().eq('id', uid); fetchAll(); } }
+    function showHistory(uid, name) { const p = cache.pros.find(x => x.id === uid); const userBks = cache.bks.filter(b => b.user_id === uid || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); let html = userBks.length === 0 ? "<p style='color:#999; text-align:center;'>無訂單紀錄</p>" : userBks.map(b => ` <div onclick="openBooking('${b.id}')" class="history-card"> <div style="display:flex; justify-content:space-between;"> <b style="color:var(--forest);">${b.service_item}</b> ${STATUS_MAP[b.status] || b.status} </div> <div style="font-size:12px; color:#666; margin-top:5px;">${b.created_at.slice(0,10)} | $${b.price}</div> </div> `).join(''); document.getElementById('m-title').innerText = `${name} 的歷史訂單`; document.getElementById('m-content').innerHTML = `<div style="max-height:400px; overflow-y:auto;">${html}</div>`; document.getElementById('modal').style.display = 'flex'; }
+
+    // 🔥 Finance: 補回 OTA 刪除按鈕 🔥
+    function renderFinance() { 
+        document.getElementById('ota-list').innerHTML = cache.otas.map(o => `<tr><td>${o.name}</td><td>${o.code}</td><td>${o.commission_rate}%</td><td>-</td><td><button class="btn btn-info" onclick="editOTA('${o.id}')">修</button><button class="btn btn-danger" onclick="delData('ota_settings', '${o.id}')">刪</button></td></tr>`).join(''); 
+        document.getElementById('cp-list').innerHTML = cache.coupons.map(c => `<tr><td>${c.name}</td><td>${c.code}</td><td>${c.discount_value}</td><td>${c.expires_at||'無'}</td><td>-</td><td>${c.usage_count}</td><td><button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button><button class="btn btn-danger" onclick="delData('coupons', '${c.id}')">刪</button></td></tr>`).join(''); 
+    }
+
+    function renderConfigTables(){ const s=document.getElementById('svc-cat-filter');s.innerHTML='<option value="">請選大類</option>'+cache.cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); document.getElementById('cat-list').innerHTML=cache.cats.map(c=>`<tr><td>${c.name}</td><td><button class="btn btn-outline" onclick="editCat('${c.id}')">✏️</button></td></tr>`).join(''); }
+    
+    // 🔥 Services: 補回排序功能與細項顯示 🔥
+    function filterServiceList(){ 
+        const c=document.getElementById('svc-cat-filter').value; 
+        document.getElementById('svc-list-container').innerHTML=cache.svcs.filter(s=>s.category_id===c).map((s,i)=>`
+            <div class="admin-row">
+                <div style="display:flex; flex-direction:column; margin-right:10px;">
+                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',-1)">▲</button>
+                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',1)">▼</button>
+                </div>
+                <div style="flex:1">
+                    <b>${s.title}</b> $${s.price} 
+                    ${s.sub_options ? `<div style="font-size:12px; color:#666;">└ ${s.sub_options}</div>` : ''}
+                </div>
+                <button class="btn btn-info" onclick="editSvc('${s.id}')">修</button>
+                <button class="btn btn-danger" onclick="delData('services','${s.id}')">刪</button>
+            </div>`).join(''); 
+    }
+    
+    async function moveSvc(id, dir) {
+        const c = document.getElementById('svc-cat-filter').value;
+        const list = cache.svcs.filter(s => s.category_id === c);
+        const idx = list.findIndex(s => s.id === id);
+        if (idx === -1 || idx + dir < 0 || idx + dir >= list.length) return;
+        const target = list[idx + dir];
+        const temp = list[idx].sort_order;
+        list[idx].sort_order = target.sort_order;
+        target.sort_order = temp;
+        await Promise.all([
+            myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id),
+            myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id)
+        ]);
+        fetchAll();
+    }
+
     function renderTimeGrid(){let h='';for(let i=13;i<=25;i++){['00','30'].forEach(m=>{let hh=i>=24?i-24:i;let t=`${hh.toString().padStart(2,'0')}:${m}`;let v=`${i}:${m}`;h+=`<div class="batch-slot"><input type="checkbox" name="ts" value="${v}"> ${t}</div>`})}document.getElementById('time-grid').innerHTML=h;}
     function toggleAllSlots(c){document.querySelectorAll('input[name="ts"]').forEach(e=>e.checked=c);}
     async function batchAddSchedule(){const d1=document.getElementById('batch-start').value,d2=document.getElementById('batch-end').value||d1,ts=Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e=>e.value);if(!d1||!ts.length)return alert("選日期時間");let ins=[],c=new Date(d1),e=new Date(d2);while(c<=e){const d=c.toISOString().split('T')[0];ts.forEach(t=>{let[hh,mm]=t.split(':').map(Number);let ad=new Date(c);if(hh>=24){ad.setDate(ad.getDate()+1);hh-=24;}ins.push({slot_date:ad.toISOString().split('T')[0],slot_time:`${hh.toString().padStart(2,'0')}:${mm}`})});c.setDate(c.getDate()+1);}await myDB.from('schedule_slots').insert(ins);alert("已生成");fetchAll();}
@@ -1210,14 +988,43 @@ function toggleKbSidebar() {
     function selectDate(d){selectedDateStr=d;renderCalendar();document.getElementById('detail-date-title').innerText=d;const s=cache.slots.filter(x=>x.slot_date===d).sort((a,b)=>a.slot_time.localeCompare(b.slot_time));document.getElementById('day-detail-container').innerHTML=s.map(x=>`<div class="compact-slot ${x.is_booked?'booked':'free'}">${x.slot_time.slice(0,5)} <span class="compact-del" onclick="delSlot('${x.id}')">×</span></div>`).join('');}
     async function delSlot(id){if(confirm("刪?"))await myDB.from('schedule_slots').delete().eq('id',id);fetchAll();}
     function render7DaySchedule(){const t=new Date();let h='';for(let i=0;i<7;i++){const d=new Date(t);d.setDate(t.getDate()+i);const ds=d.toISOString().split('T')[0];const s=cache.slots.filter(x=>x.slot_date===ds).sort((a,b)=>a.slot_time.localeCompare(b.slot_time));if(s.length)h+=`<div class="upcoming-day"><div class="upcoming-day-header">${ds}</div><div class="upcoming-slots">${s.map(x=>`<span class="u-slot ${x.is_booked?'booked':''}">${x.slot_time.slice(0,5)}</span>`).join('')}</div></div>`}document.getElementById('dashboard-7day-schedule').innerHTML=h||"無";}
-    
-    // Utils
     function closeModal(){document.getElementById('modal').style.display='none';}
     function switchTab(id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+id).classList.add('active');}
     async function delData(table, id){if(confirm("刪除？")){await myDB.from(table).delete().eq('id',id);fetchAll();}}
     window.updateS = async function(id,s){if(confirm("確定?"))await myDB.from('bookings').update({status:s}).eq('id',id);closeModal();fetchAll();}
     async function linkUser(u,b){if(confirm("歸戶?"))await myDB.from('bookings').update({user_id:u}).eq('id',b);fetchAll();}
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
+    function toggleMainSidebar() { document.body.classList.toggle('hide-nav'); }
+    function editCat(id){const c=cache.cats.find(x=>x.id===id);document.getElementById('cat-id-edit').value=c.id;document.getElementById('cat-name').value=c.name;document.getElementById('cat-terms').value=c.terms;document.getElementById('btn-cat-save').innerText="儲存";document.getElementById('btn-cat-cancel').style.display="inline-block";}
+    function cancelEdit(t){if(t==='svc'){document.getElementById('svc-id-edit').value='';document.getElementById('i-name').value='';document.getElementById('btn-svc-save').innerText="＋ 新增";document.getElementById('btn-svc-cancel').style.display="none";}else{document.getElementById('cat-id-edit').value='';document.getElementById('cat-name').value='';document.getElementById('btn-cat-save').innerText="＋ 新增";document.getElementById('btn-cat-cancel').style.display="none";}}
+    function editSvc(id){const s=cache.svcs.find(x=>x.id===id);document.getElementById('svc-id-edit').value=s.id;document.getElementById('i-name').value=s.title;document.getElementById('i-price').value=s.price;document.getElementById('i-is-main').checked=s.is_main;document.getElementById('i-report-tpl').value=s.report_template||'';document.getElementById('i-sub-opts').value=s.sub_options||'';toggleSubOptionInput();document.getElementById('btn-svc-save').innerText="儲存";document.getElementById('btn-svc-cancel').style.display='inline-block';}
+    function toggleSubOptionInput(){const m=document.getElementById('i-is-main').checked;document.getElementById('main-opt-wrapper').style.display=m?'block':'none';document.getElementById('sub-opt-wrapper').style.display=m?'none':'block';}
+    function editOTA(id) { const o = cache.otas.find(x => x.id === id); document.getElementById('ota-id').value = o.id; document.getElementById('ota-name').value = o.name; document.getElementById('ota-code').value = o.code; document.getElementById('ota-rate').value = o.commission_rate; document.getElementById('ota-front').value = o.front_url || ''; document.getElementById('ota-admin').value = o.admin_url || ''; document.getElementById('btn-ota-save').innerText = "更新平台"; document.getElementById('btn-ota-cancel').style.display = 'inline-block'; }
+    function cancelOTA() { document.getElementById('ota-id').value = ''; document.getElementById('ota-name').value = ''; document.getElementById('ota-code').value = ''; document.getElementById('ota-front').value = ''; document.getElementById('ota-admin').value = ''; document.getElementById('btn-ota-save').innerText = "💾 儲存設定"; document.getElementById('btn-ota-cancel').style.display = 'none'; }
+    async function saveOTA() { const id = document.getElementById('ota-id').value; const p = { name: document.getElementById('ota-name').value, code: document.getElementById('ota-code').value, commission_rate: document.getElementById('ota-rate').value, front_url: document.getElementById('ota-front').value, admin_url: document.getElementById('ota-admin').value }; if(!p.name) return alert("名稱必填"); if(id) await myDB.from('ota_settings').update(p).eq('id', id); else await myDB.from('ota_settings').insert([p]); cancelOTA(); fetchAll(); }
+    function toggleCpExp() { const noLimit = document.getElementById('cp-no-limit').checked; const expInput = document.getElementById('cp-exp'); expInput.disabled = noLimit; if(noLimit) expInput.value = ''; }
+    function updateCpHint() { const type = document.getElementById('cp-type').value; document.getElementById('cp-val-hint').innerText = type === 'percentage' ? "折扣數值 (90=9折)" : "折抵金額 (100=折100)"; }
+    async function saveCoupon() { const id = document.getElementById('cp-edit-id').value; const p = { name: document.getElementById('cp-name').value, code: document.getElementById('cp-code').value, discount_type: document.getElementById('cp-type').value, discount_value: document.getElementById('cp-val').value, expires_at: document.getElementById('cp-no-limit').checked ? null : document.getElementById('cp-exp').value, allow_member: document.getElementById('cp-mem').checked, allow_guest: document.getElementById('cp-guest').checked }; if(!p.name || !p.code) return alert("資料不全"); if(id) await myDB.from('coupons').update(p).eq('id', id); else await myDB.from('coupons').insert([p]); resetCouponForm(); fetchAll(); }
+    function editCoupon(id) { const c = cache.coupons.find(x => x.id === id); document.getElementById('cp-edit-id').value = c.id; document.getElementById('cp-name').value = c.name; document.getElementById('cp-code').value = c.code; document.getElementById('cp-val').value = c.discount_value; document.getElementById('cp-mem').checked = c.allow_member; document.getElementById('cp-guest').checked = c.allow_guest; if(!c.expires_at) { document.getElementById('cp-no-limit').checked = true; document.getElementById('cp-exp').disabled = true; } else { document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').value = c.expires_at.slice(0,10); document.getElementById('cp-exp').disabled = false; } document.getElementById('btn-cp-save').innerText = "更新"; document.getElementById('btn-cp-cancel').style.display = "inline-block"; }
+    function resetCouponForm() { document.getElementById('cp-edit-id').value = ''; document.getElementById('cp-name').value = ''; document.getElementById('cp-code').value = ''; document.getElementById('cp-val').value = ''; document.getElementById('cp-exp').value = ''; document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').disabled = false; document.getElementById('btn-cp-save').innerText = "建立"; document.getElementById('btn-cp-cancel').style.display = "none"; }
+    async function testCoupon() { const c = document.getElementById('test-cp-code').value; const p = document.getElementById('test-cp-price').value; const { data } = await myDB.from('coupons').select('*').eq('code', c).single(); if(!data) return alert("無效代碼"); let f = p; if(data.discount_type === 'percentage') f = Math.round(p * (data.discount_value/100)); else f = p - data.discount_value; alert(`原價 $${p} -> 折後 $${f}`); }
+    
+    // SQL 複製功能
+    function copySqlCode() {
+        const code = document.getElementById('sql-code-block').innerText;
+        navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！"));
+    }
+    
+    // 解決優惠券 Tab 切換問題 (關鍵修正)
+    function switchFinanceSub(tab) {
+        // 切換顯示
+        document.getElementById('sub-ota').style.display = tab === 'ota' ? 'block' : 'none';
+        document.getElementById('sub-coupon').style.display = tab === 'coupon' ? 'block' : 'none';
+        
+        // 切換按鈕樣式
+        document.getElementById('btn-sub-ota').className = tab === 'ota' ? 'active' : '';
+        document.getElementById('btn-sub-coupon').className = tab === 'coupon' ? 'active' : '';
+    }
 </script>
 </body>
 </html>

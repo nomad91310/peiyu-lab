@@ -975,7 +975,7 @@
 <div id="knowledge" class="section">
     <div class="kb-header">
         <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回</button>
-        <h2 class="kb-title">📘 11111培癒寶典</h2>
+        <h2 class="kb-title">📘 培癒寶典</h2>
         <div style="width:70px;"></div> 
     </div>
 
@@ -1141,17 +1141,25 @@
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
     function showSection(id) { 
+        // 1. 切換區塊顯示
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
-        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         
+        // 2. 切換導航按鈕狀態
+        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         const baseId = id.split('-')[0]; 
         const navBtn = document.getElementById('nav-' + baseId);
         if(navBtn) navBtn.classList.add('active');
         
-        // 切換頁面後自動關閉手機選單
+        // 3. 自動關閉手機選單
         document.getElementById('nav-menu').classList.remove('active');
         
+        // 🔥🔥🔥 關鍵修復：如果是點擊「培癒寶典」，強制回到目錄首頁 🔥🔥🔥
+        if (id === 'knowledge') {
+            renderKbHome(); // 這一行救了整個導航！
+        }
+        
+        // 4. 捲動到最上方
         window.scrollTo(0,0); 
     }
 

@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="preload" as="image" href="logo.png">
+    <link rel="preload" as="image" href="logohuman.png">
+
 <style>
     /* ======================================================
        1. 全站基礎設定 (Variables & Reset)
@@ -35,7 +38,7 @@
     h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
 
     /* ======================================================
-       2. 導航與佈局 (Nav & Footer)
+       2. 導航與佈局 (Nav & Layout)
        ====================================================== */
     nav { 
         background: var(--forest); padding: 0 40px; 
@@ -84,9 +87,9 @@
     .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
     /* ======================================================
-       3. UI 元件 (Buttons, Cards, Modals, Forms)
+       3. 通用元件 (Components)
        ====================================================== */
-    /* 一般按鈕 */
+    /* 按鈕 (一般) */
     .btn-primary { 
         padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
         color: var(--white); border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; 
@@ -97,33 +100,23 @@
     .btn-secondary { padding: 10px 25px; background: transparent; color: var(--forest); border: 2px solid var(--forest); border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 10px; }
     .btn-secondary:hover { background: var(--forest); color: var(--white); }
 
-    /* 🔥 V104 通用返回膠囊按鈕 (全站統一) */
-    .btn-back-capsule {
+    /* 返回膠囊按鈕 (KB 內頁 & 預約頁共用) */
+    .btn-back-capsule, .kb-internal-back {
         display: inline-flex; align-items: center; gap: 8px;
         color: var(--forest); background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
         padding: 8px 24px; border-radius: 50px;
         font-size: 0.95rem; font-weight: bold; font-family: 'Noto Serif TC', serif;
-        cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.3s ease;
+        cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+        text-decoration: none; transition: all 0.3s ease;
     }
-    .btn-back-capsule:hover { color: #ffffff; background: var(--forest); border-color: var(--forest); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); }
-    .btn-back-capsule:hover i { transform: translateX(-3px); }
-    .btn-back-capsule i { transition: transform 0.3s ease; }
-
-    /* KB 內部的膠囊按鈕 (樣式同上，保留 class 名稱以防 JS 依賴) */
-    .kb-internal-back { 
-        display: inline-flex; align-items: center; gap: 8px;
-        color: var(--forest); background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
-        padding: 8px 24px; border-radius: 50px;
-        font-size: 0.95rem; font-weight: bold; cursor: pointer; text-decoration: none; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; 
-        margin-bottom: 5px; 
-    }
-    .kb-internal-back:hover { 
-        color: #ffffff; background: var(--forest); border-color: var(--forest);
+    .kb-internal-back { margin-bottom: 5px; } /* KB 列表頁需要緊湊一點 */
+    
+    .btn-back-capsule:hover, .kb-internal-back:hover { 
+        color: #ffffff; background: var(--forest); border-color: var(--forest); 
         transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); 
     }
-    .kb-internal-back:hover i { animation: arrowMove 0.6s infinite alternate; }
-    @keyframes arrowMove { from { transform: translateX(0); } to { transform: translateX(-3px); } }
+    .btn-back-capsule:hover i, .kb-internal-back:hover i { transform: translateX(-3px); }
+    .btn-back-capsule i, .kb-internal-back i { transition: transform 0.3s ease; }
 
     /* 懸浮按鈕 (FAB) */
     .kb-fab-back {
@@ -158,18 +151,17 @@
     .close-modal-btn:hover { background: var(--error); }
 
     /* ======================================================
-       4. 通用標題樣式 (V103 Brand Headers)
+       4. 通用標題樣式 (Brand Headers - V109 精修版)
        ====================================================== */
-    /* 適用於：服務預約、抽卡區 */
     .brand-section-header, .draw-section-header {
         text-align: center;
         margin-bottom: 40px;
         padding-top: 10px;
         position: relative;
     }
-    .draw-section-header { margin-bottom: 60px; } /* 抽卡區留白多一點 */
+    .draw-section-header { margin-bottom: 60px; }
 
-    /* 英文大標 */
+    /* 英文大標 (電腦版) */
     .brand-h2-en, .draw-title-h2 {
         font-family: 'Cinzel', serif;
         font-size: 2.5rem;
@@ -179,9 +171,9 @@
         text-shadow: 3px 3px 0px rgba(198, 168, 124, 0.25);
         letter-spacing: 1px;
     }
-    .draw-title-h2 { font-size: 2.8rem; margin-bottom: 15px; } /* 抽卡標題更大 */
+    .draw-title-h2 { font-size: 2.8rem; margin-bottom: 15px; }
 
-    /* 中文副標 */
+    /* 中文副標 (電腦版) */
     .brand-h3-zh, .draw-title-zh {
         font-family: 'Noto Serif TC', serif;
         font-size: 1.5rem;
@@ -193,7 +185,7 @@
     }
     .draw-title-zh { margin-top: -10px; }
 
-    /* 金邊膠囊引導語 */
+    /* 金邊膠囊引導語 (電腦版) */
     .brand-capsule, .draw-desc-p {
         font-family: 'Noto Serif TC', serif;
         font-size: 1rem;
@@ -205,7 +197,7 @@
         border: 1px solid var(--accent);
         box-shadow: 0 5px 15px rgba(198, 168, 124, 0.15);
     }
-    .draw-desc-p { font-size: 1.05rem; padding: 10px 40px; } /* 抽卡文字稍大 */
+    .draw-desc-p { font-size: 1.05rem; padding: 10px 40px; }
     
     .brand-capsule::before, .brand-capsule::after, 
     .draw-desc-p::before, .draw-desc-p::after {
@@ -260,7 +252,7 @@
     .coupon-msg.success { color: var(--success); }
     .coupon-msg.error { color: var(--error); }
 
-    /* 文字內容樣式 */
+    /* 故事與規則文字 */
     .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
     .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0; }
     .rule-item { margin-bottom: 30px; }
@@ -277,30 +269,15 @@
     /* ======================================================
        6. 培癒寶典 (Knowledge Base)
        ====================================================== */
-    
-    /* 容器設定 */
     .kb-cat-view, .kb-article-view {
-        background: #fdfaf5; 
-        min-height: 80vh; 
-        padding: 40px 20px;
-        position: relative; 
-        overflow: visible !important; /* 讓便利貼可以凸出去 */
+        background: #fdfaf5; min-height: 80vh; padding: 40px 20px;
+        position: relative; overflow: visible !important; 
     }
-    
-    /* 文章內頁容器 */
     .kb-article-view {
-        background: #ffffff; 
-        padding: 40px 50px; 
-        border-radius: 16px; 
-        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
-        border: 1px solid rgba(0,0,0,0.02); 
-        margin-bottom: 60px; 
-        max-width: 900px; 
-        margin-left: auto; 
-        margin-right: auto; 
+        background: #ffffff; padding: 40px 50px; 
+        border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
+        border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; 
     }
-
-    /* 標題與導航控制 */
     .kb-cat-header { text-align: center; margin-bottom: 40px; }
     .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
     .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
@@ -310,18 +287,11 @@
 
     /* 便利貼 (Sticky Note) - 電腦版預設 (框內) */
     .kb-tiny-note {
-        position: absolute;
-        top: 25px;
-        right: 30px;
-        z-index: 10;
-        background: #ffffff;
-        border: 2px dashed var(--accent);
-        padding: 15px 20px;
-        border-radius: 12px;
+        position: absolute; top: 25px; right: 30px; z-index: 10;
+        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 20px; border-radius: 12px;
         box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
         font-size: 12px; color: #888; text-align: left; line-height: 1.7; font-family: sans-serif;
-        max-width: 300px;
-        transform: rotate(1deg); transition: transform 0.3s ease;
+        max-width: 300px; transform: rotate(1deg); transition: transform 0.3s ease;
     }
     .kb-tiny-note:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25); }
 
@@ -367,23 +337,168 @@
     .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
     .close-card-btn { position: fixed; top: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5); color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2002; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
     .close-card-btn:hover { background: var(--accent); color: var(--forest); transform: rotate(90deg); border-color: var(--forest); }
-    .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
+    /* 載入動畫 (V112 優化) */
+    .img-loader {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        z-index: 5; color: var(--accent); font-size: 40px; display: none;
+    }
+    .fa-spinner { animation: spin 2s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; opacity: 0; transition: opacity 0.6s ease-in-out; background-color: var(--cream); }
+    .layer-bg.loaded { opacity: 1; }
+    
     .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
     /* ======================================================
-       8. 編輯器內容 (Editor Content)
+       8. 編輯器內容 (前後台同步樣式 V132 - 點點間距修正版)
        ====================================================== */
-    .ql-editor { padding: 0; color: #333; font-size: 16px; line-height: 1.8; font-family: sans-serif; }
-    .ql-editor ul, .ql-editor ol { padding-left: 1.5em; margin-bottom: 0 !important; margin-top: 0; }
-    .ql-editor li { margin-bottom: 0; font-weight: bold; }
-    .ql-editor .ql-indent-1 { padding-left: 2em; margin-top: 0em !important; margin-bottom: 1em !important; color: #555; display: block; }
-    .ql-indent-2 { padding-left: 4em; margin-bottom: 2.5em !important; }
-    .ql-indent-3 { padding-left: 6em; margin-bottom: 2.5em !important; }
-    .ql-editor p { margin-bottom: 1em; }
-    .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 40px; margin-bottom: 20px; display: block; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
-    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 10px 0 !important; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .ql-editor { 
+        padding: 0; 
+        color: #333; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+        overflow-wrap: break-word; 
+    }
+
+    /* 圖片 RWD (靠左) */
+    .ql-editor img { 
+        max-width: 100%; 
+        height: auto; 
+        display: block; 
+        margin: 20px 0; 
+        border-radius: 4px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }
+
+    /* 4. 列表樣式 (V133 垂直間距修正：解決行距太寬) */
+    
+    /* 列表樣式 (緊湊版) */
+    .ql-editor ul, 
+    .ql-editor ol { 
+        padding-left: 5px !important; 
+        margin-bottom: 5px !important; 
+        margin-top: 0 !important;
+    }
+
+    .ql-editor li { 
+        padding-left: 1.2em !important; 
+        margin-bottom: 0px !important;  
+        line-height: 1.3 !important;    
+        padding-bottom: 0px !important;
+    }
+
+    /* 🔥 消除隱藏的 P 邊距，讓列表更緊湊 */
+    .ql-editor li > p { 
+        margin: 0 !important; 
+        padding: 0 !important;
+        display: inline-block !important;
+        line-height: 1.3 !important;
+    }
+    * 點點的樣式 */
+    .ql-editor li::before {
+        margin-right: 0.3em !important;
+        width: 1.2em !important;
+        text-align: center !important;
+        display: inline-block !important;
+    }
+
+    /* 縮排 */
+    .ql-editor .ql-indent-1 { padding-left: 2em; }
+    .ql-editor .ql-indent-2 { padding-left: 4em; }
+    .ql-editor .ql-indent-3 { padding-left: 6em; }
+
+    /* --- 字體大小 (無底線) --- */
+    .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
+    
+    .ql-editor .ql-size-large {
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin-top: 30px;    
+        margin-bottom: 10px; 
+        line-height: 1.4;
+        display: block;      
+        color: var(--forest); 
+    }
+
+    .ql-editor .ql-size-huge {
+        font-size: 2.2rem;
+        font-weight: 900;
+        margin-top: 40px;
+        margin-bottom: 25px;
+        line-height: 1.2;
+        display: block;
+        color: var(--forest);
+        text-align: center; 
+    }
+
+    /* 引用區塊 */
+    .ql-editor blockquote {
+        border-left: 5px solid var(--shopee, #d35400);
+        background-color: #fffaf0;
+        padding: 15px 20px;
+        margin: 20px 0;
+        color: #8a5a00;
+        font-style: italic;
+        font-weight: bold;
+    }
+
+    /* 標題框 (H2) */
+    .ql-editor h2.title-boxed-h2 {
+        border-left: 8px solid var(--accent);
+        background: var(--forest);
+        color: #fff;
+        padding: 10px 20px;
+        margin: 30px 0 15px 0;
+        border-radius: 4px;
+        font-family: 'Noto Serif TC', serif;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        display: table;
+        box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4);
+    }
+
+    .ql-editor h3.title-boxed-h3 {
+        border: 2px solid var(--accent);
+        background: #fffcf5;
+        color: var(--forest);
+        
+        display: inline-flex !important; /* 彈性盒子 */
+        align-items: center !important;  /* 垂直置中 */
+        justify-content: center;         /* 水平置中 */
+
+        padding: 8px 35px !important;    /* 膠囊的內距 */
+        margin: 25px 0 15px 0;
+        border-radius: 50px;             /* 膠囊圓角 */
+        
+        font-family: 'Noto Serif TC', serif;
+        width: auto;
+        max-width: 100%;
+        min-height: 50px; /* 確保框框有基本高度 */
+    }
+
+    .ql-editor h3.title-boxed-h3 .ql-size-large {
+        margin: 0 !important;        /* 👈 兇手就是它！殺掉上距，文字就會浮回中間 */
+        padding: 0 !important;
+        line-height: 1.2 !important; /* 稍微緊湊一點 */
+        display: inline !important;  /* 讓它乖乖當文字，不要當區塊 */
+        border: none !important;     /* 確保沒有底線 */
+    }
+
+    /* RWD 手機修正 */
+    @media (max-width: 768px) {
+        .ql-editor h2.title-boxed-h2, 
+        .ql-editor h3.title-boxed-h3 {
+            display: block; width: 100%; box-sizing: border-box;
+        }
+        .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
+        .ql-editor h3.title-boxed-h3 { font-size: 1rem; }
+    }
+
+    /* 輔助功能 */
     .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
+    strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
     /* ======================================================
        9. 手機版 RWD (Mobile Layout Overrides)
@@ -408,19 +523,9 @@
 
         /* KB Tiny Note (手機拼貼風 - 騎在邊緣) */
         .kb-tiny-note {
-            position: absolute;
-            top: -12px;    /* 🔥 V97：半浮在上方，像書籤 */
-            right: -5px;   /* 微微靠右 */
-            width: fit-content;
-            max-width: 55%; 
-            padding: 8px 10px;
-            text-align: left;
-            font-size: 10px;
-            line-height: 1.4;
-            transform: rotate(2deg);
-            z-index: 999;
-            margin: 0;
-            transition: none;
+            position: absolute; top: -12px; right: -5px; width: fit-content; max-width: 55%; 
+            padding: 8px 10px; text-align: left; font-size: 10px; line-height: 1.4;
+            transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
         }
         .kb-tiny-note:hover { transform: rotate(2deg); box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15); }
         
@@ -437,20 +542,29 @@
         .social-grid { gap: 8px; }
         .social-btn { flex: 1 1 40%; font-size: 0.85rem; }
 
-        /* Brand Headers (手機縮小) */
-        .brand-h2-en, .draw-title-h2 { font-size: 2rem; }
-        .brand-h3-zh, .draw-title-zh { font-size: 1.3rem; }
-        .brand-capsule, .draw-desc-p { font-size: 0.9rem; padding: 8px 20px; width: 95%; }
+        /* Brand Headers (手機版標題縮小防爆) */
+        .brand-h2-en, .draw-title-h2 { font-size: 1.5rem !important; letter-spacing: 1px; margin-bottom: 5px; }
+        .brand-h3-zh, .draw-title-zh { font-size: 1.1rem !important; margin-top: 0 !important; margin-bottom: 15px !important; letter-spacing: 2px; }
+        .brand-capsule, .draw-desc-p { 
+            font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; 
+            display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; 
+        }
+        .brand-capsule::before, .brand-capsule::after, .draw-desc-p::before, .draw-desc-p::after { margin: 0 5px !important; }
+
+        /* 標題框 RWD */
+        .ql-editor h2.title-boxed-h2, 
+        .ql-editor h3.title-boxed-h3 {
+            display: block; width: 100%; box-sizing: border-box;
+        }
+        .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
+        .ql-editor h3.title-boxed-h3 { font-size: 1rem; }
     }
 
     /* 橫向模式救援補丁 (Landscape) */
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note {
-            top: 10px !important;   /* 縮回框內 */
-            right: 15px !important; 
-            transform: rotate(0deg) !important; 
-            max-width: 40%;
-            background: rgba(255,255,255,0.98); 
+            top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; 
+            max-width: 40%; background: rgba(255,255,255,0.98); 
         }
         .kb-cat-header, .kb-article-title-h1 { margin-top: 30px; }
     }
@@ -470,7 +584,7 @@
         <button onclick="showSection('booking-step-1')" id="nav-booking">服務預約</button>
         <button onclick="showSection('knowledge')" id="nav-knowledge">培癒寶典</button>
         <button onclick="showSection('draw')" id="nav-draw">能量抽卡</button>
-        <button onclick="showSection('member')" id="nav-member">個案專區</button>
+        <button onclick="showSection('member')" id="nav-member">會員專區</button>
     </div>
 </nav>
 
@@ -660,11 +774,10 @@
     <div id="kb-container">載入中...</div>
 </div> 
 <div id="draw" class="section">
-    <div class="draw-section-header">
-        <div class="draw-title-h2">ORACLE GUIDANCE</div>
-        <div class="draw-title-zh">64 閘門能量指引</div>
+    <div class="brand-section-header" style="margin-bottom: 60px;"> <div class="brand-h2-en">ORACLE GUIDANCE</div>
+        <div class="brand-h3-zh">64 閘門能量指引</div>
         
-        <div class="draw-desc-p">
+        <div class="brand-capsule">
             深呼吸，憑直覺選一張牌，領取當下的指引
         </div>
     </div>
@@ -1174,17 +1287,14 @@
         }
     }
 
-    // 🔥 V92 首頁：調整排版順序 (按鈕優先)
-    // 🔥 V99 首頁：移除小提醒 (乾淨版)，讓位給您的故事
+
+    // 🔥 V106 培癒寶典首頁：加入精緻品牌標題區
     function renderKbHome() {
         kbState.level = 0;
         kbState.big = null;
         kbState.activeMid = null;
 
-        // 這裡會自動抓取您資料庫裡所有的「大分類」
-        // 如果您新增了「品牌故事」，這裡就會自動抓到
         const bigCats = Object.keys(kbTree);
-        
         const listHtml = bigCats.map(cat => {
             return `
             <div class="kb-article-card" onclick="enterKb('${cat}')" style="padding: 35px 30px;">
@@ -1195,13 +1305,15 @@
             </div>`;
         }).join('');
 
+        // 🔥 V107：直接使用 kb-cat-view，不再套用內層 .card
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
-                <div class="kb-cat-header" style="margin-top: 20px;">
-                    <h1 class="kb-cat-title-h1">培癒寶典</h1>
-                    <p style="color:#888; margin-top:10px; font-family:'Noto Serif TC', serif;">
-                        請選擇您想閱讀的分類
-                    </p>
+                <div class="brand-section-header">
+                    <div class="brand-h2-en">PY JOURNEY</div>
+                    <div class="brand-h3-zh">培癒寶典</div>
+                    <div class="brand-capsule">
+                        探索自我的導引手冊
+                    </div>
                 </div>
                 
                 <div class="kb-list-container">
@@ -1213,8 +1325,7 @@
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         window.scrollTo(0,0);
     }
-    
-    // 🔥 V92 分類列表：調整排版順序 (按鈕 -> 便利貼)
+
     // 🔥 修改：根據後台設定決定是否顯示便利貼
     function enterKb(big) {
         kbState.level = 1;
@@ -1287,7 +1398,6 @@
         window.scrollTo(0, 0);
     }
     // 🔥 V92 文章內頁：調整排版順序 (按鈕 -> 便利貼)
-    // 🔥 修改：文章內頁同步隱藏設定
     async function readArt(id) {
         const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
         if (error || !data) { console.error(error); alert("讀取失敗"); return; }
@@ -1398,8 +1508,39 @@
     async function drawCard(card) { document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; document.getElementById('p-zodiac').innerText = card.zodiac || ''; document.getElementById('p-quote').innerText = card.quote || ''; if (card.image_url) { document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; } const style = card.style_config || defaultStyle; applyStyle('gate', style.gate || defaultStyle.gate); applyStyle('info', style.info || defaultStyle.info); applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); applyStyle('quote', style.quote || defaultStyle.quote); document.getElementById('overlay').classList.add('active'); }
     function applyStyle(id, s) { const el = document.getElementById(`p-${id}`); const def = defaultStyle[id]; const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; el.style.left = val('x') + '%'; el.style.top = val('y') + '%'; el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color'); const str = val('stroke'); el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; }
     function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); document.getElementById('p-bg').src = ""; }, 500); }
-    async function loadSiteAssets() { const { data } = await myDB.from('site_content').select('*').eq('category', 'site_asset'); if (data) { data.forEach(item => { if (item.title === 'logo') document.getElementById('site-logo').src = item.image_url; if (item.title === 'logohuman') document.getElementById('site-hero').src = item.image_url; if (item.title === 'my_hd_chart') document.getElementById('hd-chart-img').src = item.image_url; }); } }
-    
+    // 🔥 V113 圖片極速載入邏輯 (請確保資料夾內有 logo.png 和 logohuman.png)
+    async function loadSiteAssets() { 
+        // 1. 這裡不做任何事，因為 HTML 已經寫死 src="logo.png" 了
+        // 瀏覽器一打開就會直接顯示本地圖片，不用等 JS，這才是真正的 0 秒載入
+
+        // 2. 背景默默連線資料庫，檢查有沒有「新版本」的圖要換
+        const { data } = await myDB.from('site_content').select('*').eq('category', 'site_asset'); 
+        
+        if (data) { 
+            data.forEach(item => { 
+                // 這裡我們「偷偷」下載新圖片，使用者這時候還在看舊圖，完全無感
+                const img = new Image();
+                img.src = item.image_url;
+                
+                // 等新圖片下載好之後，才無縫替換掉舊的
+                img.onload = () => {
+                    if (item.title === 'logo') {
+                        // 只有當圖片真的不一樣時才替換，避免閃爍
+                        const el = document.getElementById('site-logo');
+                        if(el.src !== item.image_url) el.src = item.image_url;
+                    }
+                    if (item.title === 'logohuman') {
+                        const el = document.getElementById('site-hero');
+                        if(el.src !== item.image_url) el.src = item.image_url;
+                    }
+                    if (item.title === 'my_hd_chart') {
+                        const chartEl = document.getElementById('hd-chart-img');
+                        if(chartEl) chartEl.src = item.image_url;
+                    }
+                };
+            }); 
+        } 
+    }
     async function doLogin() { 
         const phone = document.getElementById('l-phone').value.trim(); 
         const pass = document.getElementById('l-pass').value.trim(); 

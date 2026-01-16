@@ -14,167 +14,505 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <style>
-        /* ================= 全域樣式 ================= */
-        :root { 
-            --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; 
-            --dark: #2c3e50; --danger: #e74c3c; --info: #3498db; 
-            --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; 
-        }
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* 左側導航 */
-        .sidebar { width: 240px; background: var(--forest); height: 100%; color: white; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: width 0.3s ease; overflow-x: hidden; white-space: nowrap; }
-        body.hide-nav .sidebar { width: 0; }
-        .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; }
-        .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
-        .sidebar button:hover { background: #2a3f33; color: white; }
-        .sidebar button.active { background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); }
-        
-        /* 主內容 */
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; position: relative; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* 卡片與按鈕 */
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; text-decoration: none; white-space:nowrap; }
-        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
-        .btn-forest { background: var(--forest); color: white; }
-        .btn-info { background: var(--info); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-purple { background: var(--purple); color: white; }
-        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
-        .btn-sort { background: #7f8c8d; padding: 4px 8px; font-size: 12px; color:white; line-height: 1; }
+<style>
+    /* ======================================================
+       1. 全站基礎與後台佈局 (Backend Layout) - 絕對不動區
+       ====================================================== */
+    :root { 
+        --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; 
+        --dark: #2c3e50; --danger: #e74c3c; --info: #3498db; 
+        --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; 
+        --shopee: #ff5722; 
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* 左側導航 */
+    .sidebar { width: 240px; background: var(--forest); height: 100%; color: white; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: width 0.3s ease; overflow-x: hidden; white-space: nowrap; }
+    body.hide-nav .sidebar { width: 0; }
+    .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; }
+    .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
+    .sidebar button:hover { background: #2a3f33; color: white; }
+    .sidebar button.active { background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); }
+    
+    /* 主內容區 */
+    .main { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; position: relative; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* 卡片與通用元件 */
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; text-decoration: none; white-space:nowrap; }
+    .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+    .btn-forest { background: var(--forest); color: white; }
+    .btn-info { background: var(--info); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+    .btn-sort { background: #7f8c8d; padding: 4px 8px; font-size: 12px; color:white; line-height: 1; }
 
-        /* 表格優化 */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: auto !important; }
-        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap !important; }
-        td { padding: 10px 8px !important; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; word-break: keep-all !important; white-space: nowrap !important; }
-        tr:hover { background: #fdfaf1; }
+    /* 表格優化 */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: auto !important; }
+    th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap !important; }
+    td { padding: 10px 8px !important; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; word-break: keep-all !important; white-space: nowrap !important; }
+    tr:hover { background: #fdfaf1; }
 
-        /* 標籤 */
-        .tag { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight:bold; color: white; display: inline-block; margin-right: 3px; }
-        .tag-main { background: #d32f2f; }
-        .tag-addon { background: #1976d2; }
-        .tag-ota { background: #f39c12; }
-        .tag-coupon { background: #e91e63; padding: 4px 8px; font-size: 12px; border-radius: 20px; }
-        .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; border-radius: 4px; font-size:12px; }
-        .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 4px; font-size:12px; }
+    /* 狀態標籤 */
+    .tag { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight:bold; color: white; display: inline-block; margin-right: 3px; }
+    .tag-main { background: #d32f2f; }
+    .tag-addon { background: #1976d2; }
+    .tag-ota { background: #f39c12; }
+    .tag-coupon { background: #e91e63; padding: 4px 8px; font-size: 12px; border-radius: 20px; }
+    .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; border-radius: 4px; font-size:12px; }
+    .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 4px; font-size:12px; }
 
-        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
-        input:disabled { background: #eee; color: #999; cursor: not-allowed; }
-        .finance-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .finance-nav button { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; color: #666; transition: 0.2s; }
-        .finance-nav button.active { background: var(--forest); color: white; }
+    /* 表單元件 */
+    input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
+    input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+    .finance-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+    .finance-nav button { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; color: #666; transition: 0.2s; }
+    .finance-nav button.active { background: var(--forest); color: white; }
 
-        /* KB 樣式 */
-        .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); transition: all 0.3s ease; }
-        .kb-layout.collapsed { grid-template-columns: 0 1fr; gap: 0; }
-        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; white-space: nowrap; }
-        .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
-        .kb-tree-content { padding: 10px; flex: 1; }
-        details.big-cat { margin-bottom: 5px; }
-        details.big-cat > summary { padding: 10px; cursor: pointer; font-weight: bold; list-style: none; border-radius: 4px; color: #ecf0f1; }
-        details.big-cat > summary:hover { background: rgba(255,255,255,0.1); }
-        details.mid-cat { margin-left: 12px; border-left: 1px solid #555; }
-        details.mid-cat > summary { padding: 8px; cursor: pointer; color: #ccc; font-size: 0.95rem; }
-        details.mid-cat > summary:hover { color: #fff; }
-        .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: block; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; display: flex; align-items: center; }
-        .article-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .article-item.active { color: #fff; background: #c6a87c; font-weight: bold; }
-        .article-item.draft { color: #e74c3c; } 
-        .article-item.draft::before { content: '🔴 '; font-size: 10px; }
-        .sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
-        .btn-sort-arrow { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; border-radius: 3px; line-height: 1.2; }
-        .btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
-        .article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
-        .article-item:hover .sort-actions { opacity: 1; }
-        .article-title-span { flex: 1; }
+    /* ======================================================
+       2. 知識庫與圖庫 (KB & Gallery) - 絕對不動區
+       ====================================================== */
+    .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); transition: all 0.3s ease; }
+    .kb-layout.collapsed { grid-template-columns: 0 1fr; gap: 0; }
+    .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; white-space: nowrap; }
+    .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
+    .kb-tree-content { padding: 10px; flex: 1; }
+    details.big-cat { margin-bottom: 5px; }
+    details.big-cat > summary { padding: 10px; cursor: pointer; font-weight: bold; list-style: none; border-radius: 4px; color: #ecf0f1; }
+    details.big-cat > summary:hover { background: rgba(255,255,255,0.1); }
+    details.mid-cat { margin-left: 12px; border-left: 1px solid #555; }
+    details.mid-cat > summary { padding: 8px; cursor: pointer; color: #ccc; font-size: 0.95rem; }
+    details.mid-cat > summary:hover { color: #fff; }
+    .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: block; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; display: flex; align-items: center; }
+    .article-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .article-item.active { color: #fff; background: #c6a87c; font-weight: bold; }
+    .article-item.draft { color: #e74c3c; } 
+    .article-item.draft::before { content: '🔴 '; font-size: 10px; }
+    .sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
+    .btn-sort-arrow { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; border-radius: 3px; line-height: 1.2; }
+    .btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
+    .article-item:hover .sort-actions { opacity: 1; }
+    .article-title-span { flex: 1; }
 
-        /* 編輯器容器 */
-        #editor-container { flex: 1; min-height: 200px; display: flex; flex-direction: column; background: white; margin-bottom: 0; border: 1px solid #ccc; overflow: hidden; }
-        .ql-container { flex: 1; overflow-y: auto; font-size: 16px; font-family: "Microsoft JhengHei", sans-serif; }
-        .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
-        .ql-font-monospace { font-family: 'Courier New', monospace !important; }
-        .ql-picker-item[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
-        .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
-        .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
-
-        /* 圖庫與 Modals */
-        .gallery-box { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-        .gallery-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .gallery-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 20px; background: #fff; }
-        .gallery-item { border: 2px solid #eee; border-radius: 6px; overflow: hidden; cursor: pointer; transition: 0.2s; position: relative; aspect-ratio: 1/1; }
-        .gallery-item:hover { border-color: #3498db; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
-        
-        /* 鎖屏與其他 */
-        #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-        #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
-        .batch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
-        .batch-slot { position: relative; }
-        .batch-slot input { position: absolute; opacity: 0; cursor: pointer; }
-        .batch-slot label { display: block; padding: 8px; background: #fff; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .batch-slot input:checked + label { background: var(--forest); color: white; border-color: var(--forest); }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #fff; }
-        .cal-cell { border: 1px solid #eee; min-height: 80px; padding: 5px; cursor: pointer; position: relative; background: white; transition: 0.2s; }
-        .cal-cell:hover { background: #f9f9f9; border-color: var(--accent); }
-        .cal-cell.active { border: 2px solid var(--forest); background: #f0f7ff; }
-        .day-detail-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
-        .compact-slot { padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px; background: white; position: relative; }
-        .compact-slot.booked { background: #fff5f5; color: #c0392b; border-color: #e74c3c; }
-        .compact-slot.free { background: #f0f7ff; color: #2980b9; border-color: #3498db; }
-        .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
-        .compact-slot:hover .compact-del { display: block; }
-        .u-slot { display: inline-block !important; margin: 3px !important; padding: 4px 8px !important; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
-        .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
-        .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
-        .admin-row:hover { background: #f0f7ff; }
-        
-        /* SQL 複製區樣式 */
-        .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
-        .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
-        .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
-
-        .dashboard-layout { grid-template-columns: 3fr 1fr !important; }
-        /* 🔥 編輯器美化：橘色引用線 & 縮排設定 🔥 */
-        .ql-editor blockquote {
-        border-left: 5px solid #d35400 !important; /* 橘色粗線 */
-        background-color: #fffaf0 !important;      /* 淡米色底 */
-        padding: 10px 15px !important;             /* 內距 */
-        margin: 10px 0 !important;
-        color: #8a5a00;
+    /* 圖庫與 Modal */
+    .gallery-box { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .gallery-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .gallery-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 20px; background: #fff; }
+    .gallery-item { border: 2px solid #eee; border-radius: 6px; overflow: hidden; cursor: pointer; transition: 0.2s; position: relative; aspect-ratio: 1/1; }
+    .gallery-item:hover { border-color: #3498db; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
+    
+    /* 鎖屏與其他 */
+    #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
+   /* =========================================
+       🔥 V151 排程樣式最終整合 (已移除重複代碼)
+       ========================================= */
+    
+    /* 1. 左側：快速排班格子 (固定 3 欄，內容置頂不拉伸) */
+    .batch-grid { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 5px; 
+        margin-top: 10px; 
+        align-content: start !important; /* 關鍵：防止被撐開 */
+    }
+    
+    /* 格子容器 (鎖定高度 35px) */
+    .batch-slot { 
+        position: relative; 
+        height: 35px !important; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        overflow: hidden; 
+    }
+    
+    /* 隱藏 Checkbox (鋪滿整個格子) */
+    .batch-slot input { 
+        position: absolute; 
+        width: 100%; 
+        height: 100%; 
+        opacity: 0; 
+        cursor: pointer; 
+        z-index: 2; 
+        left: 0; 
+        top: 0; 
+    }
+    
+    /* 格子文字顯示 (置中美化) */
+    .batch-slot label { 
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        width: 100%; 
+        height: 100%; 
+        background: #fff; 
+        font-size: 13px; 
+        color: #333; 
         font-weight: bold;
-        }
+        transition: 0.2s;
+    }
     
-        /* 讓縮排 (Indent) 真的有效果 */
-        .ql-indent-1 { padding-left: 2em !important; }
-        .ql-indent-2 { padding-left: 4em !important; }
-        .ql-indent-3 { padding-left: 6em !important; }
+    /* 選中狀態 */
+    .batch-slot input:checked + label { 
+        background: var(--forest); 
+        color: white; 
+        border-color: var(--forest); 
+    }
     
-        /* 讓對齊 (Align) 真的有效果 */
-        .ql-align-center { text-align: center !important; }
-        .ql-align-right { text-align: right !important; }
-        /* 🔥 格式刷游標樣式 🔥 */
-        .painter-active {
-            cursor: copy !important; /* 滑鼠變成複製圖示 */
-            user-select: none;
-         }
-        /* 讓格式刷按鈕被按下時有顏色 */
-        .ql-format-painter.active {
-            color: var(--forest) !important;
-            font-weight: bold;
-        }
-    </style>
+    /* 月曆容器：往下拉 15px */
+    #calendar-body { 
+        display: grid; 
+        grid-template-columns: repeat(7, 1fr); 
+        gap: 6px; 
+        background: #fff; 
+        margin-top: 15px !important; /* 👈 這裡讓它往下拉 */
+        padding-bottom: 10px;
+    }
+    .cal-week-header {
+        text-align: center;
+        font-weight: bold;
+        color: var(--forest);
+        background-color: #e8f5e9; /* 淺綠底 */
+        padding: 8px 0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    /* 月曆格子：版面配置優化 */
+    .cal-cell { 
+        min-height: 65px !important; /*稍微加高一點點，讓標籤放得下 */
+        padding: 4px !important;
+        border: 1px solid #eee;
+        border-radius: 6px; /* 圓角看起來比較舒服 */
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        flex-direction: column; /* 讓內容垂直排列 */
+        align-items: center;    /* 內容置中 */
+        background: #fff;
+    }
+    
+    .cal-cell:hover { background: #fdfaf1; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.05); }
+    .cal-cell.active { border: 2px solid var(--forest); background: #f4f9f4; }
+
+    .cal-past {
+        background: #f8f8f8 !important; /* 淺灰背景 */
+        color: #ddd !important;         /* 淺灰文字 */
+        pointer-events: none;           /* 👈 禁止點擊 (若您希望還能查閱歷史，請刪除這行) */
+        cursor: default !important;
+        border-color: #eee !important;
+    }
+    
+    /* 讓裡面的膠囊標籤也變淡、變黑白 */
+    .cal-past .cal-stat {
+        opacity: 0.3; 
+        filter: grayscale(100%);
+    }
+    /* 日期數字 */
+    .cal-date { 
+        font-size: 14px; 
+        font-weight: bold; 
+        color: var(--dark); 
+        margin-bottom: 4px;
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid #f5f5f5; /* 加一條淡淡的分隔線 */
+        padding-bottom: 2px;
+    }
+
+    /* 狀態標籤 (膠囊狀) - 取代原本的紅藍點 */
+    .cal-stat {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 2px;
+        width: 90%; /* 讓標籤寬度一致 */
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: normal;
+    }
+
+    /* 三種狀態顏色 */
+    .st-free { background-color: #3498db; }  /* 藍色：空檔 */
+    .st-book { background-color: #e74c3c; }  /* 紅色：已預約 */
+    .st-off  { background-color: #95a5a6; font-weight: bold; color:#fff;}  /* 灰色：休假中 */
+
+    /* 3. 右側：單日詳情列表 (防止跑版) */
+    .day-detail-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        overflow-y: auto;
+        justify-content: flex-start !important;
+    }
+
+    /* 每一列時段 (鎖定高度 45px，左右撐開) */
+    .detail-row {
+        flex: 0 0 45px !important; 
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 6px;
+    }
+    .detail-row:hover { background: #f0f7ff; border-color: var(--info); }
+    
+    /* 狀態樣式 */
+    .detail-row.booked {
+        background: #fff5f5;
+        border-color: #e74c3c;
+        color: #c0392b;
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+    /* V152 休假模式樣式 */
+    .day-off-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        color: #999;
+    }
+    .day-off-icon {
+        font-size: 50px;
+        margin-bottom: 10px;
+        color: #e74c3c; /* 紅色 */
+    }
+    /* 月曆上的休假標記 */
+    .dot-off {
+        position: absolute;
+        top: 5px; right: 5px;
+        font-size: 10px;
+        background: #e74c3c;
+        color: white;
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
+    .detail-chk { width: 18px; height: 18px; cursor: pointer; }
+    .day-detail-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .compact-slot { padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px; background: white; position: relative; }
+    .compact-slot.booked { background: #fff5f5; color: #c0392b; border-color: #e74c3c; }
+    .compact-slot.free { background: #f0f7ff; color: #2980b9; border-color: #3498db; }
+    .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
+    .compact-slot:hover .compact-del { display: block; }
+    .u-slot { display: inline-block !important; margin: 3px !important; padding: 4px 8px !important; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
+    .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+    .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
+    .admin-row:hover { background: #f0f7ff; }
+    
+    /* SQL 複製區樣式 */
+    .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
+    .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
+    .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
+
+    .dashboard-layout { grid-template-columns: 3fr 1fr !important; }
+
+    /* ======================================================
+       PART B: 編輯器樣式同步 (Editor Sync V135)
+       ⚠️ 關鍵修正：圖片靠左、列表緊湊、點點對齊
+       ====================================================== */
+    
+    /* 編輯器容器 - 讓它撐開 */
+    #editor-container { flex: 1; min-height: 200px; display: flex; flex-direction: column; background: white; margin-bottom: 0; border: 1px solid #ccc; overflow: hidden; position: relative; }
+    .ql-container { flex: 1; overflow-y: auto; font-size: 16px; font-family: "Microsoft JhengHei", sans-serif; }
+
+    /* 基本文字設定 */
+    .ql-editor { 
+        padding: 20px 30px; 
+        color: #333; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+        overflow-wrap: break-word; 
+    }
+
+    /* 字體選單修正 */
+    .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
+    .ql-font-monospace { font-family: 'Courier New', monospace !important; }
+    .ql-picker-item[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
+    .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
+    .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
+
+    /* 圖片 RWD (靠左，不置中) */
+    .ql-editor img { 
+        max-width: 100%; 
+        height: auto; 
+        display: block; 
+        margin: 20px 0; /* 👈 關鍵：靠左對齊 */
+        border-radius: 4px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }    
+    /* 4. 列表樣式 (V136：透過行高控制，不需要負邊距) */
+    
+    /* 列表容器 */
+    .ql-editor ul, 
+    #editor-container .ql-editor ul,
+    .ql-editor ol,
+    #editor-container .ql-editor ol { 
+        padding-left: 5px !important; 
+        margin-bottom: 5px !important; 
+        margin-top: 0 !important;
+    }
+
+    /* 列表項目 */
+    .ql-editor li,
+    #editor-container .ql-editor li { 
+        padding-left: 1.2em !important; 
+        margin-bottom: 0px !important;  /* 👈 設為 0 就好，不用 -9 */
+        line-height: 1.3 !important;    /* 👈 覺得太寬改這裡！改成 1.2 會更擠 */
+        padding-bottom: 0px !important;
+    }
+
+    /* 🔥 這段留著！它把原本的寬度殺掉了，所以你才不用設 -9 */
+    .ql-editor li > p,
+    #editor-container .ql-editor li > p { 
+        margin: 0 !important; 
+        padding: 0 !important;
+        display: inline-block !important;
+        line-height: 1.3 !important; /* 跟上面 li 保持一致 */
+    }
+
+    /* 點點的樣式修正 */
+    .ql-editor li::before,
+    #editor-container .ql-editor li::before {
+        margin-right: 0.3em !important;
+        width: 1.2em !important;
+        text-align: center !important;
+        display: inline-block !important;
+    }
+
+    /* 縮排 */
+    .ql-editor .ql-indent-1 { padding-left: 2em; }
+    .ql-editor .ql-indent-2 { padding-left: 4em; }
+    .ql-editor .ql-indent-3 { padding-left: 6em; }
+
+    /* 字體大小與間距 (無底線，統一上距) */
+    /* Small */
+    .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
+    
+    /* Large (副標題) */
+    .ql-editor .ql-size-large {
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin-top: 30px;    
+        margin-bottom: 10px; 
+        line-height: 1.4;
+        display: block;      
+        color: var(--forest); 
+    }
+
+    /* Huge (大標題) */
+    .ql-editor .ql-size-huge {
+        font-size: 2.2rem;
+        font-weight: 900;
+        margin-top: 40px;
+        margin-bottom: 25px;
+        line-height: 1.2;
+        display: block;
+        color: var(--forest);
+        text-align: center; 
+    }
+
+    /* 引用區塊 */
+    .ql-editor blockquote {
+        border-left: 5px solid var(--shopee, #d35400);
+        background-color: #fffaf0;
+        padding: 15px 20px;
+        margin: 20px 0;
+        color: #8a5a00;
+        font-style: italic;
+        font-weight: bold;
+    }
+
+    /* =========================================
+       4. 特殊樣式：標題外框 & HTML 模式
+       ========================================= */
+
+    /* H2 大章節標題 (深綠底 + 金色陰影) */
+    .ql-editor h2.title-boxed-h2 {
+        border-left: 8px solid var(--accent);
+        background: var(--forest);
+        color: #fff;
+        padding: 10px 20px;
+        margin: 30px 0 15px 0;
+        border-radius: 4px;
+        font-family: 'Noto Serif TC', serif;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        display: table; 
+        box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4);
+    }
+
+    /* 2. 標題框 (H3) - 使用 Flexbox 強制置中 */
+    .ql-editor h3.title-boxed-h3 {
+        border: 2px solid var(--accent);
+        background: #fffcf5;
+        color: var(--forest);
+        
+        display: inline-flex !important; /* 彈性盒子 */
+        align-items: center !important;  /* 垂直置中 */
+        justify-content: center;         /* 水平置中 */
+
+        padding: 8px 35px !important;    /* 膠囊的內距 */
+        margin: 25px 0 15px 0;
+        border-radius: 50px;             /* 膠囊圓角 */
+        
+        font-family: 'Noto Serif TC', serif;
+        width: auto;
+        max-width: 100%;
+        min-height: 50px; /* 確保框框有基本高度 */
+    }
+
+    /* 🔥🔥🔥 關鍵修正：當 Large 跑進 H3 裡面時，殺掉它的邊距 🔥🔥🔥 */
+    .ql-editor h3.title-boxed-h3 .ql-size-large {
+        margin: 0 !important;        /* 👈 兇手就是它！殺掉上距，文字就會浮回中間 */
+        padding: 0 !important;
+        line-height: 1.2 !important; /* 稍微緊湊一點 */
+        display: inline !important;  /* 讓它乖乖當文字，不要當區塊 */
+        border: none !important;     /* 確保沒有底線 */
+    }
+
+    /* 格式刷狀態 */
+    .painter-active { cursor: copy !important; user-select: none; }
+    .ql-format-painter.active { color: var(--forest) !important; font-weight: bold; }
+
+    /* HTML 原始碼編輯區 */
+    .html-editor {
+        width: 100%;
+        height: 100%;
+        display: none;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 14px;
+        padding: 20px;
+        border: none;
+        line-height: 1.5;
+        resize: none;
+        outline: none;
+        position: absolute; 
+        top: 0; left: 0;
+        z-index: 10;
+    }
+</style>
 </head>
 <body>
 
@@ -250,33 +588,42 @@
         </div>
     </div>
 
-    <div id="tab-schedule" class="tab-content">
-        <div style="display: flex; gap: 20px; height: 85vh;">
-            <div class="card" style="width:280px; flex-shrink:0; overflow-y:auto;">
+   <div id="tab-schedule" class="tab-content">
+        <div style="display: flex; gap: 10px; height: 85vh;">
+            
+            <div class="card" style="width:240px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto;">
                 <h4 style="color:var(--forest); margin-top:0;">⚡ 快速排班</h4>
-                <label>日期區間</label>
-                <div style="display:flex; gap:2px; margin-bottom:10px;">
-                    <input type="date" id="batch-start"><span style="padding-top:5px;">~</span><input type="date" id="batch-end">
+                <div style="display:flex; flex-direction: column; gap:8px; margin-bottom:15px;">
+                    <input type="date" id="batch-start" style="width:100%;">
+                    <div style="text-align:center; font-size:12px; color:#999;">⬇️ 至 ⬇️</div>
+                    <input type="date" id="batch-end" style="width:100%;">
                 </div>
-                <label>勾選時段 (每30分)</label>
                 <div style="display:flex; gap:5px; margin-bottom:5px;">
                     <button class="btn btn-outline" style="font-size:10px; flex:1;" onclick="toggleAllSlots(true)">全選</button>
                     <button class="btn btn-outline" style="font-size:10px; flex:1;" onclick="toggleAllSlots(false)">清空</button>
                 </div>
-                <div id="time-grid" class="batch-grid"></div>
-                <button class="btn btn-forest" style="width:100%; margin-top:15px;" onclick="batchAddSchedule()">🚀 生成排程</button>
+                <div id="time-grid" class="batch-grid" style="flex:1; overflow-y:auto;"></div>
+                <button class="btn btn-forest" style="width:100%; margin-top:15px;" onclick="batchAddSchedule()">🚀 生成</button>
             </div>
-            <div class="card" style="flex:1; display:flex; flex-direction:column;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+
+            <div class="card" style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                     <button class="btn btn-outline" onclick="changeMonth(-1)">◀</button>
-                    <h3 id="cal-title" style="margin:0;">Loading...</h3>
+                    <h3 id="cal-title" style="margin:0; font-size:1.2rem;">Loading...</h3>
                     <button class="btn btn-outline" onclick="changeMonth(1)">▶</button>
                 </div>
-                <div id="calendar-body" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex:1;"></div>
+                <div id="calendar-body" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; flex:1; overflow-y:auto; align-content: start;"></div>
             </div>
-            <div class="card" style="width:250px; flex-shrink:0; background:#fdfdfd;">
-                <h4 id="detail-date-title" style="margin-top:0; color:var(--dark); border-bottom:2px solid var(--accent); padding-bottom:10px;">請選擇日期</h4>
-                <div id="day-detail-container" class="day-detail-list"></div>
+
+            <div class="card" style="width:400px; flex-shrink:0; background:#fdfdfd; display:flex; flex-direction:column;">
+                <h4 id="detail-date-title" style="margin-top:0; border-bottom:2px solid var(--accent); padding-bottom:10px;">請選擇日期</h4>
+                <div id="detail-actions" style="display:none; gap:5px; margin-bottom:10px; flex-shrink:0;">
+                    <button class="btn btn-outline" style="font-size:12px; flex:1;" onclick="toggleDetailChecks(true)">全選</button>
+                    <button class="btn btn-outline" style="font-size:12px; flex:1;" onclick="toggleDetailChecks(false)">取消</button>
+                    <button class="btn btn-danger" style="font-size:12px; flex:1;" onclick="deleteSelectedSlots()">🗑️ 刪除</button>
+                    <button class="btn btn-warning" style="font-size:12px; flex:1;" onclick="setDayOff()">☕ 休假</button>
+                </div>
+                <div id="day-detail-container" class="day-detail-list" style="flex:1; overflow-y:auto;"></div>
             </div>
         </div>
     </div>
@@ -326,34 +673,51 @@
 
             <div id="sub-coupon" style="display:none;">
                 <input type="hidden" id="cp-edit-id">
-                <div style="background:#fffcf5; padding:20px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
-                    <h4 style="margin-top:0; color:#e65100;">🎫 優惠券編輯器</h4>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div style="background:#fffcf5; padding:25px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
+                    <h4 style="margin-top:0; color:#e65100; border-bottom:1px dashed #e65100; padding-bottom:10px; margin-bottom:20px;">🎫 優惠券編輯器</h4>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                        
                         <div><label>優惠券名稱</label><input type="text" id="cp-name" placeholder="例如：新春調頻 9 折"></div>
                         <div><label>優惠代碼 (Code)</label><input type="text" id="cp-code" placeholder="例如：2026NEW" style="text-transform:uppercase;"></div>
+                        
                         <div><label>折扣類型</label><select id="cp-type" onchange="updateCpHint()"><option value="percentage">打折 (Percentage)</option><option value="fixed">折抵金額 (Fixed Amount)</option></select></div>
                         <div><label id="cp-val-hint">折扣數值 (90 = 9折)</label><input type="number" id="cp-val" placeholder="輸入數值"></div>
-                        <div>
-                            <label>使用期限</label>
+                        
+                        <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
+                            <label style="margin-bottom: 8px;">使用期限</label>
                             <div style="display:flex; gap:10px; align-items:center;">
-                                <input type="date" id="cp-exp">
-                                <label style="white-space:nowrap; cursor:pointer;"><input type="checkbox" id="cp-no-limit" onchange="toggleCpExp()" style="margin-right:5px;"> 無期限</label>
+                                <input type="date" id="cp-exp" style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:5px; white-space:nowrap;">
+                                    <input type="checkbox" id="cp-no-limit" onchange="toggleCpExp()" style="width:18px; height:18px; cursor:pointer;"> 
+                                    <label for="cp-no-limit" style="margin:0; cursor:pointer; font-weight:normal;">無期限</label>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label>適用對象</label>
-                            <div style="margin-top:10px; display:flex; gap:20px;">
-                                <label><input type="checkbox" id="cp-mem" checked style="margin-right:5px;"> 需會員</label>
-                                <label><input type="checkbox" id="cp-guest" style="margin-right:5px;"> 訪客可用</label>
+
+                        <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
+                            <label style="margin-bottom: 8px;">適用對象</label>
+                            <div style="display:flex; gap:20px; align-items:center; height: 42px;"> <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
+                                    <input type="checkbox" id="cp-mem" checked style="width:18px; height:18px;"> 需會員
+                                </label>
+                                <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
+                                    <input type="checkbox" id="cp-guest" style="width:18px; height:18px;"> 訪客可用
+                                </label>
                             </div>
                         </div>
+
                     </div>
-                    <div style="text-align:right; margin-top:20px;">
-                        <button class="btn btn-outline" id="btn-cp-cancel" onclick="resetCouponForm()" style="display:none;">取消</button>
-                        <button class="btn btn-forest" id="btn-cp-save" onclick="saveCoupon()" style="padding:10px 30px;">建立優惠券</button>
+                    
+                    <div style="text-align:right; margin-top:25px; padding-top:15px; border-top:1px dashed #fae1c3;">
+                        <button class="btn btn-outline" id="btn-cp-cancel" onclick="resetCouponForm()" style="display:none; margin-right: 10px;">取消</button>
+                        <button class="btn btn-forest" id="btn-cp-save" onclick="saveCoupon()" style="padding:10px 40px; font-size:1.1rem;">建立優惠券</button>
                     </div>
                 </div>
-                <table><thead><tr><th>名稱</th><th>代碼</th><th>內容</th><th>期限</th><th>對象</th><th>次數</th><th>操作</th></tr></thead><tbody id="cp-list"></tbody></table>
+                
+                <table>
+                    <thead><tr><th>名稱</th><th>代碼</th><th>內容</th><th>期限</th><th>對象</th><th>次數</th><th>操作</th></tr></thead>
+                    <tbody id="cp-list"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -378,16 +742,26 @@
                     <div><label style="font-weight:bold;">文章標題</label><input type="text" id="kb-title" placeholder="輸入標題..."></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#f1f8e9; padding:10px; border-radius:8px;">
-                    <div><label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;"><input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示</label></div>
-                    <div style="display:flex; gap:10px;">
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn btn-outline" onclick="toggleHtmlMode()" id="btn-html-view" title="切換 HTML 模式"><i class="fa-solid fa-code"></i> HTML</button>
+                        <button class="btn btn-outline" onclick="applyBoxedTitle('h2')" title="大標題樣式"><i class="fa-solid fa-heading"></i> 2</button>
+                        <button class="btn btn-outline" onclick="applyBoxedTitle('h3')" title="小標題樣式"><i class="fa-solid fa-heading"></i> 3</button>
+                    </div>
+
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;">
+                            <input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示
+                        </label>
                         <input type="hidden" id="kb-id">
                         <button class="btn btn-danger" onclick="delArticle()" style="display:none;" id="btn-kb-del">刪除</button>
                         <button class="btn btn-info" onclick="previewArticle()">👁️ 預覽</button>
                         <button class="btn btn-forest" onclick="saveArticle()">💾 儲存文章</button>
                     </div>
                 </div>
-                <div id="editor-container">
+
+                <div id="editor-container" style="position: relative;">
                     <div id="editor"></div>
+                    <textarea id="html-textarea" class="html-editor"></textarea>
                 </div>
             </div>
         </div>
@@ -701,6 +1075,7 @@
 
     // ================= 遺失的關鍵函式 (renderBks) =================
     
+    // V158 修正：預約列表 (自動抓取客人填寫的姓名與 Email 傳給建立按鈕)
     function renderBks() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
         document.getElementById('bk-list').innerHTML = cache.bks.filter(x => 
@@ -708,14 +1083,30 @@
         ).map(x => {
             const hasPro = !!x.profiles;
             
+            // 1. 嘗試從 wish_detail 抓取客人填寫的資料
+            let guestName = '';
+            let guestEmail = '';
+            if (x.wish_detail) {
+                const nm = x.wish_detail.match(/姓名:(.*?) \|/);
+                const em = x.wish_detail.match(/Email:(.*?) \|/);
+                if (nm) guestName = nm[1].trim();
+                if (em) guestEmail = em[1].trim();
+            }
+
+            // 2. 處理 OTA 標籤
             let otaTag = '';
             if (x.ota_order_id) {
                 const otaName = cache.otas.find(o => o.code === x.ota_source)?.name || 'OTA';
                 otaTag = `<br><span class="tag tag-ota">${otaName} #${x.ota_order_id.slice(-5)}</span>`;
             } else if (x.payment_method === 'shopee') otaTag = `<br><span class="tag tag-ota">蝦皮(舊)</span>`;
 
+            // 3. 生成按鈕 (將抓到的 name 和 email 傳進去)
+            // 注意：這裡用 replace 把可能單引號轉義，避免報錯
+            const safeName = guestName.replace(/'/g, "&apos;"); 
+            const safeEmail = guestEmail.replace(/'/g, "&apos;");
+
             let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` :
-                           `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${x.temp_phone}', '${x.id}')">＋建立</button>`;
+                           `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${x.temp_phone}', '${x.id}', '${safeName}', '${safeEmail}')">＋建立</button>`;
 
             return `<tr>
                 <td><small>${x.created_at.slice(0,10)}</small><br><small>${x.booking_id.slice(-6)}</small>${otaTag}</td>
@@ -732,9 +1123,91 @@
         if(document.getElementById('inc-val')) document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
         if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
     }
+    // ==========================================
+    // 🔥 V157 補完：建立會員功能 (含自動歸戶)
+    // ==========================================
 
-    function openCreateMemberModal(phone, bookingId) {
-        alert(`建立會員功能 (手機: ${phone}) \n請確認是否需要此功能的完整代碼？`);
+    // 1. 開啟建立視窗 (動態生成表單，不用改 HTML)
+    // V158 修正：建立會員視窗 (接收 name 與 email 並自動填入)
+    function openCreateMemberModal(phone, bookingId, name, email) {
+        // 預設密碼：guest + 手機末4碼
+        const defaultPwd = phone && phone.length >= 4 ? 'guest' + phone.slice(-4) : 'guest1234';
+        
+        // 處理 undefined (如果沒抓到資料傳進來是字串 'undefined' 或空值)
+        const initName = (name && name !== 'undefined') ? name : '';
+        const initEmail = (email && email !== 'undefined') ? email : '';
+
+        document.getElementById('m-title').innerText = "👤 建立新會員";
+        document.getElementById('m-content').innerHTML = `
+            <div style="padding:10px;">
+                <div style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:var(--forest);">姓名 *</label>
+                    <input type="text" id="new-name" value="${initName}" placeholder="請輸入客戶姓名" style="margin-top:5px;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:var(--forest);">手機 * (帳號)</label>
+                    <input type="text" id="new-phone" value="${phone || ''}" style="margin-top:5px;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">Email (選填)</label>
+                    <input type="text" id="new-email" value="${initEmail}" placeholder="example@mail.com" style="margin-top:5px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="font-weight:bold; color:#666;">預設密碼</label>
+                    <input type="text" id="new-pwd" value="${defaultPwd}" style="margin-top:5px; background:#eee;" readonly>
+                    <small style="color:#999;">預設為 guest + 手機末4碼</small>
+                </div>
+                <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;">
+                    <button class="btn btn-forest" onclick="saveNewMember('${bookingId}')" style="width:100%; padding:12px; font-size:1.1rem;">確認建立並歸戶</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('modal').style.display = 'flex';
+    }
+    // 2. 儲存會員邏輯
+    // V159 修正：移除誤導的錯誤訊息，並優化錯誤顯示
+    // V160 升級：建立會員 + 全站同手機號自動歸戶 (Batch Link)
+    async function saveNewMember(bookingId) {
+        const n = document.getElementById('new-name').value.trim();
+        const p = document.getElementById('new-phone').value.trim();
+        const e = document.getElementById('new-email').value.trim();
+        const pwd = document.getElementById('new-pwd').value.trim();
+
+        if (!n || !p) return alert("❌ 姓名與手機為必填欄位");
+
+        // 1. 建立會員資料 (Profiles)
+        const { data, error } = await myDB.from('profiles').insert([{
+            full_name: n,
+            phone: p,
+            email: e,
+            password: pwd,
+            role: 'member'
+        }]).select().single();
+
+        if (error) {
+            if (error.code === '23505') return alert("❌ 建立失敗：此手機號碼已存在！\n請直接使用「手動歸戶」功能。");
+            return alert("❌ 系統錯誤: " + error.message);
+        }
+
+        // 2. 🔥 關鍵升級：全站自動歸戶 (不只當前這筆，所有同手機的孤兒訂單全收)
+        // 條件：手機號碼吻合 (temp_phone = p) 且 尚未歸戶 (user_id is null)
+        const { data: updatedBks, error: linkErr } = await myDB.from('bookings')
+            .update({ user_id: data.id })
+            .eq('temp_phone', p) 
+            .is('user_id', null)
+            .select();
+
+        let msg = `✅ 會員 ${n} 建立成功！`;
+        
+        if (!linkErr && updatedBks && updatedBks.length > 0) {
+            msg += `\n🔗 系統已自動將 ${updatedBks.length} 筆相關訂單歸戶給他！`;
+        } else {
+            msg += "\n(無發現其他未歸戶的相關訂單)";
+        }
+
+        alert(msg);
+        closeModal();
+        fetchAll(); // 刷新列表，所有相關訂單都會瞬間變成已會員狀態
     }
 
     // 🌟 4. 預約選單優化 (V48 美化版)
@@ -811,7 +1284,38 @@
     }
 
     function resetKbForm(){ document.getElementById('kb-id').value=''; document.getElementById('kb-title').value=''; document.getElementById('kb-big').value=''; document.getElementById('kb-mid').value=''; if(quill) quill.root.innerHTML=''; document.getElementById('btn-kb-del').style.display='none'; document.getElementById('mode-title').innerText="新增文章"; }
-    async function saveArticle(){ const p={title:document.getElementById('kb-title').value,big_category:document.getElementById('kb-big').value,mid_category:document.getElementById('kb-mid').value,is_published:document.getElementById('kb-pub').checked,body:quill ? quill.root.innerHTML : ''}; const id=document.getElementById('kb-id').value; if(!p.title || !p.big_category){alert("標題/分類必填");return;} try { if(id) await myDB.from('kb_articles').update(p).eq('id',id); else { const {data}=await myDB.from('kb_articles').select('sort_order').order('sort_order',{ascending:false}).limit(1); p.sort_order=(data&&data.length)?data[0].sort_order+1:1; await myDB.from('kb_articles').insert([p]); } alert("✅ 已儲存"); fetchAll(); if(!id)resetKbForm(); } catch(e){ alert("儲存失敗: " + e.message); } }
+async function saveArticle() {
+        // 防呆：如果是 HTML 模式，先把 textarea 的字寫回 quill
+        if (typeof isHtmlMode !== 'undefined' && isHtmlMode) {
+            quill.root.innerHTML = document.getElementById('html-textarea').value;
+        }
+
+        const p = {
+            title: document.getElementById('kb-title').value,
+            big_category: document.getElementById('kb-big').value,
+            mid_category: document.getElementById('kb-mid').value,
+            is_published: document.getElementById('kb-pub').checked,
+            body: quill ? quill.root.innerHTML : ''
+        };
+        const id = document.getElementById('kb-id').value;
+
+        if (!p.title || !p.big_category) { alert("標題/分類必填"); return; }
+
+        try {
+            if (id) {
+                await myDB.from('kb_articles').update(p).eq('id', id);
+            } else {
+                const { data } = await myDB.from('kb_articles').select('sort_order').order('sort_order', { ascending: false }).limit(1);
+                p.sort_order = (data && data.length) ? data[0].sort_order + 1 : 1;
+                await myDB.from('kb_articles').insert([p]);
+            }
+            alert("✅ 已儲存");
+            fetchAll();
+            if (!id) resetKbForm();
+        } catch (e) {
+            alert("儲存失敗: " + e.message);
+        }
+    }
     async function delArticle(){ if(confirm("確定刪除？")) { await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value); alert("已刪除"); resetKbForm(); fetchAll(); } }
     function previewArticle() { const title=document.getElementById('kb-title').value, html=quill ? quill.root.innerHTML : '', isPub=document.getElementById('kb-pub').checked; document.getElementById('m-title').innerText="前台預覽"; document.getElementById('m-content').innerHTML=`<div style="font-family:sans-serif;padding:10px;">${!isPub?'<div style="color:red">(隱藏)</div>':''}<h1>${title}</h1><div class="ql-editor" style="padding:0;">${html}</div></div>`; document.getElementById('modal').style.display='flex'; }
 
@@ -824,37 +1328,27 @@
     async function uploadImage(){const f=document.getElementById('upload-input').files[0];if(!f)return;await myDB.storage.from(currentBucket).upload(`${Date.now()}_${f.name}`,f);loadGalleryImages();}
 
     // 🔥 排序 (變數名修正 complete)
-    // 🔥 修改：確保資料結構裡有 hide_note (黑名單)
-    function syncKbOrderKeys() {
+function syncKbOrderKeys() {
         let c = false;
-        
-        // 1. 初始化 hide_note 陣列 (如果沒有的話)
-        if (!kbCatOrder.hide_note) {
-            kbCatOrder.hide_note = [];
-            c = true;
-        }
+        // 確保 hide_note 存在
+        if (!kbCatOrder.hide_note) { kbCatOrder.hide_note = []; c = true; }
 
         const ct = {};
         cache.articles.forEach(a => {
             if (!ct[a.big_category]) ct[a.big_category] = new Set();
             ct[a.big_category].add(a.mid_category);
         });
-        
         Object.keys(ct).forEach(b => {
             if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); c = true; }
         });
-        
         Object.keys(ct).forEach(b => {
             if (!kbCatOrder.mid[b]) kbCatOrder.mid[b] = [];
             [...ct[b]].forEach(m => {
                 if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); c = true; }
             });
         });
-        
         if (c) saveKbOrderConfig();
-    }
-
-    // 🔥 修改：在渲染列表時，加上 📢/🔇 按鈕
+    }    
     function renderKbTree() {
         const t = {};
         cache.articles.forEach(a => {
@@ -864,21 +1358,16 @@
         });
 
         document.getElementById('kb-tree').innerHTML = kbCatOrder.big.filter(b => t[b]).map(b => {
-            
-            // --- 新增邏輯：判斷是否隱藏 ---
-            // 如果 b 在 hide_note 黑名單裡，就是隱藏(🔇)，否則顯示(📢)
+            // 判斷隱藏狀態
             const isHidden = (kbCatOrder.hide_note || []).includes(b);
             const noteIcon = isHidden ? '🔇' : '📢';
-            const noteTitle = isHidden ? '目前：不顯示便利貼 (點擊開啟)' : '目前：顯示便利貼 (點擊關閉)';
-            const noteBtn = `<span onclick="toggleKbNote('${b}', event)" style="cursor:pointer; margin-right:5px; font-size:14px;" title="${noteTitle}">${noteIcon}</span>`;
-            // ---------------------------
+            const noteBtn = `<span onclick="toggleKbNote('${b}', event)" style="cursor:pointer; margin-right:8px; font-size:14px; opacity:0.8;" title="切換便利貼">${noteIcon}</span>`;
 
             const ms = (kbCatOrder.mid[b] || []).filter(m => t[b][m]).map(m => {
                 const as = t[b][m].map(a => `<div class="article-item ${a.is_published ? '' : 'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
                 return `<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
             }).join('');
             
-            // 把 noteBtn 加在 📂 前面
             return `<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>${noteBtn} 📂 ${b}</summary>${ms}</details>`;
         }).join('');
 
@@ -887,29 +1376,7 @@
         Object.values(kbCatOrder.mid).forEach(a => a.forEach(m => allMids.add(m)));
         document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v => `<option value="${v}">`).join('');
     }
-    // 🔥 新增：切換是否顯示便利貼，並存入資料庫
-    async function toggleKbNote(categoryName, event) {
-        event.stopPropagation(); // 避免觸發摺疊
-        
-        // 確保陣列存在
-        if (!kbCatOrder.hide_note) kbCatOrder.hide_note = [];
 
-        const index = kbCatOrder.hide_note.indexOf(categoryName);
-        
-        if (index > -1) {
-            // 如果原本在黑名單 -> 移除 (變回顯示)
-            kbCatOrder.hide_note.splice(index, 1);
-        } else {
-            // 如果原本不在黑名單 -> 加入 (變成隱藏)
-            kbCatOrder.hide_note.push(categoryName);
-        }
-
-        // 重新渲染畫面 (讓圖示馬上變)
-        renderKbTree();
-        
-        // 儲存到 Supabase
-        await saveKbOrderConfig();
-    }
     async function moveBig(n,d,e){e.stopPropagation();const i=kbCatOrder.big.indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.big.length)return;[kbCatOrder.big[i],kbCatOrder.big[i+d]]=[kbCatOrder.big[i+d],kbCatOrder.big[i]];renderKbTree();await saveKbOrderConfig();}
     async function moveMid(b,n,d,e){e.stopPropagation();const i=kbCatOrder.mid[b].indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.mid[b].length)return;[kbCatOrder.mid[b][i],kbCatOrder.mid[b][i+d]]=[kbCatOrder.mid[b][i+d],kbCatOrder.mid[b][i]];renderKbTree();await saveKbOrderConfig();}
 // 🔥 修復版：文章排序 (補上必填欄位，解決 SQL 報錯)
@@ -1044,18 +1511,257 @@
         fetchAll();
     }
 
-    function renderTimeGrid(){let h='';for(let i=13;i<=25;i++){['00','30'].forEach(m=>{let hh=i>=24?i-24:i;let t=`${hh.toString().padStart(2,'0')}:${m}`;let v=`${i}:${m}`;h+=`<div class="batch-slot"><input type="checkbox" name="ts" value="${v}"> ${t}</div>`})}document.getElementById('time-grid').innerHTML=h;}
+    function renderTimeGrid(){
+    let h='';
+    for(let i=13;i<=25;i++){
+        ['00','30'].forEach(m=>{
+            let hh=i>=24?i-24:i;
+            let t=`${hh.toString().padStart(2,'0')}:${m}`;
+            let v=`${i}:${m}`;
+            // 這裡生成 input + label 結構配合 CSS
+            h+=`<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`;
+        })
+    }
+    document.getElementById('time-grid').innerHTML=h;
+    }
     function toggleAllSlots(c){document.querySelectorAll('input[name="ts"]').forEach(e=>e.checked=c);}
-    async function batchAddSchedule(){const d1=document.getElementById('batch-start').value,d2=document.getElementById('batch-end').value||d1,ts=Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e=>e.value);if(!d1||!ts.length)return alert("選日期時間");let ins=[],c=new Date(d1),e=new Date(d2);while(c<=e){const d=c.toISOString().split('T')[0];ts.forEach(t=>{let[hh,mm]=t.split(':').map(Number);let ad=new Date(c);if(hh>=24){ad.setDate(ad.getDate()+1);hh-=24;}ins.push({slot_date:ad.toISOString().split('T')[0],slot_time:`${hh.toString().padStart(2,'0')}:${mm}`})});c.setDate(c.getDate()+1);}await myDB.from('schedule_slots').insert(ins);alert("已生成");fetchAll();}
-    function renderCalendar(){const t=new Date();document.getElementById('cal-title').innerText=`${currentYear}/${currentMonth}`;const fd=new Date(currentYear,currentMonth-1,1).getDay(),dim=new Date(currentYear,currentMonth,0).getDate();let h='';for(let i=0;i<fd;i++)h+='<div class="cal-cell empty"></div>';for(let d=1;d<=dim;d++){const ds=`${currentYear}-${currentMonth.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;const s=cache.slots.filter(x=>x.slot_date===ds);const f=s.filter(x=>!x.is_booked).length,bk=s.filter(x=>x.is_booked).length;h+=`<div class="cal-cell ${ds===selectedDateStr?'active':''}" onclick="selectDate('${ds}')"><div class="cal-date">${d}</div>${f?`<div class="dot-free">🔵${f}</div>`:''}${bk?`<div class="dot-booked">🔴${bk}</div>`:''}</div>`}document.getElementById('calendar-body').innerHTML=h;}
+    async function batchAddSchedule() {
+        const d1 = document.getElementById('batch-start').value;
+        const d2 = document.getElementById('batch-end').value || d1;
+        // 抓取有勾選的 input
+        const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value);
+
+        if (!d1 || !ts.length) return alert("請選擇日期區間與時段");
+
+        let ins = [];
+        let skipped = 0; // 紀錄跳過的重複項
+        let c = new Date(d1);
+        let e = new Date(d2);
+
+        // 迴圈跑日期
+        while (c <= e) {
+            const dateStr = c.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            ts.forEach(t => {
+                let [hh, mm] = t.split(':').map(Number);
+                let ad = new Date(c);
+                
+                // 處理跨日 (24:00, 25:00)
+                if (hh >= 24) {
+                    ad.setDate(ad.getDate() + 1);
+                    hh -= 24;
+                }
+                const finalDate = ad.toISOString().split('T')[0];
+                const finalTime = `${hh.toString().padStart(2, '0')}:${mm}:00`;
+
+                // 🔥 關鍵檢查：比對 cache.slots 是否已有此時段
+                const exists = cache.slots.some(s => s.slot_date === finalDate && s.slot_time.startsWith(finalTime.slice(0,5)));
+
+                if (!exists) {
+                    ins.push({
+                        slot_date: finalDate,
+                        slot_time: finalTime,
+                        is_booked: false
+                    });
+                } else {
+                    skipped++;
+                }
+            });
+            c.setDate(c.getDate() + 1);
+        }
+
+        if (ins.length === 0) {
+            alert(`所有選定時段均已存在，無須新增。(跳過 ${skipped} 筆)`);
+            return;
+        }
+
+        const { error } = await myDB.from('schedule_slots').insert(ins);
+        if (error) {
+            alert("生成失敗: " + error.message);
+        } else {
+            alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : ""));
+            fetchAll(); // 重新讀取
+            // 清空勾選
+            toggleAllSlots(false);
+        }
+    }
+ // V155 修正：月曆渲染 (修復括號錯誤、過去日期反灰、休假顯示)
+// V156 修正：月曆渲染 (補上星期幾標頭)
+    function renderCalendar() {
+        const t = new Date();
+        document.getElementById('cal-title').innerText = `${currentYear}/${currentMonth}`;
+        
+        const fd = new Date(currentYear, currentMonth - 1, 1).getDay();
+        const dim = new Date(currentYear, currentMonth, 0).getDate();
+        const today = new Date().toISOString().split('T')[0];
+
+        // 1. 先畫星期幾 (Header)
+        const weeks = ['日', '一', '二', '三', '四', '五', '六'];
+        let h = '';
+        
+        weeks.forEach(w => {
+            h += `<div class="cal-week-header">${w}</div>`;
+        });
+        
+        // 2. 補前面的空白格
+        for (let i = 0; i < fd; i++) {
+            h += '<div class="cal-cell" style="background:#f9f9f9; border:none; cursor:default;"></div>';
+        }
+        
+        // 3. 渲染日期
+        for (let d = 1; d <= dim; d++) {
+            const ds = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+            const s = cache.slots.filter(x => x.slot_date === ds);
+            
+            const isOff = s.some(x => x.type === 'off');
+            const f = s.filter(x => !x.is_booked && x.type !== 'off').length;
+            const bk = s.filter(x => x.is_booked && x.type !== 'off').length;
+            
+            const isPast = ds < today;
+            const activeClass = ds === selectedDateStr ? 'active' : '';
+            const pastClass = isPast ? 'cal-past' : '';
+
+            h += `<div class="cal-cell ${activeClass} ${pastClass}" onclick="selectDate('${ds}')">
+                    <div class="cal-date">${d}</div>
+                    ${isOff ? `<div class="cal-stat st-off">☕ 休假中</div>` : ''}
+                    ${!isOff && f ? `<div class="cal-stat st-free">空檔 ${f}</div>` : ''}
+                    ${!isOff && bk ? `<div class="cal-stat st-book">預約 ${bk}</div>` : ''}
+                </div>`;
+        }
+        
+        document.getElementById('calendar-body').innerHTML = h;
+    }
     function changeMonth(o){currentMonth+=o;if(currentMonth>12){currentMonth=1;currentYear++}else if(currentMonth<1){currentMonth=12;currentYear--}renderCalendar();}
-    function selectDate(d){selectedDateStr=d;renderCalendar();document.getElementById('detail-date-title').innerText=d;const s=cache.slots.filter(x=>x.slot_date===d).sort((a,b)=>a.slot_time.localeCompare(b.slot_time));document.getElementById('day-detail-container').innerHTML=s.map(x=>`<div class="compact-slot ${x.is_booked?'booked':'free'}">${x.slot_time.slice(0,5)} <span class="compact-del" onclick="delSlot('${x.id}')">×</span></div>`).join('');}
+    // 🔥 3. 點擊日期顯示詳情 (V147 修正：刪除空檔文字，只留紅框+時間)
+    // V152 修正：點擊日期 (支援休假顯示)
+    // V152 修正：點擊日期 (支援休假顯示)
+    function selectDate(d) {
+        selectedDateStr = d;
+        renderCalendar();
+        document.getElementById('detail-date-title').innerText = `${d}`;
+        document.getElementById('detail-actions').style.display = 'flex';
+        
+        const s = cache.slots.filter(x => x.slot_date === d);
+        
+        // 1. 檢查是否為休假日
+        const dayOffRecord = s.find(x => x.type === 'off');
+
+        if (dayOffRecord) {
+            document.getElementById('day-detail-container').innerHTML = `
+                <div class="day-off-state">
+                    <div class="day-off-icon">☕</div>
+                    <h3>本日已設為休假</h3>
+                    <p style="font-size:12px; color:#ccc;">未來首頁將顯示為不開放</p>
+                    <button class="btn btn-outline" onclick="cancelDayOff('${dayOffRecord.id}')" style="margin-top:15px;">❌ 取消休假</button>
+                </div>
+            `;
+            return; // 如果是休假，執行到這裡就結束
+        }
+
+        // 2. 正常排程顯示 (若無資料)
+        if (s.length === 0) {
+            document.getElementById('day-detail-container').innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">本日無排程</p>';
+            return;
+        }
+
+        // 3. 正常排程顯示 (有資料)
+        const sortedS = s.sort((a, b) => a.slot_time.localeCompare(b.slot_time));
+        document.getElementById('day-detail-container').innerHTML = sortedS.map(x => `
+            <div class="detail-row ${x.is_booked ? 'booked' : ''}" style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:4px; ${x.is_booked ? 'background:#ffebee; border-color:#ef9a9a;' : ''}">
+                <input type="checkbox" class="detail-chk" value="${x.id}" ${x.is_booked ? 'disabled' : ''}>
+                <span style="font-weight:bold; font-size:1.1rem; ${x.is_booked ? 'text-decoration:line-through; color:#c62828;' : ''}">${x.slot_time.slice(0, 5)}</span>
+            </div>
+        `).join('');
+    }
+
+    function toggleDetailChecks(checked) {
+        document.querySelectorAll('.detail-chk:not(:disabled)').forEach(el => el.checked = checked);
+    }
+
+    // 批量刪除選中的時段
+    async function deleteSelectedSlots() {
+        const ids = Array.from(document.querySelectorAll('.detail-chk:checked')).map(e => e.value);
+        
+        if (ids.length === 0) return alert("請先勾選要刪除的時段");
+        if (!confirm(`確定要刪除這 ${ids.length} 個時段嗎？`)) return;
+
+        const { error } = await myDB.from('schedule_slots').delete().in('id', ids);
+        
+        if (error) {
+            alert("刪除失敗: " + error.message);
+        } else {
+            // alert("已刪除"); // 省略彈窗提升體驗
+            fetchAll(); // 刷新資料
+            // 稍等一下重新渲染右側 (因為 fetchAll 是非同步，這裡簡單延遲或直接從 cache 移除)
+            setTimeout(() => {
+                if(selectedDateStr) selectDate(selectedDateStr);
+            }, 500); 
+        }
+    }
+    // V152 新增：設定休假
+    async function setDayOff() {
+        if (!selectedDateStr) return alert("請先選擇日期");
+        
+        // 檢查當天是否已有「真人預約」
+        const hasRealBooking = cache.slots.some(s => s.slot_date === selectedDateStr && s.is_booked && s.type !== 'off');
+        if (hasRealBooking) return alert("⚠️ 無法休假：當天已有客戶預約，請先手動取消訂單。");
+
+        if (!confirm(`確定要將 ${selectedDateStr} 設為休假嗎？\n(將會清除當天所有空檔)`)) return;
+
+        // 1. 刪除當天所有舊時段
+        await myDB.from('schedule_slots').delete().eq('slot_date', selectedDateStr);
+
+        // 2. 插入一筆「休假」專用紀錄 (時間設為 00:00 佔位)
+        const { error } = await myDB.from('schedule_slots').insert([{
+            slot_date: selectedDateStr,
+            slot_time: '00:00:00',
+            is_booked: true, // 設為 true 防止被意外撈取
+            type: 'off'      // 🔥 關鍵標記
+        }]);
+
+        if (error) alert("設定失敗: " + error.message);
+        else {
+            fetchAll(); // 刷新
+            // 簡單延遲確保畫面更新
+            setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500);
+        }
+    }
+
+    // V152 新增：取消休假
+    async function cancelDayOff(id) {
+        if (!confirm("確定取消休假？\n(取消後您需要重新安排時段)")) return;
+        
+        await myDB.from('schedule_slots').delete().eq('id', id);
+        fetchAll();
+        setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500);
+    }
     async function delSlot(id){if(confirm("刪?"))await myDB.from('schedule_slots').delete().eq('id',id);fetchAll();}
     function render7DaySchedule(){const t=new Date();let h='';for(let i=0;i<7;i++){const d=new Date(t);d.setDate(t.getDate()+i);const ds=d.toISOString().split('T')[0];const s=cache.slots.filter(x=>x.slot_date===ds).sort((a,b)=>a.slot_time.localeCompare(b.slot_time));if(s.length)h+=`<div class="upcoming-day"><div class="upcoming-day-header">${ds}</div><div class="upcoming-slots">${s.map(x=>`<span class="u-slot ${x.is_booked?'booked':''}">${x.slot_time.slice(0,5)}</span>`).join('')}</div></div>`}document.getElementById('dashboard-7day-schedule').innerHTML=h||"無";}
     function closeModal(){document.getElementById('modal').style.display='none';}
     function switchTab(id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+id).classList.add('active');}
     async function delData(table, id){if(confirm("刪除？")){await myDB.from(table).delete().eq('id',id);fetchAll();}}
-    window.updateS = async function(id,s){if(confirm("確定?"))await myDB.from('bookings').update({status:s}).eq('id',id);closeModal();fetchAll();}
+    // V161 修正：更新狀態 (結案前強制檢查是否有報告)
+    window.updateS = async function(id, status) {
+        // 1. 抓出這張單的資料
+        const b = cache.bks.find(x => x.id === id);
+        
+        // 2. 如果是要「結案 (completed)」，進行防呆檢查
+        if (status === 'completed') {
+            // 檢查 wish_detail 欄位裡有沒有報告標記
+            const hasReport = b.wish_detail && b.wish_detail.includes('[報告已生成');
+            
+            if (!hasReport) {
+                return alert("⚠️ 無法結案！\n\n系統檢測不到服務報告。\n請先點擊「📄 生成服務報告」並完成存檔後，才能結案。");
+            }
+        }
+
+        // 3. 通過檢查，執行更新
+        if (confirm("確定要更新狀態嗎？")) {
+            await myDB.from('bookings').update({ status: status }).eq('id', id);
+            closeModal();
+            fetchAll();
+        }
+    }
     async function linkUser(u,b){if(confirm("歸戶?"))await myDB.from('bookings').update({user_id:u}).eq('id',b);fetchAll();}
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
     function toggleMainSidebar() { document.body.classList.toggle('hide-nav'); }
@@ -1089,6 +1795,75 @@
         document.getElementById('btn-sub-ota').className = tab === 'ota' ? 'active' : '';
         document.getElementById('btn-sub-coupon').className = tab === 'coupon' ? 'active' : '';
     }
+    // ================= 新增功能 (HTML & 樣式) =================
+
+    // 1. 註冊樣式白名單 (防止存檔後樣式被洗掉)
+    try {
+        var Parchment = Quill.import('parchment');
+        var BoxedClass = new Parchment.Attributor.Class('boxed', 'title-boxed', {
+            scope: Parchment.Scope.BLOCK
+        });
+        Quill.register(BoxedClass, true);
+    } catch(e) { console.log("樣式註冊略過"); }
+    // 1. 切換便利貼顯示
+    async function toggleKbNote(cat, e) {
+        e.stopPropagation();
+        if (!kbCatOrder.hide_note) kbCatOrder.hide_note = [];
+        const idx = kbCatOrder.hide_note.indexOf(cat);
+        if (idx > -1) kbCatOrder.hide_note.splice(idx, 1);
+        else kbCatOrder.hide_note.push(cat);
+        renderKbTree();
+        await saveKbOrderConfig();
+    }
+    // 2. 切換 HTML 模式
+    let isHtmlMode = false;
+    function toggleHtmlMode() {
+        const editorEl = document.getElementById('editor');
+        const textareaEl = document.getElementById('html-textarea');
+        const btn = document.getElementById('btn-html-view');
+
+        if (!isHtmlMode) {
+            // 轉成 HTML 代碼
+            textareaEl.value = quill.root.innerHTML;
+            editorEl.style.display = 'none';
+            textareaEl.style.display = 'block';
+            btn.classList.replace('btn-outline', 'btn-warning');
+            isHtmlMode = true;
+        } else {
+            // 轉回 編輯器
+            quill.root.innerHTML = textareaEl.value;
+            editorEl.style.display = 'block';
+            textareaEl.style.display = 'none';
+            btn.classList.replace('btn-warning', 'btn-outline');
+            isHtmlMode = false;
+        }
+    }
+
+    // 3. 套用外框標題
+    function applyBoxedTitle(level) {
+        const range = quill.getSelection();
+        if (!range) return alert("請先點選一行文字");
+        const headerLevel = level === 'h2' ? 2 : 3;
+        const className = level === 'h2' ? 'title-boxed-h2' : 'title-boxed-h3';
+
+        quill.format('header', headerLevel);
+        setTimeout(() => {
+            const [line, offset] = quill.getLine(range.index);
+            if (line && line.domNode) {
+                line.domNode.classList.remove('title-boxed-h2', 'title-boxed-h3');
+                line.domNode.classList.add(className);
+            }
+        }, 10);
+    }
+
+    // 4. 改寫存檔函式 (為了支援 HTML 模式下直接存檔)
+    const _oldSave = saveArticle;
+    saveArticle = async function() {
+        if (isHtmlMode) {
+            quill.root.innerHTML = document.getElementById('html-textarea').value;
+        }
+        await _oldSave();
+    };
 </script>
 </body>
 </html>

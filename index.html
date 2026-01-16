@@ -255,30 +255,37 @@
         box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25);
     }
 
-    /* 手機版：改為「靠右」且「縮小」 */
+    /* =========================================
+       🔥🔥🔥 V89 手機版：隨性迷你便條紙 (斜斜的) 🔥🔥🔥
+       ========================================= */
     @media (max-width: 768px) {
         .kb-tiny-note {
             position: relative;
             
-            /* 1. 靠右關鍵：左邊 margin 自動，就會把自己推到右邊 */
-            margin: 0 0 15px auto; 
+            /* 1. 排版：靠右，但留一點縫隙，不要貼死邊緣 */
+            margin: 0 5px 10px auto; 
             
-            /* 2. 尺寸控制：內容有多少就多寬，不要佔滿 */
+            /* 2. 尺寸：超級迷你版 */
             width: fit-content; 
-            max-width: 60%; /* 限制最大寬度，避免字太多太寬 */
+            max-width: 55%; /* 寬度縮更窄，看起來更精緻 */
+            padding: 8px 10px; /* 內距縮小 */
             
-            /* 3. 視覺微調 */
-            text-align: left; /* 雖然盒子在右邊，但文字還是靠左比較好讀 */
-            font-size: 10px;  /* 字縮小一點 */
-            padding: 8px 12px; /* 框框縮小一點 */
+            /* 3. 視覺：小字 + 隨性風 */
+            text-align: left; 
+            font-size: 10px;  /* 字體縮小 */
+            line-height: 1.5; /* 行距緊湊一點 */
+            
+            /* 4. 🔥 關鍵：讓它斜斜的！ */
+            transform: rotate(3deg); /* 微微向右歪，像隨手貼上去的 */
+            
+            /* 5. 修正手機版位置 */
             right: 0;
             top: 0;
-            transform: none;
         }
         
-        /* 手機版移除浮動效果 */
+        /* 手機版移除 hover 互動，保持靜態 */
         .kb-tiny-note:hover {
-            transform: none;
+            transform: rotate(3deg); /* 保持歪斜，不要動 */
             box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
         }
     }

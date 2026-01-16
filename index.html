@@ -254,7 +254,51 @@
         transform: rotate(0deg) scale(1.02);
         box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25);
     }
+    /* =========================================
+       🔥🔥🔥 V90 新增：右下角懸浮返回鈕 (FAB) 🔥🔥🔥
+       ========================================= */
+    .kb-fab-back {
+        position: fixed;
+        bottom: 40px;      /* 距離底部 */
+        right: 25px;       /* 距離右邊 (拇指好按的位置) */
+        width: 60px;
+        height: 60px;
+        background: var(--forest);
+        color: var(--accent);
+        border: 2px solid var(--accent);
+        border-radius: 50%; /* 圓形 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        z-index: 9999;     /* 確保浮在最上面 */
+        cursor: pointer;
+        font-size: 1.4rem; /* 圖示大小 */
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;        /* 進場動畫用 */
+        animation: fabPopIn 0.5s forwards 0.3s; /* 延遲一點點跳出來 */
+    }
 
+    /* 按下去的微互動 */
+    .kb-fab-back:active {
+        transform: scale(0.9);
+        background: var(--accent);
+        color: var(--forest);
+    }
+    
+    /* 進場動畫 */
+    @keyframes fabPopIn {
+        from { opacity: 0; transform: scale(0) rotate(-90deg); }
+        to { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    /* 電腦版不需要這個鈕 (因為有左上角了，而且滑鼠操作不會誤觸) */
+    /* 當然如果您想保留也可以，把這段 media query 刪掉就好 */
+    @media (min-width: 769px) {
+        .kb-fab-back {
+            display: none;
+        }
+    }
     /* =========================================
        🔥🔥🔥 V89 手機版：隨性迷你便條紙 (斜斜的) 🔥🔥🔥
        ========================================= */
@@ -1148,8 +1192,15 @@
             </details>`;
         }).join('');
         
+        // ... (前面代碼不變) ...
+
+        // 4. 組合畫面 (加入右下角懸浮按鈕)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
+                <div class="kb-fab-back" onclick="kbGoBack()">
+                    <i class="fa-solid fa-reply"></i>
+                </div>
+
                 <div class="kb-tiny-note">
                     如果內容有誤 歡迎協助修正<br>
                     或是提供我免費課程 🤭<br>
@@ -1166,16 +1217,33 @@
                 ${contentHtml}
             </div>
         `;
+        
         window.scrollTo(0, 0);
     }
-    // 🔥 V87 文章內頁：更新右上角文字
+    // 🔥 V88 最終修復：移除語法錯誤，確保文章能順利打開
     async function readArt(id) {
-        const { data } = await myDB.from('kb_articles').select('*').eq('id', id).single();
+        // 1. 抓取資料
+        const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
+        
+        // 安全檢查：如果資料庫連線失敗或找不到文章
+        if (error || !data) {
+            console.error("文章讀取失敗:", error);
+            alert("抱歉，無法讀取文章，請稍後再試。");
+            return;
+        }
+
         kbState.activeMid = data.mid_category;
+        
+        // 2. 進入閱讀模式 (隱藏外部 Header)
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
+        // 3. 渲染文章內容 (含右上角小提醒 + 懸浮按鈕)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-article-view">
+                <div class="kb-fab-back" onclick="kbGoBack()">
+                    <i class="fa-solid fa-reply"></i>
+                </div>
+
                 <div class="kb-tiny-note">
                     如果內容有誤 歡迎協助修正<br>
                     或是提供我免費課程 🤭<br>

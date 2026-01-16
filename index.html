@@ -203,29 +203,26 @@
     .kb-article-view { background: #ffffff; padding: 40px 50px; border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
     .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
     
-    /* 內部返回按鈕 (V91 美化版：優雅膠囊) */
+   /* 內部返回按鈕 (V92 微調版) */
     .kb-internal-back { 
         display: inline-flex; 
         align-items: center; 
-        gap: 8px; /* 圖示跟字的距離 */
-        
-        /* 1. 外觀基礎 */
-        color: var(--forest);   /* 深綠色文字，比較有質感 */
-        background: #ffffff;    /* 純白底色 */
-        border: 1px solid rgba(0,0,0,0.08); /* 很淡的邊框 */
-        padding: 8px 24px;      /* 左右寬一點，像顆膠囊 */
-        border-radius: 50px;    /* 圓弧造型 */
-        
-        /* 2. 排版細節 */
+        gap: 8px;
+        color: var(--forest);
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.08);
+        padding: 8px 24px;
+        border-radius: 50px;
         font-size: 0.95rem; 
         font-weight: bold; 
         cursor: pointer; 
-        margin-bottom: 25px;    /* 跟下方標題拉開距離 */
         text-decoration: none; 
-        
-        /* 3. 質感陰影與動畫 */
         box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         transition: all 0.3s ease; 
+        
+        /* 🔥 關鍵修改：原本 margin-bottom: 25px 改小一點 */
+        /* 這樣「按鈕」跟「下一行的便利貼」才不會分太開 */
+        margin-bottom: 5px; 
     }
 
     /* 滑鼠移過去的效果 (反白) */
@@ -246,7 +243,7 @@
         from { transform: translateX(0); }
         to { transform: translateX(-3px); }
     }
-    
+
     /* 分類標籤 (Badges) */
     .kb-meta-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
     .kb-tag { font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 1px; }
@@ -1149,7 +1146,7 @@
         }
     }
 
-    // 🔥 V87 首頁：更新右上角文字
+    // 🔥 V92 首頁：調整排版順序 (按鈕優先)
     function renderKbHome() {
         kbState.level = 0;
         kbState.big = null;
@@ -1169,14 +1166,14 @@
 
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
-                <div class="kb-tiny-note">
+                <div class="kb-tiny-note" style="margin-top: 10px;">
                     如果內容有誤 歡迎協助修正<br>
                     或是提供我免費課程 🤭<br>
                     如果看了覺得不專業或不開心<br>
                     請直接關閉 謝謝掰掰 👋
                 </div>
 
-                <div class="kb-cat-header" style="margin-top: 20px;">
+                <div class="kb-cat-header" style="margin-top: 10px;">
                     <h1 class="kb-cat-title-h1">培癒寶典</h1>
                     <p style="color:#888; margin-top:10px; font-family:'Noto Serif TC', serif;">
                         請選擇您想閱讀的分類
@@ -1193,20 +1190,18 @@
         window.scrollTo(0,0);
     }
     
-    // 🔥 V87 分類列表：更新右上角文字
+    // 🔥 V92 分類列表：調整排版順序 (按鈕 -> 便利貼)
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
         
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 排序邏輯 (防呆版)
+        // 排序邏輯
         let sortedMids = [];
         if (typeof window.kbCatOrder !== 'undefined' && window.kbCatOrder && window.kbCatOrder.mid && window.kbCatOrder.mid[big]) {
             sortedMids = window.kbCatOrder.mid[big].filter(m => kbTree[big] && kbTree[big][m]);
-            if(kbTree[big]) {
-                Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); });
-            }
+            if(kbTree[big]) Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); });
         } else if (kbTree[big]) {
             sortedMids = Object.keys(kbTree[big]);
         }
@@ -1232,13 +1227,12 @@
             </details>`;
         }).join('');
         
-        // ... (前面代碼不變) ...
-
-        // 4. 組合畫面 (加入右下角懸浮按鈕)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
-                <div class="kb-fab-back" onclick="kbGoBack()">
-                    <i class="fa-solid fa-reply"></i>
+                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
+
+                <div onclick="kbGoBack()" class="kb-internal-back">
+                    <i class="fa-solid fa-arrow-left"></i> 返回首頁
                 </div>
 
                 <div class="kb-tiny-note">
@@ -1248,40 +1242,29 @@
                     請直接關閉 謝謝掰掰 👋
                 </div>
 
-                <div onclick="kbGoBack()" class="kb-internal-back" style="margin-bottom:20px;">
-                    <i class="fa-solid fa-arrow-left"></i> 返回首頁
-                </div>
                 <div class="kb-cat-header">
                     <h1 class="kb-cat-title-h1">${big}</h1>
                 </div>
                 ${contentHtml}
             </div>
         `;
-        
         window.scrollTo(0, 0);
     }
-    // 🔥 V88 最終修復：移除語法錯誤，確保文章能順利打開
+
+    // 🔥 V92 文章內頁：調整排版順序 (按鈕 -> 便利貼)
     async function readArt(id) {
-        // 1. 抓取資料
         const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
-        
-        // 安全檢查：如果資料庫連線失敗或找不到文章
-        if (error || !data) {
-            console.error("文章讀取失敗:", error);
-            alert("抱歉，無法讀取文章，請稍後再試。");
-            return;
-        }
+        if (error || !data) { console.error(error); alert("讀取失敗"); return; }
 
         kbState.activeMid = data.mid_category;
-        
-        // 2. 進入閱讀模式 (隱藏外部 Header)
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 3. 渲染文章內容 (含右上角小提醒 + 懸浮按鈕)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-article-view">
-                <div class="kb-fab-back" onclick="kbGoBack()">
-                    <i class="fa-solid fa-reply"></i>
+                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
+
+                <div onclick="kbGoBack()" class="kb-internal-back">
+                    <i class="fa-solid fa-arrow-left"></i> 返回目錄
                 </div>
 
                 <div class="kb-tiny-note">
@@ -1289,10 +1272,6 @@
                     或是提供我免費課程 🤭<br>
                     如果看了覺得不專業或不開心<br>
                     請直接關閉 謝謝掰掰 👋
-                </div>
-
-                <div onclick="kbGoBack()" class="kb-internal-back">
-                    <i class="fa-solid fa-arrow-left"></i> 返回目錄
                 </div>
 
                 <h1 class="kb-article-title-h1">${data.title}</h1>

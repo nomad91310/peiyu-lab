@@ -337,42 +337,52 @@
         }
     }
     /* =========================================
-       🔥🔥🔥 V93 手機版：浮動拼貼風 (超出邊界) 🔥🔥🔥
+       🔥🔥🔥 V94 手機版：便利貼防消失 + 完美定位 🔥🔥🔥
        ========================================= */
     @media (max-width: 768px) {
+        
+        /* 1. 強制解除封印：告訴容器「不要切掉跑出去的東西」 */
+        /* 這行是救回消失便利貼的關鍵 */
+        .kb-article-view, .kb-cat-view {
+            overflow: visible !important;
+            position: relative; /* 確保絕對定位是參考這張卡片 */
+        }
+
         .kb-tiny-note {
-            /* 1. 啟用絕對定位：無視排版規則，想貼哪就貼哪 */
+            /* 2. 定位模式：絕對定位 (像貼紙一樣隨便貼) */
             position: absolute;
             
-            /* 2. 定位座標：讓它往右上角飛 */
-            top: -15px;  /* 負值代表往上超出邊界，製造「貼在紙邊緣」的感覺 */
-            right: -5px; /* 稍微往右凸出去一點點 */
+            /* 3. 位置微調：讓它往上飛，並靠右 */
+            top: -28px;   /* 負值越大越往上，讓它明顯超出白框 */
+            right: -10px; /* 負值讓它稍微凸出右邊界，更有層次感 */
             
-            /* 3. 尺寸與文字 */
+            /* 4. 尺寸與外觀 */
             width: fit-content;
-            max-width: 55%; 
+            max-width: 50%; /* 寬度限制，避免蓋到左邊按鈕 */
             padding: 8px 10px;
+            
             text-align: left;
             font-size: 10px;
             line-height: 1.4;
             
-            /* 4. 角度：保持隨性的歪斜感 */
+            /* 5. 角度：隨性歪斜 */
             transform: rotate(3deg);
             
-            /* 5. 確保它浮在最上面 */
-            z-index: 20; 
-            margin: 0; /* 清除原本的邊距 */
+            /* 6. 層級：設高一點，確保它浮在最上面，不會被切掉 */
+            z-index: 999; 
+            margin: 0;
+            
+            /* 7. 移除可能造成閃爍的動畫 */
+            transition: none; 
+            animation: none;
         }
         
-        /* 確保容器不會把超出的部分切掉 (這行很重要！) */
-        .kb-article-view, .kb-cat-view {
-            overflow: visible !important;
-        }
-
-        /* 順便微調返回按鈕的位置，讓它跟便利貼的「下緣」視覺上對齊 */
+        /* 調整左邊按鈕的位置，讓它跟便利貼在視覺上平衡 */
         .kb-internal-back {
-            margin-top: 5px; /* 稍微往下壓一點點 */
-            margin-bottom: 20px;
+            margin-top: 10px;  /* 稍微往下壓，讓上方留給便利貼 */
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 5; /* 確保按鈕也能被按到 */
         }
     }
     /* ======================================================

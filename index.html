@@ -337,43 +337,43 @@
         }
     }
     /* =========================================
-       🔥🔥🔥 V89 手機版：隨性迷你便條紙 (斜斜的) 🔥🔥🔥
+       🔥🔥🔥 V93 手機版：浮動拼貼風 (超出邊界) 🔥🔥🔥
        ========================================= */
     @media (max-width: 768px) {
         .kb-tiny-note {
-            position: relative;
+            /* 1. 啟用絕對定位：無視排版規則，想貼哪就貼哪 */
+            position: absolute;
             
-            /* 1. 排版：靠右，但留一點縫隙，不要貼死邊緣 */
-            margin: 0 5px 10px auto; 
+            /* 2. 定位座標：讓它往右上角飛 */
+            top: -15px;  /* 負值代表往上超出邊界，製造「貼在紙邊緣」的感覺 */
+            right: -5px; /* 稍微往右凸出去一點點 */
             
-            /* 2. 尺寸：超級迷你版 */
-            width: fit-content; 
-            max-width: 55%; /* 寬度縮更窄，看起來更精緻 */
-            padding: 8px 10px; /* 內距縮小 */
+            /* 3. 尺寸與文字 */
+            width: fit-content;
+            max-width: 55%; 
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 10px;
+            line-height: 1.4;
             
-            /* 3. 視覺：小字 + 隨性風 */
-            text-align: left; 
-            font-size: 10px;  /* 字體縮小 */
-            line-height: 1.5; /* 行距緊湊一點 */
+            /* 4. 角度：保持隨性的歪斜感 */
+            transform: rotate(3deg);
             
-            /* 4. 🔥 關鍵：讓它斜斜的！ */
-            transform: rotate(3deg); /* 微微向右歪，像隨手貼上去的 */
-            
-            /* 5. 修正手機版位置 */
-            right: 0;
-            top: 0;
+            /* 5. 確保它浮在最上面 */
+            z-index: 20; 
+            margin: 0; /* 清除原本的邊距 */
         }
         
-        /* 手機版移除 hover 互動，保持靜態 */
-        .kb-tiny-note:hover {
-            transform: rotate(3deg); /* 保持歪斜，不要動 */
-            box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
+        /* 確保容器不會把超出的部分切掉 (這行很重要！) */
+        .kb-article-view, .kb-cat-view {
+            overflow: visible !important;
         }
-    }
-    
-    /* 讓容器變成定位點 (這段保持不變，確保定位準確) */
-    .kb-cat-view, .kb-article-view {
-        position: relative; 
+
+        /* 順便微調返回按鈕的位置，讓它跟便利貼的「下緣」視覺上對齊 */
+        .kb-internal-back {
+            margin-top: 5px; /* 稍微往下壓一點點 */
+            margin-bottom: 20px;
+        }
     }
     /* ======================================================
        C. 文章內文排版 (Editor Content)

@@ -255,20 +255,28 @@
         box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25);
     }
 
-    /* 手機版：改成置中放在標題上方 */
+    /* 手機版：改為「靠右」且「縮小」 */
     @media (max-width: 768px) {
         .kb-tiny-note {
-            position: relative; /* 變回正常流動排版 */
-            top: 0;
+            position: relative;
+            
+            /* 1. 靠右關鍵：左邊 margin 自動，就會把自己推到右邊 */
+            margin: 0 0 15px auto; 
+            
+            /* 2. 尺寸控制：內容有多少就多寬，不要佔滿 */
+            width: fit-content; 
+            max-width: 60%; /* 限制最大寬度，避免字太多太寬 */
+            
+            /* 3. 視覺微調 */
+            text-align: left; /* 雖然盒子在右邊，但文字還是靠左比較好讀 */
+            font-size: 10px;  /* 字縮小一點 */
+            padding: 8px 12px; /* 框框縮小一點 */
             right: 0;
-            transform: none; /* 手機版不旋轉 */
-            text-align: center; /* 文字置中 */
-            margin: 0 auto 30px auto; /* 上下留白 */
-            font-size: 11px;
-            padding: 12px 15px; /* 內距稍微縮小 */
-            max-width: 90%; /* 寬度適應螢幕 */
+            top: 0;
+            transform: none;
         }
-        /* 手機版移除 hover 效果，避免誤觸 */
+        
+        /* 手機版移除浮動效果 */
         .kb-tiny-note:hover {
             transform: none;
             box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);

@@ -12,7 +12,7 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <style>
     /* ======================================================
-       A. 全站基礎設定 (Foundation & Components)
+       1. 全站基礎設定 (Variables & Reset)
        ====================================================== */
     :root { 
         --forest: #1a2f23; --forest-light: #2a4032;
@@ -32,10 +32,11 @@
         color: var(--text-main); line-height: 1.7; letter-spacing: 0.02em;
     }
     #home { padding-bottom: 220px; }
-
     h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
-    
-    /* --- 導航列 (Nav) --- */
+
+    /* ======================================================
+       2. 導航與佈局 (Nav & Layout)
+       ====================================================== */
     nav { 
         background: var(--forest); padding: 0 40px; 
         display: flex; justify-content: space-between; align-items: center; 
@@ -62,7 +63,7 @@
     .nav-links button.active::after { width: 100%; background-color: var(--white); }
     .hamburger-btn { display: none; background: none; border: none; color: var(--white); font-size: 28px; cursor: pointer; padding: 5px; }
 
-    /* --- 動畫與容器 --- */
+    /* 動畫容器 */
     .section { 
         display: none; padding: 40px 20px 100px 20px; 
         max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 80px); 
@@ -74,7 +75,51 @@
         to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* --- Hero 首頁 --- */
+    /* Footer Banner */
+    .footer-banner { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; background-color: var(--forest); border-top: 3px solid var(--accent); padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
+    .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .social-group { display: flex; gap: 8px; align-items: center; }
+    .social-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); transition: all 0.2s; }
+    .social-btn:hover { background: var(--accent); color: var(--forest); border-color: var(--accent); }
+    .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
+
+    /* ======================================================
+       3. 通用元件 (Components)
+       ====================================================== */
+    /* 按鈕 */
+    .btn-primary { 
+        padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
+        color: var(--white); border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; 
+        box-shadow: 0 5px 15px rgba(26, 47, 35, 0.3); transition: all 0.3s ease; display: inline-block; letter-spacing: 1px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.4); }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary { padding: 10px 25px; background: transparent; color: var(--forest); border: 2px solid var(--forest); border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 10px; }
+    .btn-secondary:hover { background: var(--forest); color: var(--white); }
+
+    /* 卡片與表單 */
+    .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; margin-bottom: 30px; position: relative; }
+    .card h2, .card h3 { color: var(--forest); margin-top: 0; border-left: 5px solid var(--accent); padding-left: 15px; }
+    
+    .form-group { margin-bottom: 25px; }
+    label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
+    label.required::after { content: " *"; color: var(--error); }
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 14px 18px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; background: #fafafa; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
+    input:disabled { background: #eee; cursor: not-allowed; color: #999; }
+
+    /* 彈窗 (Modals) */
+    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.4s; }
+    .result-overlay.active { display: flex; opacity: 1; }
+    .text-modal-card { position: relative; width: 90%; max-width: 650px; max-height: 85vh; background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); opacity: 0; transition: all 0.4s ease; }
+    .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
+    .text-modal-card h3 { text-align: center; color: var(--forest); margin-top: 10px; margin-bottom: 25px; font-size: 2rem; border: none; padding: 10px 0; background: linear-gradient(to right, transparent, rgba(198, 168, 124, 0.2), transparent); }
+    .close-modal-btn { display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; padding: 14px 0; background: var(--text-main); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .close-modal-btn:hover { background: var(--error); }
+
+    /* ======================================================
+       4. 首頁與預約系統 (Home & Booking)
+       ====================================================== */
     .hero-section { display: flex; align-items: center; justify-content: center; gap: 0px; padding: 40px 0 60px 0; border-bottom: 1px solid rgba(26, 47, 35, 0.1); margin-bottom: 40px; }
     .hero-text { flex: 1; max-width: 550px; z-index: 2; display: flex; flex-direction: column; align-items: center; }
     .hero-text h1 { font-size: 2.5rem; color: var(--forest); margin: 0 0 10px 0; line-height: 1.5; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); text-align: center; width: 100%; }
@@ -84,7 +129,6 @@
     .hero-img img { width: 100%; max-width: 200px; border-radius: 20px; box-shadow: 20px 20px 0px var(--accent); transition: transform 0.5s ease; }
     .hero-img img:hover { transform: translateY(-10px); }
 
-    /* --- 卡片與按鈕元件 --- */
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px 0; }
     .feature-card { 
         background: var(--white); padding: 40px 30px; border-radius: 16px; 
@@ -99,28 +143,7 @@
     .feature-title { font-size: 1.6rem; color: var(--forest); margin-bottom: 15px; }
     .feature-desc { color: var(--text-light); font-size: 1.05rem; }
 
-    .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; margin-bottom: 30px; position: relative; }
-    .card h2, .card h3 { color: var(--forest); margin-top: 0; border-left: 5px solid var(--accent); padding-left: 15px; }
-
-    .btn-primary { 
-        padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
-        color: var(--white); border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; 
-        box-shadow: 0 5px 15px rgba(26, 47, 35, 0.3); transition: all 0.3s ease; display: inline-block; letter-spacing: 1px;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.4); }
-    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-secondary { padding: 10px 25px; background: transparent; color: var(--forest); border: 2px solid var(--forest); border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 10px; }
-    .btn-secondary:hover { background: var(--forest); color: var(--white); }
-
-    /* --- 表單 --- */
-    .form-group { margin-bottom: 25px; }
-    label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
-    label.required::after { content: " *"; color: var(--error); }
-    input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; padding: 14px 18px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; background: #fafafa; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
-    input:disabled { background: #eee; cursor: not-allowed; color: #999; }
-
-    /* --- 服務預約 & 優惠券 --- */
+    /* 預約相關卡片 */
     .cat-card { border: 1px solid #eee; padding: 25px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; background: var(--white); transition: 0.3s; display: flex; align-items: center; justify-content: space-between; }
     .cat-card:hover { border-color: var(--accent); background: #fdfcf9; transform: translateX(5px); }
     .cat-card h3 { margin: 0; border: none; padding: 0; font-size: 1.3rem; }
@@ -141,55 +164,113 @@
     .coupon-msg.success { color: var(--success); }
     .coupon-msg.error { color: var(--error); }
 
-    /* --- Modals --- */
-    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.4s; }
-    .result-overlay.active { display: flex; opacity: 1; }
-    .text-modal-card { position: relative; width: 90%; max-width: 650px; max-height: 85vh; background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); opacity: 0; transition: all 0.4s ease; }
-    .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
-    .text-modal-card h3 { text-align: center; color: var(--forest); margin-top: 10px; margin-bottom: 25px; font-size: 2rem; border: none; padding: 10px 0; background: linear-gradient(to right, transparent, rgba(198, 168, 124, 0.2), transparent); }
-    .close-modal-btn { display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; padding: 14px 0; background: var(--text-main); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-    .close-modal-btn:hover { background: var(--error); }
-    
+    /* 故事與規則文字 */
     .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
     .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0; }
-    
     .rule-item { margin-bottom: 30px; }
     .rule-head { color: var(--accent); font-size: 1.3rem; margin-bottom: 12px; display: flex; align-items: center; font-weight: bold; }
     .rule-num { background: var(--forest); color: var(--accent); width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 18px; font-weight: bold; flex-shrink: 0; }
     .rule-body { font-size: 1.05rem; color: #555; line-height: 1.8; margin-left: 50px; }
-    
     .hd-chart-container { text-align: center; margin: 30px 0; }
     .hd-chart-container img { max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #ddd; box-shadow: var(--shadow-soft); }
     .hd-caption { font-size: 13px; color: #888; margin-top: 8px; font-style: italic; }
-    
     .disclaimer-box { background-color: #fffcf5; border: 2px dashed var(--accent); border-radius: 8px; padding: 15px 20px; margin: 20px auto 30px auto; text-align: center; max-width: 90%; width: 600px; position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(198, 168, 124, 0.15); }
     .disclaimer-box::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background-color: var(--accent); }
     .disclaimer-box p { margin: 5px 0; color: var(--forest); font-weight: bold; font-size: 1rem; line-height: 1.6; }
 
     /* ======================================================
-       B. 培癒寶典 (知識庫) - 雜誌精裝版
+       5. 培癒寶典 (Knowledge Base) - 雜誌風
        ====================================================== */
     
-    /* 1. 列表頁容器 (List View) */
-    .kb-cat-view { background: #fdfaf5; min-height: 80vh; padding: 40px 20px; }
+    /* 容器設定 */
+    .kb-cat-view, .kb-article-view {
+        background: #fdfaf5; /* 預設米色底 (列表用) */
+        min-height: 80vh; 
+        padding: 40px 20px;
+        position: relative; 
+        overflow: visible !important; /* 讓便利貼可以凸出去 */
+    }
     
-    /* 頂部大標題 */
+    /* 文章內頁容器 (白色卡片) */
+    .kb-article-view {
+        background: #ffffff; 
+        padding: 40px 50px; 
+        border-radius: 16px; 
+        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
+        border: 1px solid rgba(0,0,0,0.02); 
+        margin-bottom: 60px; 
+        max-width: 900px; 
+        margin-left: auto; 
+        margin-right: auto; 
+    }
+
+    /* 標題與導航控制 */
     .kb-cat-header { text-align: center; margin-bottom: 40px; }
     .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
+    .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
+    
+    .kb-reading-mode .kb-header { display: none !important; }
+    .kb-reading-mode #kb-container { padding-top: 30px; }
 
-    /* 中分類章節 (摺疊) */
+    /* 返回按鈕 (左上角膠囊) */
+    .kb-internal-back { 
+        display: inline-flex; align-items: center; gap: 8px;
+        color: var(--forest); background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
+        padding: 8px 24px; border-radius: 50px;
+        font-size: 0.95rem; font-weight: bold; cursor: pointer; text-decoration: none; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; 
+        margin-bottom: 5px; /* 下方留一點點空間 */
+    }
+    .kb-internal-back:hover { 
+        color: #ffffff; background: var(--forest); border-color: var(--forest);
+        transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); 
+    }
+    .kb-internal-back:hover i { animation: arrowMove 0.6s infinite alternate; }
+    @keyframes arrowMove { from { transform: translateX(0); } to { transform: translateX(-3px); } }
+
+    /* 懸浮返回按鈕 (右下角 FAB) */
+    .kb-fab-back {
+        position: fixed; bottom: 40px; right: 25px;
+        width: 60px; height: 60px; border-radius: 50%;
+        background: var(--forest); color: var(--accent); border: 2px solid var(--accent);
+        display: flex; justify-content: center; align-items: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 9999; cursor: pointer; font-size: 1.4rem;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
+        animation: fabPopIn 0.5s forwards 0.3s;
+    }
+    .kb-fab-back:active { transform: scale(0.9); background: var(--accent); color: var(--forest); }
+    @keyframes fabPopIn { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+    /* 電腦版隱藏 FAB */
+    @media (min-width: 769px) { .kb-fab-back { display: none; } }
+
+    /* 便利貼 (Sticky Note) - 電腦版預設 */
+    .kb-tiny-note {
+        position: absolute;
+        top: 25px;   /* 電腦版乖乖待在框內 */
+        right: 30px;
+        z-index: 10;
+        background: #ffffff;
+        border: 2px dashed var(--accent);
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
+        font-size: 12px; color: #888; text-align: left; line-height: 1.7; font-family: sans-serif;
+        max-width: 300px;
+        transform: rotate(1deg); transition: transform 0.3s ease;
+    }
+    .kb-tiny-note:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25); }
+
+    /* 分類與列表元件 */
     details.kb-section-group { margin-bottom: 40px; transition: 0.3s; }
     summary.kb-mid-separator { display: flex; align-items: center; justify-content: center; cursor: pointer; list-style: none; margin-bottom: 25px; outline: none; position: relative; }
     summary.kb-mid-separator::-webkit-details-marker { display: none; }
     summary.kb-mid-separator::before, summary.kb-mid-separator::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
     
-    /* 膠囊標籤 */
     .kb-mid-badge { background: var(--forest); color: var(--accent); padding: 10px 35px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; font-family: 'Noto Serif TC', serif; box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); display: flex; align-items: center; gap: 10px; transition: 0.3s; border: 2px solid transparent; }
     summary.kb-mid-separator:hover .kb-mid-badge { background: #fff; color: var(--forest); border-color: var(--forest); transform: translateY(-3px); }
     .kb-mid-badge::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s; }
     details[open] summary .kb-mid-badge::after { transform: rotate(180deg); }
 
-    /* 卡片列表 */
     .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 5px 0; }
     .kb-article-card { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #f0f0f0; border-left: 6px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
     .kb-article-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(26, 47, 35, 0.15); border-left-color: var(--forest); }
@@ -199,195 +280,13 @@
     .kb-arrow { color: #ddd; font-size: 1.5rem; transition: 0.3s; }
     .kb-article-card:hover .kb-arrow { color: var(--forest); transform: translateX(5px); }
 
-    /* 2. 文章內頁容器 (Article View) */
-    .kb-article-view { background: #ffffff; padding: 40px 50px; border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
-    .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
-    
-   /* 內部返回按鈕 (V92 微調版) */
-    .kb-internal-back { 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 8px;
-        color: var(--forest);
-        background: #ffffff;
-        border: 1px solid rgba(0,0,0,0.08);
-        padding: 8px 24px;
-        border-radius: 50px;
-        font-size: 0.95rem; 
-        font-weight: bold; 
-        cursor: pointer; 
-        text-decoration: none; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-        transition: all 0.3s ease; 
-        
-        /* 🔥 關鍵修改：原本 margin-bottom: 25px 改小一點 */
-        /* 這樣「按鈕」跟「下一行的便利貼」才不會分太開 */
-        margin-bottom: 5px; 
-    }
-
-    /* 滑鼠移過去的效果 (反白) */
-    .kb-internal-back:hover { 
-        color: #ffffff;           /* 變白字 */
-        background: var(--forest); /* 變深綠底 */
-        border-color: var(--forest);
-        transform: translateY(-2px); /* 微微浮起 */
-        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); /* 陰影加深 */
-    }
-    
-    /* 讓箭頭有個小動畫 */
-    .kb-internal-back:hover i {
-        animation: arrowMove 0.6s infinite alternate;
-    }
-    
-    @keyframes arrowMove {
-        from { transform: translateX(0); }
-        to { transform: translateX(-3px); }
-    }
-
-    /* 分類標籤 (Badges) */
     .kb-meta-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
     .kb-tag { font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 1px; }
     .kb-tag-big { background: var(--forest); color: #fff; }
     .kb-tag-mid { background: #fffcf5; color: var(--accent); border: 1px solid var(--accent); }
     .kb-divider { color: #ccc; font-size: 0.8rem; }
 
-    /* 閱讀模式 JS 控制 */
-    .kb-reading-mode .kb-header { display: none !important; }
-    .kb-reading-mode #kb-container { padding-top: 30px; }
-
-    /* =========================================
-       🔥🔥🔥 V86 修正：右上角小提醒加框 (便利貼風格) 🔥🔥🔥
-       ========================================= */
-    
-    .kb-tiny-note {
-        /* 1. 定位 (保持在右上角) */
-        position: absolute;
-        top: 25px;  /* 稍微往下挪一點，呼吸感更好 */
-        right: 30px;
-        z-index: 10;
-
-        /* 2. 🔥🔥🔥 新增：邊框與背景樣式 🔥🔥🔥 */
-        background: #ffffff; /* 純白背景，讓它跳脫出來 */
-        border: 2px dashed var(--accent); /* 金色虛線框，呼應網站主題 */
-        padding: 15px 20px; /* 舒服的內距 */
-        border-radius: 12px; /* 圓角看起來比較親切 */
-        box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15); /* 帶有金色調的柔和陰影 */
-        
-        /* 3. 文字設定 */
-        font-size: 12px; /* 小字 */
-        color: #888;     /* 適中的灰色，在白底上閱讀舒適 */
-        text-align: left; /* 框內文字靠左對齊比較整齊 */
-        line-height: 1.7;
-        font-family: sans-serif;
-        max-width: 300px; /* 限制最大寬度 */
-        
-        /* 4. 小裝飾：讓它有點旋轉角度，更像隨手貼的 */
-        transform: rotate(1deg); 
-        transition: transform 0.3s ease;
-    }
-
-    /* 滑鼠移過去扶正，增加一點互動趣味 */
-    .kb-tiny-note:hover {
-        transform: rotate(0deg) scale(1.02);
-        box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25);
-    }
-    /* =========================================
-       🔥🔥🔥 V90 新增：右下角懸浮返回鈕 (FAB) 🔥🔥🔥
-       ========================================= */
-    .kb-fab-back {
-        position: fixed;
-        bottom: 40px;      /* 距離底部 */
-        right: 25px;       /* 距離右邊 (拇指好按的位置) */
-        width: 60px;
-        height: 60px;
-        background: var(--forest);
-        color: var(--accent);
-        border: 2px solid var(--accent);
-        border-radius: 50%; /* 圓形 */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-        z-index: 9999;     /* 確保浮在最上面 */
-        cursor: pointer;
-        font-size: 1.4rem; /* 圖示大小 */
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        opacity: 0;        /* 進場動畫用 */
-        animation: fabPopIn 0.5s forwards 0.3s; /* 延遲一點點跳出來 */
-    }
-
-    /* 按下去的微互動 */
-    .kb-fab-back:active {
-        transform: scale(0.9);
-        background: var(--accent);
-        color: var(--forest);
-    }
-    
-    /* 進場動畫 */
-    @keyframes fabPopIn {
-        from { opacity: 0; transform: scale(0) rotate(-90deg); }
-        to { opacity: 1; transform: scale(1) rotate(0); }
-    }
-
-    /* 電腦版不需要這個鈕 (因為有左上角了，而且滑鼠操作不會誤觸) */
-    /* 當然如果您想保留也可以，把這段 media query 刪掉就好 */
-    @media (min-width: 769px) {
-        .kb-fab-back {
-            display: none;
-        }
-    }
-    /* =========================================
-       🔥🔥🔥 V94 手機版：便利貼防消失 + 完美定位 🔥🔥🔥
-       ========================================= */
-    @media (max-width: 768px) {
-        
-        /* 1. 強制解除封印：告訴容器「不要切掉跑出去的東西」 */
-        /* 這行是救回消失便利貼的關鍵 */
-        .kb-article-view, .kb-cat-view {
-            overflow: visible !important;
-            position: relative; /* 確保絕對定位是參考這張卡片 */
-        }
-
-        .kb-tiny-note {
-            /* 2. 定位模式：絕對定位 (像貼紙一樣隨便貼) */
-            position: absolute;
-            
-            /* 3. 位置微調：讓它往上飛，並靠右 */
-            top: -28px;   /* 負值越大越往上，讓它明顯超出白框 */
-            right: -10px; /* 負值讓它稍微凸出右邊界，更有層次感 */
-            
-            /* 4. 尺寸與外觀 */
-            width: fit-content;
-            max-width: 50%; /* 寬度限制，避免蓋到左邊按鈕 */
-            padding: 8px 10px;
-            
-            text-align: left;
-            font-size: 10px;
-            line-height: 1.4;
-            
-            /* 5. 角度：隨性歪斜 */
-            transform: rotate(3deg);
-            
-            /* 6. 層級：設高一點，確保它浮在最上面，不會被切掉 */
-            z-index: 999; 
-            margin: 0;
-            
-            /* 7. 移除可能造成閃爍的動畫 */
-            transition: none; 
-            animation: none;
-        }
-        
-        /* 調整左邊按鈕的位置，讓它跟便利貼在視覺上平衡 */
-        .kb-internal-back {
-            margin-top: 10px;  /* 稍微往下壓，讓上方留給便利貼 */
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 5; /* 確保按鈕也能被按到 */
-        }
-    }
-    /* ======================================================
-       C. 文章內文排版 (Editor Content)
-       ====================================================== */
+    /* 編輯器排版 */
     .ql-editor { padding: 0; color: #333; font-size: 16px; line-height: 1.8; font-family: sans-serif; }
     .ql-editor ul, .ql-editor ol { padding-left: 1.5em; margin-bottom: 0 !important; margin-top: 0; }
     .ql-editor li { margin-bottom: 0; font-weight: bold; }
@@ -401,7 +300,7 @@
     .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
 
     /* ======================================================
-       D. 其他元件 (抽卡、Banner)
+       6. 抽卡系統 (Oracle Card)
        ====================================================== */
     #draw-area { display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; perspective: 1000px; width: 100%; max-width: 800px; margin: 0 auto; justify-content: center; }
     .card-back { width: 130%; justify-self: center; aspect-ratio: 3/5; height: auto; background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png'); background-repeat: no-repeat; background-position: center; background-size: cover; border-radius: 4px; cursor: pointer; position: relative; box-shadow: -2px 0 6px rgba(0,0,0,0.3); z-index: 1; will-change: transform; transition: transform 0.2s ease-out; }
@@ -410,9 +309,7 @@
     @keyframes cardDrawUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); } }
     .card-back.is-drawing { animation: cardDrawUp 0.6s ease-out forwards; z-index: 999 !important; pointer-events: none; }
     /* 電腦版抽卡懸停 */
-    @media (min-width: 1025px) {
-        .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
-    }
+    @media (min-width: 1025px) { .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); } }
 
     .card-reveal { position: relative; width: 340px; height: 580px; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
@@ -421,16 +318,8 @@
     .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
     .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
 
-    /* Footer Banner */
-    .footer-banner { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; background-color: var(--forest); border-top: 3px solid var(--accent); padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
-    .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .social-group { display: flex; gap: 8px; align-items: center; }
-    .social-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); transition: all 0.2s; }
-    .social-btn:hover { background: var(--accent); color: var(--forest); border-color: var(--accent); }
-    .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
-
     /* ======================================================
-       E. 手機版 RWD (統一彙整)
+       7. 手機版 RWD (Mobile Layout Overrides)
        ====================================================== */
     @media (max-width: 768px) {
         /* Nav */
@@ -447,8 +336,29 @@
         .disclaimer-box { padding: 15px; margin-bottom: 20px; }
         .disclaimer-box p { font-size: 0.95rem; }
 
-        /* KB Article View */
+        /* KB Article View (手機縮內距) */
         .kb-article-view { padding: 30px 20px; }
+
+        /* KB Tiny Note (手機拼貼風 - 騎在邊緣) */
+        .kb-tiny-note {
+            position: absolute;
+            top: -12px;    /* 🔥 關鍵：半浮在上方 */
+            right: -5px;   /* 微微靠右 */
+            width: fit-content;
+            max-width: 55%; 
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 10px;
+            line-height: 1.4;
+            transform: rotate(2deg);
+            z-index: 999;
+            margin: 0;
+            transition: none;
+        }
+        .kb-tiny-note:hover { transform: rotate(2deg); box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15); }
+        
+        /* KB Internal Back (配合便利貼下壓) */
+        .kb-internal-back { margin-top: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
 
         /* Draw */
         #draw-area { grid-template-columns: repeat(8, 1fr); gap: 6px 0; width: 92%; margin: 0 auto; padding: 15px 0; }
@@ -459,6 +369,18 @@
         .footer-banner { padding-bottom: 30px; }
         .social-grid { gap: 8px; }
         .social-btn { flex: 1 1 40%; font-size: 0.85rem; }
+    }
+
+    /* 8. 橫向模式救援補丁 (Landscape) */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .kb-tiny-note {
+            top: 10px !important;   /* 縮回框內 */
+            right: 15px !important; 
+            transform: rotate(0deg) !important; 
+            max-width: 40%;
+            background: rgba(255,255,255,0.98); 
+        }
+        .kb-cat-header, .kb-article-title-h1 { margin-top: 30px; }
     }
 </style>
 </head>

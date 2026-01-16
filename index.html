@@ -203,9 +203,49 @@
     .kb-article-view { background: #ffffff; padding: 40px 50px; border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
     .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
     
-    /* 內部返回按鈕 */
-    .kb-internal-back { display: inline-flex; align-items: center; gap: 5px; color: #999; font-size: 0.95rem; cursor: pointer; margin-bottom: 10px; transition: 0.3s; font-weight: bold; text-decoration: none; }
-    .kb-internal-back:hover { color: var(--accent); transform: translateX(-5px); }
+    /* 內部返回按鈕 (V91 美化版：優雅膠囊) */
+    .kb-internal-back { 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px; /* 圖示跟字的距離 */
+        
+        /* 1. 外觀基礎 */
+        color: var(--forest);   /* 深綠色文字，比較有質感 */
+        background: #ffffff;    /* 純白底色 */
+        border: 1px solid rgba(0,0,0,0.08); /* 很淡的邊框 */
+        padding: 8px 24px;      /* 左右寬一點，像顆膠囊 */
+        border-radius: 50px;    /* 圓弧造型 */
+        
+        /* 2. 排版細節 */
+        font-size: 0.95rem; 
+        font-weight: bold; 
+        cursor: pointer; 
+        margin-bottom: 25px;    /* 跟下方標題拉開距離 */
+        text-decoration: none; 
+        
+        /* 3. 質感陰影與動畫 */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+        transition: all 0.3s ease; 
+    }
+
+    /* 滑鼠移過去的效果 (反白) */
+    .kb-internal-back:hover { 
+        color: #ffffff;           /* 變白字 */
+        background: var(--forest); /* 變深綠底 */
+        border-color: var(--forest);
+        transform: translateY(-2px); /* 微微浮起 */
+        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); /* 陰影加深 */
+    }
+    
+    /* 讓箭頭有個小動畫 */
+    .kb-internal-back:hover i {
+        animation: arrowMove 0.6s infinite alternate;
+    }
+    
+    @keyframes arrowMove {
+        from { transform: translateX(0); }
+        to { transform: translateX(-3px); }
+    }
     
     /* 分類標籤 (Badges) */
     .kb-meta-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #eee; }

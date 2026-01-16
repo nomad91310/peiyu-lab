@@ -1079,11 +1079,14 @@
     }
 
     // 🔥 V92 首頁：調整排版順序 (按鈕優先)
+    // 🔥 V99 首頁：移除小提醒 (乾淨版)，讓位給您的故事
     function renderKbHome() {
         kbState.level = 0;
         kbState.big = null;
         kbState.activeMid = null;
 
+        // 這裡會自動抓取您資料庫裡所有的「大分類」
+        // 如果您新增了「品牌故事」，這裡就會自動抓到
         const bigCats = Object.keys(kbTree);
         
         const listHtml = bigCats.map(cat => {
@@ -1098,14 +1101,7 @@
 
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
-                <div class="kb-tiny-note" style="margin-top: 10px;">
-                    如果內容有誤 歡迎協助修正<br>
-                    或是提供我免費課程 🤭<br>
-                    如果看了覺得不專業或不開心<br>
-                    請直接關閉 謝謝掰掰 👋
-                </div>
-
-                <div class="kb-cat-header" style="margin-top: 10px;">
+                <div class="kb-cat-header" style="margin-top: 20px;">
                     <h1 class="kb-cat-title-h1">培癒寶典</h1>
                     <p style="color:#888; margin-top:10px; font-family:'Noto Serif TC', serif;">
                         請選擇您想閱讀的分類

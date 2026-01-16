@@ -824,28 +824,92 @@
     async function uploadImage(){const f=document.getElementById('upload-input').files[0];if(!f)return;await myDB.storage.from(currentBucket).upload(`${Date.now()}_${f.name}`,f);loadGalleryImages();}
 
     // 🔥 排序 (變數名修正 complete)
-    function syncKbOrderKeys(){let c=false;const ct={};cache.articles.forEach(a=>{if(!ct[a.big_category])ct[a.big_category]=new Set();ct[a.big_category].add(a.mid_category);});Object.keys(ct).forEach(b=>{if(!kbCatOrder.big.includes(b)){kbCatOrder.big.push(b);c=true;}});Object.keys(ct).forEach(b=>{if(!kbCatOrder.mid[b])kbCatOrder.mid[b]=[];[...ct[b]].forEach(m=>{if(!kbCatOrder.mid[b].includes(m)){kbCatOrder.mid[b].push(m);c=true;}});});if(c)saveKbOrderConfig();}
-    
-    function renderKbTree(){
-        const t={};
-        cache.articles.forEach(a=>{if(!t[a.big_category])t[a.big_category]={};if(!t[a.big_category][a.mid_category])t[a.big_category][a.mid_category]=[];t[a.big_category][a.mid_category].push(a);});
+    // 🔥 修改：確保資料結構裡有 hide_note (黑名單)
+    function syncKbOrderKeys() {
+        let c = false;
         
-        document.getElementById('kb-tree').innerHTML=kbCatOrder.big.filter(b=>t[b]).map(b=>{
-            const ms=(kbCatOrder.mid[b]||[]).filter(m=>t[b][m]).map(m=>{
-                const as=t[b][m].map(a=>`<div class="article-item ${a.is_published?'':'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
-                return`<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
-            }).join('');
-            return`<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>📂 ${b}</summary>${ms}</details>`;
-        }).join('');
+        // 1. 初始化 hide_note 陣列 (如果沒有的話)
+        if (!kbCatOrder.hide_note) {
+            kbCatOrder.hide_note = [];
+            c = true;
+        }
+
+        const ct = {};
+        cache.articles.forEach(a => {
+            if (!ct[a.big_category]) ct[a.big_category] = new Set();
+            ct[a.big_category].add(a.mid_category);
+        });
         
-        document.getElementById('kb-big-list').innerHTML=kbCatOrder.big.map(v=>`<option value="${v}">`).join('');
+        Object.keys(ct).forEach(b => {
+            if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); c = true; }
+        });
         
-        // 🔥 變數名修正：使用 allMids 而不是 am
-        const allMids = new Set(); 
-        Object.values(kbCatOrder.mid).forEach(a=>a.forEach(m=>allMids.add(m)));
-        document.getElementById('kb-mid-list').innerHTML=[...allMids].map(v=>`<option value="${v}">`).join('');
+        Object.keys(ct).forEach(b => {
+            if (!kbCatOrder.mid[b]) kbCatOrder.mid[b] = [];
+            [...ct[b]].forEach(m => {
+                if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); c = true; }
+            });
+        });
+        
+        if (c) saveKbOrderConfig();
     }
 
+    // 🔥 修改：在渲染列表時，加上 📢/🔇 按鈕
+    function renderKbTree() {
+        const t = {};
+        cache.articles.forEach(a => {
+            if (!t[a.big_category]) t[a.big_category] = {};
+            if (!t[a.big_category][a.mid_category]) t[a.big_category][a.mid_category] = [];
+            t[a.big_category][a.mid_category].push(a);
+        });
+
+        document.getElementById('kb-tree').innerHTML = kbCatOrder.big.filter(b => t[b]).map(b => {
+            
+            // --- 新增邏輯：判斷是否隱藏 ---
+            // 如果 b 在 hide_note 黑名單裡，就是隱藏(🔇)，否則顯示(📢)
+            const isHidden = (kbCatOrder.hide_note || []).includes(b);
+            const noteIcon = isHidden ? '🔇' : '📢';
+            const noteTitle = isHidden ? '目前：不顯示便利貼 (點擊開啟)' : '目前：顯示便利貼 (點擊關閉)';
+            const noteBtn = `<span onclick="toggleKbNote('${b}', event)" style="cursor:pointer; margin-right:5px; font-size:14px;" title="${noteTitle}">${noteIcon}</span>`;
+            // ---------------------------
+
+            const ms = (kbCatOrder.mid[b] || []).filter(m => t[b][m]).map(m => {
+                const as = t[b][m].map(a => `<div class="article-item ${a.is_published ? '' : 'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
+                return `<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
+            }).join('');
+            
+            // 把 noteBtn 加在 📂 前面
+            return `<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>${noteBtn} 📂 ${b}</summary>${ms}</details>`;
+        }).join('');
+
+        document.getElementById('kb-big-list').innerHTML = kbCatOrder.big.map(v => `<option value="${v}">`).join('');
+        const allMids = new Set();
+        Object.values(kbCatOrder.mid).forEach(a => a.forEach(m => allMids.add(m)));
+        document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v => `<option value="${v}">`).join('');
+    }
+    // 🔥 新增：切換是否顯示便利貼，並存入資料庫
+    async function toggleKbNote(categoryName, event) {
+        event.stopPropagation(); // 避免觸發摺疊
+        
+        // 確保陣列存在
+        if (!kbCatOrder.hide_note) kbCatOrder.hide_note = [];
+
+        const index = kbCatOrder.hide_note.indexOf(categoryName);
+        
+        if (index > -1) {
+            // 如果原本在黑名單 -> 移除 (變回顯示)
+            kbCatOrder.hide_note.splice(index, 1);
+        } else {
+            // 如果原本不在黑名單 -> 加入 (變成隱藏)
+            kbCatOrder.hide_note.push(categoryName);
+        }
+
+        // 重新渲染畫面 (讓圖示馬上變)
+        renderKbTree();
+        
+        // 儲存到 Supabase
+        await saveKbOrderConfig();
+    }
     async function moveBig(n,d,e){e.stopPropagation();const i=kbCatOrder.big.indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.big.length)return;[kbCatOrder.big[i],kbCatOrder.big[i+d]]=[kbCatOrder.big[i+d],kbCatOrder.big[i]];renderKbTree();await saveKbOrderConfig();}
     async function moveMid(b,n,d,e){e.stopPropagation();const i=kbCatOrder.mid[b].indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.mid[b].length)return;[kbCatOrder.mid[b][i],kbCatOrder.mid[b][i+d]]=[kbCatOrder.mid[b][i+d],kbCatOrder.mid[b][i]];renderKbTree();await saveKbOrderConfig();}
 // 🔥 修復版：文章排序 (補上必填欄位，解決 SQL 報錯)

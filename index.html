@@ -724,6 +724,7 @@
     const myDB = supabase.createClient(SB_URL, SB_KEY);
 
     let cats = [], items = [], activeCat = null, allCards = [], kbTree = {}, kbState = { level: 0 }, otas = [];
+    let kbCatOrder = { big: [], mid: {}, hide_note: [] }; 
     let currentCoupon = null; 
     let currentUser = null; 
     let isMemberBlocked = false; 
@@ -1064,9 +1065,17 @@
     function toggleFlow() { const isD=document.getElementById('data-flow').value==='data'; document.getElementById('flow-data').style.display=isD?'block':'none'; document.getElementById('flow-upload').style.display=isD?'none':'block'; }
     function toggleSubmitBtn(c) { if(isMemberBlocked) return; document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
 
-    // --- KB, Draw, Login ---
+    // 🔥 修改：讀取文章 + 讀取後台設定 (排序 & 隱藏清單)
     async function initKbData() {
-        const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true).order('sort_order', { ascending: true }); // ✅ 關鍵：加上這行，依照您後台排的順序讀取;
+        // 1. 抓文章
+        const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true).order('sort_order', { ascending: true });
+        
+        // 2. 抓設定 (這裡是新增的重點！)
+        const { data: cfg } = await myDB.from('site_content').select('content').eq('title', 'kb_category_order').single();
+        if (cfg && cfg.content) {
+            kbCatOrder = cfg.content; // 把後台設定 (含 hide_note) 存入前台變數
+        }
+
         if (data) {
             kbTree = {};
             data.forEach(i => {
@@ -1119,17 +1128,33 @@
     }
     
     // 🔥 V92 分類列表：調整排版順序 (按鈕 -> 便利貼)
+    // 🔥 修改：根據後台設定決定是否顯示便利貼
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
         
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 排序邏輯
+        // 1. 判斷是否隱藏便利貼
+        // 檢查 hide_note 陣列是否存在，且是否包含目前的大分類名稱
+        const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(big);
+        
+        // 如果隱藏就給空字串，否則顯示便利貼 HTML
+        const noteHtml = isHidden ? '' : `
+            <div class="kb-tiny-note">
+                如果內容有誤 歡迎協助修正<br>
+                或是提供我免費課程 🤭<br>
+                如果看了覺得不專業或不開心<br>
+                請直接關閉 謝謝掰掰 👋
+            </div>`;
+
+        // 2. 排序邏輯 (沿用您的設定)
         let sortedMids = [];
-        if (typeof window.kbCatOrder !== 'undefined' && window.kbCatOrder && window.kbCatOrder.mid && window.kbCatOrder.mid[big]) {
-            sortedMids = window.kbCatOrder.mid[big].filter(m => kbTree[big] && kbTree[big][m]);
-            if(kbTree[big]) Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); });
+        if (kbCatOrder && kbCatOrder.mid && kbCatOrder.mid[big]) {
+            sortedMids = kbCatOrder.mid[big].filter(m => kbTree[big] && kbTree[big][m]);
+            if(kbTree[big]) {
+                Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); });
+            }
         } else if (kbTree[big]) {
             sortedMids = Object.keys(kbTree[big]);
         }
@@ -1155,6 +1180,7 @@
             </details>`;
         }).join('');
         
+        // 3. 組合畫面 (把 noteHtml 放進去)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
@@ -1163,12 +1189,7 @@
                     <i class="fa-solid fa-arrow-left"></i> 返回首頁
                 </div>
 
-                <div class="kb-tiny-note">
-                    如果內容有誤 歡迎協助修正<br>
-                    或是提供我免費課程 🤭<br>
-                    如果看了覺得不專業或不開心<br>
-                    請直接關閉 謝謝掰掰 👋
-                </div>
+                ${noteHtml}
 
                 <div class="kb-cat-header">
                     <h1 class="kb-cat-title-h1">${big}</h1>
@@ -1178,14 +1199,25 @@
         `;
         window.scrollTo(0, 0);
     }
-
     // 🔥 V92 文章內頁：調整排版順序 (按鈕 -> 便利貼)
+    // 🔥 修改：文章內頁同步隱藏設定
     async function readArt(id) {
         const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
         if (error || !data) { console.error(error); alert("讀取失敗"); return; }
 
         kbState.activeMid = data.mid_category;
         document.getElementById('knowledge').classList.add('kb-reading-mode');
+        
+        // 1. 判斷是否隱藏 (檢查這篇文章的大分類)
+        const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(data.big_category);
+        
+        const noteHtml = isHidden ? '' : `
+            <div class="kb-tiny-note">
+                如果內容有誤 歡迎協助修正<br>
+                或是提供我免費課程 🤭<br>
+                如果看了覺得不專業或不開心<br>
+                請直接關閉 謝謝掰掰 👋
+            </div>`;
         
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-article-view">
@@ -1195,12 +1227,7 @@
                     <i class="fa-solid fa-arrow-left"></i> 返回目錄
                 </div>
 
-                <div class="kb-tiny-note">
-                    如果內容有誤 歡迎協助修正<br>
-                    或是提供我免費課程 🤭<br>
-                    如果看了覺得不專業或不開心<br>
-                    請直接關閉 謝謝掰掰 👋
-                </div>
+                ${noteHtml}
 
                 <h1 class="kb-article-title-h1">${data.title}</h1>
                 
@@ -1218,6 +1245,7 @@
         kbState.level = 2;
         window.scrollTo(0, 0);
     }
+    
     // 🔥 返回功能 (V78：退出閱讀模式)
     function kbGoBack() {
         // 1. 退出「閱讀模式」：把外部 Header 叫回來

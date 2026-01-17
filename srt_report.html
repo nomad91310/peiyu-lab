@@ -976,23 +976,39 @@ function roundRect(ctx, x, y, width, height, radius) {
 }
 
 // 🔥 必要輔助函式：文字換行
+// 🔥 修復版：文字換行處理器 (支援 Enter 換行 + 自動斷行)
 function processParagraphs(ctx, text, maxWidth) {
     if (!text) return [""];
+    
+    // 1. 先把使用者的手動換行 (Enter) 切開
     const paragraphs = text.split('\n');
     let allLines = [];
+
     paragraphs.forEach(para => {
-        if (para.trim() === "") { allLines.push(""); return; }
-        const words = para.split(''); let currentLine = words[0];
+        // 如果是空行 (使用者連按兩次 Enter)，就塞一個空字串佔位
+        if (para.trim() === "") {
+            allLines.push(""); 
+            return;
+        }
+
+        // 2. 針對每一段，檢查是否太長需要自動斷行
+        const words = para.split(''); 
+        let currentLine = words[0];
+
         for (let i = 1; i < words.length; i++) {
             const width = ctx.measureText(currentLine + words[i]).width;
-            if (width < maxWidth) { currentLine += words[i]; } 
-            else { allLines.push(currentLine); currentLine = words[i]; }
+            if (width < maxWidth) {
+                currentLine += words[i];
+            } else {
+                allLines.push(currentLine); // 這一行滿了，推出去
+                currentLine = words[i];     // 新的一行開始
+            }
         }
-        allLines.push(currentLine);
+        allLines.push(currentLine); // 把最後剩下的也推出去
     });
+
     return allLines;
 }
-
 // 🔥 必要輔助函式：頁首繪製
 function drawHeader(ctx, width, height, meta, logoImg) {
     const mainBarH = height - 100;

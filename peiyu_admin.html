@@ -551,6 +551,7 @@
     <button onclick="switchTab('finance')" id="nav-finance">💰 財務與優惠券</button>
     <button onclick="switchTab('kb')" id="nav-kb">📝 知識庫 (CMS)</button>
     <button onclick="switchTab('menu')" id="nav-menu">⚙️ 服務配置</button>
+    <button onclick="switchTab('announce')" id="nav-announce">📢 公告管理</button>
 </div>
 
 <div class="main">
@@ -766,7 +767,28 @@
             </div>
         </div>
     </div>
-
+    <div id="tab-announce" class="tab-content">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>📢 首頁公告管理</h3>
+                <button class="btn btn-success" onclick="openAnnounceModal()">＋ 新增公告</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="10%">排序</th>
+                        <th width="30%">按鈕標題</th>
+                        <th width="15%">狀態</th>
+                        <th width="20%">建立時間</th>
+                        <th width="25%">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="announce-list">
+                    </tbody>
+            </table>
+        </div>
+    </div>
     <div id="tab-menu" class="tab-content">
         <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;">
             <div class="card" id="card-cat">
@@ -851,7 +873,39 @@
         <div id="m-content"></div>
     </div>
 </div>
-
+<div id="announce-modal" class="modal">
+    <div class="modal-body" style="max-width: 800px;">
+        <span onclick="closeAnnounceModal()" class="close-btn">×</span>
+        <h2 id="anc-modal-title" style="border-bottom:1px solid #eee; padding-bottom:10px;">新增公告</h2>
+        
+        <input type="hidden" id="anc-id">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-bottom:15px;">
+            <div><label>按鈕標題</label><input type="text" id="anc-title" placeholder="例如：🎉 開幕慶"></div>
+            <div><label>排序 (小至大)</label><input type="number" id="anc-order" value="1"></div>
+        </div>
+        
+        <div style="margin-bottom:15px;">
+            <label>狀態</label>
+            <select id="anc-active">
+                <option value="true">🟢 上架顯示</option>
+                <option value="false">🔴 下架隱藏</option>
+            </select>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label>公告類型</label>
+            <select id="anc-type">
+                <option value="must_read">📘 必讀專區 (常駐)</option>
+                <option value="temp">🔥 臨時快訊 (活動/公休)</option>
+            </select>
+        </div>
+        <label>彈窗內容 (支援 HTML)</label>
+        <textarea id="anc-content" style="height: 200px; font-family: monospace;" placeholder="請輸入內容 HTML..."></textarea>
+        
+        <div style="text-align:right; margin-top:20px;">
+            <button class="btn btn-forest" onclick="saveAnnouncement()">💾 儲存公告</button>
+        </div>
+    </div>
+</div>
 <script>
     // ==========================================
     // 🚀 培癒中控室 V60 | 穩定回歸版
@@ -1065,6 +1119,7 @@
             
             if(typeof renderKbTree === 'function') renderKbTree(); 
             if(typeof render7DaySchedule === 'function') render7DaySchedule();
+            if(typeof fetchAnnouncements === 'function') fetchAnnouncements();
             
             console.log("✅ 資料讀取成功！");
 
@@ -1194,6 +1249,8 @@
     // 2. 儲存會員邏輯
     // V159 修正：移除誤導的錯誤訊息，並優化錯誤顯示
     // V160 升級：建立會員 + 全站同手機號自動歸戶 (Batch Link)
+   // 🔥 V166 終極修復：建立會員 (智慧歸戶版)
+    // 如果會員已存在 (SRT 建過了)，不報錯，直接執行歸戶！
     async function saveNewMember(bookingId) {
         const n = document.getElementById('new-name').value.trim();
         const p = document.getElementById('new-phone').value.trim();
@@ -1202,7 +1259,10 @@
 
         if (!n || !p) return alert("❌ 姓名與手機為必填欄位");
 
-        // 1. 建立會員資料 (Profiles)
+        let targetUserId = null;
+        let isNew = false;
+
+        // 1. 嘗試建立會員
         const { data, error } = await myDB.from('profiles').insert([{
             full_name: n,
             phone: p,
@@ -1212,31 +1272,42 @@
         }]).select().single();
 
         if (error) {
-            if (error.code === '23505') return alert("❌ 建立失敗：此手機號碼已存在！\n請直接使用「手動歸戶」功能。");
-            return alert("❌ 系統錯誤: " + error.message);
-        }
-
-        // 2. 🔥 關鍵升級：全站自動歸戶 (不只當前這筆，所有同手機的孤兒訂單全收)
-        // 條件：手機號碼吻合 (temp_phone = p) 且 尚未歸戶 (user_id is null)
-        const { data: updatedBks, error: linkErr } = await myDB.from('bookings')
-            .update({ user_id: data.id })
-            .eq('temp_phone', p) 
-            .is('user_id', null)
-            .select();
-
-        let msg = `✅ 會員 ${n} 建立成功！`;
-        
-        if (!linkErr && updatedBks && updatedBks.length > 0) {
-            msg += `\n🔗 系統已自動將 ${updatedBks.length} 筆相關訂單歸戶給他！`;
+            // 🔥 關鍵修正：如果報錯是因為「手機已存在 (23505)」
+            // 代表 srt_report 已經幫你建過了，不要擋路，直接抓舊資料來用！
+            if (error.code === '23505') {
+                const { data: existUser } = await myDB.from('profiles').select('id').eq('phone', p).single();
+                if (existUser) {
+                    targetUserId = existUser.id; // 抓到既有會員 ID
+                } else {
+                    return alert("❌ 發生怪異錯誤，找不到該會員資料");
+                }
+            } else {
+                return alert("❌ 系統錯誤: " + error.message);
+            }
         } else {
-            msg += "\n(無發現其他未歸戶的相關訂單)";
+            targetUserId = data.id; // 這是全新建立的
+            isNew = true;
         }
 
-        alert(msg);
-        closeModal();
-        fetchAll(); // 刷新列表，所有相關訂單都會瞬間變成已會員狀態
-    }
+        // 2. 執行全站歸戶 (把所有同手機的單都連過去)
+        if (targetUserId) {
+            const { data: updatedBks, error: linkErr } = await myDB.from('bookings')
+                .update({ user_id: targetUserId })
+                .eq('temp_phone', p)  
+                .is('user_id', null)
+                .select();
 
+            let msg = isNew ? `✅ 會員 ${n} 建立成功！` : `✅ 偵測到會員已存在，執行自動歸戶！`;
+            
+            if (!linkErr && updatedBks && updatedBks.length > 0) {
+                msg += `\n🔗 已將 ${updatedBks.length} 筆訂單歸戶成功！`;
+            }
+
+            alert(msg);
+            closeModal();
+            fetchAll(); // 🔥 刷新列表，那個「＋建立」按鈕就會消失，變成會員名字！
+        }
+    }
     // 🌟 4. 預約選單優化 (V48 美化版)
     // V164 修正：訂單詳情視窗 (支援 大類/主項/加購 分層顯示)
     function openBooking(id) {
@@ -1976,6 +2047,117 @@ function syncKbOrderKeys() {
             document.getElementById('btn-svc-cancel').style.display = 'none';
         }
     }
+    // ==========================================
+    // 🔥 公告管理系統 (Admin JS)
+    // ==========================================
+    
+    // 1. 讀取公告列表
+    async function fetchAnnouncements() {
+        const { data, error } = await myDB.from('announcements')
+            .select('*')
+            .order('sort_order', { ascending: true });
+            
+        if (error) { console.error(error); return; }
+        
+        const list = document.getElementById('announce-list');
+        list.innerHTML = data.map(item => `
+            <tr>
+                <td><span class="badge badge-secondary">${item.sort_order}</span></td>
+                <td style="font-weight:bold; color:var(--forest);">${item.title}</td>
+                <td>
+                    ${item.is_active 
+                        ? '<span class="tag tag-paid">🟢 上架中</span>' 
+                        : '<span class="tag tag-wait">🔴 已隱藏</span>'}
+                </td>
+                <td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button>
+                    <button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 2. 開啟編輯視窗
+    function openAnnounceModal() {
+        document.getElementById('anc-id').value = '';
+        document.getElementById('anc-title').value = '';
+        document.getElementById('anc-order').value = '10';
+        document.getElementById('anc-content').value = '';
+        document.getElementById('anc-active').value = 'true';
+        document.getElementById('anc-modal-title').innerText = "新增公告";
+        document.getElementById('announce-modal').style.display = 'flex';
+    }
+
+    function closeAnnounceModal() {
+        document.getElementById('announce-modal').style.display = 'none';
+    }
+
+    // 3. 編輯現有公告 (回填資料)
+    // 3. 編輯現有公告 (回填資料 - 修正版：補上 type 回填)
+    async function editAnnouncement(id) {
+        const { data } = await myDB.from('announcements').select('*').eq('id', id).single();
+        if (data) {
+            document.getElementById('anc-id').value = data.id;
+            document.getElementById('anc-title').value = data.title;
+            document.getElementById('anc-order').value = data.sort_order;
+            document.getElementById('anc-content').value = data.content;
+            document.getElementById('anc-active').value = data.is_active.toString();
+            
+            // 🔥🔥🔥 補上這行：把資料庫裡的分類 (must_read/temp) 填回選單
+            // 如果舊資料沒有 type，就預設給 must_read
+            document.getElementById('anc-type').value = data.type || 'must_read';
+            
+            document.getElementById('anc-modal-title').innerText = "編輯公告";
+            document.getElementById('announce-modal').style.display = 'flex';
+        }
+    }
+
+    // 4. 儲存公告 (修正版：補上 type 寫入)
+    async function saveAnnouncement() {
+        const id = document.getElementById('anc-id').value;
+        
+        // 🔥🔥🔥 關鍵修正：這裡要抓取 type 選單的值
+        const typeVal = document.getElementById('anc-type').value;
+
+        const payload = {
+            title: document.getElementById('anc-title').value,
+            sort_order: parseInt(document.getElementById('anc-order').value),
+            content: document.getElementById('anc-content').value,
+            is_active: document.getElementById('anc-active').value === 'true',
+            type: typeVal // 👈 這裡把分類寫進去！
+        };
+
+        if (!payload.title) return alert("標題必填！");
+
+        let error;
+        if (id) {
+            const res = await myDB.from('announcements').update(payload).eq('id', id);
+            error = res.error;
+        } else {
+            const res = await myDB.from('announcements').insert([payload]);
+            error = res.error;
+        }
+
+        if (error) {
+            alert("儲存失敗: " + error.message);
+        } else {
+            alert("✅ 公告已儲存！");
+            closeAnnounceModal();
+            fetchAnnouncements(); // 刷新列表
+        }
+    }
+    
+    // 5. 刪除公告
+    async function deleteAnnouncement(id) {
+        if (confirm("⚠️ 確定要刪除此公告嗎？刪除後無法復原！")) {
+            await myDB.from('announcements').delete().eq('id', id);
+            fetchAnnouncements();
+        }
+    }
+
+    // 🔥 記得把 fetchAnnouncements() 加入到原本的 fetchAll() 裡面，讓它一進來就讀取
+    // 或者在 switchTab('announce') 的時候呼叫它
     // ==========================================
     // 🔥 V167 修復：服務細項管理 (新增/修改/UI切換)
     // ==========================================

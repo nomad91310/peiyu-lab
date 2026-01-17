@@ -206,25 +206,47 @@
             }
         };
 
-        async function fetchBookingService(bid) {
+       async function fetchBookingService(bid) {
             if(!myDB) return;
             try {
-                const { data, error } = await myDB.from('bookings').select('service_item, service_detail').eq('id', bid).single();
-                if (error) throw error;
-                if (data && data.service_detail) {
-                    const mainItem = data.service_item.trim();
-                    const details = data.service_detail.split('|').map(s => s.trim());
+                // 1. 同步進行兩項查詢：
+                //    A. 查這張訂單的內容
+                //    B. 查系統設定中所有是「主項目 (is_main=true)」的名稱
+                const [bookingRes, servicesRes] = await Promise.all([
+                    myDB.from('bookings').select('service_detail').eq('id', bid).single(),
+                    myDB.from('services').select('title').eq('is_main', true)
+                ]);
+
+                if (bookingRes.error) throw bookingRes.error;
+                
+                // 2. 建立「主項目黑名單」
+                // (把資料庫裡所有 is_main=true 的名稱存成一個 Set，方便比對)
+                const mainServiceSet = new Set(
+                    (servicesRes.data || []).map(s => s.title.trim())
+                );
+
+                if (bookingRes.data && bookingRes.data.service_detail) {
+                    const details = bookingRes.data.service_detail.split('|').map(s => s.trim());
+                    
                     detectedAddons = details.filter(d => {
-                        const cleanName = d.replace(/\(\$\d+\)/g, '').trim();
-                        return !cleanName.includes(mainItem) && cleanName !== "";
-                    }).map(d => d.replace(/\(\$\d+\)/g, '').trim());
+                        // 3. 先把價格洗掉，只留名稱來比對
+                        // "SRT 靈魂療癒 ($3,000)" -> "SRT 靈魂療癒"
+                        const cleanName = d.replace(/\(\$.*?\)/g, '').trim();
+
+                        if (cleanName === "") return false;
+
+                        // 4. 🔥 核心邏輯：查表法 🔥
+                        // 只要這個名字在「主項目黑名單」裡面，就隱藏！
+                        if (mainServiceSet.has(cleanName)) return false; 
+
+                        return true; // 不在黑名單裡的 (加購、細項)，全部保留
+                    }).map(d => d.replace(/\(\$.*?\)/g, '').trim()); // 顯示時也拿掉價格
                     
                     if (detectedAddons.length > 0) renderAddonInputs(detectedAddons);
                 }
             } catch(e) { console.error("Fetch Service Error", e); }
         }
-
-        function renderAddonInputs(addonNames) {
+            function renderAddonInputs(addonNames) {
             const container = document.getElementById('addon-container');
             document.getElementById('addon-section-wrapper').style.display = 'block';
             container.innerHTML = '';

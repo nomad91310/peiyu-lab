@@ -711,20 +711,51 @@
         <label style="font-size:1.4rem; color:var(--forest); margin-bottom:20px;">1. 選擇方案內容與加購</label>
         <div id="items-area" style="margin-bottom:40px;"></div>
         
-        <div class="coupon-box">
-            <input type="text" id="coupon-code" placeholder="輸入優惠代碼" style="flex:1; border:1px solid #ccc; background:#fff;">
+        <div class="coupon-box" style="margin-top: 25px;">
+            <input type="text" id="coupon-code" placeholder="輸入優惠代碼 (若無可跳過)" style="flex:1; border:1px solid #ccc; background:#fff;">
             <button class="btn-secondary" onclick="verifyCoupon()" style="margin:0; padding:12px 25px;">套用</button>
         </div>
+        <div id="coupon-msg" class="coupon-msg"></div>
         <div id="coupon-msg" class="coupon-msg"></div>
 
         <div id="conditional-question" style="background:#fcf8f2; padding:30px; border-radius:15px; margin:30px 0; border:1px solid #eee;"></div>
         
-        <div class="form-group"><label>🔶 出生年月日資料提供</label><select id="data-flow" onchange="toggleFlow()"><option value="data">提供出生日期時間</option><option value="upload">直接上傳人類圖截圖</option></select></div>
-        
+        <div class="form-group" id="data-flow-wrapper" style="display:none;">
+            <label>🔶 請選擇資料提供方式</label>
+            <select id="data-flow" onchange="toggleFlow()">
+                </select>
+        </div>
         <div id="flow-data" style="background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
             <div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div>
-            <div class="form-group"><label>出生精確時間</label><input type="time" id="b-time" value="12:00"><small style="color:#d32f2f; display:block; margin-top:5px;">✅ 請確認是上午或下午</small></div>
-            <div class="form-group"><label>出生國家與城市</label><input type="text" id="b-place" placeholder="例如：台灣台中市"></div>
+            <div class="form-group">
+                <label>出生精確時間</label>
+                <input type="time" id="b-time" value="12:00">
+                <small style="color:#d32f2f; display:block; margin-top:5px;">✅ 請確認是上午或下午</small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>出生地區/城市</label>
+                    <input type="text" id="b-place" placeholder="例：台北、上海、洛杉磯">
+                </div>
+                <div class="form-group">
+                    <label>當地時區 (GMT)</label>
+                    <select id="b-timezone">
+                        <option value="+8">GMT+8 (台灣/中港澳/新馬)</option>
+                        <option value="+9">GMT+9 (日本/韓國)</option>
+                        <option value="+7">GMT+7 (泰國/印尼)</option>
+                        <option value="+10">GMT+10 (澳洲-布里斯本)</option>
+                        <option value="+0">GMT+0 (英國/倫敦)</option>
+                        <option value="+1">GMT+1 (德/法/義/瑞/西)</option>
+                        <option value="-5">GMT-5 (美東-紐約/波士頓)</option>
+                        <option value="-6">GMT-6 (美中-芝加哥)</option>
+                        <option value="-7">GMT-7 (美山-丹佛)</option>
+                        <option value="-8">GMT-8 (美西-洛杉磯/溫哥華)</option>
+                        <option value="other">其他 (請於備註說明)</option>
+                    </select>
+                </div>
+            </div>
+            <small style="color:#666; display:block; margin-top:-10px;">⚠️ 若不確定夏令時間，請依出生當下醫院紀錄為主。</small>
         </div>
         
         <div id="flow-upload" style="display:none; background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
@@ -824,7 +855,7 @@
         </div>
 </div>
 <div id="success-overlay" class="result-overlay">
-    <div class="text-modal-card" style="text-align:center; padding: 40px 30px;">
+    <div class="text-modal-card" style="text-align:center; padding: 40px 30px; max-width: 450px;">
         <h3 style="color:var(--forest); margin:0 0 10px 0;">🎉 預約成功！</h3>
         <p style="color:#666; margin-bottom: 30px;">您的預約已送出，訂單編號如下：</p>
         
@@ -836,17 +867,21 @@
             ⚠️ 請務必點擊下方按鈕<br>傳送編號給我確認，才算完成喔！
         </p>
 
-        <a id="line-super-btn" href="#" target="_blank" class="btn-primary" style="background:#06c755; box-shadow:0 5px 15px rgba(6,199,85,0.4); width:100%; display:flex; justify-content:center; align-items:center; text-decoration:none; line-height:50px; border-radius:30px;">
-            <i class="fa-brands fa-line" style="margin-right:8px; font-size:1.5rem;"></i> 
-            <span style="font-size:1.1rem;">傳送訂單編號 (LINE)</span>
+        <a id="line-super-btn" href="#" target="_blank" class="btn-primary" 
+           style="background:#06c755; box-shadow:0 5px 15px rgba(6,199,85,0.4); 
+                  display: inline-flex; justify-content: center; align-items: center; 
+                  text-decoration: none; line-height: 50px; border-radius: 30px; 
+                  padding: 0 35px; width: auto; min-width: 240px; max-width: 100%; box-sizing: border-box;">
+            <i class="fa-brands fa-line" style="margin-right:10px; font-size:1.5rem;"></i> 
+            <span style="font-size:1.1rem; font-weight: bold;">傳送訂單編號 (LINE)</span>
         </a>
 
-        <div style="margin-top:15px; background:#f5f5f5; color:#777; font-size:12px; padding:10px; border-radius:8px; line-height:1.6; border:1px solid #eee;">
+        <div style="margin-top:25px; background:#f5f5f5; color:#777; font-size:12px; padding:12px; border-radius:8px; line-height:1.6; border:1px solid #eee;">
             🖥️ 電腦版用戶若沒安裝 LINE<br>
             請直接搜尋 ID <b style="color:#333; user-select:all;">@927ctmwa</b> 並回傳訂單編號唷！
         </div>
 
-        <button onclick="closeSuccessModal()" style="margin-top:25px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline; font-size:0.9rem;">
+        <button onclick="closeSuccessModal()" style="margin-top:25px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline; font-size:0.9rem; padding: 10px;">
             稍後再傳，先回首頁
         </button>
     </div>
@@ -1076,13 +1111,26 @@
     }
 
     async function initBookingData() {
-        const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); cats = c || [];
-        const { data: i } = await myDB.from('services').select('*').order('sort_order'); items = i || [];
-        const { data: o } = await myDB.from('ota_settings').select('*'); otas = o || [];
+        // 1. 讀取大類
+        const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); 
         
+        // 🔥 關鍵修正：只保留「啟用中 (is_active !== false)」的大類
+        // 這樣後台按暫停的，這裡就會自動消失
+        cats = (c || []).filter(x => x.is_active !== false);
+
+        // 2. 讀取細項
+        const { data: i } = await myDB.from('services').select('*').order('sort_order'); 
+        items = i || [];
+        
+        // 3. 讀取 OTA 設定
+        const { data: o } = await myDB.from('ota_settings').select('*'); 
+        otas = o || [];
+        
+        // 4. 渲染 OTA 選單
         const otaSelect = document.getElementById('ota-source-select');
         if(otaSelect) otaSelect.innerHTML = otas.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
 
+        // 5. 渲染大類列表 (Category List)
         document.getElementById('category-list').innerHTML = cats.map(c => `
             <div class="cat-card" onclick="selectCat('${c.id}')">
                 <h3>${c.name}</h3>
@@ -1097,20 +1145,72 @@
         document.getElementById('agree-check').checked = false; toggleSubmitBtn(false);
         document.getElementById('coupon-code').value = ""; document.getElementById('coupon-msg').innerText = ""; currentCoupon = null;
 
+        // 1. 渲染細項與互斥勾選邏輯 (維持 V162)
         const sub = items.filter(x => x.category_id === id);
+        let hasCheckedMain = false;
+
         document.getElementById('items-area').innerHTML = sub.map(i => {
+            let checkAttr = "";
+            if (i.is_main && !hasCheckedMain) {
+                checkAttr = "checked";
+                hasCheckedMain = true;
+            }
             let subHtml = i.sub_options ? `<div class="sub-check-grid">${i.sub_options.split(/[,，]/).map(o=>`<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${o.trim()}"> ${o.trim()}</label>`).join('')}</div>` : '';
-            return `<div class="service-card" id="card-${i.id}"><div class="service-header"><label class="service-info"><input type="checkbox" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" data-is-main="${i.is_main}" onchange="handleServiceCheck(this)"> <span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div>${subHtml}</div>`;
+            return `<div class="service-card" id="card-${i.id}"><div class="service-header"><label class="service-info"><input type="checkbox" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" data-is-main="${i.is_main}" ${checkAttr} onchange="handleServiceCheck(this)"> <span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div>${subHtml}</div>`;
         }).join('');
         
         document.getElementById('conditional-question').innerHTML = activeCat.question_type === 'sleep' ? `<label>🌙 睡眠時間</label><input type="text" id="q-val" placeholder="例如：23:30 ~ 07:00">` : `<label>📅 希望諮詢時間</label><input type="text" id="q-val" placeholder="例如：平日晚上">`;
-        calcTotal(); showSection('booking-step-2');
+
+        // 2. 🔥 V171 核心：動態決定資料提供方式 🔥
+        const reqStr = activeCat.data_requirement || 'birth'; // 預設 birth
+        const flowSelect = document.getElementById('data-flow');
+        const flowWrapper = document.getElementById('data-flow-wrapper');
+        
+        // 清空並重建選項
+        flowSelect.innerHTML = '';
+        
+        if (reqStr.includes('birth')) {
+            const opt = document.createElement('option');
+            opt.value = 'data';
+            opt.text = '📅 提供出生日期時間';
+            flowSelect.add(opt);
+        }
+        if (reqStr.includes('image')) {
+            const opt = document.createElement('option');
+            opt.value = 'upload';
+            opt.text = '📸 直接上傳人類圖截圖';
+            flowSelect.add(opt);
+        }
+
+        // 判斷是否顯示下拉選單
+        // 如果同時有 birth 和 image (長度>1)，就顯示選單讓客人選
+        // 如果只有一種，就隱藏選單 (但值還在，所以邏輯會通)
+        if (reqStr.includes('birth') && reqStr.includes('image')) {
+            flowWrapper.style.display = 'block';
+        } else {
+            flowWrapper.style.display = 'none';
+        }
+
+        // 強制觸發一次切換，讓下方的表單 (出生框 vs 上傳框) 顯示正確
+        toggleFlow();
+
+        calcTotal(); 
+        showSection('booking-step-2');
     }
 
     function handleServiceCheck(el) {
-        if (el.dataset.isMain === 'true') {
+        // 🔥 V162 修正：主項目單選互斥邏輯
+        // 如果現在勾選的是「主項目」，就去把其他也是「主項目」的勾勾取消掉
+        if (el.dataset.isMain === 'true' && el.checked) {
             document.querySelectorAll('input[name="svc"][data-is-main="true"]').forEach(i => {
-                if (i !== el) { i.disabled = el.checked; if(document.getElementById(`card-${i.value}`)) document.getElementById(`card-${i.value}`).classList.toggle('disabled-card', el.checked); }
+                if (i !== el) { 
+                    i.checked = false; // 自動取消別人，不用再手動取消了
+                    // 移除之前的 disabled 樣式 (防呆，確保乾淨)
+                    if(document.getElementById(`card-${i.value}`)) {
+                        document.getElementById(`card-${i.value}`).classList.remove('disabled-card');
+                    }
+                    i.disabled = false; 
+                }
             });
         }
         calcTotal();
@@ -1153,11 +1253,13 @@
         });
     }
 
-   async function doSubmit() {
+async function doSubmit() {
         if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「個案專區」登入！");
+        
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
+        
         if (!name || !phone || !email) return alert("請填寫完整基本資料");
         if (!/^09\d{8}$/.test(phone)) return alert("手機格式錯誤 (需10碼)");
         
@@ -1174,10 +1276,13 @@
 
         const flow = document.getElementById('data-flow').value;
         let finalDataInfo = "";
-        const btn = document.getElementById('sub-btn'); btn.disabled = true; btn.innerText = "資料處理中...";
+        
+        const btn = document.getElementById('sub-btn'); 
+        btn.disabled = true; 
+        btn.innerText = "資料處理中...";
 
         try {
-            // --- (保留) 圖片上傳與出生資料邏輯 ---
+            // 1. 圖片/資料處理 (維持原樣)
             if (flow === 'upload') {
                 const fileInput = document.getElementById('c-file');
                 if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
@@ -1196,16 +1301,26 @@
                 finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;
             }
 
-            // --- (保留) 服務細項組裝 ---
-            let details = [];
-            document.querySelectorAll('input[name="svc"]:checked').forEach(el => {
+            // 2. 🔥 核心修正：主項目與加購項目徹底分流 🔥
+            const checkedInputs = document.querySelectorAll('input[name="svc"]:checked');
+            let details = []; // 這個陣列現在「只存加購」
+            let specificMainService = ""; // 這個變數存「主項目」
+
+            checkedInputs.forEach(el => {
                 let txt = `${el.dataset.title} ($${el.dataset.price})`;
                 let subs = Array.from(document.querySelectorAll(`.sub-opt-item[data-parent-id="${el.value}"]:checked`)).map(s=>s.value);
                 if(subs.length) txt += ` [${subs.join('、')}]`;
-                details.push(txt);
+
+                if (el.dataset.isMain === 'true') {
+                    // ✅ 如果是主項目：存入 main_service，不要放進 details
+                    specificMainService = txt; 
+                } else {
+                    // ✅ 如果是加購：存入 details
+                    details.push(txt);
+                }
             });
 
-            // --- (保留) 優惠券扣除次數 ---
+            // 3. 優惠券 (維持原樣)
             let couponInfoText = null;
             if (currentCoupon) {
                 let desc = currentCoupon.discount_type === 'percentage' ? `${currentCoupon.discount_value}折` : `折$${currentCoupon.discount_value}`;
@@ -1213,47 +1328,87 @@
                 await myDB.from('coupons').update({ usage_count: currentCoupon.usage_count + 1 }).eq('id', currentCoupon.id);
             }
 
-            // 🔥🔥🔥 關鍵修正 1：在這裡定義 myBookingId (在寫入資料庫之前) 🔥🔥🔥
+            // 4. 寫入資料庫
             const myBookingId = "OD" + Date.now(); 
 
-            // 寫入資料庫 (這裡會用到上面的 myBookingId)
             const { error } = await myDB.from('bookings').insert([{
-                booking_id: myBookingId, // 👈 這裡不會再報錯了
-                temp_phone: phone, status: 'pending', price: finalPrice,
-                service_item: activeCat.name, service_detail: details.join(' | '),
+                booking_id: myBookingId,
+                temp_phone: phone, 
+                status: 'pending', 
+                price: finalPrice,
+                // A. 大類名稱 (如: 個人能量調頻)
+                service_item: activeCat.name, 
+                // B. 主項目 (如: 靈擺調整 $800) -> 獨立欄位
+                main_service: specificMainService, 
+                // C. 加購細項 (如: 豐盛之流 $400) -> 獨立欄位，只存加購
+                service_detail: details.join(' | '), 
                 ota_source: payStatus === 'ota' ? otaSource : null,
                 ota_order_id: payStatus === 'ota' ? otaOrderId : null,
-                payment_method: payStatus, sleep_time: qVal,
+                payment_method: payStatus, 
+                sleep_time: qVal,
                 wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}`,
-                coupon_info: couponInfoText, user_id: currentUser ? currentUser.id : null
+                coupon_info: couponInfoText, 
+                user_id: currentUser ? currentUser.id : null
             }]);
 
             if(!error) { 
-                // 🛑 測試模式
-                // ✅ 恢復功能：把前面的 // 拿掉，這行變回彩色就是成功了！
-                //await myDB.functions.invoke('line-notify', { body: { name, phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}` } });
-                console.log("假裝通知已發送 (測試中)..."); 
+                // 1. LINE Notify 發送給老師 (維持原樣)
+                //try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });console.log("✅ LINE 通知已成功發送");} catch (notifyErr) {console.error("❌ 通知發送失敗:", notifyErr); }
+
+                // 2. 準備彈窗資訊
                 const shortId = myBookingId.slice(-6);
                 const myLineId = "@927ctmwa"; 
-                
-                // 這裡改成用 myBookingId
                 const message = encodeURIComponent(`我已完成服務預約，訂單編號是：${shortId}`);
                 const lineUrl = `https://line.me/R/oaMessage/${myLineId}/?${message}`;
                 
-                // 這裡也改成用 myBookingId
                 document.getElementById('success-order-id').innerText = myBookingId;
-                document.getElementById('line-super-btn').href = lineUrl;
+                
+                const lineBtn = document.getElementById('line-super-btn');
+                // 1. 這裡維持你原本的 lineUrl，不要改 javascript:void(0)
+                lineBtn.href = lineUrl; 
+
+                // 2. 改寫 onclick，加入攔截邏輯
+                lineBtn.onclick = function(e) {
+                    e.preventDefault(); 
+                    
+                    const textToCopy = `預約編號：${myBookingId} (Line ID: ${myLineId})`;
+                    
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        const originalHtml = lineBtn.innerHTML;
+                        lineBtn.innerHTML = `<i class="fa-solid fa-check"></i> <b>編號已複製！正在開啟...</b>`;
+                        lineBtn.style.background = "#05b34c";
+                        
+                        setTimeout(() => {
+                            // 🔥 V181 修正：判斷螢幕寬度決定是否開新視窗
+                            if (window.innerWidth > 768) {
+                                // 電腦版：開新分頁，保留原本網頁
+                                window.open(lineUrl, '_blank');
+                            } else {
+                                // 手機版：原視窗跳轉，喚起 App 比較順
+                                window.location.href = lineUrl;
+                            }
+                        }, 600);
+                        
+                        setTimeout(() => {
+                            lineBtn.innerHTML = originalHtml;
+                            lineBtn.style.background = "#06c755";
+                        }, 5000);
+                    }).catch(() => {
+                        // 失敗保險
+                        if (window.innerWidth > 768) window.open(lineUrl, '_blank');
+                        else window.location.href = lineUrl;
+                    });
+                };
 
                 document.getElementById('sub-btn').disabled = false;
                 document.getElementById('sub-btn').innerText = "送出預約";
                 openModal('success-overlay');
-
             } else { 
                 throw error; 
             }
 
         } catch (err) { 
-            console.error(err); // 建議印出錯誤方便除錯
+            console.error(err);
             alert(err.message || "發生錯誤"); 
             btn.disabled = false; 
             btn.innerText = "送出預約"; 
@@ -1504,7 +1659,18 @@
             table.appendChild(el); 
         }); 
     }
+    // 🔥 V175 修正：成功彈窗關閉並跳回首頁
+    function closeSuccessModal() {
+        // 1. 關閉彈窗
+        closeModal('success-overlay');
+        // 2. 強制切換回首頁區塊
+        showSection('home');
+        // 3. 畫面捲回最上方 (避免在首頁底部)
+        window.scrollTo(0, 0);
+    }
 
+    // 順便檢查原本的 closeSuccessModal 是否有點錯，
+    // 確保 HTML 裡的按鈕 onclick="closeSuccessModal()" 能對應到上面這個。
     async function drawCard(card) { document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; document.getElementById('p-zodiac').innerText = card.zodiac || ''; document.getElementById('p-quote').innerText = card.quote || ''; if (card.image_url) { document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; } const style = card.style_config || defaultStyle; applyStyle('gate', style.gate || defaultStyle.gate); applyStyle('info', style.info || defaultStyle.info); applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); applyStyle('quote', style.quote || defaultStyle.quote); document.getElementById('overlay').classList.add('active'); }
     function applyStyle(id, s) { const el = document.getElementById(`p-${id}`); const def = defaultStyle[id]; const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; el.style.left = val('x') + '%'; el.style.top = val('y') + '%'; el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color'); const str = val('stroke'); el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; }
     function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); document.getElementById('p-bg').src = ""; }, 500); }

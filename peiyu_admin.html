@@ -772,9 +772,30 @@
             <div class="card" id="card-cat">
                 <h3>📂 大類管理</h3>
                 <input type="hidden" id="cat-id-edit">
-                <input type="text" id="cat-name" placeholder="大類名稱" style="width:100%; margin-bottom:10px; padding:8px;">
-                <select id="cat-type" style="width:100%; margin-bottom:10px; padding:8px;"><option value="sleep">詢問睡眠 (調頻類)</option><option value="consult">詢問日期 (諮詢類)</option></select>
+                
+                <input type="text" id="cat-name" placeholder="大類名稱 (例: 人類圖解讀)" style="width:100%; margin-bottom:10px; padding:8px;">
+                
+                <select id="cat-type" style="width:100%; margin-bottom:10px; padding:8px;">
+                    <option value="sleep">詢問睡眠 (調頻類)</option>
+                    <option value="consult">詢問日期 (諮詢類)</option>
+                </select>
+
+                <div style="background:#e3f2fd; padding:12px; border-radius:6px; margin-bottom:10px; border:1px solid #bbdefb;">
+                    <label style="font-size:12px; color:#1565c0; font-weight:bold; display:block; margin-bottom:8px;">客人可提供資料方式 (可複選)：</label>
+                    <div style="display:flex; gap:15px;">
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
+                            <input type="checkbox" id="req-birth" value="birth" style="width:18px; height:18px;"> 
+                            📅 出生年月日
+                        </label>
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
+                            <input type="checkbox" id="req-image" value="image" style="width:18px; height:18px;"> 
+                            📸 上傳截圖
+                        </label>
+                    </div>
+                </div>
+
                 <textarea id="cat-terms" placeholder="服務規範條款" style="width:100%; height:80px; margin-bottom:10px; padding:8px;"></textarea>
+                
                 <div style="display:flex; gap:10px;">
                     <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增</button>
                     <button class="btn btn-outline" id="btn-cat-cancel" onclick="cancelEdit('cat')" style="display:none;">取消</button>
@@ -1076,6 +1097,7 @@
     // ================= 遺失的關鍵函式 (renderBks) =================
     
     // V158 修正：預約列表 (自動抓取客人填寫的姓名與 Email 傳給建立按鈕)
+   // V165 修正：後台列表極簡化 (服務欄位只顯示「大類」)
     function renderBks() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
         document.getElementById('bk-list').innerHTML = cache.bks.filter(x => 
@@ -1083,36 +1105,41 @@
         ).map(x => {
             const hasPro = !!x.profiles;
             
-            // 1. 嘗試從 wish_detail 抓取客人填寫的資料
-            let guestName = '';
-            let guestEmail = '';
+            // 1. 客人資訊處理
+            let guestName = '', guestEmail = '';
             if (x.wish_detail) {
                 const nm = x.wish_detail.match(/姓名:(.*?) \|/);
                 const em = x.wish_detail.match(/Email:(.*?) \|/);
                 if (nm) guestName = nm[1].trim();
                 if (em) guestEmail = em[1].trim();
             }
-
-            // 2. 處理 OTA 標籤
             let otaTag = '';
             if (x.ota_order_id) {
                 const otaName = cache.otas.find(o => o.code === x.ota_source)?.name || 'OTA';
                 otaTag = `<br><span class="tag tag-ota">${otaName} #${x.ota_order_id.slice(-5)}</span>`;
             } else if (x.payment_method === 'shopee') otaTag = `<br><span class="tag tag-ota">蝦皮(舊)</span>`;
 
-            // 3. 生成按鈕 (將抓到的 name 和 email 傳進去)
-            // 注意：這裡用 replace 把可能單引號轉義，避免報錯
             const safeName = guestName.replace(/'/g, "&apos;"); 
             const safeEmail = guestEmail.replace(/'/g, "&apos;");
 
             let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` :
                            `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${x.temp_phone}', '${x.id}', '${safeName}', '${safeEmail}')">＋建立</button>`;
 
+            // 2. 🔥 服務內容：只顯示大類 (乾淨俐落)
+            let serviceHtml = `<div style="font-weight:bold; color:#2c3e50; font-size:15px;">${x.service_item || '未知類別'}</div>`;
+
+            // 3. 金額與優惠券
+            let moneyHtml = `<div style="font-weight:bold; font-size:16px;">$${x.price}</div>`;
+            if (x.coupon_info) {
+                const cpName = x.coupon_info.split('(')[0]; 
+                moneyHtml += `<div style="font-size:11px; color:#e91e63; margin-top:2px;">🎟️ ${cpName}</div>`;
+            }
+
             return `<tr>
                 <td><small>${x.created_at.slice(0,10)}</small><br><small>${x.booking_id.slice(-6)}</small>${otaTag}</td>
                 <td>${userHtml}</td>
-                <td><small>${x.service_item}</small></td>
-                <td>$${x.price}</td>
+                <td>${serviceHtml}</td>
+                <td>${moneyHtml}</td>
                 <td>${STATUS_MAP[x.status] || x.status}</td>
                 <td><button class="btn btn-forest" onclick="openBooking('${x.id}')">詳情</button><button class="btn btn-danger" onclick="deleteBooking('${x.id}')" style="padding:2px 8px;">刪</button></td>
             </tr>`;
@@ -1211,11 +1238,13 @@
     }
 
     // 🌟 4. 預約選單優化 (V48 美化版)
+    // V164 修正：訂單詳情視窗 (支援 大類/主項/加購 分層顯示)
     function openBooking(id) {
         const b = cache.bks.find(x => x.id === id);
         if(!b) return alert("找不到訂單");
         
         try {
+            // 1. 資料清洗 (移除付款碼、截圖網址等雜訊)
             const rawDetail = b.wish_detail || '';
             const cleanDetail = rawDetail.replace(/\| \[付款碼.*?\]/g, '').replace(/\| \[QR已傳.*?\]/g, '');
             const urlMatch = cleanDetail.match(/(https?:\/\/[^\s|]+)/); 
@@ -1231,7 +1260,25 @@
             if(nm) extractName = nm[1].trim(); 
             if(em) extractEmail = em[1].trim();
 
-            const mainService = (cache.svcs || []).find(s => s.is_main && (b.service_detail||'').includes(s.title));
+            // 2. 🔥 核心修正：建構服務內容 HTML (分層顯示) 🔥
+            let serviceHtml = `<div style="font-size:1.1rem; font-weight:bold; color:#2c3e50;">📂 ${b.service_item || '未知大類'}</div>`;
+            
+            // 如果有主項目 (新訂單)
+            if (b.main_service) {
+                // 移除價格顯示 (選擇性，若想留著就把 replace 拿掉)
+                const mainTxt = b.main_service; 
+                serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${mainTxt}</div>`;
+            }
+
+            // 如果有加購細項
+            if (b.service_detail) {
+                // 分割並列出
+                const addons = b.service_detail.split('|').map(s => `<div style="margin-top:3px;">➕ ${s.trim()}</div>`).join('');
+                serviceHtml += `<div style="color:#666; font-size:0.95rem; margin-top:8px; padding-left:15px; border-left:3px solid #eee;">${addons}</div>`;
+            }
+
+            // 3. 其他邏輯 (報告、排程、優惠券)
+            const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
             let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
             let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
             
@@ -1252,17 +1299,25 @@
 
             const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
 
+            // 4. 渲染彈窗內容
             document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;
             document.getElementById('m-content').innerHTML = `
                 <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;"><div style="width:50px; height:50px; background:var(--forest); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px; font-weight:bold;">${extractName[0]}</div><div><div style="font-weight:bold; font-size:1.1rem;">${extractName}</div><div style="color:#666;">${b.temp_phone}</div><div style="color:#888; font-size:0.8rem;">${extractEmail}</div></div></div>
-                <div style="background:#fafafa; padding:15px; border-radius:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between;"><b>${b.service_item}</b><b style="color:#d35400;">$${b.price}</b></div><div style="color:#666; font-size:0.9rem;">${b.service_detail}</div>${couponBadge}</div>
+                
+                <div style="background:#fafafa; padding:15px; border-radius:8px; border:1px solid #eee;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="flex:1;">${serviceHtml}</div>
+                        <b style="color:#d35400; font-size:1.2rem; white-space:nowrap;">$${b.price}</b>
+                    </div>
+                    ${couponBadge}
+                </div>
+
                 <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;"><label style="color:#999; font-size:12px;">備註 / 許願</label><div style="margin-top:5px; line-height:1.5;">${displayData || '無'}</div><div style="margin-top:5px; font-weight:bold; color:#e67e22;">許願：${b.sleep_time || '無'}</div><div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">${screenshotBtn}</div></div>
                 ${scheduleBox}${reportArea}
                 <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>`;
             document.getElementById('modal').style.display = 'flex';
         } catch (e) { console.error(e); alert("詳情開啟失敗: " + e.message); }
     }
-
     // ================= KB 功能 (修復編輯功能) =================
     
     function toggleKbSidebar() { document.querySelector('.kb-layout').classList.toggle('collapsed'); }
@@ -1475,8 +1530,67 @@ function syncKbOrderKeys() {
         document.getElementById('cp-list').innerHTML = cache.coupons.map(c => `<tr><td>${c.name}</td><td>${c.code}</td><td>${c.discount_value}</td><td>${c.expires_at||'無'}</td><td>-</td><td>${c.usage_count}</td><td><button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button><button class="btn btn-danger" onclick="delData('coupons', '${c.id}')">刪</button></td></tr>`).join(''); 
     }
 
-    function renderConfigTables(){ const s=document.getElementById('svc-cat-filter');s.innerHTML='<option value="">請選大類</option>'+cache.cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); document.getElementById('cat-list').innerHTML=cache.cats.map(c=>`<tr><td>${c.name}</td><td><button class="btn btn-outline" onclick="editCat('${c.id}')">✏️</button></td></tr>`).join(''); }
-    
+    // ==========================================
+    // 🔥 V168 補丁：大類管理 (列表渲染 + 刪除 + 隱藏)
+    // ==========================================
+
+    // 1. 渲染設定表格 (大類列表)
+    function renderConfigTables() {
+        // A. 更新下拉選單 (給細項用的)
+        const s = document.getElementById('svc-cat-filter');
+        // 只顯示「啟用中」的大類給細項選，避免選到已暫停的
+        const activeCats = cache.cats.filter(c => c.is_active !== false);
+        s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        // B. 渲染大類列表 (含刪除與隱藏按鈕)
+        document.getElementById('cat-list').innerHTML = cache.cats.map(c => {
+            // 判斷狀態 (預設 true, 若為 false 則視為暫停)
+            const isActive = c.is_active !== false; 
+            
+            // 樣式調整
+            const rowStyle = isActive ? '' : 'background:#eee; color:#999;';
+            const statusLabel = isActive ? '' : '<span style="font-size:12px; color:red; font-weight:bold;">(已暫停)</span>';
+            const toggleBtnText = isActive ? '🚫 暫停' : '👁️ 啟用';
+            const toggleBtnClass = isActive ? 'btn-warning' : 'btn-success';
+
+            return `<tr style="${rowStyle}">
+                <td>
+                    ${c.name} ${statusLabel}
+                    <div style="font-size:12px; color:#aaa;">${c.terms ? '(含規範)' : ''}</div>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯">✏️</button>
+                    <button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="font-size:12px;">${toggleBtnText}</button>
+                    <button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除">🗑️</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // 2. 切換大類狀態 (暫停/啟用)
+    async function toggleCatStatus(id, newStatus) {
+        const { error } = await myDB.from('service_categories').update({ is_active: newStatus }).eq('id', id);
+        if (error) {
+            alert("更新失敗: " + error.message);
+        } else {
+            // 不彈窗擾民，直接刷新
+            fetchAll();
+        }
+    }
+
+    // 3. 刪除大類
+    async function deleteCat(id) {
+        // 防呆警告
+        if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？\n\n注意：如果這個大類底下還有「服務細項」，它們會變成孤兒！\n建議先使用「暫停」功能即可。")) return;
+
+        const { error } = await myDB.from('service_categories').delete().eq('id', id);
+        if (error) {
+            alert("刪除失敗 (可能有關聯資料): " + error.message);
+        } else {
+            alert("✅ 已刪除");
+            fetchAll();
+        }
+    }
     // 🔥 Services: 補回排序功能與細項顯示 🔥
     function filterServiceList(){ 
         const c=document.getElementById('svc-cat-filter').value; 
@@ -1765,10 +1879,192 @@ function syncKbOrderKeys() {
     async function linkUser(u,b){if(confirm("歸戶?"))await myDB.from('bookings').update({user_id:u}).eq('id',b);fetchAll();}
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
     function toggleMainSidebar() { document.body.classList.toggle('hide-nav'); }
-    function editCat(id){const c=cache.cats.find(x=>x.id===id);document.getElementById('cat-id-edit').value=c.id;document.getElementById('cat-name').value=c.name;document.getElementById('cat-terms').value=c.terms;document.getElementById('btn-cat-save').innerText="儲存";document.getElementById('btn-cat-cancel').style.display="inline-block";}
-    function cancelEdit(t){if(t==='svc'){document.getElementById('svc-id-edit').value='';document.getElementById('i-name').value='';document.getElementById('btn-svc-save').innerText="＋ 新增";document.getElementById('btn-svc-cancel').style.display="none";}else{document.getElementById('cat-id-edit').value='';document.getElementById('cat-name').value='';document.getElementById('btn-cat-save').innerText="＋ 新增";document.getElementById('btn-cat-cancel').style.display="none";}}
-    function editSvc(id){const s=cache.svcs.find(x=>x.id===id);document.getElementById('svc-id-edit').value=s.id;document.getElementById('i-name').value=s.title;document.getElementById('i-price').value=s.price;document.getElementById('i-is-main').checked=s.is_main;document.getElementById('i-report-tpl').value=s.report_template||'';document.getElementById('i-sub-opts').value=s.sub_options||'';toggleSubOptionInput();document.getElementById('btn-svc-save').innerText="儲存";document.getElementById('btn-svc-cancel').style.display='inline-block';}
-    function toggleSubOptionInput(){const m=document.getElementById('i-is-main').checked;document.getElementById('main-opt-wrapper').style.display=m?'block':'none';document.getElementById('sub-opt-wrapper').style.display=m?'none':'block';}
+ // ==========================================
+    // 🔥 V170 升級：大類管理 (資料需求改為複選邏輯)
+    // ==========================================
+
+    // 1. 儲存大類 (將勾選狀態組合成字串存入)
+    async function saveCategory() {
+        const id = document.getElementById('cat-id-edit').value;
+        const name = document.getElementById('cat-name').value.trim();
+        const type = document.getElementById('cat-type').value;
+        const terms = document.getElementById('cat-terms').value;
+
+        if (!name) return alert("❌ 大類名稱為必填！");
+
+        // 🔥 收集勾選框狀態
+        let reqs = [];
+        if (document.getElementById('req-birth').checked) reqs.push('birth');
+        if (document.getElementById('req-image').checked) reqs.push('image');
+        
+        // 轉成字串存入 (例如 "birth,image" 或 "birth")
+        // 如果都沒勾，預設給 "birth" 避免出錯
+        const dataReqStr = reqs.length > 0 ? reqs.join(',') : 'birth';
+
+        const payload = {
+            name: name,
+            question_type: type,
+            data_requirement: dataReqStr, // 寫入組合字串
+            terms: terms
+        };
+
+        let error = null;
+        if (id) {
+            const res = await myDB.from('service_categories').update(payload).eq('id', id);
+            error = res.error;
+        } else {
+            const res = await myDB.from('service_categories').insert([payload]);
+            error = res.error;
+        }
+
+        if (error) {
+            alert("儲存失敗: " + error.message);
+        } else {
+            alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
+            cancelEdit('cat');
+            fetchAll();
+        }
+    }
+
+    // 2. 編輯回填 (解析字串並勾選)
+    function editCat(id) {
+        const c = cache.cats.find(x => x.id === id);
+        if (!c) return;
+
+        document.getElementById('cat-id-edit').value = c.id;
+        document.getElementById('cat-name').value = c.name;
+        document.getElementById('cat-type').value = c.question_type || 'sleep';
+        document.getElementById('cat-terms').value = c.terms || '';
+
+        // 🔥 解析資料需求字串
+        const reqStr = c.data_requirement || 'birth'; // 預設 birth
+        document.getElementById('req-birth').checked = reqStr.includes('birth');
+        document.getElementById('req-image').checked = reqStr.includes('image');
+
+        document.getElementById('btn-cat-save').innerText = "💾 儲存修改";
+        document.getElementById('btn-cat-save').className = "btn btn-warning";
+        document.getElementById('btn-cat-cancel').style.display = "inline-block";
+        document.getElementById('card-cat').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 3. 取消重置 (回復預設狀態)
+    function cancelEdit(type) {
+        if (type === 'cat') {
+            document.getElementById('cat-id-edit').value = '';
+            document.getElementById('cat-name').value = '';
+            document.getElementById('cat-terms').value = '';
+            document.getElementById('cat-type').value = 'sleep';
+            
+            // 🔥 重置勾選框 (預設只勾出生)
+            document.getElementById('req-birth').checked = true;
+            document.getElementById('req-image').checked = false;
+            
+            document.getElementById('btn-cat-save').innerText = "＋ 新增";
+            document.getElementById('btn-cat-save').className = "btn btn-forest";
+            document.getElementById('btn-cat-cancel').style.display = "none";
+        } else if (type === 'svc') {
+            // (服務細項邏輯不變)
+            document.getElementById('svc-id-edit').value = '';
+            document.getElementById('i-name').value = '';
+            document.getElementById('i-price').value = '';
+            document.getElementById('i-sub-opts').value = '';
+            document.getElementById('i-report-tpl').value = '';
+            document.getElementById('i-is-main').checked = false;
+            toggleSubOptionInput();
+            document.getElementById('btn-svc-save').innerText = "＋ 新增項目";
+            document.getElementById('btn-svc-save').className = "btn btn-forest";
+            document.getElementById('btn-svc-cancel').style.display = 'none';
+        }
+    }
+    // ==========================================
+    // 🔥 V167 修復：服務細項管理 (新增/修改/UI切換)
+    // ==========================================
+
+    // 1. 儲存服務細項
+    async function saveItem() {
+        const id = document.getElementById('svc-id-edit').value;
+        const catId = document.getElementById('svc-cat-filter').value; // 必須先選大類
+        const title = document.getElementById('i-name').value.trim();
+        const price = document.getElementById('i-price').value;
+        const isMain = document.getElementById('i-is-main').checked;
+        const reportTpl = document.getElementById('i-report-tpl').value.trim();
+        const subOpts = document.getElementById('i-sub-opts').value.trim();
+
+        // 防呆檢查
+        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！");
+        if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
+
+        const payload = {
+            category_id: catId,
+            title: title,
+            price: parseInt(price),
+            is_main: isMain,
+            report_template: reportTpl,
+            sub_options: subOpts
+        };
+
+        let error = null;
+
+        if (id) {
+            // A. 修改模式 (Update)
+            const res = await myDB.from('services').update(payload).eq('id', id);
+            error = res.error;
+        } else {
+            // B. 新增模式 (Insert)
+            // 先抓目前的數量來做排序 (放在最後面)
+            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true });
+            payload.sort_order = count ? count + 1 : 1;
+            
+            const res = await myDB.from('services').insert([payload]);
+            error = res.error;
+        }
+
+        if (error) {
+            alert("儲存失敗: " + error.message);
+        } else {
+            alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
+            cancelEdit('svc'); // 清空表單
+            fetchAll();        // 刷新列表 (這樣才能看到新資料)
+        }
+    }
+
+    // 2. 編輯服務細項 (資料回填)
+    function editSvc(id) {
+        const s = cache.svcs.find(x => x.id === id);
+        if (!s) return;
+
+        // 必須先把下拉選單切換到該服務的大類，不然儲存會錯亂
+        document.getElementById('svc-cat-filter').value = s.category_id;
+        filterServiceList(); // 觸發列表刷新，讓當前編輯的項目顯示出來
+
+        // 回填資料
+        document.getElementById('svc-id-edit').value = s.id;
+        document.getElementById('i-name').value = s.title;
+        document.getElementById('i-price').value = s.price;
+        document.getElementById('i-is-main').checked = s.is_main;
+        document.getElementById('i-report-tpl').value = s.report_template || '';
+        document.getElementById('i-sub-opts').value = s.sub_options || '';
+
+        // 根據是否為主項目，切換顯示輸入框
+        toggleSubOptionInput();
+
+        // 切換按鈕
+        document.getElementById('btn-svc-save').innerText = "💾 儲存修改";
+        document.getElementById('btn-svc-save').className = "btn btn-warning";
+        document.getElementById('btn-svc-cancel').style.display = 'inline-block';
+
+        // 貼心滑動
+        document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 3. UI 切換 (主項目填報告樣板 / 加購項目填子選項)
+    function toggleSubOptionInput() {
+        const isMain = document.getElementById('i-is-main').checked;
+        // 如果是主項目 -> 顯示「報告檔案」欄位，隱藏「子選項」
+        document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none';
+        // 如果是加購 -> 顯示「子選項」，隱藏「報告檔案」
+        document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block';
+    }
     function editOTA(id) { const o = cache.otas.find(x => x.id === id); document.getElementById('ota-id').value = o.id; document.getElementById('ota-name').value = o.name; document.getElementById('ota-code').value = o.code; document.getElementById('ota-rate').value = o.commission_rate; document.getElementById('ota-front').value = o.front_url || ''; document.getElementById('ota-admin').value = o.admin_url || ''; document.getElementById('btn-ota-save').innerText = "更新平台"; document.getElementById('btn-ota-cancel').style.display = 'inline-block'; }
     function cancelOTA() { document.getElementById('ota-id').value = ''; document.getElementById('ota-name').value = ''; document.getElementById('ota-code').value = ''; document.getElementById('ota-front').value = ''; document.getElementById('ota-admin').value = ''; document.getElementById('btn-ota-save').innerText = "💾 儲存設定"; document.getElementById('btn-ota-cancel').style.display = 'none'; }
     async function saveOTA() { const id = document.getElementById('ota-id').value; const p = { name: document.getElementById('ota-name').value, code: document.getElementById('ota-code').value, commission_rate: document.getElementById('ota-rate').value, front_url: document.getElementById('ota-front').value, admin_url: document.getElementById('ota-admin').value }; if(!p.name) return alert("名稱必填"); if(id) await myDB.from('ota_settings').update(p).eq('id', id); else await myDB.from('ota_settings').insert([p]); cancelOTA(); fetchAll(); }

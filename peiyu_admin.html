@@ -2160,6 +2160,43 @@ function syncKbOrderKeys() {
         }
         await _oldSave();
     };
+    // ==========================================
+    // 🔥 V180 升級：即時監聽 (Realtime Listener)
+    // 當 SRT 報告按結案時，這裡會自動刷新
+    // ==========================================
+    function initRealtimeListener() {
+        console.log("📡 啟動訂單監聽系統...");
+        
+        myDB.channel('custom-all-channel')
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'bookings' },
+            (payload) => {
+                // 偵測到訂單狀態變為 'completed' (結案)
+                if (payload.new.status === 'completed' && payload.old.status !== 'completed') {
+                    console.log("🔔 偵測到自動結案，正在刷新列表...");
+                    
+                    // 1. 播放一個提示音效 (可選，不需要可刪除)
+                    // const audio = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+                    // audio.play().catch(e=>{}); 
+
+                    // 2. 顯示不干擾的小通知
+                    const notify = document.createElement('div');
+                    notify.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1a2f23; color:white; padding:15px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; animation: fadeIn 0.5s;";
+                    notify.innerHTML = `✅ 訂單已自動結案，列表已刷新`;
+                    document.body.appendChild(notify);
+                    setTimeout(() => notify.remove(), 3000);
+
+                    // 3. 執行刷新
+                    fetchAll(); 
+                }
+            }
+        )
+        .subscribe();
+    }
+
+    // 🔥 記得啟動它！ (放在 window.onload 裡面，或是 script 的最後面)
+    initRealtimeListener();
 </script>
 </body>
 </html>

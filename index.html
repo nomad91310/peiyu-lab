@@ -699,9 +699,18 @@
         .card-back { width: 115% !important; }
         .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
 
-        /* Footer (✅ 只有首頁看得到) */
-        .footer-banner { position: relative !important; padding-bottom: 30px; margin-top: 40px; }
-
+    /* 修正 1：手機版 Footer 固定最底 */
+        .footer-banner {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 1001 !important;
+        padding: 10px 0 !important;
+        background: #1a2f23 !important;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.2) !important;
+        border-top: 2px solid #c6a87c !important;
+    }
         /* Brand Headers (✅ 還原標題與膠囊設定) */
         /* 1. 標題層級修正：讓中文當主角，英文變裝飾副標 */
         .brand-h2-en, .draw-title-h2 { 
@@ -988,7 +997,10 @@
             <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳剛才下載的圖檔</label>
             <input type="file" id="c-file" accept="image/*" style="background:#fff; border:1px solid #ccc; width:100%; padding:10px; border-radius:8px;">
         </div>
-        
+        <div class="form-group" style="margin-top: 25px;">
+    <label>📖 寫下您的故事 / 現況</label>
+    <textarea id="c-story" placeholder="可以簡單分享想調整的原因、最近遇到的困難或對自己的期許..." style="height: 100px; line-height: 1.6;"></textarea>
+</div>
         <div class="card" style="background:#fffcf5; border-top:none; padding:30px; margin-bottom:0; border:1px solid #fae1c3;">
             <label>📜 服務規範</label>
             <div id="terms-box" style="height:150px; overflow-y:auto; border:1px solid #e0e0e0; padding:15px; font-size:14px; background:#fff; border-radius:8px; line-height:1.8;"></div>
@@ -1431,7 +1443,9 @@ async function doSubmit() {
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
-        
+        const qval = document.getElementById('q-val').value.trim();
+        const story = document.getElementById('c-story').value.trim();
+
         if (!name || !phone || !email) return alert("請填寫完整基本資料");
         if (!/^09\d{8}$/.test(phone)) return alert("手機格式錯誤 (需10碼)");
         
@@ -1518,14 +1532,14 @@ async function doSubmit() {
                 ota_order_id: payStatus === 'ota' ? otaOrderId : null,
                 payment_method: payStatus, 
                 sleep_time: qVal,
+                case_story: story,
                 wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}`,
-                coupon_info: couponInfoText, 
                 user_id: currentUser ? currentUser.id : null
             }]);
 
             if(!error) { 
                 // 1. LINE Notify 發送給老師 (維持原樣)
-                //try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });console.log("✅ LINE 通知已成功發送");} catch (notifyErr) {console.error("❌ 通知發送失敗:", notifyErr); }
+                try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });console.log("✅ LINE 通知已成功發送");} catch (notifyErr) {console.error("❌ 通知發送失敗:", notifyErr); }
 
                 // 2. 準備彈窗資訊
                 const shortId = myBookingId.slice(-6);
@@ -1586,7 +1600,16 @@ async function doSubmit() {
             btn.innerText = "送出預約"; 
         }
     }
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
+function openModal(id) {
+    const modal = document.getElementById(id);
+    modal.classList.add('active');
+    
+    // 解決彈窗捲軸殘留問題
+    const card = modal.querySelector('.text-modal-card');
+    if (card) {
+        card.scrollTop = 0;
+    }
+}
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function toggleOTA() { const isOTA = document.getElementById('pay-status').value === 'ota'; document.getElementById('ota-area').style.display = isOTA ? 'block' : 'none'; }
     function toggleFlow() { const isD=document.getElementById('data-flow').value==='data'; document.getElementById('flow-data').style.display=isD?'block':'none'; document.getElementById('flow-upload').style.display=isD?'none':'block'; }

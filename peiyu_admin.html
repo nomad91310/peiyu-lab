@@ -1120,7 +1120,9 @@
             if(typeof renderKbTree === 'function') renderKbTree(); 
             if(typeof render7DaySchedule === 'function') render7DaySchedule();
             if(typeof fetchAnnouncements === 'function') fetchAnnouncements();
-            
+            if (document.getElementById('svc-cat-filter')?.value) {
+        filterServiceList();
+    }
             console.log("✅ 資料讀取成功！");
 
         } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
@@ -1200,11 +1202,18 @@
             </tr>`;
         }).join('');
 
-        const m = new Date().toISOString().slice(0, 7);
-        const inc = cache.bks.filter(x => x.status === 'paid' && x.created_at.startsWith(m)).reduce((s, x) => s + (x.price || 0), 0);
-        if(document.getElementById('inc-val')) document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
-        if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
+        // 找到 renderBks 函式最後這幾行並修改：
+const m = new Date().toISOString().slice(0, 7);
+// 🔥 修正：已付款 (paid) 跟 已結案 (completed) 都要算錢！
+const inc = cache.bks.filter(x => 
+    (x.status === 'paid' || x.status === 'completed') && x.created_at.startsWith(m)
+).reduce((s, x) => s + (x.price || 0), 0);
+
+if(document.getElementById('inc-val')) document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
+if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
     }
+
+
     // ==========================================
     // 🔥 V157 補完：建立會員功能 (含自動歸戶)
     // ==========================================
@@ -1310,12 +1319,12 @@
     }
     // 🌟 4. 預約選單優化 (V48 美化版)
     // V164 修正：訂單詳情視窗 (支援 大類/主項/加購 分層顯示)
-    function openBooking(id) {
+ function openBooking(id) {
         const b = cache.bks.find(x => x.id === id);
         if(!b) return alert("找不到訂單");
         
         try {
-            // 1. 資料清洗 (移除付款碼、截圖網址等雜訊)
+            // 1. 資料清洗
             const rawDetail = b.wish_detail || '';
             const cleanDetail = rawDetail.replace(/\| \[付款碼.*?\]/g, '').replace(/\| \[QR已傳.*?\]/g, '');
             const urlMatch = cleanDetail.match(/(https?:\/\/[^\s|]+)/); 
@@ -1331,24 +1340,24 @@
             if(nm) extractName = nm[1].trim(); 
             if(em) extractEmail = em[1].trim();
 
-            // 2. 🔥 核心修正：建構服務內容 HTML (分層顯示) 🔥
+            // 2. 服務內容 HTML
             let serviceHtml = `<div style="font-size:1.1rem; font-weight:bold; color:#2c3e50;">📂 ${b.service_item || '未知大類'}</div>`;
-            
-            // 如果有主項目 (新訂單)
             if (b.main_service) {
-                // 移除價格顯示 (選擇性，若想留著就把 replace 拿掉)
-                const mainTxt = b.main_service; 
-                serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${mainTxt}</div>`;
+                serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${b.main_service}</div>`;
             }
-
-            // 如果有加購細項
             if (b.service_detail) {
-                // 分割並列出
                 const addons = b.service_detail.split('|').map(s => `<div style="margin-top:3px;">➕ ${s.trim()}</div>`).join('');
                 serviceHtml += `<div style="color:#666; font-size:0.95rem; margin-top:8px; padding-left:15px; border-left:3px solid #eee;">${addons}</div>`;
             }
 
-            // 3. 其他邏輯 (報告、排程、優惠券)
+            // 3. 🔥 新增：客人故事區邏輯
+            const storyHtml = b.case_story ? 
+                `<div style="margin-top:15px; padding:12px; background:#fdfaf5; border:1px solid #fae1c3; border-radius:8px;">
+                    <label style="color:#1a2f23; font-weight:bold; font-size:13px;">📖 客人說的故事：</label>
+                    <div style="margin-top:5px; white-space:pre-wrap; line-height:1.6; color:#444; font-size:14px;">${b.case_story}</div>
+                </div>` : '';
+
+            // 4. 其他邏輯 (報告、排程)
             const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
             let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
             let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
@@ -1370,7 +1379,7 @@
 
             const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
 
-            // 4. 渲染彈窗內容
+            // 5. 渲染彈窗
             document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;
             document.getElementById('m-content').innerHTML = `
                 <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;"><div style="width:50px; height:50px; background:var(--forest); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px; font-weight:bold;">${extractName[0]}</div><div><div style="font-weight:bold; font-size:1.1rem;">${extractName}</div><div style="color:#666;">${b.temp_phone}</div><div style="color:#888; font-size:0.8rem;">${extractEmail}</div></div></div>
@@ -1383,10 +1392,23 @@
                     ${couponBadge}
                 </div>
 
-                <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;"><label style="color:#999; font-size:12px;">備註 / 許願</label><div style="margin-top:5px; line-height:1.5;">${displayData || '無'}</div><div style="margin-top:5px; font-weight:bold; color:#e67e22;">許願：${b.sleep_time || '無'}</div><div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">${screenshotBtn}</div></div>
+                <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;">
+                    <label style="color:#999; font-size:12px;">數據與備註</label>
+                    <div style="margin-top:5px; line-height:1.5; font-size:14px;">${displayData || '無'}</div>
+                    <div style="margin-top:5px; font-weight:bold; color:#e67e22;">許願時間：${b.sleep_time || '無'}</div>
+                    <div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">${screenshotBtn}</div>
+                </div>
+
+                ${storyHtml} 
+
                 ${scheduleBox}${reportArea}
+                
                 <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>`;
+            
             document.getElementById('modal').style.display = 'flex';
+            // 🔥 強制讓彈窗內容回到最上面
+            document.querySelector('.modal-body').scrollTop = 0;
+
         } catch (e) { console.error(e); alert("詳情開啟失敗: " + e.message); }
     }
     // ================= KB 功能 (修復編輯功能) =================
@@ -1565,7 +1587,22 @@ function syncKbOrderKeys() {
     function loadSlotsForBooking(date) { const slots = cache.slots.filter(s => s.slot_date === date && !s.is_booked); const sel = document.getElementById('book-slot'); sel.innerHTML = slots.length ? slots.map(s => `<option value="${s.id}" data-t="${s.slot_date} ${s.slot_time}">${s.slot_time.slice(0,5)}</option>`).join('') : '<option>無空檔</option>'; }
     async function confirmSchedule(bid) { const sel = document.getElementById('book-slot'); if(!sel.value || sel.value.includes("先選")) return alert("請選擇時段"); const t = sel.options[sel.selectedIndex].dataset.t; await myDB.from('bookings').update({scheduled_at: t, status: 'awaiting_service'}).eq('id', bid); await myDB.from('schedule_slots').update({is_booked: true}).eq('id', sel.value); alert("✅ 排程成功"); closeModal(); fetchAll(); }
     async function deleteBooking(id) { if(confirm("確定刪除？")) { await myDB.from('bookings').delete().eq('id',id); fetchAll(); } }
-    async function sendPayLink(id) { if(confirm("確定發送？")) { const t = new Date().toLocaleString(); await myDB.from('bookings').update({ status: 'awaiting_payment', wish_detail: `${cache.bks.find(x=>x.id===id).wish_detail} | [QR已傳: ${t}]` }).eq('id', id); alert("OK"); closeModal(); fetchAll(); } }
+async function sendPayLink(id) {
+    if(confirm("確定發送？")) {
+        const t = new Date().toLocaleString();
+        const b = cache.bks.find(x => x.id === id);
+        
+        await myDB.from('bookings').update({ 
+            status: 'awaiting_payment', 
+            wish_detail: `${b.wish_detail} | [QR已傳: ${t}]` 
+        }).eq('id', id);
+        
+        // 🔥 關鍵：不關彈窗，直接刷新資料庫並重開詳情
+        await fetchAll(); 
+        openBooking(id); 
+        alert("✅ 付款碼狀態已更新");
+    }
+}
     function renderActionButtons(b) { if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程</button>`; if (b.status === 'awaiting_service') return `<button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`; if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">已結案</button>`; if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}')">📧 傳付款碼</button>`; if (b.status === 'awaiting_payment' || b.payment_method === 'shopee' || b.ota_order_id) return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`; return ""; }
     
     // 🔥 CRM: 補回歷史與刪除按鈕 🔥
@@ -1927,25 +1964,21 @@ function syncKbOrderKeys() {
     async function delData(table, id){if(confirm("刪除？")){await myDB.from(table).delete().eq('id',id);fetchAll();}}
     // V161 修正：更新狀態 (結案前強制檢查是否有報告)
     window.updateS = async function(id, status) {
-        // 1. 抓出這張單的資料
-        const b = cache.bks.find(x => x.id === id);
-        
-        // 2. 如果是要「結案 (completed)」，進行防呆檢查
-        if (status === 'completed') {
-            // 檢查 wish_detail 欄位裡有沒有報告標記
-            const hasReport = b.wish_detail && b.wish_detail.includes('[報告已生成');
-            
-            if (!hasReport) {
-                return alert("⚠️ 無法結案！\n\n系統檢測不到服務報告。\n請先點擊「📄 生成服務報告」並完成存檔後，才能結案。");
-            }
-        }
+    const b = cache.bks.find(x => x.id === id);
+    
+    if (status === 'completed') {
+        const hasReport = b.wish_detail && b.wish_detail.includes('[報告已生成');
+        if (!hasReport) return alert("⚠️ 無法結案！請先生成服務報告並存檔。");
+    }
 
-        // 3. 通過檢查，執行更新
-        if (confirm("確定要更新狀態嗎？")) {
-            await myDB.from('bookings').update({ status: status }).eq('id', id);
-            closeModal();
-            fetchAll();
-        }
+    if (confirm("確定要更新狀態嗎？")) {
+        await myDB.from('bookings').update({ status: status }).eq('id', id);
+        
+        // 🔥 關鍵：原地刷新，讓按鈕跟狀態直接在彈窗裡變掉
+        await fetchAll();
+        openBooking(id); 
+        console.log("✅ 狀態更新完成");
+    }
     }
     async function linkUser(u,b){if(confirm("歸戶?"))await myDB.from('bookings').update({user_id:u}).eq('id',b);fetchAll();}
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
@@ -2202,12 +2235,15 @@ function syncKbOrderKeys() {
         }
 
         if (error) {
-            alert("儲存失敗: " + error.message);
-        } else {
-            alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
-            cancelEdit('svc'); // 清空表單
-            fetchAll();        // 刷新列表 (這樣才能看到新資料)
-        }
+        alert("儲存失敗: " + error.message);
+    } else {
+        alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
+        cancelEdit('svc'); 
+        // 🔥 改成 await，確保資料抓回來了才往下走
+        await fetchAll(); 
+        // 🔥 手動再補一發，確保畫面刷新
+        filterServiceList(); 
+    }
     }
 
     // 2. 編輯服務細項 (資料回填)

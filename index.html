@@ -433,10 +433,33 @@
         #flow-data div[style*="display: flex"] { 
             display: block !important; grid-template-columns: 1fr !important; gap: 15px !important; 
         }
-        #flow-data { padding: 12px !important; }
-        #flow-data .form-group { width: 100% !important; margin-bottom: 15px !important; }
-        #flow-data input, #flow-data select { font-size: 14px !important; padding: 10px !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; margin-bottom: 5px !important; }
-        
+        #flow-data {
+            padding: 15px 10px !important; /* 縮小左右 padding */
+        }
+
+        #flow-data .form-group {
+            width: 100% !important;
+            margin-bottom: 15px !important;
+        }
+
+        /* 修正日期與時間選擇框在手機上的尺寸 */
+        #flow-data input[type="date"], 
+        #flow-data input[type="time"],
+        #flow-data input[type="text"],
+        #flow-data select {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important; /* 確保 padding 不會撐開寬度 */
+            font-size: 16px !important; /* 防止 iOS 自動放大 */
+            appearance: none; /* 移除系統預設外觀，更穩定 */
+            -webkit-appearance: none;
+        }
+
+        /* 調整標籤文字大小避免過長擠壓 */
+        #flow-data label {
+            font-size: 0.9rem !important;
+            margin-bottom: 5px !important;
+        }
         .cat-card { padding: 15px !important; }
         .service-card { padding: 10px !important; }
         .service-info { font-size: 0.95rem !important; }
@@ -463,7 +486,12 @@
         .ql-editor h2.title-boxed-h2, .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
         .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
         .ql-editor h3.title-boxed-h3 { font-size: 1rem; }
-
+        #birth-time-group, #birth-geo-group {
+            display: flex !important;
+            flex-direction: column !important; /* 強制上下堆疊 */
+            gap: 10px !important;
+            width: 100% !important;
+        }
         /* Draw Area */
         #draw-area { grid-template-columns: repeat(8, 1fr) !important; gap: 6px 0 !important; width: 92% !important; margin: 0 auto !important; padding: 15px 0 !important; }
         .card-back { width: 115% !important; }

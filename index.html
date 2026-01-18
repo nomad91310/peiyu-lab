@@ -611,9 +611,37 @@
         
         /* Hero & Home (✅ 還原你原本最穩的設定) */
         .hero-section { flex-direction: column-reverse; gap: 30px; }
-        .hero-img { margin-left: 0; width: 180px; height: 180px; }
+        .hero-img { 
+            margin: 0 auto !important; /* 👈 這裡之前寫錯了，改成 margin: 0 auto 就會置中了 */
+            width: 180px; 
+            height: 180px; 
+        }
         .hero-text h1 { font-size: 1.8rem; line-height: 1.4; margin-bottom: 15px; }
-
+        /* 5. 三大功能選單：手機版強制「一個按鈕一行」 */
+        .hero-menu-grid { 
+            grid-template-columns: 1fr !important; /* 👈 強制一列一個 */
+            gap: 15px !important; 
+            width: 100% !important;
+            max-width: 340px !important; /* 限制最大寬度，避免在大手機上寬到難看 */
+            margin: 30px auto 0 auto !important; 
+        }
+        .hero-menu-item { 
+            width: 100% !important;
+            padding: 25px 20px !important; /* 加厚按鈕，觸感更好 */
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            border-radius: 20px !important;
+            box-shadow: 0 5px 15px rgba(26, 47, 35, 0.05) !important;
+        }
+        .hero-menu-icon {
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 2rem !important;
+            margin-bottom: 10px !important;
+        }
+        .hero-menu-text { font-size: 1.1rem !important; font-weight: 900 !important; }
+        .hero-menu-desc { font-size: 0.9rem !important; margin-top: 5px !important; }
         /* 🔥 公告專區：植入一行一個按鈕 (垂直排版) */
         #must-read-container, #temp-container { 
             flex-direction: column !important; 

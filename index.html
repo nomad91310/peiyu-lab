@@ -589,111 +589,102 @@
     strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
    /* ======================================================
-       9. 手機版 RWD (V400 全比例優化 + 併行修正版)
+       9. 手機版 RWD (V420 漢堡恢復 + 抽卡修正 + 比例瘦身)
        ====================================================== */
     @media (max-width: 768px) {
-        /* 1. 全局比例縮小：解決大到很怪的問題 */
+        /* 1. 全局瘦身：減少區塊與卡片間距 */
         .section { padding: 15px 12px 100px 12px !important; }
         .card { padding: 20px 15px !important; border-radius: 12px !important; }
         
-        /* 2. 導航優化 */
-        nav { padding: 0 15px; height: 70px; }
-        .logo-img { max-height: 50px; }
-        .nav-links { top: 70px; padding: 10px 0; }
-        .nav-links button { padding: 12px 0; font-size: 15px; }
+        /* 2. 導航與漢堡按鈕修正 */
+        nav { padding: 0 15px; height: 70px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-img { max-height: 48px; }
+        .hamburger-btn { 
+            display: block !important; /* 🔥 漢堡按鈕強制顯現 */
+            font-size: 24px;
+            color: var(--white);
+            z-index: 1001;
+        }
+        .nav-links { 
+            display: none; /* 平常隱藏 */
+            position: absolute; top: 70px; left: 0; width: 100%; 
+            background: var(--forest); flex-direction: column; padding: 10px 0; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 1000;
+        }
+        .nav-links.active { display: flex !important; } /* 點擊後展開 */
+        .nav-links button { padding: 12px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* 3. 首頁 Hero 瘦身 */
+        /* 3. 首頁 Hero 比例修正 */
         .hero-section { border-radius: 0 0 25px 25px; padding: 30px 15px 40px 15px; }
-        .hero-img { width: 160px; height: 160px; border-width: 4px; }
+        .hero-img { width: 150px; height: 150px; border-width: 4px; }
         .hero-text h1 { font-size: 1.6rem; letter-spacing: 1px; }
-        .hero-text h2 { font-size: 0.95rem; margin-bottom: 20px; }
+        .hero-text h2 { font-size: 0.9rem; margin-bottom: 20px; }
         
-        /* 4. 公告區防撞 (配合文字縮小) */
-        #announcement-wrapper, #must-read-wrapper, #temp-wrapper {
+        /* 4. 公告區優化 */
+        #must-read-wrapper, #temp-wrapper {
             padding: 45px 12px 20px 12px !important;
             margin: 25px auto 0 auto !important;
+            width: 100%;
         }
         .announce-badge { top: -12px !important; padding: 5px 18px !important; font-size: 0.8rem !important; }
-        #hero-btn-container .btn-primary { padding: 8px 18px !important; font-size: 0.9rem !important; }
 
-        /* 5. 功能選單 (手機直排比例調整) */
-        .hero-menu-grid { grid-template-columns: 1fr; gap: 12px; max-width: 300px; }
-        .hero-menu-item { padding: 15px; border-radius: 15px; }
-        .hero-menu-icon { width: 55px; height: 55px; font-size: 1.8rem; }
-        .hero-menu-text { font-size: 1rem; }
-
-      /* 放入 @media (max-width: 768px) 裡面 */
-    .brand-h3-zh, .draw-title-zh { 
-        display: block !important; 
-        font-size: 1.5rem !important; 
-        letter-spacing: 2px;
-        text-align: center;
-        margin-bottom: 0 !important;
-    }
-    .brand-h2-en, .draw-title-h2 { 
-        display: block !important; 
-        margin-left: 0 !important; 
-        margin-top: 2px !important; /* 👈 縮短間距 */
-        font-size: 0.85rem !important;
-        text-align: center;
-        opacity: 0.5;
-    }
-        .brand-capsule, .draw-desc-p { 
-            font-size: 0.75rem !important; 
-            padding: 5px 15px !important; 
-            width: auto !important;
-            max-width: 95%;
-        }
-
-        /* 7. 培癒寶典：數字與文字併行修正 */
-        .kb-card-content { 
-            flex-direction: row !important; /* 👈 強制橫向排列 */
-            align-items: center !important; 
-            gap: 10px; 
-            text-align: left;
-        }
-        .kb-card-num { 
-            font-size: 1.1rem !important; 
-            min-width: 32px; /* 確保數字對齊 */
+        /* 5. 品牌標題修正 (中文大字在上，英文小字在下) */
+        .brand-h3-zh, .draw-title-zh { 
+            display: block !important; 
+            font-size: 1.4rem !important; 
+            letter-spacing: 2px;
+            text-align: center;
             margin-bottom: 0 !important;
         }
-        .kb-card-text { font-size: 0.9rem !important; line-height: 1.4; }
-        .kb-article-card { padding: 12px 15px !important; margin-bottom: 8px; }
-        .kb-mid-badge { padding: 6px 20px !important; font-size: 0.9rem !important; }
-        .kb-tiny-note {
-            top: -15px !important; right: -5px !important; 
-            padding: 6px 10px !important; font-size: 9px !important; 
-            max-width: 55%; transform: rotate(2deg) !important;
+        .brand-h2-en, .draw-title-h2 { 
+            display: block !important; 
+            margin-left: 0 !important; 
+            margin-top: 2px !important; 
+            font-size: 0.8rem !important;
+            text-align: center;
+            opacity: 0.5;
+        }
+        .brand-capsule, .draw-desc-p { 
+            font-size: 0.75rem !important; 
+            padding: 6px 18px !important; 
+            margin-top: 10px !important;
         }
 
-        /* 8. 服務預約瘦身 */
-        /* 放入 @media (max-width: 768px) 裡面 */
-    .cat-card { padding: 18px 20px !important; border-radius: 12px !important; }
-    .cat-card h3 { font-size: 1.05rem !important; }
-    .service-card { padding: 15px !important; }
-    .service-info { font-size: 1rem !important; }
-    .price-badge { font-size: 12px !important; padding: 2px 10px !important; }
-    .sub-check-grid { grid-template-columns: 1fr; padding: 12px !important; }
-    .total-box { font-size: 1.4rem !important; }
-        /* 9. 抽卡系統調整 */
-        #draw-area { grid-template-columns: repeat(8, 1fr); gap: 5px 0; }
-        .card-back { width: 110%; }
-        .close-card-btn { top: 15px; right: 15px; width: 35px; height: 35px; font-size: 20px; }
+        /* 6. 培癒寶典：數字與文字併行 */
+        .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 10px; text-align: left; }
+        .kb-card-num { font-size: 1.1rem !important; min-width: 32px; margin-bottom: 0 !important; }
+        .kb-card-text { font-size: 0.9rem !important; line-height: 1.4; }
+        .kb-article-card { padding: 12px 15px !important; margin-bottom: 8px; }
+        .kb-tiny-note { top: -15px !important; right: -5px !important; font-size: 9px !important; max-width: 55%; transform: rotate(2deg) !important; }
 
-        /* 10. Footer (移動到 Home 後的微調) */
+        /* 7. 服務預約瘦身 */
+        .cat-card { padding: 15px !important; border-radius: 12px !important; }
+        .cat-card h3 { font-size: 1.05rem !important; }
+        .service-card { padding: 15px !important; }
+        .service-info { font-size: 0.95rem !important; }
+        .price-badge { font-size: 11px !important; padding: 2px 8px !important; }
+        .sub-check-grid { grid-template-columns: 1fr; padding: 12px !important; }
+        .total-box { font-size: 1.4rem !important; margin-top: 25px; }
+
+        /* 8. 抽卡系統修正：4欄排列不破版 */
+        #draw-area { grid-template-columns: repeat(8, 1fr); gap: 6px 0; width: 92%; margin: 0 auto; padding: 15px 0; }
+        .card-back { width: 115%; }
+        .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
+
+        /* 9. Footer 僅在首頁 */
         .footer-banner { 
-            position: relative !important; /* 👈 只有在首頁時顯示在底部 */
-            margin-top: 50px; 
+            position: relative !important; 
+            margin-top: 40px; 
             padding-bottom: 40px; 
             border-radius: 20px 20px 0 0;
         }
-        .social-btn { padding: 6px 10px !important; font-size: 0.7rem !important; }
     }
 
     /* 橫向模式補丁 */
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note { top: 10px !important; right: 15px !important; max-width: 40%; }
         .kb-cat-header, .kb-article-title-h1 { margin-top: 20px; }
+        #draw-area { grid-template-columns: repeat(8, 1fr) !important; } /* 橫向有空間可放8欄 */
     }
 </style>
 

@@ -755,6 +755,21 @@
             font-size:
              0.9rem !important; 
         }
+        /* 解決出生地區與時區在手機版擠在一起的問題 */
+    #flow-data div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important; /* 強制變一行 */
+        gap: 15px !important; /* 增加上下間距 */
+    }
+
+    /* 調整輸入框寬度與字體，避免在小螢幕太擁擠 */
+    #flow-data input, #flow-data select {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    #flow-data {
+        padding: 15px !important; /* 縮小內距，留更多空間給輸入框 */
+    }
         /* 5. 其他元件 */
         .section { padding: 20px 15px 60px 15px !important; }
         .card { padding: 20px 15px !important; border-radius: 12px !important; }

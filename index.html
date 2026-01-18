@@ -151,50 +151,58 @@
     .close-modal-btn:hover { background: var(--error); }
 
     /* ======================================================
-       4. 通用標題樣式 (Brand Headers)
+       4. 通用標題樣式 (Brand Headers - V900 底部對齊版)
        ====================================================== */
     .brand-section-header, .draw-section-header {
         text-align: center;
-        margin-bottom: 50px;
-        padding-top: 20px;
-        position: relative;
-        clear: both;
+        margin-bottom: 45px;
+        padding-top: 15px;
     }
 
-    /* 英文大標 */
-    .brand-h2-en, .draw-title-h2 {
-        font-family: 'Cinzel', serif !important;
-        font-size: 2.8rem !important;
+    /* 中文大標 */
+    .brand-h3-zh, .draw-title-zh {
+        display: inline-block !important;
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 2.2rem !important; 
         color: var(--forest);
-        margin: 0 0 10px 0;
+        margin: 0 !important;
         font-weight: 900;
-        text-shadow: 3px 3px 0px rgba(198, 168, 124, 0.25);
-        letter-spacing: 1px;
+        letter-spacing: 5px;
+        text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.15);
+        /* 🔥 關鍵：底部對齊 */
+        vertical-align: baseline !important;
     }
     
-    /* 中文副標 */
-    .brand-h3-zh, .draw-title-zh {
-        font-family: 'Noto Serif TC', serif !important;
-        font-size: 1.5rem !important;
+    /* 英文陪襯 */
+    .brand-h2-en, .draw-title-h2 {
+        display: inline-block !important;
+        font-family: 'Cinzel', serif !important;
+        font-size: 1.1rem !important; /* 👈 稍微縮一點，讓高低落差更有層次 */
         color: var(--forest);
-        margin-top: -5px;
-        margin-bottom: 25px;
-        font-weight: bold;
-        letter-spacing: 3px;
+        margin-left: 15px !important; 
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        opacity: 0.4; 
+        /* 🔥 關鍵：底部對齊 */
+        vertical-align: baseline !important;
+        text-shadow: none !important;
     }
 
-    /* 金邊膠囊引導語 */
+    /* 金邊膠囊 */
     .brand-capsule, .draw-desc-p {
+        display: table !important;
+        margin: 10px auto 0 auto !important; 
         font-family: 'Noto Serif TC', serif !important;
-        font-size: 1rem;
-        color: #666;
-        background: #fffcf5;
-        display: inline-block;
-        padding: 10px 35px;
+        font-size: 0.85rem !important;
+        color: #777;
+        background: #fffdf9;
+        padding: 4px 22px !important;
         border-radius: 50px;
-        border: 1px solid var(--accent);
-        box-shadow: 0 5px 15px rgba(198, 168, 124, 0.15);
+        border: 1px solid rgba(198, 168, 124, 0.4) !important;
+        box-shadow: 0 4px 10px rgba(198, 168, 124, 0.1);
     }
+
+    
     
     .brand-capsule::before, .brand-capsule::after, 
     .draw-desc-p::before, .draw-desc-p::after {
@@ -345,30 +353,112 @@
     .hero-menu-desc { font-size: 0.9rem; color: #777; line-height: 1.5; margin-top: 5px; font-weight: normal; }
 
     /* ======================================================
-       6. 預約流程與表單樣式
+       6. 預約流程與表單樣式 (V1000 品牌質感最終校準版)
        ====================================================== */
-    .cat-card { border: 1px solid #eee; padding: 25px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; background: var(--white); transition: 0.3s; display: flex; align-items: center; justify-content: space-between; }
-    .cat-card:hover { border-color: var(--accent); background: #fdfcf9; transform: translateX(5px); }
-    .cat-card h3 { margin: 0; border: none; padding: 0; font-size: 1.3rem; }
     
-    .service-card { background: #fafbfc; border: 1px solid #eee; padding: 20px; border-radius: 12px; margin-bottom: 15px; transition: 0.2s; }
-    .service-card:hover { border-color: var(--accent); background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-    .service-card.disabled-card { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+    /* 類別選擇卡片：增加移動幅度與金色陰影 */
+    .cat-card { 
+        border: 1px solid rgba(0,0,0,0.05); 
+        padding: 22px 30px; 
+        border-radius: 16px; 
+        margin-bottom: 15px; 
+        cursor: pointer; 
+        background: var(--white); 
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.03); /* 極淡的綠色系陰影 */
+    }
+    .cat-card:hover { 
+        border-color: var(--accent); 
+        background: #fffdf9; 
+        transform: translateX(8px); /* 👈 讓進入感更明顯 */
+        box-shadow: 0 10px 25px rgba(198, 168, 124, 0.15); /* 金色調陰影 */
+    }
+    .cat-card h3 { margin: 0; border: none; padding: 0; font-size: 1.25rem; color: var(--forest); font-weight: bold; }
+    
+    /* 服務細項卡片：改為更柔和的背景 */
+    .service-card { 
+        background: #ffffff; 
+        border: 1px solid #f0f0f0; 
+        padding: 20px; 
+        border-radius: 15px; 
+        margin-bottom: 15px; 
+        transition: all 0.2s ease; 
+    }
+    .service-card:hover { 
+        border-color: var(--accent); 
+        box-shadow: 0 8px 20px rgba(26, 47, 35, 0.05); 
+    }
+    .service-card.disabled-card { opacity: 0.4; filter: grayscale(1); }
+    
     .service-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .service-info { display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; }
+    .service-info { 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        font-weight: bold; 
+        font-size: 1.1rem; 
+        cursor: pointer; 
+        flex: 1; 
+        color: var(--forest);
+    }
     .service-info input { width: 22px; height: 22px; cursor: pointer; accent-color: var(--forest); }
-    .price-badge { background: var(--forest); color: var(--white); padding: 5px 12px; border-radius: 6px; font-size: 14px; font-weight: normal; }
-    .service-desc { font-size: 1rem; color: #777; margin-left: 38px; padding-top: 8px; line-height: 1.5; }
-    .sub-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; padding: 15px; background: #f0f4f1; border-radius: 10px; }
-    .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); }
-    .sub-opt-label input { width: 18px; height: 18px; margin: 0; }
-    .total-box { text-align: right; font-size: 1.8rem; font-weight: bold; color: #d35400; border-top: 2px dashed #eee; padding-top: 25px; margin-top: 30px; font-family: 'Cinzel', serif; }
     
-    .coupon-box { background: #fdfbf5; padding: 20px; border-radius: 10px; border: 1px dashed var(--accent); margin-top: 25px; display: flex; gap: 15px; align-items: center; }
-    .coupon-msg { font-size: 14px; font-weight: bold; margin-top: 8px; }
-    .coupon-msg.success { color: var(--success); }
-    .coupon-msg.error { color: var(--error); }
-
+    /* 價格標籤：改成金棕色字，更有價值感 */
+    .price-badge { 
+        background: var(--forest); 
+        color: var(--accent); /* 👈 關鍵：深綠配金字 */
+        padding: 4px 14px; 
+        border-radius: 8px; 
+        font-size: 14px; 
+        font-weight: 900;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+    }
+    
+    .service-desc { font-size: 0.95rem; color: #888; margin-left: 38px; padding-top: 5px; line-height: 1.5; }
+    
+    /* 加購區網格：背景改為超淡森林綠 */
+    .sub-check-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+        gap: 12px; 
+        margin-top: 15px; 
+        padding: 18px; 
+        background: rgba(26, 47, 35, 0.04); /* 👈 5% 濃度的森林綠 */
+        border-radius: 12px; 
+        border: 1px solid rgba(26, 47, 35, 0.05);
+    }
+    .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--forest-light); font-weight: 500; }
+    .sub-opt-label input { width: 18px; height: 18px; accent-color: var(--accent); }
+    
+    /* 結算區：回歸主色調，移除橘色 */
+    .total-box { 
+        text-align: right; 
+        font-size: 2rem; 
+        font-weight: 900; 
+        color: var(--forest); /* 👈 回歸深綠色，顯得專業稳重 */
+        border-top: 2px dashed #eee; 
+        padding-top: 25px; 
+        margin-top: 35px; 
+        font-family: 'Cinzel', serif; 
+        letter-spacing: 1px;
+    }
+    
+    /* 優惠券區：改為實線淡金邊 */
+    .coupon-box { 
+        background: #fffdf9; 
+        padding: 15px 20px; 
+        border-radius: 12px; 
+        border: 1px solid rgba(198, 168, 124, 0.4); /* 👈 實線比虛線更高級 */
+        margin-top: 25px; 
+        display: flex; 
+        gap: 15px; 
+        align-items: center; 
+    }
+    .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
     /* 故事與規則文字 */
     .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
     .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0; }
@@ -422,7 +512,14 @@
     .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 5px 0; }
     .kb-article-card { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #f0f0f0; border-left: 6px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
     .kb-article-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(26, 47, 35, 0.15); border-left-color: var(--forest); }
-    .kb-card-content { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+/* KB 卡片內容區 - 改為橫向排列 */
+    .kb-card-content { 
+        display: flex; 
+        flex-direction: row !important; /* 👈 強制橫向 */
+        align-items: center !important; /* 👈 垂直置中 */
+        gap: 12px; /* 👈 數字與文字的間距 */
+        text-align: left;
+    }
     .kb-card-num { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--accent); font-weight: 900; line-height: 1; }
     .kb-card-text { font-size: 1.1rem; font-weight: bold; color: var(--forest); letter-spacing: 0.05em; }
     .kb-arrow { color: #ddd; font-size: 1.5rem; transition: 0.3s; }
@@ -491,71 +588,112 @@
     .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
     strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
-    /* ======================================================
-       9. 手機版 RWD (Mobile Layout Overrides)
+   /* ======================================================
+       9. 手機版 RWD (V400 全比例優化 + 併行修正版)
        ====================================================== */
     @media (max-width: 768px) {
-        /* Nav */
-        nav { padding: 0 20px; }
-        .hamburger-btn { display: block !important; }
-        .nav-links { display: none; position: absolute; top: 80px; left: 0; width: 100%; background: var(--forest); flex-direction: column; padding: 20px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-links.active { display: flex; }
-        .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* 1. 全局比例縮小：解決大到很怪的問題 */
+        .section { padding: 15px 12px 100px 12px !important; }
+        .card { padding: 20px 15px !important; border-radius: 12px !important; }
         
-        /* Hero & Home */
-        .hero-section { border-radius: 0 0 30px 30px; padding-bottom: 50px; }
-        .hero-img { width: 180px; height: 180px; } 
-        .hero-text h1 { font-size: 1.8rem; }
-        #announcement-wrapper, #must-read-wrapper, #temp-wrapper { padding: 25px 20px; width: 92%; }
+        /* 2. 導航優化 */
+        nav { padding: 0 15px; height: 70px; }
+        .logo-img { max-height: 50px; }
+        .nav-links { top: 70px; padding: 10px 0; }
+        .nav-links button { padding: 12px 0; font-size: 15px; }
         
-        /* 功能卡片區 (手機變直排) */
-        .hero-menu-grid {
-            grid-template-columns: 1fr; 
-            max-width: 320px;
+        /* 3. 首頁 Hero 瘦身 */
+        .hero-section { border-radius: 0 0 25px 25px; padding: 30px 15px 40px 15px; }
+        .hero-img { width: 160px; height: 160px; border-width: 4px; }
+        .hero-text h1 { font-size: 1.6rem; letter-spacing: 1px; }
+        .hero-text h2 { font-size: 0.95rem; margin-bottom: 20px; }
+        
+        /* 4. 公告區防撞 (配合文字縮小) */
+        #announcement-wrapper, #must-read-wrapper, #temp-wrapper {
+            padding: 45px 12px 20px 12px !important;
+            margin: 25px auto 0 auto !important;
         }
-        .hero-menu-item { padding: 25px 20px; }
+        .announce-badge { top: -12px !important; padding: 5px 18px !important; font-size: 0.8rem !important; }
+        #hero-btn-container .btn-primary { padding: 8px 18px !important; font-size: 0.9rem !important; }
 
-        /* Brand Headers */
-        .brand-h2-en, .draw-title-h2 { font-size: 1.8rem !important; letter-spacing: 1px; margin-bottom: 5px; }
-        .brand-h3-zh, .draw-title-zh { font-size: 1.2rem !important; margin-top: 0 !important; margin-bottom: 15px !important; letter-spacing: 2px; }
+        /* 5. 功能選單 (手機直排比例調整) */
+        .hero-menu-grid { grid-template-columns: 1fr; gap: 12px; max-width: 300px; }
+        .hero-menu-item { padding: 15px; border-radius: 15px; }
+        .hero-menu-icon { width: 55px; height: 55px; font-size: 1.8rem; }
+        .hero-menu-text { font-size: 1rem; }
+
+      /* 放入 @media (max-width: 768px) 裡面 */
+    .brand-h3-zh, .draw-title-zh { 
+        display: block !important; 
+        font-size: 1.5rem !important; 
+        letter-spacing: 2px;
+        text-align: center;
+        margin-bottom: 0 !important;
+    }
+    .brand-h2-en, .draw-title-h2 { 
+        display: block !important; 
+        margin-left: 0 !important; 
+        margin-top: 2px !important; /* 👈 縮短間距 */
+        font-size: 0.85rem !important;
+        text-align: center;
+        opacity: 0.5;
+    }
         .brand-capsule, .draw-desc-p { 
-            font-size: 0.9rem !important; padding: 8px 20px !important; width: 90%; 
-            display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; 
+            font-size: 0.75rem !important; 
+            padding: 5px 15px !important; 
+            width: auto !important;
+            max-width: 95%;
         }
 
-        /* Editor RWD */
-        .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; display: block; width: 100%; box-sizing: border-box; }
-        .ql-editor h3.title-boxed-h3 { font-size: 1rem; display: block; width: 100%; box-sizing: border-box; }
-
-        /* Draw RWD */
-        #draw-area { grid-template-columns: repeat(8, 1fr); gap: 6px 0; width: 92%; margin: 0 auto; padding: 15px 0; }
-        .card-back { width: 115%; }
-        .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
-        
-        /* Footer */
-        .footer-banner { padding-bottom: 30px; }
-        .social-group { gap: 8px; }
-        .social-btn { flex: 1 1 40%; font-size: 0.85rem; }
-
-        /* KB Note Fix for Mobile */
+        /* 7. 培癒寶典：數字與文字併行修正 */
+        .kb-card-content { 
+            flex-direction: row !important; /* 👈 強制橫向排列 */
+            align-items: center !important; 
+            gap: 10px; 
+            text-align: left;
+        }
+        .kb-card-num { 
+            font-size: 1.1rem !important; 
+            min-width: 32px; /* 確保數字對齊 */
+            margin-bottom: 0 !important;
+        }
+        .kb-card-text { font-size: 0.9rem !important; line-height: 1.4; }
+        .kb-article-card { padding: 12px 15px !important; margin-bottom: 8px; }
+        .kb-mid-badge { padding: 6px 20px !important; font-size: 0.9rem !important; }
         .kb-tiny-note {
-            top: -12px !important; 
-            right: -5px !important; 
-            width: fit-content; 
-            max-width: 55%; 
-            padding: 8px 10px; 
-            font-size: 10px; 
-            transform: rotate(2deg);
+            top: -15px !important; right: -5px !important; 
+            padding: 6px 10px !important; font-size: 9px !important; 
+            max-width: 55%; transform: rotate(2deg) !important;
         }
+
+        /* 8. 服務預約瘦身 */
+        /* 放入 @media (max-width: 768px) 裡面 */
+    .cat-card { padding: 18px 20px !important; border-radius: 12px !important; }
+    .cat-card h3 { font-size: 1.05rem !important; }
+    .service-card { padding: 15px !important; }
+    .service-info { font-size: 1rem !important; }
+    .price-badge { font-size: 12px !important; padding: 2px 10px !important; }
+    .sub-check-grid { grid-template-columns: 1fr; padding: 12px !important; }
+    .total-box { font-size: 1.4rem !important; }
+        /* 9. 抽卡系統調整 */
+        #draw-area { grid-template-columns: repeat(8, 1fr); gap: 5px 0; }
+        .card-back { width: 110%; }
+        .close-card-btn { top: 15px; right: 15px; width: 35px; height: 35px; font-size: 20px; }
+
+        /* 10. Footer (移動到 Home 後的微調) */
+        .footer-banner { 
+            position: relative !important; /* 👈 只有在首頁時顯示在底部 */
+            margin-top: 50px; 
+            padding-bottom: 40px; 
+            border-radius: 20px 20px 0 0;
+        }
+        .social-btn { padding: 6px 10px !important; font-size: 0.7rem !important; }
     }
 
-    /* 橫向模式救援補丁 */
+    /* 橫向模式補丁 */
     @media (max-width: 768px) and (orientation: landscape) {
-        .kb-tiny-note {
-            top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; 
-            max-width: 40%; background: rgba(255,255,255,0.98); 
-        }
-        .kb-cat-header, .kb-article-title-h1 { margin-top: 30px; }
+        .kb-tiny-note { top: 10px !important; right: 15px !important; max-width: 40%; }
+        .kb-cat-header, .kb-article-title-h1 { margin-top: 20px; }
     }
 </style>
 
@@ -620,11 +758,7 @@
 
         </div>
     </div>
-    
-    </div>
-
-    
-      <div class="footer-banner">
+     <div class="footer-banner">
         <div class="footer-content">
             
             <div class="social-group">
@@ -651,14 +785,17 @@
             
         </div>
     </div>
+    
 </div>
+
+    
+     
 
 <div id="booking-step-1" class="section">
     
     <div class="brand-section-header">
-        <div class="brand-h2-en">SERVICE BOOKING</div>
         <div class="brand-h3-zh">服務預約</div>
-        
+         <div class="brand-h2-en">SERVICE BOOKING</div>       
         <div class="brand-capsule">
             請選擇您需要的服務領域
         </div>
@@ -677,7 +814,7 @@
 
         <h2 id="active-cat-name" style="margin-top:0;">服務詳情</h2>
         
-        <div style="background:#e0f7fa; padding:25px; border-radius:12px; margin-bottom:30px; border-left:5px solid #26c6da;">
+        <div class="payment-notice-box">
             <div class="form-group" style="margin-bottom:15px;">
                 <label>🔶 付款狀態選擇</label>
                 <select id="pay-status" onchange="toggleOTA()"> 
@@ -805,8 +942,10 @@
     <div id="kb-container">載入中...</div>
 </div> 
 <div id="draw" class="section">
-    <div class="brand-section-header" style="margin-bottom: 60px;"> <div class="brand-h2-en">ORACLE GUIDANCE</div>
-        <div class="brand-h3-zh">64 閘門能量指引</div>
+    <div class="brand-section-header" style="margin-bottom: 60px;"> 
+                <div class="brand-h3-zh">64 閘門能量指引</div>
+
+        <div class="brand-h2-en">ORACLE GUIDANCE</div>
         
         <div class="brand-capsule">
             憑直覺選一張牌，領取當下的指引
@@ -1421,8 +1560,8 @@ async function doSubmit() {
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="brand-section-header">
+                     <div class="brand-h3-zh">培癒寶典</div>                   
                     <div class="brand-h2-en">PY JOURNEY</div>
-                    <div class="brand-h3-zh">培癒寶典</div>
                     <div class="brand-capsule">
                         探索自我的導引手冊
                     </div>

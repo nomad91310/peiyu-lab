@@ -4,124 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>服務報表 | 培癒試驗室</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <style>
-    /* 🔥 V240 培癒品牌作業區：全局規整、字體統一、防破框版 */
     
-    /* 1. 全局初始化 - 解決所有破框與字體問題 */
-    * { 
-        box-sizing: border-box; 
-        font-family: "Microsoft JhengHei", -apple-system, "Heiti TC", sans-serif;
-    }
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
 
-    body { 
-        background: #e0e5ec; 
-        padding: 30px; 
-        margin: 0; 
-        color: #333; 
-        line-height: 1.5;
-    }
-
+<style>
+    /* ======================================================
+       1. 全站基礎設定 (Base Layout)
+       ====================================================== */
+    * { box-sizing: border-box; font-family: "Microsoft JhengHei", -apple-system, "Heiti TC", sans-serif; }
+    body { background: #e0e5ec; padding: 30px; margin: 0; color: #333; line-height: 1.5; min-height: 100vh; }
+    
+    /* 主容器 */
     .container { 
-        background: white; 
-        padding: 30px; 
-        border-radius: 16px; 
+        background: white; padding: 30px; border-radius: 16px; 
         box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-        max-width: 1280px; 
-        margin: 0 auto; 
-        width: 100%;
+        max-width: 1280px; margin: 0 auto; width: 100%; position: relative;
     }
 
-    h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px;}
+    h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px; font-weight: 900; }
+    h3 { color:#e65100; margin-bottom:10px; font-size:16px; font-weight: bold; }
 
-    /* 2. 頂部客戶資料區 */
+    /* ======================================================
+       2. 頂部資料輸入區 (Header Inputs)
+       ====================================================== */
     .header-inputs { 
         display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 15px; 
-        background: #f0f4f8; 
-        padding: 20px; 
-        border-radius: 12px; 
-        margin-bottom: 25px; 
-        border: 1px solid #dcebf7; 
+        /* 🔥 修改：原本是 repeat(4, 1fr)，改成這樣比較彈性 */
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 15px;
+        background: #f0f4f8; padding: 20px; border-radius: 12px; 
+        margin-bottom: 25px; border: 1px solid #dcebf7; 
     }
     .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
-    .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 15px; }
+    .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 15px; background: #fff; }
 
-    /* 3. 核心能量區 (三欄橫排) */
+    /* ======================================================
+       3. 核心能量區 (Core Metrics)
+       ====================================================== */
     .core-metrics-container { 
-        display: grid; 
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 15px; 
-        margin-bottom: 25px; 
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; 
         background: linear-gradient(135deg, #fff3e0 0%, #fffbf5 100%); 
-        padding: 20px; 
-        border-radius: 15px; 
-        border: 1px solid #ffe0b2; 
+        padding: 20px; border-radius: 15px; border: 1px solid #ffe0b2; 
         box-shadow: inset 0 2px 4px rgba(230, 81, 0, 0.05);
     }
-   .metric-inputs select {
-    width: 90px;
-    height: 34px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    padding: 0 5px;
-    background: #fff;
-    color: #333;
-}
-/* 讓鎖定的輸入框看起來不一樣 */
-.metric-inputs input[readonly] {
-    cursor: not-allowed;
-    border: 1px solid #c8e6c9;
-}
     .metric-card { 
-        background: white; 
-        padding: 12px 15px; 
-        border-radius: 12px; 
-        border: 1px solid #ffe0b2; 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between; 
-        transition: all 0.2s;
+        background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #ffe0b2; 
+        display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;
     }
-    .adj-fixed {
-    color: #2e7d32;
-    font-weight: bold;
-    font-size: 14px;
-    padding-left: 8px;
-    white-space: nowrap;
-}
     .metric-card:hover { border-color: #ffb300; transform: translateY(-1px); }
     .metric-title { font-weight: bold; color: #e65100; font-size: 14px; white-space: nowrap; }
-    .metric-inputs { display: flex; gap: 8px; }
+    .metric-inputs { display: flex; gap: 8px; align-items: center; }
+    .metric-inputs select { width: 90px; height: 34px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; padding: 0 5px; background: #fff; color: #333; }
     .metric-inputs input { width: 55px; height: 32px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 14px; }
+    .adj-fixed { color: #2e7d32; font-weight: bold; font-size: 14px; padding-left: 8px; white-space: nowrap; }
 
-    /* 4. 加購項目區 */
-    #addon-section-wrapper { margin-bottom: 25px; }
+    /* ======================================================
+       4. 加購項目區 (Addons)
+       ====================================================== */
+    #addon-section-wrapper { margin-bottom: 25px; display: none; } /* 預設隱藏，有資料才顯示 */
     #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-    .addon-card { border: 1px solid #b3e5fc; background: #f1f8e9; padding: 12px; border-radius: 8px; position: relative; overflow: hidden; }
-    .addon-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0288d1; }
-    .addon-title { font-weight:bold; color:#0277bd; margin-bottom:8px; font-size: 14px; padding-left: 5px;}
-
-    /* 5. 九大中心作業卡片 */
-    #inputs-container { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
-        gap: 20px; 
+    .addon-card { 
+        border: 1px solid #b3e5fc; background: #f1f8e9; padding: 12px; border-radius: 8px; 
+        position: relative; overflow: hidden; border-left: 6px solid #0288d1;
     }
+    .addon-title { font-weight:bold; color:#0277bd; margin-bottom:10px; font-size: 14px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+
+    /* ======================================================
+       5. 九大中心卡片 (Centers Grid)
+       ====================================================== */
+    #inputs-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
 
     .center-card { 
-        background: #fff; 
-        border: 1px solid #e0e0e0; 
-        border-radius: 12px; 
-        padding: 0 !important; /* 重要：讓 Header 滿版 */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-        position: relative; 
-        overflow: hidden; 
-        transition: transform 0.2s;
+        background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; 
+        padding: 0 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+        position: relative; overflow: hidden; transition: transform 0.2s;
     }
-    .center-card:hover { transform: translateY(-3px); }
+    .center-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
     /* 左側色條指示 */
     .center-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; z-index: 2; }
@@ -135,138 +94,103 @@
     .center-card[data-color="sacral"]::before { background: #e85d5d; }
     .center-card[data-color="root"]::before { background: #c69c6d; }
 
-    .center-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 12px 15px 12px 20px; 
-    }
-    /* Header 填色 */
+    /* Header 填色與佈局 */
+    .center-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px 12px 20px; }
     .center-card[data-color="head"] .center-header { background: #fdfdec; }
     .center-card[data-color="ajna"] .center-header { background: #f4f9f0; }
     .center-card[data-color="throat"] .center-header { background: #f9f5f0; }
-    /* ...以此類推，這裡統一用淡色避免干擾文字 */
+    /* (其餘中心預設白底或淡色) */
 
     .center-title { font-size: 15px; font-weight: bold; color: #333; }
-    .status-group { transform: scale(0.9); display: flex; gap: 4px; }
-    .status-btn { padding: 4px 8px; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; }
+    .status-group { transform: scale(0.9); display: flex; gap: 4px; transform-origin: right center; }
+    .status-btn { padding: 4px 8px; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; transition: 0.2s; }
     .status-btn.active { background: #34495e; color: white; border-color: #34495e; }
 
-    /* 卡片內部排版 - 統一左右邊距 */
-    .diagnosis-area, .input-row, .custom-note-area { 
-        margin: 0 15px 12px 15px !important; 
-    }
-
+    /* 卡片內部元件 */
+    .diagnosis-area, .input-row, .custom-note-area { margin: 0 15px 12px 15px !important; }
     .diagnosis-area { background: #fafafa; padding: 12px; border-radius: 8px; border: 1px dashed #ddd; }
-    .checkbox-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; margin-bottom: 6px; cursor: pointer; }
-    .checkbox-item input { margin-top: 3px; }
+    .checkbox-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; margin-bottom: 6px; cursor: pointer; color: #555; }
+    .checkbox-item:hover { color: #000; }
+    .checkbox-item input { margin-top: 3px; accent-color: #e65100; }
 
     .input-row { display: flex; gap: 10px; }
     .input-group { flex: 1; }
     .input-group label { display: block; font-size: 11px; color: #777; margin-bottom: 4px; }
-    .input-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }
+    .input-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-weight: bold; color: #333; }
 
-    .custom-note-area textarea { 
-        width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; height: 55px; resize: vertical;
-    }
+    .custom-note-area textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; height: 55px; resize: vertical; background: #fffdf9; }
 
-    /* 6. 總結作業區 (質感筆記本風) */
+    /* ======================================================
+       6. 總結與操作區 (Summary & Actions)
+       ====================================================== */
     .summary-section { 
-        background: #fffdf7; 
-        border: 1px solid #f1e4bc; 
-        border-radius: 16px; 
-        padding: 25px; 
-        margin-top: 30px; 
-        box-shadow: 0 4px 15px rgba(245, 127, 23, 0.08);
-        position: relative;
+        background: #fffdf7; border: 1px solid #f1e4bc; border-radius: 16px; 
+        padding: 25px; margin-top: 30px; box-shadow: 0 4px 15px rgba(245, 127, 23, 0.08); 
+        position: relative; overflow: hidden;
     }
-    .summary-section::before {
-        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
-        background: linear-gradient(to bottom, #f57f17, #ffb300);
-    }
+    .summary-section::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(to bottom, #f57f17, #ffb300); }
     .summary-section label { font-size: 18px; color: #f57f17; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
     .summary-section textarea { 
-        width: 100%; height: 180px; padding: 15px; border: 1px solid #eee; border-radius: 10px;
-        font-size: 16px; line-height: 1.8; color: #444; resize: vertical;
-        font-family: "Microsoft JhengHei", sans-serif !important;
+        width: 100%; height: 180px; padding: 15px; border: 1px solid #eee; border-radius: 10px; 
+        font-size: 16px; line-height: 1.8; color: #444; resize: vertical; 
+        font-family: "Microsoft JhengHei", sans-serif !important; 
     }
 
-    /* 7. 按鈕與結果區 */
     .action-bar { display: flex; gap: 15px; margin-top: 30px; }
-    .btn { width: 100%; padding: 18px; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .btn { width: 100%; padding: 18px; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .btn-preview { background: #546e7a; }
     .btn-save { background: #2e7d32; }
-    .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+    .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
 
+    #status-msg { margin-top: 15px; text-align: center; color: #666; font-weight: bold; }
+
+    /* ======================================================
+       7. 結果預覽與下載 (Results)
+       ====================================================== */
     #result-wrapper { display: none; margin-top: 40px; text-align: center; }
     #final-image { max-width: 100%; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 1px solid #eee; }
     .save-hint { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; display: inline-block; }
+    .canvas-container { display: none; } /* 隱藏實際繪圖用的 Canvas */
 
-    /* 8. 模式切換與隱藏 */
-    .canvas-container { display: none; }
-    .back-btn { position: fixed; top: 20px; left: 20px; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: none; z-index: 999; }
+    /* ======================================================
+       8. 客人瀏覽模式 (View Mode)
+       ====================================================== */
+    .back-btn { position: fixed; top: 20px; left: 20px; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: none; z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: bold; color: #555; }
     
-    /* --- 客人瀏覽模式：徹底淨空 --- */
     body.view-mode .back-btn { display: block; }
 
-    /* 1. 隱藏所有作業區標題、輸入框、提示文字、按鈕 */
-    body.view-mode h2, 
-    body.view-mode h3, 
-    body.view-mode .header-inputs, 
-    body.view-mode .core-metrics-container, 
-    body.view-mode #addon-section-wrapper, 
-    body.view-mode #inputs-container, 
-    body.view-mode .summary-section, 
-    body.view-mode .action-bar,
-    body.view-mode .save-hint { 
-        display: none !important; 
-    }
+    /* 隱藏編輯區塊 */
+    body.view-mode h2, body.view-mode h3, 
+    body.view-mode .header-inputs, body.view-mode .core-metrics-container, 
+    body.view-mode #addon-section-wrapper, body.view-mode #inputs-container, 
+    body.view-mode .summary-section, body.view-mode .action-bar,
+    body.view-mode .save-hint { display: none !important; }
 
-    /* 2. 把白底容器弄透明、拿掉陰影，讓圖片自己撐場 */
-    body.view-mode .container { 
-        background: transparent !important; 
-        box-shadow: none !important; 
-        padding: 0; 
-        max-width: 100%; 
-    }
+    /* 調整容器與結果顯示 */
+    body.view-mode .container { background: transparent !important; box-shadow: none !important; padding: 0; max-width: 100%; }
+    body.view-mode #result-wrapper { display: block !important; margin-top: 0; }
+    body.view-mode #final-image { display: block; margin: 0 auto; width: 100%; max-width: 2600px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
 
-    /* 3. 讓結果區直接顯示在最上面 */
-    body.view-mode #result-wrapper { 
-        display: block !important; 
-        margin-top: 0; 
-    }
-
-    /* 4. 讓報表圖片置中展示 */
-    body.view-mode #final-image {
-        display: block;
-        margin: 0 auto;
-        width: 100%;
-        max-width: 2600px;
-    }
-    /* --- 客人專用下載按鈕樣式 --- */
+    /* 客人下載按鈕 */
     #guest-dl-btn { 
-        display: none; /* 平常隱藏，後台看不到 */
-        margin: 20px auto; 
-        background: #c6a87c; 
-        color: white; 
-        font-size: 18px; 
-        font-weight: bold; 
-        padding: 15px 40px; 
-        border: none; 
-        border-radius: 50px; 
-        cursor: pointer; 
-        box-shadow: 0 5px 15px rgba(198, 168, 124, 0.4); 
+        display: none; margin: 20px auto; background: #c6a87c; color: white; 
+        font-size: 18px; font-weight: bold; padding: 15px 40px; border: none; 
+        border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(198, 168, 124, 0.4); 
         transition: transform 0.2s; 
     }
     #guest-dl-btn:hover { transform: translateY(-2px); background: #b0936a; }
-
-    /* 🔥 只有在客人模式下，強制顯示這個按鈕 */
     body.view-mode #guest-dl-btn { display: inline-block !important; }
-    /* 9. 響應式佈局 */
+
+    /* ======================================================
+       9. 響應式調整 (Mobile)
+       ====================================================== */
     @media (max-width: 768px) { 
         .header-inputs { grid-template-columns: 1fr 1fr; } 
         .core-metrics-container { grid-template-columns: 1fr; }
         #inputs-container { grid-template-columns: 1fr; } 
+        .input-row { flex-direction: row; } 
+        h2 { font-size: 22px; }
     }
 </style>
 </head>
@@ -274,56 +198,60 @@
     <button class="back-btn" onclick="window.close()">← 關閉視窗</button>
 
     <div class="container">
-        <h2 id="page-title">🔮 </h2>
+        <h2 id="page-title">🔮 服務報表</h2>
         
-        <div class="header-inputs">
+       <div class="header-inputs">
             <div class="header-group"><label>調整日期</label><input type="date" id="info-date"></div>
             <div class="header-group phone-group"><label>個案手機</label><input type="tel" id="info-phone" placeholder="系統自動帶入"></div>
             <div class="header-group"><label>個案姓名</label><input type="text" id="info-name" placeholder="系統自動帶入"></div>
+            
+            <div class="header-group"><label>Email (選填)</label><input type="email" id="info-email" placeholder="會員登入用"></div>
+            
             <div class="header-group"><label>療癒師</label><input type="text" id="info-healer" value="培癒試驗室"></div>
         </div>
 
-        <h3 style="color:#e65100; margin-bottom:10px; font-size:16px;">⚡ 核心能量 & 加購 (必填區)</h3>
-       <div class="core-metrics-container">
-    <div class="metric-card">
-        <div class="metric-title">🔥 生命力</div>
-        <div class="metric-inputs">
-            <select id="core-val-0">
-                <option value="低">檢測：低</option>
-                <option value="中" selected>檢測：中</option>
-                <option value="高">檢測：高</option>
-            </select>
-            <span class="adj-fixed">➔ 調整：高</span>
-            <input type="hidden" id="core-adj-0" value="高">
+        <h3>⚡ 核心能量 & 加購 (必填區)</h3>
+        <div class="core-metrics-container">
+            <div class="metric-card">
+                <div class="metric-title">🔥 生命力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-0">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-0" value="高">
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🚀 執行力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-1">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-1" value="高">
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🎨 創造力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-2">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-2" value="高">
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-title">🚀 執行力</div>
-        <div class="metric-inputs">
-            <select id="core-val-1">
-                <option value="低">檢測：低</option>
-                <option value="中" selected>檢測：中</option>
-                <option value="高">檢測：高</option>
-            </select>
-            <span class="adj-fixed">➔ 調整：高</span>
-            <input type="hidden" id="core-adj-1" value="高">
-        </div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-title">🎨 創造力</div>
-        <div class="metric-inputs">
-            <select id="core-val-2">
-                <option value="低">檢測：低</option>
-                <option value="中" selected>檢測：中</option>
-                <option value="高">檢測：高</option>
-            </select>
-            <span class="adj-fixed">➔ 調整：高</span>
-            <input type="hidden" id="core-adj-2" value="高">
-        </div>
-    </div>
-</div>
 
         <div id="addon-section-wrapper"><div id="addon-container"></div></div>
+        
         <div id="inputs-container" style="margin-top:20px;"></div>
 
         <div class="summary-section">
@@ -340,11 +268,9 @@
 
         <div id="result-wrapper">
             <div class="save-hint">✅ 圖片已生成，請右鍵另存圖片</div><br>
-
             <button id="guest-dl-btn" onclick="downloadReportImage()">📥 下載我的能量報告</button>
             <br>
-
-            <img id="final-image" />
+            <img id="final-image" alt="Generated Report" />
         </div>
     </div>
 
@@ -358,6 +284,7 @@
         let currentReportId = null;
         let detectedAddons = []; 
         let isViewMode = false;
+        let currentMainService = "";
 
         const MANDATORY_CHECKS = ["生命力", "執行力", "創造力"];
         const HD_COLORS = { head: '#e8e6a5', ajna: '#a7d28b', throat: '#c6a87c', g: '#f4eb68', ego: '#ff9b9b', solar: '#c69c6d', spleen: '#c69c6d', sacral: '#ff9b9b', root: '#c69c6d' };
@@ -377,118 +304,105 @@
         };
 
         const CENTERS = [
-    { id: 'head', shape: 'tri-up', cx: 400, cy: 120, w: 180, h: 150, textDy: 10 }, // 往上 5
-    { id: 'ajna', shape: 'tri-down', cx: 400, cy: 290, w: 180, h: 150, textDy: -10 }, // 往下 5
-    { id: 'throat', shape: 'square', cx: 400, cy: 450, w: 140, h: 140, textDy: 0 },
-    { id: 'g', shape: 'diamond', cx: 400, cy: 650, w: 170, h: 170, textDy: 0 },
-    { id: 'ego', shape: 'tri-small', cx: 620, cy: 680, w: 130, h: 120, textDy: 0 }, 
-    { id: 'sacral', shape: 'square', cx: 400, cy: 840, w: 140, h: 140, textDy: 0 },
-    { id: 'spleen', shape: 'tri-left', cx: 165, cy: 830, w: 180, h: 160, textDy: 0 }, // 往右 5
-    { id: 'solar', shape: 'tri-right', cx: 635, cy: 830, w: 180, h: 160, textDy: 0 }, // 往左 3
-    { id: 'root', shape: 'square', cx: 400, cy: 1030, w: 140, h: 140, textDy: 0 }
-];
-
+            { id: 'head', shape: 'tri-up', cx: 400, cy: 120, w: 180, h: 150, textDy: 10 }, 
+            { id: 'ajna', shape: 'tri-down', cx: 400, cy: 290, w: 180, h: 150, textDy: -10 },
+            { id: 'throat', shape: 'square', cx: 400, cy: 450, w: 140, h: 140, textDy: 0 },
+            { id: 'g', shape: 'diamond', cx: 400, cy: 650, w: 170, h: 170, textDy: 0 },
+            { id: 'ego', shape: 'tri-small', cx: 620, cy: 680, w: 130, h: 120, textDy: 0 }, 
+            { id: 'sacral', shape: 'square', cx: 400, cy: 840, w: 140, h: 140, textDy: 0 },
+            { id: 'spleen', shape: 'tri-left', cx: 165, cy: 830, w: 180, h: 160, textDy: 0 }, 
+            { id: 'solar', shape: 'tri-right', cx: 635, cy: 830, w: 180, h: 160, textDy: 0 }, 
+            { id: 'root', shape: 'square', cx: 400, cy: 1030, w: 140, h: 140, textDy: 0 }
+        ];
 
         const CHANNELS = [['head','ajna'],['ajna','throat'],['throat','g'],['throat','spleen'],['throat','sacral'],['throat','solar'],['g','sacral'],['g','spleen'],['g','ego'],['ego','throat'],['ego','solar'],['sacral','root'],['sacral','spleen'],['sacral','solar'],['spleen','root'],['solar','root']];
 
         window.onload = async function() {
-    document.getElementById('info-date').valueAsDate = new Date();
-    renderInputs(); 
+            document.getElementById('info-date').valueAsDate = new Date();
+            renderInputs(); 
 
-    try {
-        myDB = window.supabase.createClient(SB_URL, SB_KEY);
-        console.log("✅ DB Connected");
-    } catch(e) { console.error("DB Error:", e); }
+            try {
+                myDB = window.supabase.createClient(SB_URL, SB_KEY);
+                console.log("✅ DB Connected");
+            } catch(e) { console.error("DB Error:", e); }
 
-    const params = new URLSearchParams(window.location.search);
-    const pId = params.get('id'); 
-    const pMode = params.get('mode'); 
+            const params = new URLSearchParams(window.location.search);
+            const pId = params.get('id'); 
+            const pMode = params.get('mode'); 
 
-    if (pMode === 'view') {
-        isViewMode = true;
-        document.body.classList.add('view-mode');
-        if(pId) await loadReportData(pId);
-    } else if (pId) {
-        currentReportId = pId;
-        // 🔥 修正：不要在這裡寫死標題！
-        // 把原本那句 "編輯歷史報表" 拿掉，標題才會正確顯示資料庫存的名稱
-        document.getElementById('btn-real-save').innerText = "💾 更新儲存";
-        await loadReportData(pId); 
-    } else {
-        const pName = params.get('name');
-        const pPhone = params.get('phone');
-        const pBid = params.get('bid');
-        if (pName) document.getElementById('info-name').value = pName;
-        if (pPhone) document.getElementById('info-phone').value = pPhone;
-        if (pBid) {
-            currentBookingId = pBid;
-            fetchBookingService(pBid); 
-        }
-    }
-};
-let currentMainService = ""; // 初始設為空，完全由抓取決定
-
-async function fetchBookingService(bid) {
-    if(!myDB) return;
-    try {
-        const { data: booking, error } = await myDB
-            .from('bookings')
-            .select('service_item, service_detail')
-            .eq('id', bid)
-            .single();
-
-        if (error) throw error;
-
-        if (booking) {
-            // 這裡抓到原始的 service_item
-            currentMainService = booking.service_item;
-            document.getElementById('page-title').innerText = `🔮 ${currentMainService}`;
-
-            if (booking.service_detail) {
-                let detailStr = booking.service_detail
-                    .replace(/\(\s*\$\s*\d+\s*\)/g, '') 
-                    .replace(/\$\s*\d+/g, '')          
-                    .replace(/\d+\s*元/g, '')         
-                    .trim();
-
-                const parts = detailStr.split('|').map(p => p.trim());
-                detectedAddons = []; 
-
-                parts.forEach(p => {
-                    const match = p.match(/(.+?)[\[\(](.+?)[\]\)]/);
-                    if (match) {
-                        const category = match[1].trim(); 
-                        const subItems = match[2].split(/[、，,]+/).map(s => s.trim()).filter(s => s !== "");
-                        detectedAddons.push({ name: category, subs: subItems });
-                    } else if (p && p !== currentMainService) {
-                        detectedAddons.push({ name: p, subs: [] });
-                    }
-                });
-                
-                // 渲染加購 UI
-                const container = document.getElementById('addon-container');
-                const wrapper = document.getElementById('addon-section-wrapper');
-                if (container && detectedAddons.length > 0) {
-                    wrapper.style.display = 'block';
-                    container.innerHTML = ''; 
-                    detectedAddons.forEach((item, idx) => {
-                        const card = document.createElement('div');
-                        card.className = 'addon-card';
-                        card.style.cssText = "background:#fff; border:1px solid #b3e5fc; border-radius:8px; padding:15px; margin-bottom:15px; border-left:6px solid #0288d1;";
-                        let html = `<div style="font-weight:bold; color:#0277bd; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">${item.name}</div>`;
-                        html += `<div style="margin-bottom:10px;"><label style="font-size:12px; color:#c62828;">項目檢測：</label><select id="addon-main-val-${idx}"><option value="低">低</option><option value="中" selected>中</option><option value="高">高</option></select></div>`;
-                        item.subs.forEach((sub, sIdx) => {
-                            html += `<div style="margin-bottom:8px; padding-left:10px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px;">• ${sub}</span><select id="addon-sub-adj-${idx}-${sIdx}"><option value="低">調整：低</option><option value="中">調整：中</option><option value="高" selected>調整：高</option></select></div>`;
-                        });
-                        card.innerHTML = html;
-                        container.appendChild(card);
-                    });
+            if (pMode === 'view') {
+                isViewMode = true;
+                document.body.classList.add('view-mode');
+                if(pId) await loadReportData(pId);
+            } else if (pId) {
+                currentReportId = pId;
+                document.getElementById('btn-real-save').innerText = "💾 更新儲存";
+                await loadReportData(pId); 
+            } else {
+                const pName = params.get('name');
+                const pPhone = params.get('phone');
+                const pBid = params.get('bid');
+                if (pName) document.getElementById('info-name').value = pName;
+                if (pPhone) document.getElementById('info-phone').value = pPhone;
+                if (pBid) {
+                    currentBookingId = pBid;
+                    fetchBookingService(pBid); 
                 }
             }
-        }
-    } catch(e) { console.error("Fetch Booking Error:", e); }
-}
+        };
 
+        async function fetchBookingService(bid) {
+            if(!myDB) return;
+            try {
+                const { data: booking, error } = await myDB.from('bookings').select('service_item, service_detail').eq('id', bid).single();
+                if (error) throw error;
+
+                if (booking) {
+                    currentMainService = booking.service_item;
+                    document.getElementById('page-title').innerText = `🔮 ${currentMainService}`;
+
+                    if (booking.service_detail) {
+                        let detailStr = booking.service_detail
+                            .replace(/\(\s*\$\s*\d+\s*\)/g, '') 
+                            .replace(/\$\s*\d+/g, '')          
+                            .replace(/\d+\s*元/g, '')         
+                            .trim();
+
+                        const parts = detailStr.split('|').map(p => p.trim());
+                        detectedAddons = []; 
+
+                        parts.forEach(p => {
+                            const match = p.match(/(.+?)[\[\(](.+?)[\]\)]/);
+                            if (match) {
+                                const category = match[1].trim(); 
+                                const subItems = match[2].split(/[、，,]+/).map(s => s.trim()).filter(s => s !== "");
+                                detectedAddons.push({ name: category, subs: subItems });
+                            } else if (p && p !== currentMainService) {
+                                detectedAddons.push({ name: p, subs: [] });
+                            }
+                        });
+                        
+                        const container = document.getElementById('addon-container');
+                        const wrapper = document.getElementById('addon-section-wrapper');
+                        if (container && detectedAddons.length > 0) {
+                            wrapper.style.display = 'block';
+                            container.innerHTML = ''; 
+                            detectedAddons.forEach((item, idx) => {
+                                const card = document.createElement('div');
+                                card.className = 'addon-card';
+                                let html = `<div class="addon-title">${item.name}</div>`;
+                                html += `<div style="margin-bottom:10px;"><label style="font-size:12px; color:#c62828;">項目檢測：</label><select id="addon-main-val-${idx}"><option value="低">低</option><option value="中" selected>中</option><option value="高">高</option></select></div>`;
+                                item.subs.forEach((sub, sIdx) => {
+                                    html += `<div style="margin-bottom:8px; padding-left:10px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px;">• ${sub}</span><select id="addon-sub-adj-${idx}-${sIdx}"><option value="低">調整：低</option><option value="中">調整：中</option><option value="高" selected>調整：高</option></select></div>`;
+                                });
+                                card.innerHTML = html;
+                                container.appendChild(card);
+                            });
+                        }
+                    }
+                }
+            } catch(e) { console.error("Fetch Booking Error:", e); }
+        }
 
         function renderInputs() {
             const container = document.getElementById('inputs-container');
@@ -534,551 +448,466 @@ async function fetchBookingService(bid) {
             }
         }
 
+        function collectDataFromUI() {
+            const centersData = CENTERS.map(c => {
+                const centerKey = c.id;
+                const db = CENTER_CONTENT[centerKey];
+                const status = document.getElementById(`status-${centerKey}`) ? document.getElementById(`status-${centerKey}`).value : 'defined'; 
+                let statusLabel = (status === 'defined') ? "已定義" : (status === 'undefined') ? "未定義" : "全空白";
+                let valInput = document.getElementById(`val-${centerKey}`).value;
+                let val = valInput === "" ? "--" : valInput;
+                let adjInput = document.getElementById(`adj-${centerKey}`).value;
+                const checkboxes = document.getElementsByName(`diag-${centerKey}`);
+                let hasUnhealthyIssue = false;
+                let dynamicPairs = [];
+                
+                checkboxes.forEach((cb, i) => {
+                    if (cb.checked) {
+                        const item = db.dynamic[i];
+                        if (!item.isHealthy) hasUnhealthyIssue = true;
+                        let dTxt = (status === 'defined' ? item.defDiag : item.undefDiag);
+                        let aTxt = (status === 'defined' ? item.defAdj : item.undefAdj);
+                        if (item.isHealthy) { dynamicPairs.push({ type: 'healthy_diag', diag: `🟢 ${dTxt}` }); } 
+                        else { dynamicPairs.push({ type: 'diag', text: `⚠️ ${dTxt}` }); dynamicPairs.push({ type: 'adjust', text: `🛠️ ${aTxt}` }); }
+                    }
+                });
+                let finalAdj = adjInput !== "" ? adjInput : (valInput !== "" && parseInt(valInput) !== 100 ? "100" : (hasUnhealthyIssue ? "100" : "無須調整"));
+                
+                return { 
+                    ...c, label: db.label, status: status, statusLabel: statusLabel, sLabel: statusLabel, val: val, adj: finalAdj, finalAdj: finalAdj, 
+                    content: [{ type: 'static', text: db.static[status] }].concat(dynamicPairs.map(p => ({ type: p.type, text: p.text || p.diag }))).concat(document.getElementById(`note-${centerKey}`).value.trim() ? [{type:'note', text: '💡 補充：' + document.getElementById(`note-${centerKey}`).value.trim()}] : []),
+                    raw_diags: dynamicPairs 
+                }; 
+            });
 
-    function collectDataFromUI() {
-    // 1. 收集九大中心資料
-    const centersData = CENTERS.map(c => {
-        const centerKey = c.id;
-        const db = CENTER_CONTENT[centerKey];
-        const statusEl = document.getElementById(`status-${centerKey}`);
-        const status = statusEl ? statusEl.value : 'defined'; 
-        let statusLabel = (status === 'defined') ? "已定義" : (status === 'undefined') ? "未定義" : "全空白";
-        let valInput = document.getElementById(`val-${centerKey}`).value;
-        let val = valInput === "" ? "--" : valInput;
-        let adjInput = document.getElementById(`adj-${centerKey}`).value;
-        const checkboxes = document.getElementsByName(`diag-${centerKey}`);
-        let hasUnhealthyIssue = false;
-        let dynamicPairs = [];
-        
-        checkboxes.forEach((cb, i) => {
-            if (cb.checked) {
-                const item = db.dynamic[i];
-                if (!item.isHealthy) hasUnhealthyIssue = true;
-                let dTxt = (status === 'defined' ? item.defDiag : item.undefDiag);
-                let aTxt = (status === 'defined' ? item.defAdj : item.undefAdj);
-                if (item.isHealthy) { dynamicPairs.push({ type: 'healthy_diag', diag: `🟢 ${dTxt}` }); } 
-                else { dynamicPairs.push({ type: 'diag', text: `⚠️ ${dTxt}` }); dynamicPairs.push({ type: 'adjust', text: `🛠️ ${aTxt}` }); }
-            }
-        });
-        let finalAdj = adjInput !== "" ? adjInput : (valInput !== "" && parseInt(valInput) !== 100 ? "100" : (hasUnhealthyIssue ? "100" : "無須調整"));
-        
-        return { 
-            ...c, label: db.label, status: status, statusLabel: statusLabel, sLabel: statusLabel, val: val, adj: finalAdj, finalAdj: finalAdj, 
-            content: [{ type: 'static', text: db.static[status] }].concat(dynamicPairs.map(p => ({ type: p.type, text: p.text || p.diag }))).concat(document.getElementById(`note-${centerKey}`).value.trim() ? [{type:'note', text: '💡 補充：' + document.getElementById(`note-${centerKey}`).value.trim()}] : []),
-            raw_diags: dynamicPairs 
-        }; 
-    });
-
-    // 2. 核心三項
-    const coreData = MANDATORY_CHECKS.map((name, i) => ({
-        name: name, val: document.getElementById(`core-val-${i}`).value, adj: "高", isCore: true, subs: []
-    }));
-
-    // 3. 加購項目
-    const addonsData = [];
-    if (detectedAddons && detectedAddons.length > 0) {
-        detectedAddons.forEach((item, idx) => {
-            const mainVal = document.getElementById(`addon-main-val-${idx}`).value;
-            const subsData = item.subs.map((subName, sIdx) => ({
-                name: subName,
-                adj: document.getElementById(`addon-sub-adj-${idx}-${sIdx}`).value
+            const coreData = MANDATORY_CHECKS.map((name, i) => ({
+                name: name, val: document.getElementById(`core-val-${i}`).value, adj: "高", isCore: true, subs: []
             }));
-            addonsData.push({ name: item.name, val: mainVal, subs: subsData, isCore: false });
-        });
-    }
 
-    // 🔥 關鍵修正：回傳 reportTitle
-    return { 
-        centers: centersData, 
-        specialItems: [...coreData, ...addonsData],
-        reportTitle: currentMainService 
-    };
-}
-
-
-function generatePreview() {
-    try {
-        const msg = document.getElementById('status-msg');
-        msg.innerText = "🎨 正在生成預覽圖...";
-        const fullData = collectDataFromUI();
-
-        const meta = {
-            title: currentMainService, // 🔥 這裡會讀到資料庫抓來的 service_item
-            date: document.getElementById('info-date').value,
-            name: document.getElementById('info-name').value,
-            phone: document.getElementById('info-phone').value,
-            healer: document.getElementById('info-healer').value,
-            summary: document.getElementById('overall-summary').value
-        };
-
-        drawClassicReport(fullData, meta); 
-
-        msg.innerText = "";
-        document.getElementById('btn-real-save').style.display = 'inline-block';
-        document.getElementById('result-wrapper').style.display = 'block';
-        
-        if (isViewMode) {
-             document.getElementById('result-wrapper').scrollIntoView();
-        } else {
-             document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"});
-        }
-    } catch (e) {
-        console.error(e);
-        alert("生成失敗: " + e.message);
-    }
-}
-        async function saveToDatabase() {
-    const msg = document.getElementById('status-msg');
-    const ph = document.getElementById('info-phone').value.trim();
-    const nm = document.getElementById('info-name').value.trim();
-    if(!myDB) { alert("連線錯誤"); return; }
-    if(!ph) { alert("請填寫個案手機"); return; }
-
-    msg.innerText = "⏳ 正在存檔並執行結案程序...";
-    document.getElementById('btn-real-save').disabled = true;
-    const fullData = collectDataFromUI();
-
-    try {
-        let uid = null;
-        // 1. 處理 Profile
-        const { data: prof } = await myDB.from('profiles').select('id').eq('phone', ph).single();
-        if(prof) {
-            uid = prof.id; 
-        } else {
-            const { data: np } = await myDB.from('profiles').insert([{phone: ph, full_name: nm}]).select().single();
-            uid = np.id;
-        }
-
-        const sum = document.getElementById('overall-summary').value;
-        const dt = document.getElementById('info-date').value;
-        const healer = document.getElementById('info-healer').value;
-
-        // 2. 準備報告資料
-        const payload = { 
-            user_id: uid, 
-            service_date: dt, 
-            healer_name: healer, 
-            summary: sum, 
-            raw_data: fullData,
-            service_item: currentMainService 
-        };
-
-        let reportId = currentReportId;
-        if (currentReportId) {
-            await myDB.from('reports').update(payload).eq('id', currentReportId);
-        } else {
-            const { data: newR, error: ie } = await myDB.from('reports').insert([payload]).select().single();
-            if(ie) throw ie;
-            reportId = newR.id;
-            currentReportId = newR.id;
-        }
-
-        // 3. 連動後台訂單結案 (這動作會觸發 Admin 刷新)
-        if (currentBookingId) {
-            const linkText = `[報告已生成 ID:${reportId}]`;
-            const { data: oldB } = await myDB.from('bookings').select('wish_detail').eq('id', currentBookingId).single();
-            let newDetail = oldB ? (oldB.wish_detail || "") : "";
-            
-            if (!newDetail.includes("報告已生成")) {
-                newDetail += (newDetail ? " | " : "") + linkText;
-            }
-
-            // 更新 bookings 表為已完成
-            await myDB.from('bookings')
-                .update({ 
-                    status: 'completed', 
-                    wish_detail: newDetail 
-                })
-                .eq('id', currentBookingId);
-        }
-
-        alert("✅ 存檔成功！視窗將自動關閉。");
-        // 🔥 關鍵：直接關閉視窗
-        window.close();
-
-    } catch(err) {
-        console.error(err);
-        msg.innerText = "⚠️ 存檔失敗: " + err.message;
-        document.getElementById('btn-real-save').disabled = false;
-    }
-}
-
-        async function loadReportData(reportId) {
-    const msg = document.getElementById('status-msg');
-    msg.innerText = "⏳ 正在讀取資料...";
-    
-    const { data, error } = await myDB.from('reports').select('*').eq('id', reportId).single();
-    if (error) { alert("讀取失敗：" + error.message); return; }
-
-    document.getElementById('info-date').value = data.service_date;
-    document.getElementById('info-healer').value = data.healer_name;
-    document.getElementById('overall-summary').value = data.summary || "";
-    
-    // 🔥 優先還原標題變數
-    if (data.service_item) {
-        currentMainService = data.service_item;
-    } else if (data.raw_data && data.raw_data.reportTitle) {
-        currentMainService = data.raw_data.reportTitle;
-    }
-    document.getElementById('page-title').innerText = currentMainService ? `🔮 ${currentMainService}` : "🔮";
-
-    // 還原用戶資料
-    if (data.user_id) {
-        const { data: prof } = await myDB.from('profiles').select('*').eq('id', data.user_id).single();
-        if (prof) {
-            document.getElementById('info-name').value = prof.full_name;
-            document.getElementById('info-phone').value = prof.phone;
-        }
-    }
-
-    if (data.raw_data) {
-        const rd = data.raw_data;
-        // 1. 還原九大中心 (完整版)
-        (rd.centers || []).forEach(item => {
-            const cid = item.id;
-            setStatus(cid, item.status);
-            if(item.val && item.val!=="--") document.getElementById(`val-${cid}`).value = item.val;
-            if(item.finalAdj && item.finalAdj!=="無須調整" && item.finalAdj!=="100") document.getElementById(`adj-${cid}`).value = item.finalAdj;
-            if (item.raw_diags) {
-                const dbDynamic = CENTER_CONTENT[cid].dynamic;
-                const cbs = document.getElementsByName(`diag-${cid}`);
-                item.raw_diags.forEach(d => {
-                    let r = d.text || d.diag; if(!r) return;
-                    const clean = r.substring(2).trim();
-                    dbDynamic.forEach((def, idx) => {
-                        if(def.defDiag===clean || def.undefDiag===clean || def.defAdj===clean || def.undefAdj===clean) {
-                            if(cbs[idx]) cbs[idx].checked = true;
-                        }
-                    });
+            const addonsData = [];
+            if (detectedAddons && detectedAddons.length > 0) {
+                detectedAddons.forEach((item, idx) => {
+                    const mainVal = document.getElementById(`addon-main-val-${idx}`).value;
+                    const subsData = item.subs.map((subName, sIdx) => ({
+                        name: subName,
+                        adj: document.getElementById(`addon-sub-adj-${idx}-${sIdx}`).value
+                    }));
+                    addonsData.push({ name: item.name, val: mainVal, subs: subsData, isCore: false });
                 });
             }
-            if (item.content) {
-                const nb = item.content.find(x => x.type === 'note');
-                if (nb) document.getElementById(`note-${cid}`).value = nb.text.replace("💡 補充：", "");
-            }
-        });
 
-        // 2. 還原核心能量
-        const special = rd.specialItems || [];
-        special.filter(x => x.isCore).forEach((c, i) => {
-            const el = document.getElementById(`core-val-${i}`);
-            if (el) el.value = c.val;
-        });
-
-        // 3. 🔥 重建加購區 (這是客人能看到橫向圖的名字來源)
-        const addons = special.filter(x => !x.isCore);
-        const container = document.getElementById('addon-container');
-        if (container && addons.length > 0) {
-            container.innerHTML = '';
-            detectedAddons = addons.map(a => ({
-                name: a.name,
-                subs: a.subs ? a.subs.map(s => s.name) : []
-            }));
-            addons.forEach((item, idx) => {
-                const card = document.createElement('div');
-                card.className = 'addon-card';
-                let h = `<div class="addon-title">${item.name}</div>`;
-                h += `<select id="addon-main-val-${idx}"><option value="${item.val}">${item.val}</option></select>`;
-                if (item.subs) item.subs.forEach((s, si) => h += `<select id="addon-sub-adj-${idx}-${si}"><option value="${s.adj}">${s.adj}</option></select>`);
-                card.innerHTML = h;
-                container.appendChild(card);
-            });
+            return { centers: centersData, specialItems: [...coreData, ...addonsData], reportTitle: currentMainService };
         }
-    }
-    msg.innerText = "";
-    setTimeout(() => { generatePreview(); }, 200);
-}
 
+        function generatePreview() {
+            try {
+                const msg = document.getElementById('status-msg');
+                msg.innerText = "🎨 正在生成預覽圖...";
+                const fullData = collectDataFromUI();
 
+                const meta = {
+                    title: currentMainService, 
+                    date: document.getElementById('info-date').value,
+                    name: document.getElementById('info-name').value,
+                    phone: document.getElementById('info-phone').value,
+                    healer: document.getElementById('info-healer').value,
+                    summary: document.getElementById('overall-summary').value
+                };
 
-async function drawClassicReport(fullData, meta) { 
-    try {
-        const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        const canvasWidth = 2600; const headerHeight = 250;
+                drawClassicReport(fullData, meta); 
 
-        const logoImg = await new Promise((res) => {
-            const img = new Image(); img.src = 'logo.png';
-            img.onload = () => res(img); img.onerror = () => res(null);
-        });
+                msg.innerText = "";
+                document.getElementById('btn-real-save').style.display = 'inline-block';
+                document.getElementById('result-wrapper').style.display = 'block';
+                
+                if (isViewMode) { document.getElementById('result-wrapper').scrollIntoView(); } 
+                else { document.getElementById('result-wrapper').scrollIntoView({behavior: "smooth"}); }
+            } catch (e) {
+                console.error(e);
+                alert("生成失敗: " + e.message);
+            }
+        }
 
-        const reportData = fullData.centers; 
-        const specialItems = fullData.specialItems || [];
-        const coreItems = specialItems.filter(x => x.isCore);
-        const addonItems = specialItems.filter(x => !x.isCore);
-        const healthyCenters = reportData.filter(x => x.finalAdj === "無須調整");
-        const adjustCenters = reportData.filter(x => x.finalAdj !== "無須調整");
+        async function saveToDatabase() {
+            const msg = document.getElementById('status-msg');
+            const ph = document.getElementById('info-phone').value.trim();
+            const nm = document.getElementById('info-name').value.trim();
+            const em = document.getElementById('info-email').value.trim(); // 👈 抓取 Email
 
-        const dividerX = 750; const rightPanelX = 780; const rightPanelW = 1770;
-        const mainColWidth = (rightPanelW - 50) / 3;
-        const mainColX = [rightPanelX, rightPanelX + mainColWidth + 25, rightPanelX + (mainColWidth + 25) * 2];
-        const HEALTHY_CARD_H = 160; const ADJUST_CARD_H = 460;
+            if(!myDB) { alert("連線錯誤"); return; }
+            if(!ph) { alert("請填寫個案手機"); return; }
 
-        // 能量條工具
-        const drawEnergyBarRow = (bx, by, level, label, isDet, barW = 100) => {
-            ctx.fillStyle = "#888"; ctx.font = "15px Microsoft JhengHei"; ctx.textAlign = "left";
-            ctx.fillText(label, bx, by + 14);
-            const labelW = ctx.measureText(label).width + 8;
-            const barH = 16; const segW = (barW - 6) / 3;
-            ctx.fillStyle = "#f0f0f0"; roundRect(ctx, bx + labelW, by, barW, barH, 4); ctx.fill();
-            let count = (level === "低" ? 1 : level === "中" ? 2 : 3);
-            let color = isDet ? "#ff5252" : (count === 1 ? "#ff5252" : count === 2 ? "#ffd740" : "#69f0ae");
-            for (let k = 0; k < count; k++) { ctx.fillStyle = color; roundRect(ctx, bx + labelW + 3 + (k * (segW + 2)), by + 3, segW, barH - 6, 2); ctx.fill(); }
-        };
+            msg.innerText = "⏳ 正在存檔並執行結案程序...";
+            document.getElementById('btn-real-save').disabled = true;
+            const fullData = collectDataFromUI();
 
-        // 高度動態計算
-        let rowY = headerHeight + 130;
-        let addonAreaH = addonItems.length * 160;
-        let healthyTopY = headerHeight + 100 + addonAreaH + 20;
-        let healthyTotalH = Math.ceil(healthyCenters.length / 3) * (HEALTHY_CARD_H + 30) + 40;
-        let adjustTopY = healthyTopY + healthyTotalH;
-        let adjustTotalH = Math.ceil(adjustCenters.length / 3) * (ADJUST_CARD_H + 100) + 40;
-        const sumLines = processParagraphs(ctx, meta.summary || "", canvasWidth - 280);
-        const summaryBoxH = (sumLines.length * 52) + 160;
+            try {
+                let uid = null;
+                // 1. 查詢是否已是會員
+                const { data: prof } = await myDB.from('profiles').select('id').eq('phone', ph).single();
+                
+                if(prof) {
+                    uid = prof.id; 
+                } else {
+                    // 🔥 關鍵修正：生成預設密碼 (guest + 手機末4碼)
+                    const defaultPwd = ph.length >= 4 ? 'guest' + ph.slice(-4) : 'guest1234';
+                    
+                    // 🔥 關鍵修正：註冊時同時寫入 email、password 與 role
+                    const { data: np, error: createErr } = await myDB.from('profiles').insert([{
+                        phone: ph, 
+                        full_name: nm,
+                        email: em,           
+                        password: defaultPwd, 
+                        role: 'member'
+                    }]).select().single();
+                    
+                    if(createErr) throw createErr;
+                    uid = np.id;
+                }
 
-        canvas.width = canvasWidth; canvas.height = adjustTopY + adjustTotalH + summaryBoxH + 200;
-        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawHeader(ctx, canvasWidth, headerHeight, meta, logoImg);
+                // 2. 準備報告與訂單連動邏輯
+                const sum = document.getElementById('overall-summary').value;
+                const dt = document.getElementById('info-date').value;
+                const healer = document.getElementById('info-healer').value;
 
-        // --- 人類圖區域 ---
-        ctx.save(); ctx.translate(0, headerHeight);
-        ctx.strokeStyle = "#eee"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(dividerX, 0); ctx.lineTo(dividerX, adjustTopY + adjustTotalH - headerHeight - 50); ctx.stroke();
-        CHANNELS.forEach(p => { const c1 = CENTERS.find(c => c.id === p[0]), c2 = CENTERS.find(c => c.id === p[1]); if(c1 && c2) { ctx.lineWidth=3; ctx.strokeStyle="#e0e0e0"; ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); } });
-        reportData.forEach(item => { 
-            const {cx:x, cy:y, w, h} = item; ctx.beginPath();
-            if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
-            else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
-            else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
-            else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
-            else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
-            else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
-            else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
-            ctx.fillStyle = (item.status === 'defined' ? HD_COLORS[item.id] : "#ffffff"); ctx.fill();
-            ctx.lineWidth = 4; ctx.strokeStyle = "#444"; ctx.stroke();
-            let tx = x, ty = y, tAlign = "center";
-            if (item.id === 'head') { ty = y + (h/2) - 32; tx = x - 15; } else if (item.id === 'ajna') { ty = y - (h/2) + 32; tx = x - 15; } 
-            else if (item.id === 'spleen') { tAlign = "left"; tx = x - (w/2) + 18; } else if (item.id === 'solar') { tAlign = "right"; tx = x + (w/2) - 18; } else { tx = x - 15; }
-            ctx.fillStyle = "#2c3e50"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.textAlign = tAlign; ctx.textBaseline = "middle"; ctx.fillText(item.label, tx, ty); 
-            let val = (item.finalAdj === "無須調整" && item.val === "--") ? "100" : item.val;
-            let bC = (parseInt(val)<=40)? ENERGY_COLORS.red : (parseInt(val)<=70)? ENERGY_COLORS.yellow : ENERGY_COLORS.green;
-            let bx = (tAlign === "left") ? tx + ctx.measureText(item.label).width + 30 : (tAlign === "right") ? tx - ctx.measureText(item.label).width - 30 : tx + 45;
-            ctx.beginPath(); ctx.arc(bx, ty, 22, 0, Math.PI*2); ctx.fillStyle = bC; ctx.fill();
-            ctx.fillStyle = (bC === ENERGY_COLORS.red) ? "#ffffff" : "#000000"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center"; ctx.fillText(val, bx, ty);
-        });
-        ctx.restore();
+                const payload = { 
+                    user_id: uid, 
+                    service_date: dt, 
+                    healer_name: healer, 
+                    summary: sum, 
+                    raw_data: fullData,
+                    service_item: currentMainService 
+                };
 
-        // --- 5. 指數區 (核心項 + 加購項) ---
-        const titleY = headerHeight + 65;
-        ctx.fillStyle = "#1a2f23"; ctx.font = "bold 34px 'Noto Serif TC', serif"; ctx.textAlign="left";
-        ctx.fillText("⚡ 基本能量檢測與加購項目調整", rightPanelX, titleY);
+                let reportId = currentReportId;
+                if (currentReportId) {
+                    await myDB.from('reports').update(payload).eq('id', currentReportId);
+                } else {
+                    const { data: newR, error: ie } = await myDB.from('reports').insert([payload]).select().single();
+                    if(ie) throw ie;
+                    reportId = newR.id;
+                    currentReportId = newR.id;
+                }
 
-        coreItems.forEach((cItem, i) => {
-            const bx = rightPanelX + 550 + (i * 420);
-            ctx.save(); ctx.strokeStyle = "#c6a87c"; ctx.lineWidth = 1;
-            roundRect(ctx, bx, titleY - 45, 400, 90, 15); ctx.stroke(); ctx.restore();
-            ctx.fillStyle = "#1a1a1a"; ctx.font = "bold 20px Microsoft JhengHei";
-            ctx.fillText(cItem.name, bx + 20, titleY);
-            drawEnergyBarRow(bx + 110, titleY - 30, cItem.val, "檢測", true, 90);
-            drawEnergyBarRow(bx + 110, titleY + 5, "高", "調整", false, 90);
-        });
+                if (currentBookingId) {
+                    const linkText = `[報告已生成 ID:${reportId}]`;
+                    const { data: oldB } = await myDB.from('bookings').select('wish_detail').eq('id', currentBookingId).single();
+                    let newDetail = oldB ? (oldB.wish_detail || "") : "";
+                    if (!newDetail.includes("報告已生成")) { newDetail += (newDetail ? " | " : "") + linkText; }
+                    await myDB.from('bookings').update({ status: 'completed', wish_detail: newDetail }).eq('id', currentBookingId);
+                }
 
-        addonItems.forEach((aItem, idx) => {
-            ctx.save(); ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#eee"; roundRect(ctx, rightPanelX, rowY, rightPanelW - 50, 120, 15); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = "#0288d1"; roundRect(ctx, rightPanelX, rowY, 10, 120, {tl:15, bl:15}); ctx.fill();
-            ctx.fillStyle = "#0277bd"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.fillText(aItem.name, rightPanelX + 35, rowY + 50);
-            drawEnergyBarRow(rightPanelX + 35, rowY + 75, aItem.val, "檢測值", true, 130);
-            if (aItem.subs) { aItem.subs.forEach((sub, sIdx) => { if (sIdx < 4) { const sx = rightPanelX + 380 + (sIdx * 340); ctx.fillStyle = "#333"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.fillText(sub.name, sx, rowY + 50); drawEnergyBarRow(sx, rowY + 75, sub.adj, "調整後", false, 130); } }); }
-            rowY += 120;
-        });
+                alert("✅ 存檔成功！視窗將自動關閉。");
+                window.close();
 
-        // 🔥🔥🔥 6. 內部中心卡片繪製 🔥🔥🔥
-        const drawCenterCard = (centerObj, dx, dy, h, isH) => {
-            ctx.save(); ctx.fillStyle = "#ffffff"; ctx.shadowColor = "rgba(0,0,0,0.05)"; ctx.shadowBlur = 10; roundRect(ctx, dx, dy, mainColWidth, h, 15); ctx.fill(); ctx.restore();
-            ctx.fillStyle = HD_COLORS[centerObj.id]; roundRect(ctx, dx, dy, 10, h, {tl:15, bl:15}); ctx.fill();
+            } catch(err) {
+                console.error(err);
+                msg.innerText = "⚠️ 存檔失敗: " + err.message;
+                document.getElementById('btn-real-save').disabled = false;
+            }
+        }
+        
+        async function loadReportData(reportId) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "⏳ 正在讀取資料...";
             
-            const themeDesc = CENTER_THEMES[centerObj.id] ? ` - ${CENTER_THEMES[centerObj.id]}` : "";
-            const title = `${centerObj.label}中心 (${centerObj.sLabel})${themeDesc}`;
-            
-            ctx.font = "bold 20px Microsoft JhengHei"; const pillW = ctx.measureText(title).width + 35;
-            ctx.strokeStyle = HD_COLORS[centerObj.id]; ctx.lineWidth = 3; roundRect(ctx, dx + 30, dy + 25, pillW, 45, 22.5); ctx.stroke();
-            
-            ctx.save(); ctx.fillStyle = "#333"; ctx.textAlign="center"; ctx.textBaseline="middle"; 
-            ctx.fillText(title, dx + 30 + pillW/2, dy + 25 + 22.5); ctx.restore();
+            const { data, error } = await myDB.from('reports').select('*').eq('id', reportId).single();
+            if (error) { alert("讀取失敗：" + error.message); return; }
 
-            if (isH) {
-                ctx.save(); ctx.fillStyle = "#e8f5e9"; roundRect(ctx, dx + mainColWidth - 85, dy + 32, 65, 32, 6); ctx.fill();
-                ctx.fillStyle = "#2e7d32"; ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText("健康", dx + mainColWidth - 52.5, dy + 48); ctx.restore();
+            document.getElementById('info-date').value = data.service_date;
+            document.getElementById('info-healer').value = data.healer_name;
+            document.getElementById('overall-summary').value = data.summary || "";
+            
+            if (data.service_item) { currentMainService = data.service_item; } 
+            else if (data.raw_data && data.raw_data.reportTitle) { currentMainService = data.raw_data.reportTitle; }
+            document.getElementById('page-title').innerText = currentMainService ? `🔮 ${currentMainService}` : "🔮";
+
+            if (data.user_id) {
+                const { data: prof } = await myDB.from('profiles').select('*').eq('id', data.user_id).single();
+                if (prof) {
+                    document.getElementById('info-name').value = prof.full_name;
+                    document.getElementById('info-phone').value = prof.phone;
+                }
             }
 
-            ctx.textAlign="left"; ctx.textBaseline="top"; ctx.fillStyle="#555"; ctx.font="17px Microsoft JhengHei";
-            const centerStatus = centerObj.status || 'defined';
-            const staticText = CENTER_CONTENT[centerObj.id].static[centerStatus] || "";
-            
-            if(isH) { 
-                processParagraphs(ctx, staticText, mainColWidth - 60).forEach((line, lineIdx) => ctx.fillText(line, dx + 35, dy + 95 + lineIdx * 26)); 
-            } else {
-                let cy = dy + 85; ctx.fillStyle = "#7f8c8d"; ctx.font = "17px Microsoft JhengHei";
-                const introText = processParagraphs(ctx, staticText, mainColWidth - 60);
-                introText.slice(0, 2).forEach(line => { ctx.fillText(line, dx + 35, cy); cy += 25; });
-                
-                cy += 10; ctx.fillStyle = "#2c3e50"; ctx.font = "bold 19px Microsoft JhengHei"; ctx.fillText("能量檢測/調整項目", dx + 35, cy);
+            if (data.raw_data) {
+                const rd = data.raw_data;
+                (rd.centers || []).forEach(item => {
+                    const cid = item.id;
+                    setStatus(cid, item.status);
+                    if(item.val && item.val!=="--") document.getElementById(`val-${cid}`).value = item.val;
+                    if(item.finalAdj && item.finalAdj!=="無須調整" && item.finalAdj!=="100") document.getElementById(`adj-${cid}`).value = item.finalAdj;
+                    if (item.raw_diags) {
+                        const dbDynamic = CENTER_CONTENT[cid].dynamic;
+                        const cbs = document.getElementsByName(`diag-${cid}`);
+                        item.raw_diags.forEach(d => {
+                            let r = d.text || d.diag; if(!r) return;
+                            const clean = r.substring(2).trim();
+                            dbDynamic.forEach((def, idx) => {
+                                if(def.defDiag===clean || def.undefDiag===clean || def.defAdj===clean || def.undefAdj===clean) {
+                                    if(cbs[idx]) cbs[idx].checked = true;
+                                }
+                            });
+                        });
+                    }
+                    if (item.content) {
+                        const nb = item.content.find(x => x.type === 'note');
+                        if (nb) document.getElementById(`note-${cid}`).value = nb.text.replace("💡 補充：", "");
+                    }
+                });
 
-                // 🔥 修復區百分比小框與藍字邏輯
-                ctx.save();
-                ctx.fillStyle = "#f8f9fa"; // 淺灰底色框
-                roundRect(ctx, dx + mainColWidth - 225, cy - 8, 210, 35, 6); ctx.fill();
-                ctx.strokeStyle = "#eee"; ctx.lineWidth = 1; ctx.stroke();
-                
-                ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-                let detTxt = `檢測 ${centerObj.val}% ➔ `;
-                ctx.fillStyle = "#e53935"; // 檢測部分維持紅色
-                ctx.fillText(detTxt, dx + mainColWidth - 215, cy + 10);
-                let detW = ctx.measureText(detTxt).width;
-                
-                ctx.fillStyle = "#0277bd"; // 🔥 調整部分改為藍色
-                ctx.fillText(`調整後 ${centerObj.adj}%`, dx + mainColWidth - 215 + detW, cy + 10);
+                const special = rd.specialItems || [];
+                special.filter(x => x.isCore).forEach((c, i) => {
+                    const el = document.getElementById(`core-val-${i}`);
+                    if (el) el.value = c.val;
+                });
+
+                const addons = special.filter(x => !x.isCore);
+                const container = document.getElementById('addon-container');
+                const wrapper = document.getElementById('addon-section-wrapper');
+                if (container && addons.length > 0) {
+                    wrapper.style.display = 'block';
+                    container.innerHTML = '';
+                    detectedAddons = addons.map(a => ({ name: a.name, subs: a.subs ? a.subs.map(s => s.name) : [] }));
+                    addons.forEach((item, idx) => {
+                        const card = document.createElement('div');
+                        card.className = 'addon-card';
+                        let h = `<div class="addon-title">${item.name}</div>`;
+                        h += `<div style="margin-bottom:10px;"><label style="font-size:12px; color:#c62828;">項目檢測：</label><select id="addon-main-val-${idx}"><option value="${item.val}">${item.val}</option></select></div>`;
+                        if (item.subs) item.subs.forEach((s, si) => h += `<div style="margin-bottom:8px; padding-left:10px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px;">• ${s.name}</span><select id="addon-sub-adj-${idx}-${si}"><option value="${s.adj}">${s.adj}</option></select></div>`);
+                        card.innerHTML = h;
+                        container.appendChild(card);
+                    });
+                }
+            }
+            msg.innerText = "";
+            setTimeout(() => { generatePreview(); }, 200);
+        }
+
+        async function drawClassicReport(fullData, meta) { 
+            try {
+                const canvas = document.getElementById('mainCanvas');
+                const ctx = canvas.getContext('2d');
+                const canvasWidth = 2600; const headerHeight = 250;
+
+                const logoImg = await new Promise((res) => {
+                    const img = new Image(); img.src = 'logo.png';
+                    img.onload = () => res(img); img.onerror = () => res(null);
+                });
+
+                const reportData = fullData.centers; 
+                const specialItems = fullData.specialItems || [];
+                const coreItems = specialItems.filter(x => x.isCore);
+                const addonItems = specialItems.filter(x => !x.isCore);
+                const healthyCenters = reportData.filter(x => x.finalAdj === "無須調整");
+                const adjustCenters = reportData.filter(x => x.finalAdj !== "無須調整");
+
+                const dividerX = 750; const rightPanelX = 780; const rightPanelW = 1770;
+                const mainColWidth = (rightPanelW - 50) / 3;
+                const mainColX = [rightPanelX, rightPanelX + mainColWidth + 25, rightPanelX + (mainColWidth + 25) * 2];
+                const HEALTHY_CARD_H = 160; const ADJUST_CARD_H = 460;
+
+                const drawEnergyBarRow = (bx, by, level, label, isDet, barW = 100) => {
+                    ctx.fillStyle = "#888"; ctx.font = "15px Microsoft JhengHei"; ctx.textAlign = "left";
+                    ctx.fillText(label, bx, by + 14);
+                    const labelW = ctx.measureText(label).width + 8;
+                    const barH = 16; const segW = (barW - 6) / 3;
+                    ctx.fillStyle = "#f0f0f0"; roundRect(ctx, bx + labelW, by, barW, barH, 4); ctx.fill();
+                    let count = (level === "低" ? 1 : level === "中" ? 2 : 3);
+                    let color = isDet ? "#ff5252" : (count === 1 ? "#ff5252" : count === 2 ? "#ffd740" : "#69f0ae");
+                    for (let k = 0; k < count; k++) { ctx.fillStyle = color; roundRect(ctx, bx + labelW + 3 + (k * (segW + 2)), by + 3, segW, barH - 6, 2); ctx.fill(); }
+                };
+
+                let rowY = headerHeight + 130;
+                let addonAreaH = addonItems.length * 160;
+                let healthyTopY = headerHeight + 100 + addonAreaH + 20;
+                let healthyTotalH = Math.ceil(healthyCenters.length / 3) * (HEALTHY_CARD_H + 30) + 40;
+                let adjustTopY = healthyTopY + healthyTotalH;
+                let adjustTotalH = Math.ceil(adjustCenters.length / 3) * (ADJUST_CARD_H + 100) + 40;
+                const sumLines = processParagraphs(ctx, meta.summary || "", canvasWidth - 280);
+                const summaryBoxH = (sumLines.length * 52) + 160;
+
+                canvas.width = canvasWidth; canvas.height = adjustTopY + adjustTotalH + summaryBoxH + 200;
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawHeader(ctx, canvasWidth, headerHeight, meta, logoImg);
+
+                ctx.save(); ctx.translate(0, headerHeight);
+                ctx.strokeStyle = "#eee"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(dividerX, 0); ctx.lineTo(dividerX, adjustTopY + adjustTotalH - headerHeight - 50); ctx.stroke();
+                CHANNELS.forEach(p => { const c1 = CENTERS.find(c => c.id === p[0]), c2 = CENTERS.find(c => c.id === p[1]); if(c1 && c2) { ctx.lineWidth=3; ctx.strokeStyle="#e0e0e0"; ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); } });
+                reportData.forEach(item => { 
+                    const {cx:x, cy:y, w, h} = item; ctx.beginPath();
+                    if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
+                    else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
+                    else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
+                    else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
+                    ctx.fillStyle = (item.status === 'defined' ? HD_COLORS[item.id] : "#ffffff"); ctx.fill();
+                    ctx.lineWidth = 4; ctx.strokeStyle = "#444"; ctx.stroke();
+                    let tx = x, ty = y, tAlign = "center";
+                    if (item.id === 'head') { ty = y + (h/2) - 32; tx = x - 15; } else if (item.id === 'ajna') { ty = y - (h/2) + 32; tx = x - 15; } 
+                    else if (item.id === 'spleen') { tAlign = "left"; tx = x - (w/2) + 18; } else if (item.id === 'solar') { tAlign = "right"; tx = x + (w/2) - 18; } else { tx = x - 15; }
+                    ctx.fillStyle = "#2c3e50"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.textAlign = tAlign; ctx.textBaseline = "middle"; ctx.fillText(item.label, tx, ty); 
+                    let val = (item.finalAdj === "無須調整" && item.val === "--") ? "100" : item.val;
+                    let bC = (parseInt(val)<=40)? ENERGY_COLORS.red : (parseInt(val)<=70)? ENERGY_COLORS.yellow : ENERGY_COLORS.green;
+                    let bx = (tAlign === "left") ? tx + ctx.measureText(item.label).width + 30 : (tAlign === "right") ? tx - ctx.measureText(item.label).width - 30 : tx + 45;
+                    ctx.beginPath(); ctx.arc(bx, ty, 22, 0, Math.PI*2); ctx.fillStyle = bC; ctx.fill();
+                    ctx.fillStyle = (bC === ENERGY_COLORS.red) ? "#ffffff" : "#000000"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center"; ctx.fillText(val, bx, ty);
+                });
                 ctx.restore();
 
-                cy+=35; 
-                let dPairs = []; if (centerObj.content) { for(let j=0; j < centerObj.content.length; j++){ if(centerObj.content[j].type === 'diag'){ dPairs.push({d: centerObj.content[j].text, a: centerObj.content[j+1] ? centerObj.content[j+1].text : ""}); j++; } } }
-                dPairs.forEach(p => {
-                    const dL = processParagraphs(ctx, p.d, mainColWidth-80); const aL = processParagraphs(ctx, p.a, mainColWidth-80);
-                    const bh = (dL.length + aL.length) * 28 + 20; ctx.fillStyle="#fffcf5"; ctx.strokeStyle="#fae1c3"; roundRect(ctx, dx+35, cy, mainColWidth-70, bh, 10); ctx.fill(); ctx.stroke();
-                    ctx.font="bold 16px Microsoft JhengHei"; ctx.fillStyle="#8e242a"; dL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+i*28));
-                    ctx.font="15px Microsoft JhengHei"; ctx.fillStyle="#1a4a6e"; aL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+dL.length*28+i*28));
-                    cy+=bh+10;
+                const titleY = headerHeight + 65;
+                ctx.fillStyle = "#1a2f23"; ctx.font = "bold 34px 'Noto Serif TC', serif"; ctx.textAlign="left";
+                ctx.fillText("⚡ 基本能量檢測與加購項目調整", rightPanelX, titleY);
+
+                coreItems.forEach((cItem, i) => {
+                    const bx = rightPanelX + 550 + (i * 420);
+                    ctx.save(); ctx.strokeStyle = "#c6a87c"; ctx.lineWidth = 1;
+                    roundRect(ctx, bx, titleY - 45, 400, 90, 15); ctx.stroke(); ctx.restore();
+                    ctx.fillStyle = "#1a1a1a"; ctx.font = "bold 20px Microsoft JhengHei";
+                    ctx.fillText(cItem.name, bx + 20, titleY);
+                    drawEnergyBarRow(bx + 110, titleY - 30, cItem.val, "檢測", true, 90);
+                    drawEnergyBarRow(bx + 110, titleY + 5, "高", "調整", false, 90);
                 });
+
+                addonItems.forEach((aItem, idx) => {
+                    ctx.save(); ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#eee"; roundRect(ctx, rightPanelX, rowY, rightPanelW - 50, 120, 15); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#0288d1"; roundRect(ctx, rightPanelX, rowY, 10, 120, {tl:15, bl:15}); ctx.fill();
+                    ctx.fillStyle = "#0277bd"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.fillText(aItem.name, rightPanelX + 35, rowY + 50);
+                    drawEnergyBarRow(rightPanelX + 35, rowY + 75, aItem.val, "檢測值", true, 130);
+                    if (aItem.subs) { aItem.subs.forEach((sub, sIdx) => { if (sIdx < 4) { const sx = rightPanelX + 380 + (sIdx * 340); ctx.fillStyle = "#333"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.fillText(sub.name, sx, rowY + 50); drawEnergyBarRow(sx, rowY + 75, sub.adj, "調整後", false, 130); } }); }
+                    rowY += 120;
+                });
+
+                const drawCenterCard = (centerObj, dx, dy, h, isH) => {
+                    ctx.save(); ctx.fillStyle = "#ffffff"; ctx.shadowColor = "rgba(0,0,0,0.05)"; ctx.shadowBlur = 10; roundRect(ctx, dx, dy, mainColWidth, h, 15); ctx.fill(); ctx.restore();
+                    ctx.fillStyle = HD_COLORS[centerObj.id]; roundRect(ctx, dx, dy, 10, h, {tl:15, bl:15}); ctx.fill();
+                    
+                    const themeDesc = CENTER_THEMES[centerObj.id] ? ` - ${CENTER_THEMES[centerObj.id]}` : "";
+                    const title = `${centerObj.label}中心 (${centerObj.sLabel})${themeDesc}`;
+                    
+                    ctx.font = "bold 20px Microsoft JhengHei"; const pillW = ctx.measureText(title).width + 35;
+                    ctx.strokeStyle = HD_COLORS[centerObj.id]; ctx.lineWidth = 3; roundRect(ctx, dx + 30, dy + 25, pillW, 45, 22.5); ctx.stroke();
+                    
+                    ctx.save(); ctx.fillStyle = "#333"; ctx.textAlign="center"; ctx.textBaseline="middle"; 
+                    ctx.fillText(title, dx + 30 + pillW/2, dy + 25 + 22.5); ctx.restore();
+
+                    if (isH) {
+                        ctx.save(); ctx.fillStyle = "#e8f5e9"; roundRect(ctx, dx + mainColWidth - 85, dy + 32, 65, 32, 6); ctx.fill();
+                        ctx.fillStyle = "#2e7d32"; ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                        ctx.fillText("健康", dx + mainColWidth - 52.5, dy + 48); ctx.restore();
+                    }
+
+                    ctx.textAlign="left"; ctx.textBaseline="top"; ctx.fillStyle="#555"; ctx.font="17px Microsoft JhengHei";
+                    const centerStatus = centerObj.status || 'defined';
+                    const staticText = CENTER_CONTENT[centerObj.id].static[centerStatus] || "";
+                    
+                    if(isH) { 
+                        processParagraphs(ctx, staticText, mainColWidth - 60).forEach((line, lineIdx) => ctx.fillText(line, dx + 35, dy + 95 + lineIdx * 26)); 
+                    } else {
+                        let cy = dy + 85; ctx.fillStyle = "#7f8c8d"; ctx.font = "17px Microsoft JhengHei";
+                        const introText = processParagraphs(ctx, staticText, mainColWidth - 60);
+                        introText.slice(0, 2).forEach(line => { ctx.fillText(line, dx + 35, cy); cy += 25; });
+                        
+                        cy += 10; ctx.fillStyle = "#2c3e50"; ctx.font = "bold 19px Microsoft JhengHei"; ctx.fillText("能量檢測/調整項目", dx + 35, cy);
+
+                        ctx.save();
+                        ctx.fillStyle = "#f8f9fa"; 
+                        roundRect(ctx, dx + mainColWidth - 225, cy - 8, 210, 35, 6); ctx.fill();
+                        ctx.strokeStyle = "#eee"; ctx.lineWidth = 1; ctx.stroke();
+                        
+                        ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+                        let detTxt = `檢測 ${centerObj.val}% ➔ `;
+                        ctx.fillStyle = "#e53935"; 
+                        ctx.fillText(detTxt, dx + mainColWidth - 215, cy + 10);
+                        let detW = ctx.measureText(detTxt).width;
+                        
+                        ctx.fillStyle = "#0277bd"; 
+                        ctx.fillText(`調整後 ${centerObj.adj}%`, dx + mainColWidth - 215 + detW, cy + 10);
+                        ctx.restore();
+
+                        cy+=35; 
+                        let dPairs = []; if (centerObj.content) { for(let j=0; j < centerObj.content.length; j++){ if(centerObj.content[j].type === 'diag'){ dPairs.push({d: centerObj.content[j].text, a: centerObj.content[j+1] ? centerObj.content[j+1].text : ""}); j++; } } }
+                        dPairs.forEach(p => {
+                            const dL = processParagraphs(ctx, p.d, mainColWidth-80); const aL = processParagraphs(ctx, p.a, mainColWidth-80);
+                            const bh = (dL.length + aL.length) * 28 + 20; ctx.fillStyle="#fffcf5"; ctx.strokeStyle="#fae1c3"; roundRect(ctx, dx+35, cy, mainColWidth-70, bh, 10); ctx.fill(); ctx.stroke();
+                            ctx.font="bold 16px Microsoft JhengHei"; ctx.fillStyle="#8e242a"; dL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+i*28));
+                            ctx.font="15px Microsoft JhengHei"; ctx.fillStyle="#1a4a6e"; aL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+dL.length*28+i*28));
+                            cy+=bh+10;
+                        });
+                    }
+                };
+
+                if(healthyCenters.length > 0) { ctx.fillStyle="#2e7d32"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("✅ 穩定運作能量中心", rightPanelX, healthyTopY + 30); let hY = [healthyTopY+60, healthyTopY+60, healthyTopY+60]; healthyCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], hY[col], HEALTHY_CARD_H, true); hY[col] += HEALTHY_CARD_H + 35; }); }
+                if(adjustCenters.length > 0) { ctx.fillStyle="#c62828"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("🛠️ 重點調整能量中心", rightPanelX, adjustTopY + 30); let aY = [adjustTopY+80, adjustTopY+80, adjustTopY+80]; adjustCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], aY[col], ADJUST_CARD_H, false); aY[col] += ADJUST_CARD_H + 35; }); }
+
+                const finalSy = Math.max(adjustTopY + adjustTotalH - 30, healthyTopY + healthyTotalH); 
+                ctx.fillStyle="#f9f7f2"; ctx.strokeStyle="#c6a87c"; roundRect(ctx, 100, finalSy, canvasWidth-200, summaryBoxH, 30); ctx.fill(); ctx.stroke();
+                ctx.fillStyle="#1a2f23"; ctx.font="bold 42px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("✍️ 療癒師總結：", 140, finalSy+40); 
+                ctx.fillStyle="#333"; ctx.font="26px Microsoft JhengHei"; sumLines.forEach((line, i) => ctx.fillText(line, 140, finalSy + 110 + i * 52));
+
+                document.getElementById('final-image').src = canvas.toDataURL("image/jpeg", 0.9);
+            } catch (e) { console.error("❌ 繪圖失敗：", e); alert("繪圖出錯！請按 F12 檢查。"); }
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            if (typeof radius === 'number') { radius = {tl: radius, tr: radius, br: radius, bl: radius}; }
+            ctx.beginPath(); ctx.moveTo(x + radius.tl, y); ctx.lineTo(x + width - radius.tr, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr); ctx.lineTo(x + width, y + height - radius.br);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height); ctx.lineTo(x + radius.bl, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl); ctx.lineTo(x, y + radius.tl);
+            ctx.quadraticCurveTo(x, y, x + radius.tl, y); ctx.closePath();
+        }
+
+        function processParagraphs(ctx, text, maxWidth) {
+            if (!text) return [""];
+            const paragraphs = text.split('\n');
+            let allLines = [];
+            paragraphs.forEach(para => {
+                if (para.trim() === "") { allLines.push(""); return; }
+                const words = para.split(''); 
+                let currentLine = words[0];
+                for (let i = 1; i < words.length; i++) {
+                    const width = ctx.measureText(currentLine + words[i]).width;
+                    if (width < maxWidth) { currentLine += words[i]; } 
+                    else { allLines.push(currentLine); currentLine = words[i]; }
+                }
+                allLines.push(currentLine);
+            });
+            return allLines;
+        }
+
+        function drawHeader(ctx, width, height, meta, logoImg) {
+            const mainBarH = height - 100;
+            ctx.fillStyle = "#1a2f23"; ctx.fillRect(0, 0, width, mainBarH);
+            if (logoImg) {
+                const logoH = 90; const logoW = (logoImg.width / logoImg.height) * logoH;
+                ctx.drawImage(logoImg, 50, (mainBarH / 2) - (logoH / 2), logoW, logoH);
             }
-        };
-
-        if(healthyCenters.length > 0) { ctx.fillStyle="#2e7d32"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("✅ 穩定運作能量中心", rightPanelX, healthyTopY + 30); let hY = [healthyTopY+60, healthyTopY+60, healthyTopY+60]; healthyCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], hY[col], HEALTHY_CARD_H, true); hY[col] += HEALTHY_CARD_H + 35; }); }
-        if(adjustCenters.length > 0) { ctx.fillStyle="#c62828"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("🛠️ 重點調整能量中心", rightPanelX, adjustTopY + 30); let aY = [adjustTopY+80, adjustTopY+80, adjustTopY+80]; adjustCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], aY[col], ADJUST_CARD_H, false); aY[col] += ADJUST_CARD_H + 35; }); }
-
-        const finalSy = Math.max(adjustTopY + adjustTotalH - 30, healthyTopY + healthyTotalH); 
-        ctx.fillStyle="#f9f7f2"; ctx.strokeStyle="#c6a87c"; roundRect(ctx, 100, finalSy, canvasWidth-200, summaryBoxH, 30); ctx.fill(); ctx.stroke();
-        ctx.fillStyle="#1a2f23"; ctx.font="bold 42px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("✍️ 療癒師總結：", 140, finalSy+40); 
-        ctx.fillStyle="#333"; ctx.font="26px Microsoft JhengHei"; sumLines.forEach((line, i) => ctx.fillText(line, 140, finalSy + 110 + i * 52));
-
-        document.getElementById('final-image').src = canvas.toDataURL("image/jpeg", 0.9);
-    } catch (e) { console.error("❌ 繪圖失敗：", e); alert("繪圖出錯！請按 F12 檢查。"); }
-}
-
-
-// 🔥 必要輔助函式：圓角矩形
-function roundRect(ctx, x, y, width, height, radius) {
-    if (typeof radius === 'number') { radius = {tl: radius, tr: radius, br: radius, bl: radius}; }
-    ctx.beginPath(); ctx.moveTo(x + radius.tl, y); ctx.lineTo(x + width - radius.tr, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr); ctx.lineTo(x + width, y + height - radius.br);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height); ctx.lineTo(x + radius.bl, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl); ctx.lineTo(x, y + radius.tl);
-    ctx.quadraticCurveTo(x, y, x + radius.tl, y); ctx.closePath();
-}
-
-// 🔥 必要輔助函式：文字換行
-// 🔥 修復版：文字換行處理器 (支援 Enter 換行 + 自動斷行)
-function processParagraphs(ctx, text, maxWidth) {
-    if (!text) return [""];
-    
-    // 1. 先把使用者的手動換行 (Enter) 切開
-    const paragraphs = text.split('\n');
-    let allLines = [];
-
-    paragraphs.forEach(para => {
-        // 如果是空行 (使用者連按兩次 Enter)，就塞一個空字串佔位
-        if (para.trim() === "") {
-            allLines.push(""); 
-            return;
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 72px 'Noto Serif TC', serif"; ctx.textAlign = "center";
+            ctx.fillText(meta.title, width / 2, (mainBarH / 2) + 20); 
+            ctx.fillStyle = "#c6a87c"; ctx.fillRect(0, mainBarH - 4, width, 4);
+            ctx.fillStyle = "#f9f7f2"; ctx.fillRect(0, mainBarH, width, 100);
+            ctx.fillStyle = "#1a2f23"; ctx.font = "bold 26px 'Noto Serif TC', serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+            const colW = (width - 300) / 4;
+            ctx.fillText(`📅 調整日期：${meta.date}`, 150, mainBarH + 50);
+            ctx.fillText(`👤 姓名：${meta.name}`, 150 + colW, mainBarH + 50);
+            ctx.fillText(`📞 手機：${meta.phone}`, 150 + colW * 2, mainBarH + 50);
+            ctx.fillText(`🩺 療癒師：${meta.healer}`, 150 + colW * 3, mainBarH + 50);
         }
 
-        // 2. 針對每一段，檢查是否太長需要自動斷行
-        const words = para.split(''); 
-        let currentLine = words[0];
-
-        for (let i = 1; i < words.length; i++) {
-            const width = ctx.measureText(currentLine + words[i]).width;
-            if (width < maxWidth) {
-                currentLine += words[i];
-            } else {
-                allLines.push(currentLine); // 這一行滿了，推出去
-                currentLine = words[i];     // 新的一行開始
-            }
+        function downloadReportImage() {
+            const name = document.getElementById('info-name').value || 'EnergyReport';
+            const date = document.getElementById('info-date').value || '';
+            const fileName = `服務報告_${name}_${date}.jpg`;
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = document.getElementById('mainCanvas').toDataURL("image/jpeg", 1.0);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-        allLines.push(currentLine); // 把最後剩下的也推出去
-    });
-
-    return allLines;
-}
-// 🔥 必要輔助函式：頁首繪製
-function drawHeader(ctx, width, height, meta, logoImg) {
-    const mainBarH = height - 100;
-    ctx.fillStyle = "#1a2f23"; ctx.fillRect(0, 0, width, mainBarH);
-    if (logoImg) {
-        const logoH = 90; const logoW = (logoImg.width / logoImg.height) * logoH;
-        ctx.drawImage(logoImg, 50, (mainBarH / 2) - (logoH / 2), logoW, logoH);
-    }
-    ctx.fillStyle = "#ffffff"; ctx.font = "bold 72px 'Noto Serif TC', serif"; ctx.textAlign = "center";
-    ctx.fillText(meta.title, width / 2, (mainBarH / 2) + 20); 
-    ctx.fillStyle = "#c6a87c"; ctx.fillRect(0, mainBarH - 4, width, 4);
-    ctx.fillStyle = "#f9f7f2"; ctx.fillRect(0, mainBarH, width, 100);
-    ctx.fillStyle = "#1a2f23"; ctx.font = "bold 26px 'Noto Serif TC', serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    const colW = (width - 300) / 4;
-    ctx.fillText(`📅 調整日期：${meta.date}`, 150, mainBarH + 50);
-    ctx.fillText(`👤 姓名：${meta.name}`, 150 + colW, mainBarH + 50);
-    ctx.fillText(`📞 手機：${meta.phone}`, 150 + colW * 2, mainBarH + 50);
-    ctx.fillText(`🩺 療癒師：${meta.healer}`, 150 + colW * 3, mainBarH + 50);
-}
-
-function drawHumanGraphInternal(ctx, reportData) {
-    CHANNELS.forEach(pair => {
-        const c1 = CENTERS.find(c => c.id === pair[0]);
-        const c2 = CENTERS.find(c => c.id === pair[1]);
-        if(c1 && c2) { ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); }
-    });
-    reportData.forEach(item => {
-        const x = item.cx; const y = item.cy; const w = item.w; const h = item.h;
-        let bodyColor = (item.status === 'defined') ? HD_COLORS[item.id] : "#ffffff";
-        let displayVal = (item.finalAdj === "無須調整" && item.val === "--") ? "100" : item.val;
-        let badgeColor = ENERGY_COLORS.green;
-        if (displayVal !== "--") { 
-            let v = parseInt(displayVal);
-            if (v <= 40) badgeColor = ENERGY_COLORS.red; else if (v <= 70) badgeColor = ENERGY_COLORS.yellow; 
-        }
-        ctx.beginPath();
-        if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
-        else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
-        else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
-        else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
-        else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
-        else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
-        else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
-        ctx.fillStyle = bodyColor; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = "#444"; ctx.stroke();
-        const textY = y + (item.textDy || 0); ctx.fillStyle = "#2c3e50"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.textAlign = "center";
-        ctx.strokeText(item.label, x - 12, textY); ctx.fillText(item.label, x - 12, textY);
-        const bX = (x - 12) + (ctx.measureText(item.label).width / 2) + 28;
-        ctx.beginPath(); ctx.arc(bX, textY - 2, 20, 0, Math.PI * 2); ctx.fillStyle = badgeColor; ctx.fill();
-        ctx.fillStyle = (badgeColor === ENERGY_COLORS.red) ? "#fff" : "#000"; ctx.font = "bold 16px Arial";
-        ctx.fillText(displayVal === "--" ? "?" : displayVal, bX, textY - 2);
-    });
-}
-// 🔥 Header：LOGO 靠左縮小 + 動態療癒師名稱
-// 🔥 客人點擊下載按鈕的功能
-    function downloadReportImage() {
-        // 1. 抓取客戶名字當檔名 (如果沒抓到就用 Default)
-        const name = document.getElementById('info-name').value || 'EnergyReport';
-        const date = document.getElementById('info-date').value || '';
-        const fileName = `服務報告_${name}_${date}.jpg`;
-
-        // 2. 建立虛擬連結並觸發下載
-        const link = document.createElement('a');
-        link.download = fileName;
-        // 強制設定高品質 JPEG
-        link.href = document.getElementById('mainCanvas').toDataURL("image/jpeg", 1.0);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
     </script>
 </body>
 </html>

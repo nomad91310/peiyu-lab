@@ -16,7 +16,7 @@
 
 <style>
     /* ======================================================
-       1. 全站基礎與後台佈局 (Backend Layout) - 絕對不動區
+       1. 全站變數與基礎佈局 (Variables & Base Layout)
        ====================================================== */
     :root { 
         --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; 
@@ -25,25 +25,55 @@
         --shopee: #ff5722; 
     }
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+    body { 
+        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+        background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; 
+    }
     
-    /* 左側導航 */
-    .sidebar { width: 240px; background: var(--forest); height: 100%; color: white; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: width 0.3s ease; overflow-x: hidden; white-space: nowrap; }
+    /* 側邊導航 (Sidebar) */
+    .sidebar { 
+        width: 240px; background: var(--forest); height: 100%; color: white; 
+        flex-shrink: 0; display: flex; flex-direction: column; 
+        overflow-y: auto; transition: width 0.3s ease; overflow-x: hidden; white-space: nowrap; 
+    }
     body.hide-nav .sidebar { width: 0; }
-    .sidebar h2 { text-align: center; color: var(--accent); padding: 25px 0; border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; }
-    .sidebar button { width: 100%; padding: 18px; background: none; border: none; color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; font-size: 14px; transition: 0.2s; }
-    .sidebar button:hover { background: #2a3f33; color: white; }
-    .sidebar button.active { background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); }
     
-    /* 主內容區 */
+    .sidebar h2 { 
+        text-align: center; color: var(--accent); padding: 25px 0; 
+        border-bottom: 1px solid #2a3f33; margin: 0; font-size: 1.2rem; font-family: 'Noto Serif TC', serif; 
+    }
+    .sidebar button { 
+        width: 100%; padding: 18px; background: none; border: none; 
+        color: #ccc; text-align: left; cursor: pointer; border-bottom: 1px solid #2a3f33; 
+        font-size: 14px; transition: 0.2s; 
+    }
+    .sidebar button:hover { background: #2a3f33; color: white; }
+    .sidebar button.active { 
+        background: #2a3f33; color: var(--accent); font-weight: bold; border-left: 5px solid var(--accent); 
+    }
+    
+    /* 主內容區 (Main Content) */
     .main { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; position: relative; }
     .tab-content { display: none; animation: fadeIn 0.3s ease; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* 卡片與通用元件 */
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
-    .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; text-decoration: none; white-space:nowrap; }
+
+    /* ======================================================
+       2. 通用 UI 元件 (Cards, Buttons, Tables, Tags)
+       ====================================================== */
+    /* 卡片 */
+    .card { 
+        background: white; padding: 25px; border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; 
+        border-top: 4px solid var(--accent); overflow-x: auto; 
+    }
+
+    /* 按鈕 */
+    .btn { 
+        padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; 
+        font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; 
+        margin-right: 5px; text-decoration: none; white-space:nowrap; 
+    }
     .btn:hover { opacity: 0.8; transform: translateY(-1px); }
     .btn-forest { background: var(--forest); color: white; }
     .btn-info { background: var(--info); color: white; }
@@ -52,9 +82,8 @@
     .btn-warning { background: var(--warning); color: white; }
     .btn-purple { background: var(--purple); color: white; }
     .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
-    .btn-sort { background: #7f8c8d; padding: 4px 8px; font-size: 12px; color:white; line-height: 1; }
-
-    /* 表格優化 */
+    
+    /* 表格 */
     table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: auto !important; }
     th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap !important; }
     td { padding: 10px 8px !important; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; word-break: keep-all !important; white-space: nowrap !important; }
@@ -69,40 +98,104 @@
     .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; border-radius: 4px; font-size:12px; }
     .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 4px; font-size:12px; }
 
-    /* 表單元件 */
+    /* 表單與輸入框 */
     input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
     input:disabled { background: #eee; color: #999; cursor: not-allowed; }
     .finance-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
     .finance-nav button { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; color: #666; transition: 0.2s; }
     .finance-nav button.active { background: var(--forest); color: white; }
 
+    /* 服務細項管理列表行 */
+    .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
+    .admin-row:hover { background: #f0f7ff; }
+
+    /* SQL 提示框 */
+    .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
+    .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
+    .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
+
+    /* 鎖屏介面 */
+    #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
+
     /* ======================================================
-       2. 知識庫與圖庫 (KB & Gallery) - 絕對不動區
+       3. 月曆與排程系統 (Calendar & Schedule)
+       ====================================================== */
+    /* 快速排班格子 */
+    .batch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; align-content: start; }
+    .batch-slot { position: relative; height: 35px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
+    .batch-slot input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; left: 0; top: 0; }
+    .batch-slot label { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; background: #fff; font-size: 13px; color: #333; font-weight: bold; transition: 0.2s; }
+    .batch-slot input:checked + label { background: var(--forest); color: white; border-color: var(--forest); }
+
+    /* 月曆本體 */
+    #calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #fff; margin-top: 15px; padding-bottom: 10px; }
+    .cal-week-header { text-align: center; font-weight: bold; color: var(--forest); background-color: #e8f5e9; padding: 8px 0; border-radius: 4px; font-size: 14px; }
+    .cal-cell { 
+        min-height: 65px; padding: 4px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; transition: 0.2s; 
+        display: flex; flex-direction: column; align-items: center; background: #fff; 
+    }
+    .cal-cell:hover { background: #fdfaf1; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.05); }
+    .cal-cell.active { border: 2px solid var(--forest); background: #f4f9f4; }
+    .cal-past { background: #f8f8f8; color: #ddd; pointer-events: none; cursor: default; border-color: #eee; }
+    .cal-past .cal-stat { opacity: 0.3; filter: grayscale(100%); }
+    .cal-date { font-size: 14px; font-weight: bold; color: var(--dark); margin-bottom: 4px; width: 100%; text-align: center; border-bottom: 1px solid #f5f5f5; padding-bottom: 2px; }
+    
+    /* 月曆內標籤 */
+    .cal-stat { font-size: 11px; padding: 2px 6px; border-radius: 10px; color: white; margin-bottom: 2px; width: 90%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: normal; }
+    .st-free { background-color: #3498db; }
+    .st-book { background-color: #e74c3c; }
+    .st-off { background-color: #95a5a6; font-weight: bold; color:#fff;}
+    .dot-off { position: absolute; top: 5px; right: 5px; font-size: 10px; background: #e74c3c; color: white; padding: 2px 5px; border-radius: 4px; }
+
+    /* 單日詳情 */
+    .day-detail-list { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; justify-content: flex-start; }
+    .detail-row { flex: 0 0 45px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: #fff; border: 1px solid #eee; border-radius: 6px; }
+    .detail-row:hover { background: #f0f7ff; border-color: var(--info); }
+    .detail-row.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+    .detail-chk { width: 18px; height: 18px; cursor: pointer; }
+    .day-off-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #999; }
+    .day-off-icon { font-size: 50px; margin-bottom: 10px; color: #e74c3c; }
+    
+    /* 7日概覽 */
+    .u-slot { display: inline-block; margin: 3px; padding: 4px 8px; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
+    .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+
+    /* ======================================================
+       4. 知識庫與圖庫 (Knowledge Base & Gallery)
        ====================================================== */
     .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 100px); transition: all 0.3s ease; }
     .kb-layout.collapsed { grid-template-columns: 0 1fr; gap: 0; }
     .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; white-space: nowrap; }
     .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
     .kb-tree-content { padding: 10px; flex: 1; }
+    
+    /* KB 樹狀結構 */
     details.big-cat { margin-bottom: 5px; }
     details.big-cat > summary { padding: 10px; cursor: pointer; font-weight: bold; list-style: none; border-radius: 4px; color: #ecf0f1; }
     details.big-cat > summary:hover { background: rgba(255,255,255,0.1); }
     details.mid-cat { margin-left: 12px; border-left: 1px solid #555; }
     details.mid-cat > summary { padding: 8px; cursor: pointer; color: #ccc; font-size: 0.95rem; }
     details.mid-cat > summary:hover { color: #fff; }
-    .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: block; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; display: flex; align-items: center; }
+    .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: flex; align-items: center; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; }
     .article-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
     .article-item.active { color: #fff; background: #c6a87c; font-weight: bold; }
     .article-item.draft { color: #e74c3c; } 
     .article-item.draft::before { content: '🔴 '; font-size: 10px; }
+    .article-title-span { flex: 1; }
+
+    /* 排序按鈕 */
     .sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
     .btn-sort-arrow { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; border-radius: 3px; line-height: 1.2; }
     .btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
     .article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
     .article-item:hover .sort-actions { opacity: 1; }
-    .article-title-span { flex: 1; }
 
-    /* 圖庫與 Modal */
+    /* 圖庫與彈窗 (Modals) */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
+    
     .gallery-box { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
     .gallery-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
     .gallery-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 20px; background: #fff; }
@@ -110,407 +203,59 @@
     .gallery-item:hover { border-color: #3498db; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
     .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-    .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
-    
-    /* 鎖屏與其他 */
-    #admin-lock { position: fixed; top:0; left:0; width:100%; height:100vh; background: var(--forest); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    #admin-lock input { padding: 10px; border-radius: 5px; border: none; width: 200px; margin-bottom: 10px; text-align: center; }
-   /* =========================================
-       🔥 V151 排程樣式最終整合 (已移除重複代碼)
-       ========================================= */
-    
-    /* 1. 左側：快速排班格子 (固定 3 欄，內容置頂不拉伸) */
-    .batch-grid { 
-        display: grid; 
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 5px; 
-        margin-top: 10px; 
-        align-content: start !important; /* 關鍵：防止被撐開 */
-    }
-    
-    /* 格子容器 (鎖定高度 35px) */
-    .batch-slot { 
-        position: relative; 
-        height: 35px !important; 
-        border: 1px solid #ccc; 
-        border-radius: 4px; 
-        overflow: hidden; 
-    }
-    
-    /* 隱藏 Checkbox (鋪滿整個格子) */
-    .batch-slot input { 
-        position: absolute; 
-        width: 100%; 
-        height: 100%; 
-        opacity: 0; 
-        cursor: pointer; 
-        z-index: 2; 
-        left: 0; 
-        top: 0; 
-    }
-    
-    /* 格子文字顯示 (置中美化) */
-    .batch-slot label { 
-        display: flex; 
-        justify-content: center; 
-        align-items: center;
-        width: 100%; 
-        height: 100%; 
-        background: #fff; 
-        font-size: 13px; 
-        color: #333; 
-        font-weight: bold;
-        transition: 0.2s;
-    }
-    
-    /* 選中狀態 */
-    .batch-slot input:checked + label { 
-        background: var(--forest); 
-        color: white; 
-        border-color: var(--forest); 
-    }
-    
-    /* 月曆容器：往下拉 15px */
-    #calendar-body { 
-        display: grid; 
-        grid-template-columns: repeat(7, 1fr); 
-        gap: 6px; 
-        background: #fff; 
-        margin-top: 15px !important; /* 👈 這裡讓它往下拉 */
-        padding-bottom: 10px;
-    }
-    .cal-week-header {
-        text-align: center;
-        font-weight: bold;
-        color: var(--forest);
-        background-color: #e8f5e9; /* 淺綠底 */
-        padding: 8px 0;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-    /* 月曆格子：版面配置優化 */
-    .cal-cell { 
-        min-height: 65px !important; /*稍微加高一點點，讓標籤放得下 */
-        padding: 4px !important;
-        border: 1px solid #eee;
-        border-radius: 6px; /* 圓角看起來比較舒服 */
-        cursor: pointer;
-        transition: 0.2s;
-        display: flex;
-        flex-direction: column; /* 讓內容垂直排列 */
-        align-items: center;    /* 內容置中 */
-        background: #fff;
-    }
-    
-    .cal-cell:hover { background: #fdfaf1; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.05); }
-    .cal-cell.active { border: 2px solid var(--forest); background: #f4f9f4; }
-
-    .cal-past {
-        background: #f8f8f8 !important; /* 淺灰背景 */
-        color: #ddd !important;         /* 淺灰文字 */
-        pointer-events: none;           /* 👈 禁止點擊 (若您希望還能查閱歷史，請刪除這行) */
-        cursor: default !important;
-        border-color: #eee !important;
-    }
-    
-    /* 讓裡面的膠囊標籤也變淡、變黑白 */
-    .cal-past .cal-stat {
-        opacity: 0.3; 
-        filter: grayscale(100%);
-    }
-    /* 日期數字 */
-    .cal-date { 
-        font-size: 14px; 
-        font-weight: bold; 
-        color: var(--dark); 
-        margin-bottom: 4px;
-        width: 100%;
-        text-align: center;
-        border-bottom: 1px solid #f5f5f5; /* 加一條淡淡的分隔線 */
-        padding-bottom: 2px;
-    }
-
-    /* 狀態標籤 (膠囊狀) - 取代原本的紅藍點 */
-    .cal-stat {
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 10px;
-        color: white;
-        margin-bottom: 2px;
-        width: 90%; /* 讓標籤寬度一致 */
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: normal;
-    }
-
-    /* 三種狀態顏色 */
-    .st-free { background-color: #3498db; }  /* 藍色：空檔 */
-    .st-book { background-color: #e74c3c; }  /* 紅色：已預約 */
-    .st-off  { background-color: #95a5a6; font-weight: bold; color:#fff;}  /* 灰色：休假中 */
-
-    /* 3. 右側：單日詳情列表 (防止跑版) */
-    .day-detail-list {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        overflow-y: auto;
-        justify-content: flex-start !important;
-    }
-
-    /* 每一列時段 (鎖定高度 45px，左右撐開) */
-    .detail-row {
-        flex: 0 0 45px !important; 
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 15px;
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 6px;
-    }
-    .detail-row:hover { background: #f0f7ff; border-color: var(--info); }
-    
-    /* 狀態樣式 */
-    .detail-row.booked {
-        background: #fff5f5;
-        border-color: #e74c3c;
-        color: #c0392b;
-        text-decoration: line-through;
-        opacity: 0.7;
-    }
-    /* V152 休假模式樣式 */
-    .day-off-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 200px;
-        color: #999;
-    }
-    .day-off-icon {
-        font-size: 50px;
-        margin-bottom: 10px;
-        color: #e74c3c; /* 紅色 */
-    }
-    /* 月曆上的休假標記 */
-    .dot-off {
-        position: absolute;
-        top: 5px; right: 5px;
-        font-size: 10px;
-        background: #e74c3c;
-        color: white;
-        padding: 2px 5px;
-        border-radius: 4px;
-    }
-    .detail-chk { width: 18px; height: 18px; cursor: pointer; }
-    .day-detail-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
-    .compact-slot { padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px; background: white; position: relative; }
-    .compact-slot.booked { background: #fff5f5; color: #c0392b; border-color: #e74c3c; }
-    .compact-slot.free { background: #f0f7ff; color: #2980b9; border-color: #3498db; }
-    .compact-del { position: absolute; top:-5px; right:-5px; background:red; color:white; width:15px; height:15px; border-radius:50%; font-size:10px; line-height:15px; cursor:pointer; display:none; }
-    .compact-slot:hover .compact-del { display: block; }
-    .u-slot { display: inline-block !important; margin: 3px !important; padding: 4px 8px !important; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
-    .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
-    .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
-    .admin-row:hover { background: #f0f7ff; }
-    
-    /* SQL 複製區樣式 */
-    .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
-    .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
-    .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
-
-    .dashboard-layout { grid-template-columns: 3fr 1fr !important; }
 
     /* ======================================================
-       PART B: 編輯器樣式同步 (Editor Sync V135)
-       ⚠️ 關鍵修正：圖片靠左、列表緊湊、點點對齊
+       5. 編輯器樣式 (Quill Editor)
        ====================================================== */
-    
-    /* 編輯器容器 - 讓它撐開 */
     #editor-container { flex: 1; min-height: 200px; display: flex; flex-direction: column; background: white; margin-bottom: 0; border: 1px solid #ccc; overflow: hidden; position: relative; }
     .ql-container { flex: 1; overflow-y: auto; font-size: 16px; font-family: "Microsoft JhengHei", sans-serif; }
-
-    /* 基本文字設定 */
-    .ql-editor { 
-        padding: 20px 30px; 
-        color: #333; 
-        font-size: 16px; 
-        line-height: 1.8; 
-        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
-        overflow-wrap: break-word; 
-    }
-
-    /* 字體選單修正 */
+    .ql-editor { padding: 20px 30px; color: #333; font-size: 16px; line-height: 1.8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-wrap: break-word; }
+    
+    /* 字體與列表修正 */
     .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
     .ql-font-monospace { font-family: 'Courier New', monospace !important; }
-    .ql-picker-item[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
+    .ql-picker-item[data-value="serif"]::before, .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
     .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
-    .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
 
-    /* 圖片 RWD (靠左，不置中) */
-    .ql-editor img { 
-        max-width: 100%; 
-        height: auto; 
-        display: block; 
-        margin: 20px 0; /* 👈 關鍵：靠左對齊 */
-        border-radius: 4px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    }    
-    /* 4. 列表樣式 (V136：透過行高控制，不需要負邊距) */
-    
-    /* 列表容器 */
-    .ql-editor ul, 
-    #editor-container .ql-editor ul,
-    .ql-editor ol,
-    #editor-container .ql-editor ol { 
-        padding-left: 5px !important; 
-        margin-bottom: 5px !important; 
-        margin-top: 0 !important;
-    }
+    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
+    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; line-height: 1.3 !important; }
+    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
+    .ql-editor li::before { margin-right: 0.3em !important; width: 1.2em !important; text-align: center !important; display: inline-block !important; }
 
-    /* 列表項目 */
-    .ql-editor li,
-    #editor-container .ql-editor li { 
-        padding-left: 1.2em !important; 
-        margin-bottom: 0px !important;  /* 👈 設為 0 就好，不用 -9 */
-        line-height: 1.3 !important;    /* 👈 覺得太寬改這裡！改成 1.2 會更擠 */
-        padding-bottom: 0px !important;
-    }
-
-    /* 🔥 這段留著！它把原本的寬度殺掉了，所以你才不用設 -9 */
-    .ql-editor li > p,
-    #editor-container .ql-editor li > p { 
-        margin: 0 !important; 
-        padding: 0 !important;
-        display: inline-block !important;
-        line-height: 1.3 !important; /* 跟上面 li 保持一致 */
-    }
-
-    /* 點點的樣式修正 */
-    .ql-editor li::before,
-    #editor-container .ql-editor li::before {
-        margin-right: 0.3em !important;
-        width: 1.2em !important;
-        text-align: center !important;
-        display: inline-block !important;
-    }
-
-    /* 縮排 */
-    .ql-editor .ql-indent-1 { padding-left: 2em; }
-    .ql-editor .ql-indent-2 { padding-left: 4em; }
-    .ql-editor .ql-indent-3 { padding-left: 6em; }
-
-    /* 字體大小與間距 (無底線，統一上距) */
-    /* Small */
+    /* 字級與標題 */
     .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
-    
-    /* Large (副標題) */
-    .ql-editor .ql-size-large {
-        font-size: 1.5rem;
-        font-weight: 900;
-        margin-top: 30px;    
-        margin-bottom: 10px; 
-        line-height: 1.4;
-        display: block;      
-        color: var(--forest); 
+    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 30px; margin-bottom: 10px; line-height: 1.4; display: block; color: var(--forest); }
+    .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
+    .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
+
+    /* 特殊標題框樣式 */
+    .ql-editor h2.title-boxed-h2 { 
+        border-left: 8px solid var(--accent); background: var(--forest); color: #fff; 
+        padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; 
+        font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; 
+        display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); 
     }
-
-    /* Huge (大標題) */
-    .ql-editor .ql-size-huge {
-        font-size: 2.2rem;
-        font-weight: 900;
-        margin-top: 40px;
-        margin-bottom: 25px;
-        line-height: 1.2;
-        display: block;
-        color: var(--forest);
-        text-align: center; 
+    .ql-editor h3.title-boxed-h3 { 
+        border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); 
+        display: inline-flex !important; align-items: center !important; justify-content: center; 
+        padding: 8px 35px !important; margin: 25px 0 15px 0; border-radius: 50px; 
+        font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; 
     }
+    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; }
 
-    /* 引用區塊 */
-    .ql-editor blockquote {
-        border-left: 5px solid var(--shopee, #d35400);
-        background-color: #fffaf0;
-        padding: 15px 20px;
-        margin: 20px 0;
-        color: #8a5a00;
-        font-style: italic;
-        font-weight: bold;
-    }
-
-    /* =========================================
-       4. 特殊樣式：標題外框 & HTML 模式
-       ========================================= */
-
-    /* H2 大章節標題 (深綠底 + 金色陰影) */
-    .ql-editor h2.title-boxed-h2 {
-        border-left: 8px solid var(--accent);
-        background: var(--forest);
-        color: #fff;
-        padding: 10px 20px;
-        margin: 30px 0 15px 0;
-        border-radius: 4px;
-        font-family: 'Noto Serif TC', serif;
-        font-size: 1.4rem;
-        line-height: 1.4;
-        display: table; 
-        box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4);
-    }
-
-    /* 2. 標題框 (H3) - 使用 Flexbox 強制置中 */
-    .ql-editor h3.title-boxed-h3 {
-        border: 2px solid var(--accent);
-        background: #fffcf5;
-        color: var(--forest);
-        
-        display: inline-flex !important; /* 彈性盒子 */
-        align-items: center !important;  /* 垂直置中 */
-        justify-content: center;         /* 水平置中 */
-
-        padding: 8px 35px !important;    /* 膠囊的內距 */
-        margin: 25px 0 15px 0;
-        border-radius: 50px;             /* 膠囊圓角 */
-        
-        font-family: 'Noto Serif TC', serif;
-        width: auto;
-        max-width: 100%;
-        min-height: 50px; /* 確保框框有基本高度 */
-    }
-
-    /* 🔥🔥🔥 關鍵修正：當 Large 跑進 H3 裡面時，殺掉它的邊距 🔥🔥🔥 */
-    .ql-editor h3.title-boxed-h3 .ql-size-large {
-        margin: 0 !important;        /* 👈 兇手就是它！殺掉上距，文字就會浮回中間 */
-        padding: 0 !important;
-        line-height: 1.2 !important; /* 稍微緊湊一點 */
-        display: inline !important;  /* 讓它乖乖當文字，不要當區塊 */
-        border: none !important;     /* 確保沒有底線 */
-    }
-
-    /* 格式刷狀態 */
+    /* 格式刷與 HTML 編輯 */
     .painter-active { cursor: copy !important; user-select: none; }
     .ql-format-painter.active { color: var(--forest) !important; font-weight: bold; }
+    .html-editor { width: 100%; height: 100%; display: none; background: #1e1e1e; color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; padding: 20px; border: none; line-height: 1.5; resize: none; outline: none; position: absolute; top: 0; left: 0; z-index: 10; }
 
-    /* HTML 原始碼編輯區 */
-    .html-editor {
-        width: 100%;
-        height: 100%;
-        display: none;
-        background: #1e1e1e;
-        color: #d4d4d4;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 14px;
-        padding: 20px;
-        border: none;
-        line-height: 1.5;
-        resize: none;
-        outline: none;
-        position: absolute; 
-        top: 0; left: 0;
-        z-index: 10;
+    /* 強制換行工具：對付長網址、長文字、沒空格的亂碼 */
+    .force-wrap {
+        white-space: pre-wrap !important;    /* 保留換行並自動換行 */
+        overflow-wrap: break-word !important; /* 現代換行規則 */
+        word-break: break-all !important;    /* 暴力換行，不留活口 */
+        max-width: 100% !important;          /* 限制寬度不准撐開 */
+        display: block !important;           /* 確保佔滿容器 */
     }
 </style>
 </head>
@@ -589,7 +334,7 @@
         </div>
     </div>
 
-   <div id="tab-schedule" class="tab-content">
+    <div id="tab-schedule" class="tab-content">
         <div style="display: flex; gap: 10px; height: 85vh;">
             
             <div class="card" style="width:240px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto;">
@@ -678,7 +423,6 @@
                     <h4 style="margin-top:0; color:#e65100; border-bottom:1px dashed #e65100; padding-bottom:10px; margin-bottom:20px;">🎫 優惠券編輯器</h4>
                     
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
-                        
                         <div><label>優惠券名稱</label><input type="text" id="cp-name" placeholder="例如：新春調頻 9 折"></div>
                         <div><label>優惠代碼 (Code)</label><input type="text" id="cp-code" placeholder="例如：2026NEW" style="text-transform:uppercase;"></div>
                         
@@ -698,7 +442,8 @@
 
                         <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
                             <label style="margin-bottom: 8px;">適用對象</label>
-                            <div style="display:flex; gap:20px; align-items:center; height: 42px;"> <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
+                            <div style="display:flex; gap:20px; align-items:center; height: 42px;"> 
+                                <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
                                     <input type="checkbox" id="cp-mem" checked style="width:18px; height:18px;"> 需會員
                                 </label>
                                 <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
@@ -767,6 +512,7 @@
             </div>
         </div>
     </div>
+    
     <div id="tab-announce" class="tab-content">
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -784,11 +530,11 @@
                         <th width="25%">操作</th>
                     </tr>
                 </thead>
-                <tbody id="announce-list">
-                    </tbody>
+                <tbody id="announce-list"></tbody>
             </table>
         </div>
     </div>
+
     <div id="tab-menu" class="tab-content">
         <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;">
             <div class="card" id="card-cat">
@@ -824,15 +570,13 @@
                 </div>
                 <table id="cat-list" style="margin-top:15px;"></table>
             </div>
+            
             <div class="card" id="card-svc">
                 <h3>⚙️ 細項管理</h3>
-                
                 <div class="sql-hint-box">
-                    <strong>💡 SQL 補丁 (若無法新增請在 Supabase 執行)：</strong>
+                    <strong>💡 SQL 補丁：</strong>
                     <button class="btn btn-outline btn-copy-sql" onclick="copySqlCode()">📋 複製代碼</button>
-                    <div class="sql-code-area" id="sql-code-block">
-                        ALTER TABLE services ADD COLUMN IF NOT EXISTS report_template TEXT;
-                    </div>
+                    <div class="sql-code-area" id="sql-code-block">ALTER TABLE services ADD COLUMN IF NOT EXISTS report_template TEXT;</div>
                 </div>
 
                 <input type="hidden" id="svc-id-edit">
@@ -873,6 +617,7 @@
         <div id="m-content"></div>
     </div>
 </div>
+
 <div id="announce-modal" class="modal">
     <div class="modal-body" style="max-width: 800px;">
         <span onclick="closeAnnounceModal()" class="close-btn">×</span>
@@ -906,18 +651,13 @@
         </div>
     </div>
 </div>
-<script>
-    // ==========================================
-    // 🚀 培癒中控室 V60 | 穩定回歸版
-    // ==========================================
 
-    // 1. 初始化 Supabase
+<script>
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
     const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
     const cleanPhone = (p) => p ? p.replace(/\D/g, '') : '';
     
-    // 2. 定義全域變數 (最優先)
     let cache = { bks:[], pros:[], cats:[], svcs:[], slots:[], otas:[], coupons:[], articles:[] };
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth() + 1;
@@ -933,8 +673,6 @@
         'completed': '<span class="tag" style="background:#333">已結案</span>'
     };
 
-    // 3. 初始化 Quill 編輯器 (移除不穩定的表格外掛，保住資料)
-    // (A) 註冊圖片外掛
     const BaseImage = Quill.import('formats/image');
     class CustomImage extends BaseImage {
         static formats(domNode) { return ['alt', 'height', 'width', 'style'].reduce((f, a) => { if (domNode.hasAttribute(a)) f[a] = domNode.getAttribute(a); return f; }, {}); }
@@ -942,21 +680,17 @@
     }
     Quill.register({ 'formats/image': CustomImage }, true);
     
-    // (B) 註冊字體
     var Font = Quill.import('formats/font');
     Font.whitelist = ['serif', 'sans-serif', 'monospace'];
     Quill.register(Font, true);
 
-   // (C) 註冊表格外掛 (防呆)
     if (window.QuillBetterTable) {
         Quill.register({ 'modules/better-table': window.QuillBetterTable }, true);
     }
 
-    // 🔥 全域變數：儲存格式刷狀態
-    var painterFormat = null; // 存格式
-    var isPainterOn = false;  // 存開關狀態
+    var painterFormat = null;
+    var isPainterOn = false;
 
-    // (D) 啟動編輯器 (V71：字型+大小+格式刷+排版工具 全開版)
     var quill = new Quill('#editor', {
         theme: 'snow',
         modules: { 
@@ -969,118 +703,45 @@
                 bindings: Object.assign({}, 
                     (window.QuillBetterTable ? window.QuillBetterTable.keyboardBindings : {}), 
                     {
-                        'linebreak': {
-                            key: 13,
-                            shiftKey: true,
-                            handler: function() {
-                                const range = this.quill.getSelection();
-                                if (range) {
-                                    this.quill.insertText(range.index, '\n');
-                                    this.quill.setSelection(range.index + 1);
-                                }
-                                return false; 
-                            }
-                        },
-                        'exitPainter': {
-                            key: 27, // ESC 退出格式刷
-                            handler: function() {
-                                turnOffPainter();
-                                return true;
-                            }
-                        }
+                        'linebreak': { key: 13, shiftKey: true, handler: function() { const range = this.quill.getSelection(); if (range) { this.quill.insertText(range.index, '\n'); this.quill.setSelection(range.index + 1); } return false; } },
+                        'exitPainter': { key: 27, handler: function() { turnOffPainter(); return true; } }
                     }
                 )
             },
             toolbar: {
                 container: [
-                    // 👇👇👇 這裡！把遺失的字型與大小加回來了 👇👇👇
                     [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }], 
-                    
                     [{ 'header': [1, 2, 3, false] }], 
                     ['bold', 'italic', 'underline', 'strike'], 
                     [{ 'color': [] }, { 'background': [] }], 
-                    
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }], 
                     [{ 'indent': '-1'}, { 'indent': '+1' }], 
                     [{ 'align': [] }], 
                     ['blockquote'], 
-
-                    ['format-painter'], // 格式刷
-
+                    ['format-painter'], 
                     ['link', 'image'], 
                     window.QuillBetterTable ? ['table-btn'] : [], 
                     ['clean']
                 ],
                 handlers: {
-                    'table-btn': function() {
-                        if(window.QuillBetterTable) this.quill.getModule('better-table').insertTable(3, 3);
-                    },
-                    'format-painter': function() {
-                        if (isPainterOn) {
-                            turnOffPainter();
-                        } else {
-                            var range = this.quill.getSelection();
-                            if (range) {
-                                painterFormat = this.quill.getFormat(range);
-                                isPainterOn = true;
-                                document.querySelector('.ql-editor').classList.add('painter-active');
-                                document.querySelector('.ql-format-painter').classList.add('active');
-                            }
-                        }
-                    }
+                    'table-btn': function() { if(window.QuillBetterTable) this.quill.getModule('better-table').insertTable(3, 3); },
+                    'format-painter': function() { if (isPainterOn) { turnOffPainter(); } else { var range = this.quill.getSelection(); if (range) { painterFormat = this.quill.getFormat(range); isPainterOn = true; document.querySelector('.ql-editor').classList.add('painter-active'); document.querySelector('.ql-format-painter').classList.add('active'); } } }
                 }
             }
         },
         placeholder: '在此輸入內容...'
     });
 
-    // 關閉格式刷的函式
-    function turnOffPainter() {
-        isPainterOn = false;
-        painterFormat = null;
-        document.querySelector('.ql-editor').classList.remove('painter-active');
-        document.querySelector('.ql-format-painter').classList.remove('active');
-    }
+    function turnOffPainter() { isPainterOn = false; painterFormat = null; document.querySelector('.ql-editor').classList.remove('painter-active'); document.querySelector('.ql-format-painter').classList.remove('active'); }
+    quill.on('selection-change', function(range, oldRange, source) { if (source === 'user' && range && range.length > 0 && isPainterOn && painterFormat) { for (let format in painterFormat) { quill.formatText(range.index, range.length, format, painterFormat[format]); } } });
+    setTimeout(() => { if(window.QuillBetterTable) { const btn = document.querySelector('.ql-table-btn'); if(btn) btn.innerHTML = '<i class="fa-solid fa-table"></i>'; } const painterBtn = document.querySelector('.ql-format-painter'); if(painterBtn) { painterBtn.innerHTML = '<i class="fa-solid fa-paint-roller"></i>'; painterBtn.title = "格式刷 (點一下鎖定，再點一下解除)"; } }, 100);
 
-    // 🔥 監聽：滑鼠選字時，如果刷子是開的，就瘋狂套用格式
-    quill.on('selection-change', function(range, oldRange, source) {
-        if (source === 'user' && range && range.length > 0 && isPainterOn && painterFormat) {
-            // 套用格式
-            for (let format in painterFormat) {
-                quill.formatText(range.index, range.length, format, painterFormat[format]);
-            }
-            // ⚠️ 這裡拿掉了「關閉」的程式碼，所以它會一直開著，直到您手動關掉
-        }
-    });
-
-    // 補上圖示
-    setTimeout(() => {
-        if(window.QuillBetterTable) {
-            const btn = document.querySelector('.ql-table-btn');
-            if(btn) btn.innerHTML = '<i class="fa-solid fa-table"></i>';
-        }
-        const painterBtn = document.querySelector('.ql-format-painter');
-        if(painterBtn) {
-            painterBtn.innerHTML = '<i class="fa-solid fa-paint-roller"></i>';
-            painterBtn.title = "格式刷 (點一下鎖定，再點一下解除)";
-        }
-    }, 100);
-
-
-    // 🌟 4. 核心讀取函式 (select * 保證讀取 body)
     async function fetchAll() {
         try {
             console.log("🚀 正在讀取資料...");
-
-            // (A) 讀取文章 (優先 sort_order)
             let ar = await myDB.from('kb_articles').select('*').order('sort_order');
-            
-            if (ar.error) {
-                console.warn("⚠️ 排序讀取失敗，切換舊模式...", ar.error.message);
-                ar = await myDB.from('kb_articles').select('*').order('created_at', {ascending:false});
-            }
+            if (ar.error) ar = await myDB.from('kb_articles').select('*').order('created_at', {ascending:false});
 
-            // (B) 讀取其他資料
             const [b, p, c, s, sl, o, cp, cfg] = await Promise.all([
                 myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
                 myDB.from('profiles').select('*').order('created_at', {ascending:false}),
@@ -1092,77 +753,38 @@
                 myDB.from('site_content').select('content').eq('title', 'kb_category_order').single()
             ]);
 
-            const bookingsWithProfile = (b.data || []).map(bk => {
-                const profile = (p.data || []).find(pr => pr.id === bk.user_id);
-                return { ...bk, profiles: profile || null };
-            });
-
-            // (C) 寫入快取
             cache = { 
-                bks: bookingsWithProfile, pros: p.data||[], cats: c.data||[], 
-                svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
-                coupons: cp.data||[], 
-                articles: ar.data||[] 
+                bks: (b.data || []).map(bk => ({ ...bk, profiles: (p.data || []).find(pr => pr.id === bk.user_id) || null })), 
+                pros: p.data||[], cats: c.data||[], svcs: s.data||[], slots: sl.data||[], otas: o.data||[], 
+                coupons: cp.data||[], articles: ar.data||[] 
             };
 
-            // (D) 分類排序
-            if (cfg.data && cfg.data.content) { kbCatOrder = cfg.data.content; }
-            else { kbCatOrder = { big: [], mid: {} }; }
+            if (cfg.data && cfg.data.content) { kbCatOrder = cfg.data.content; } else { kbCatOrder = { big: [], mid: {} }; }
             if(typeof syncKbOrderKeys === 'function') syncKbOrderKeys();
 
-            // (E) 渲染畫面
-            renderBks(); 
-            renderPro(); 
-            renderConfigTables(); 
-            renderCalendar(); 
-            renderFinance(); 
-            
+            renderBks(); renderPro(); renderConfigTables(); renderCalendar(); renderFinance(); 
             if(typeof renderKbTree === 'function') renderKbTree(); 
             if(typeof render7DaySchedule === 'function') render7DaySchedule();
             if(typeof fetchAnnouncements === 'function') fetchAnnouncements();
-            if (document.getElementById('svc-cat-filter')?.value) {
-        filterServiceList();
-    }
+            if (document.getElementById('svc-cat-filter')?.value) filterServiceList();
             console.log("✅ 資料讀取成功！");
-
         } catch (e) { console.error(e); alert("載入失敗: " + e.message); }
     }
 
-    // 🔒 登入驗證
     async function checkAdmin() {
         const pwd = document.getElementById('admin-pwd').value;
         const btn = document.querySelector('#admin-lock button');
-        
         if(pwd === "admin888") { 
-            btn.innerText = "讀取中...";
-            btn.disabled = true;
-            try {
-                await fetchAll(); 
-                document.getElementById('admin-lock').style.display = 'none';
-                document.querySelector('.main').style.display = 'block';
-                renderTimeGrid();
-            } catch (e) {
-                alert("載入失敗：" + e.message);
-                btn.innerText = "進入系統";
-                btn.disabled = false;
-            }
-        } else { 
-            alert("密碼錯誤"); 
-        }
+            btn.innerText = "讀取中..."; btn.disabled = true;
+            try { await fetchAll(); document.getElementById('admin-lock').style.display = 'none'; document.querySelector('.main').style.display = 'block'; renderTimeGrid(); } 
+            catch (e) { alert("載入失敗：" + e.message); btn.innerText = "進入系統"; btn.disabled = false; }
+        } else { alert("密碼錯誤"); }
     }
 
-    // ================= 遺失的關鍵函式 (renderBks) =================
-    
-    // V158 修正：預約列表 (自動抓取客人填寫的姓名與 Email 傳給建立按鈕)
-   // V165 修正：後台列表極簡化 (服務欄位只顯示「大類」)
     function renderBks() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
-        document.getElementById('bk-list').innerHTML = cache.bks.filter(x => 
-            !search || JSON.stringify(x).toUpperCase().includes(search)
-        ).map(x => {
+        document.getElementById('bk-list').innerHTML = cache.bks.filter(x => !search || JSON.stringify(x).toUpperCase().includes(search)).map(x => {
             const hasPro = !!x.profiles;
-            
-            // 1. 客人資訊處理
             let guestName = '', guestEmail = '';
             if (x.wish_detail) {
                 const nm = x.wish_detail.match(/姓名:(.*?) \|/);
@@ -1176,298 +798,185 @@
                 otaTag = `<br><span class="tag tag-ota">${otaName} #${x.ota_order_id.slice(-5)}</span>`;
             } else if (x.payment_method === 'shopee') otaTag = `<br><span class="tag tag-ota">蝦皮(舊)</span>`;
 
-            const safeName = guestName.replace(/'/g, "&apos;"); 
-            const safeEmail = guestEmail.replace(/'/g, "&apos;");
-
-            let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` :
-                           `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${x.temp_phone}', '${x.id}', '${safeName}', '${safeEmail}')">＋建立</button>`;
-
-            // 2. 🔥 服務內容：只顯示大類 (乾淨俐落)
+            const safeName = guestName.replace(/'/g, "&apos;"); const safeEmail = guestEmail.replace(/'/g, "&apos;");
+            let userHtml = hasPro ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` : `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="openCreateMemberModal('${x.temp_phone}', '${x.id}', '${safeName}', '${safeEmail}')">＋建立</button>`;
             let serviceHtml = `<div style="font-weight:bold; color:#2c3e50; font-size:15px;">${x.service_item || '未知類別'}</div>`;
-
-            // 3. 金額與優惠券
             let moneyHtml = `<div style="font-weight:bold; font-size:16px;">$${x.price}</div>`;
-            if (x.coupon_info) {
-                const cpName = x.coupon_info.split('(')[0]; 
-                moneyHtml += `<div style="font-size:11px; color:#e91e63; margin-top:2px;">🎟️ ${cpName}</div>`;
-            }
+            if (x.coupon_info) moneyHtml += `<div style="font-size:11px; color:#e91e63; margin-top:2px;">🎟️ ${x.coupon_info.split('(')[0]}</div>`;
 
-            return `<tr>
-                <td><small>${x.created_at.slice(0,10)}</small><br><small>${x.booking_id.slice(-6)}</small>${otaTag}</td>
-                <td>${userHtml}</td>
-                <td>${serviceHtml}</td>
-                <td>${moneyHtml}</td>
-                <td>${STATUS_MAP[x.status] || x.status}</td>
-                <td><button class="btn btn-forest" onclick="openBooking('${x.id}')">詳情</button><button class="btn btn-danger" onclick="deleteBooking('${x.id}')" style="padding:2px 8px;">刪</button></td>
-            </tr>`;
+            return `<tr><td><small>${x.created_at.slice(0,10)}</small><br><small>${x.booking_id.slice(-6)}</small>${otaTag}</td><td>${userHtml}</td><td>${serviceHtml}</td><td>${moneyHtml}</td><td>${STATUS_MAP[x.status] || x.status}</td><td><button class="btn btn-forest" onclick="openBooking('${x.id}')">詳情</button><button class="btn btn-danger" onclick="deleteBooking('${x.id}')" style="padding:2px 8px;">刪</button></td></tr>`;
         }).join('');
 
-        // 找到 renderBks 函式最後這幾行並修改：
-const m = new Date().toISOString().slice(0, 7);
-// 🔥 修正：已付款 (paid) 跟 已結案 (completed) 都要算錢！
-const inc = cache.bks.filter(x => 
-    (x.status === 'paid' || x.status === 'completed') && x.created_at.startsWith(m)
-).reduce((s, x) => s + (x.price || 0), 0);
-
-if(document.getElementById('inc-val')) document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
-if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
+        const m = new Date().toISOString().slice(0, 7);
+        const inc = cache.bks.filter(x => (x.status === 'paid' || x.status === 'completed') && x.created_at.startsWith(m)).reduce((s, x) => s + (x.price || 0), 0);
+        if(document.getElementById('inc-val')) document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
+        if(document.getElementById('total-val')) document.getElementById('total-val').innerText = cache.pros.length;
     }
 
-
-    // ==========================================
-    // 🔥 V157 補完：建立會員功能 (含自動歸戶)
-    // ==========================================
-
-    // 1. 開啟建立視窗 (動態生成表單，不用改 HTML)
-    // V158 修正：建立會員視窗 (接收 name 與 email 並自動填入)
     function openCreateMemberModal(phone, bookingId, name, email) {
-        // 預設密碼：guest + 手機末4碼
+        // 1. 變數初始化
         const defaultPwd = phone && phone.length >= 4 ? 'guest' + phone.slice(-4) : 'guest1234';
-        
-        // 處理 undefined (如果沒抓到資料傳進來是字串 'undefined' 或空值)
         const initName = (name && name !== 'undefined') ? name : '';
         const initEmail = (email && email !== 'undefined') ? email : '';
-
+        
+        // 2. 設定彈窗標題
         document.getElementById('m-title').innerText = "👤 建立新會員";
+
+        // 3. 設定彈窗內容 (排版整理後的 HTML)
         document.getElementById('m-content').innerHTML = `
-            <div style="padding:10px;">
-                <div style="margin-bottom:15px;">
-                    <label style="font-weight:bold; color:var(--forest);">姓名 *</label>
-                    <input type="text" id="new-name" value="${initName}" placeholder="請輸入客戶姓名" style="margin-top:5px;">
+            <div style="padding: 10px;">
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: var(--forest); display: block;">姓名 *</label>
+                    <input type="text" id="new-name" value="${initName}" placeholder="請輸入客戶姓名" style="margin-top: 5px;">
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="font-weight:bold; color:var(--forest);">手機 * (帳號)</label>
-                    <input type="text" id="new-phone" value="${phone || ''}" style="margin-top:5px;">
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: var(--forest); display: block;">手機 * (帳號)</label>
+                    <input type="text" id="new-phone" value="${phone || ''}" style="margin-top: 5px;">
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="font-weight:bold; color:#666;">Email (選填)</label>
-                    <input type="text" id="new-email" value="${initEmail}" placeholder="example@mail.com" style="margin-top:5px;">
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #666; display: block;">Email (選填)</label>
+                    <input type="text" id="new-email" value="${initEmail}" placeholder="example@mail.com" style="margin-top: 5px;">
                 </div>
-                <div style="margin-bottom:20px;">
-                    <label style="font-weight:bold; color:#666;">預設密碼</label>
-                    <input type="text" id="new-pwd" value="${defaultPwd}" style="margin-top:5px; background:#eee;" readonly>
-                    <small style="color:#999;">預設為 guest + 手機末4碼</small>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="font-weight: bold; color: #666; display: block;">預設密碼</label>
+                    <input type="text" id="new-pwd" value="${defaultPwd}" style="margin-top: 5px; background: #eee;" readonly>
+                    <small style="color: #999; display: block; margin-top: 4px;">預設為 guest + 手機末 4 碼</small>
                 </div>
-                <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;">
-                    <button class="btn btn-forest" onclick="saveNewMember('${bookingId}')" style="width:100%; padding:12px; font-size:1.1rem;">確認建立並歸戶</button>
+
+                <div style="text-align: right; border-top: 1px solid #eee; padding-top: 20px;">
+                    <button class="btn btn-forest" onclick="saveNewMember('${bookingId}')" style="width: 100%; padding: 12px; font-size: 1.1rem;">
+                        確認建立並歸戶
+                    </button>
                 </div>
+
             </div>
         `;
+        
+        // 4. 顯示彈窗
         document.getElementById('modal').style.display = 'flex';
     }
-    // 2. 儲存會員邏輯
-    // V159 修正：移除誤導的錯誤訊息，並優化錯誤顯示
-    // V160 升級：建立會員 + 全站同手機號自動歸戶 (Batch Link)
-   // 🔥 V166 終極修復：建立會員 (智慧歸戶版)
-    // 如果會員已存在 (SRT 建過了)，不報錯，直接執行歸戶！
+
     async function saveNewMember(bookingId) {
         const n = document.getElementById('new-name').value.trim();
         const p = document.getElementById('new-phone').value.trim();
         const e = document.getElementById('new-email').value.trim();
         const pwd = document.getElementById('new-pwd').value.trim();
-
         if (!n || !p) return alert("❌ 姓名與手機為必填欄位");
 
-        let targetUserId = null;
-        let isNew = false;
+        let targetUserId = null; let isNew = false;
+        const { data, error } = await myDB.from('profiles').insert([{ full_name: n, phone: p, email: e, password: pwd, role: 'member' }]).select().single();
+        if (error) { if (error.code === '23505') { const { data: existUser } = await myDB.from('profiles').select('id').eq('phone', p).single(); if (existUser) targetUserId = existUser.id; else return alert("❌ 找不到該會員資料"); } else return alert("❌ 系統錯誤: " + error.message); } else { targetUserId = data.id; isNew = true; }
 
-        // 1. 嘗試建立會員
-        const { data, error } = await myDB.from('profiles').insert([{
-            full_name: n,
-            phone: p,
-            email: e,
-            password: pwd,
-            role: 'member'
-        }]).select().single();
-
-        if (error) {
-            // 🔥 關鍵修正：如果報錯是因為「手機已存在 (23505)」
-            // 代表 srt_report 已經幫你建過了，不要擋路，直接抓舊資料來用！
-            if (error.code === '23505') {
-                const { data: existUser } = await myDB.from('profiles').select('id').eq('phone', p).single();
-                if (existUser) {
-                    targetUserId = existUser.id; // 抓到既有會員 ID
-                } else {
-                    return alert("❌ 發生怪異錯誤，找不到該會員資料");
-                }
-            } else {
-                return alert("❌ 系統錯誤: " + error.message);
-            }
-        } else {
-            targetUserId = data.id; // 這是全新建立的
-            isNew = true;
-        }
-
-        // 2. 執行全站歸戶 (把所有同手機的單都連過去)
         if (targetUserId) {
-            const { data: updatedBks, error: linkErr } = await myDB.from('bookings')
-                .update({ user_id: targetUserId })
-                .eq('temp_phone', p)  
-                .is('user_id', null)
-                .select();
-
+            const { data: updatedBks, error: linkErr } = await myDB.from('bookings').update({ user_id: targetUserId }).eq('temp_phone', p).is('user_id', null).select();
             let msg = isNew ? `✅ 會員 ${n} 建立成功！` : `✅ 偵測到會員已存在，執行自動歸戶！`;
-            
-            if (!linkErr && updatedBks && updatedBks.length > 0) {
-                msg += `\n🔗 已將 ${updatedBks.length} 筆訂單歸戶成功！`;
-            }
-
-            alert(msg);
-            closeModal();
-            fetchAll(); // 🔥 刷新列表，那個「＋建立」按鈕就會消失，變成會員名字！
+            if (!linkErr && updatedBks && updatedBks.length > 0) msg += `\n🔗 已將 ${updatedBks.length} 筆訂單歸戶成功！`;
+            alert(msg); closeModal(); fetchAll();
         }
     }
-    // 🌟 4. 預約選單優化 (V48 美化版)
-    // V164 修正：訂單詳情視窗 (支援 大類/主項/加購 分層顯示)
- function openBooking(id) {
-        const b = cache.bks.find(x => x.id === id);
+
+    function openBooking(id) {
+        const b = cache.bks.find(x => x.id === id); 
         if(!b) return alert("找不到訂單");
         
-        try {
-            // 1. 資料清洗
-            const rawDetail = b.wish_detail || '';
-            const cleanDetail = rawDetail.replace(/\| \[付款碼.*?\]/g, '').replace(/\| \[QR已傳.*?\]/g, '');
-            const urlMatch = cleanDetail.match(/(https?:\/\/[^\s|]+)/); 
-            const screenshotUrl = urlMatch ? urlMatch[0] : null;
-            const screenshotBtn = screenshotUrl 
-                ? `<a href="${screenshotUrl}" target="_blank" class="btn btn-outline" style="color:#3498db; border-color:#3498db;">🖼️ 查看截圖證據</a>` 
-                : `<span style="color:#999; font-size:12px;">(無截圖)</span>`;
-            
-            let displayData = cleanDetail.replace(/(https?:\/\/[^\s|]+)/g, '').replace(/截圖[:：]\s*/g, '').replace(/\|? ?姓名:.*? \|/g, '').replace(/\|? ?Email:.*? \|/g, '').replace(/\|? ?數據: ?/g, '').trim();
-            let extractName = "未知", extractEmail = "未知";
-            const nm = rawDetail.match(/姓名:(.*?) \|/);
-            const em = rawDetail.match(/Email:(.*?) \|/);
-            if(nm) extractName = nm[1].trim(); 
-            if(em) extractEmail = em[1].trim();
+        // --- 資料處理區 ---
+        const rawDetail = b.wish_detail || '';
+        const urlMatch = rawDetail.match(/(https?:\/\/[^\s|]+)/);
+        const screenshotBtn = urlMatch ? `<a href="${urlMatch[0]}" target="_blank" class="btn btn-outline" style="color:#3498db; border-color:#3498db;">🖼️ 查看截圖證據</a>` : `<span style="color:#999; font-size:12px;">(無截圖)</span>`;
+        let displayData = rawDetail.replace(/(https?:\/\/[^\s|]+)/g, '').replace(/截圖[:：]\s*/g, '').replace(/\|? ?姓名:.*? \|/g, '').replace(/\|? ?Email:.*? \|/g, '').replace(/\|? ?數據: ?/g, '').replace(/\| \[QR已傳.*?\]/g, '').trim();
+        
+        let extractName = "未知", extractEmail = "未知";
+        const nm = rawDetail.match(/姓名:(.*?) \|/); const em = rawDetail.match(/Email:(.*?) \|/);
+        if(nm) extractName = nm[1].trim(); if(em) extractEmail = em[1].trim();
 
-            // 2. 服務內容 HTML
-            let serviceHtml = `<div style="font-size:1.1rem; font-weight:bold; color:#2c3e50;">📂 ${b.service_item || '未知大類'}</div>`;
-            if (b.main_service) {
-                serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${b.main_service}</div>`;
-            }
-            if (b.service_detail) {
-                const addons = b.service_detail.split('|').map(s => `<div style="margin-top:3px;">➕ ${s.trim()}</div>`).join('');
-                serviceHtml += `<div style="color:#666; font-size:0.95rem; margin-top:8px; padding-left:15px; border-left:3px solid #eee;">${addons}</div>`;
-            }
+        let serviceHtml = `<div style="font-size:1.1rem; font-weight:bold; color:#2c3e50;">📂 ${b.service_item || '未知大類'}</div>`;
+        if (b.main_service) serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${b.main_service}</div>`;
+        if (b.service_detail) serviceHtml += `<div style="color:#666; font-size:0.95rem; margin-top:8px; padding-left:15px; border-left:3px solid #eee;">${b.service_detail.split('|').map(s => `<div style="margin-top:3px;">➕ ${s.trim()}</div>`).join('')}</div>`;
+        
+        const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
+        let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
+        let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
+        const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
+        const existingReportId = reportMatch ? reportMatch[1] : null;
+        let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
+        if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
 
-            // 3. 🔥 新增：客人故事區邏輯
-            const storyHtml = b.case_story ? 
-                `<div style="margin-top:15px; padding:12px; background:#fdfaf5; border:1px solid #fae1c3; border-radius:8px;">
+        let scheduleBox = '';
+        if(b.scheduled_at) { scheduleBox = `<div style="background:#f0f8ff; padding:12px; border-left:4px solid #3498db; border-radius:4px; margin-top:15px;"><div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#2980b9;">📅 已鎖定服務排程</strong><button class="btn btn-outline" style="font-size:12px; background:white;" onclick="document.getElementById('reschedule-area').style.display='block'; this.style.display='none';">✏️ 修改</button></div><div style="font-size:1.2rem; color:#2c3e50; margin-top:5px; font-weight:bold;">${new Date(b.scheduled_at).toLocaleString()}</div><div id="reschedule-area" style="display:none; margin-top:10px;"><div style="display:flex; gap:10px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認變更</button></div></div>`; }
+        else if(b.status === 'paid' || b.status === 'awaiting_service') { scheduleBox = `<div style="background:#fff3e0; padding:12px; border-left:4px solid #f39c12; border-radius:4px; margin-top:15px;"><strong style="color:#e67e22;">⏳ 等待排程</strong><div style="display:flex; gap:10px; margin-top:5px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認鎖定時段</button></div>`; }
+
+        const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
+        const couponBadge = b.coupon_info ? `<div style="display:inline-block; background:#fce4ec; color:#c2185b; font-size:12px; padding:2px 8px; border-radius:10px; margin-top:5px;">🎟️ ${b.coupon_info}</div>` : '';
+
+        // --- 彈窗顯示區 (修正版：消除空白) ---
+        document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;
+        document.getElementById('m-content').innerHTML = `
+            <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+                <div style="width:50px; height:50px; background:var(--forest); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px; font-weight:bold;">
+                    ${extractName[0]}
+                </div>
+                <div>
+                    <div style="font-weight:bold; font-size:1.1rem;">${extractName}</div>
+                    <div style="color:#666;">${b.temp_phone}</div>
+                    <div style="color:#888; font-size:0.8rem;">${extractEmail}</div>
+                </div>
+            </div>
+
+            <div style="background:#fafafa; padding:15px; border-radius:8px; border:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="flex:1;">${serviceHtml}</div>
+                    <b style="color:#d35400; font-size:1.2rem; white-space:nowrap;">$${b.price}</b>
+                </div>
+                ${couponBadge}
+            </div>
+
+            <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;">
+                <label style="color:#999; font-size:12px;">數據與備註</label>
+                <div class="force-wrap" style="margin-top:5px; line-height:1.5; font-size:14px;">${displayData || '無'}</div>
+                <div style="margin-top:5px; font-weight:bold; color:#e67e22;">
+                    許願時間：${b.sleep_time || '無'}
+                </div>
+                <div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">
+                    ${screenshotBtn}
+                </div>
+            </div>
+
+            ${b.case_story ? `
+                <div style="margin-top:15px; padding:12px; background:#fdfaf5; border:1px solid #fae1c3; border-radius:8px;">
                     <label style="color:#1a2f23; font-weight:bold; font-size:13px;">📖 客人說的故事：</label>
-                    <div style="margin-top:5px; white-space:pre-wrap; line-height:1.6; color:#444; font-size:14px;">${b.case_story}</div>
-                </div>` : '';
-
-            // 4. 其他邏輯 (報告、排程)
-            const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
-            let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
-            let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
-            
-            const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
-            const existingReportId = reportMatch ? reportMatch[1] : null;
-            
-            let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
-            if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
-
-            const couponBadge = b.coupon_info ? `<div style="display:inline-block; background:#fce4ec; color:#c2185b; font-size:12px; padding:2px 8px; border-radius:10px; margin-top:5px;">🎟️ ${b.coupon_info}</div>` : '';
-
-            let scheduleBox = '';
-            if(b.scheduled_at) {
-                scheduleBox = `<div style="background:#f0f8ff; padding:12px; border-left:4px solid #3498db; border-radius:4px; margin-top:15px;"><div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#2980b9;">📅 已鎖定服務排程</strong><button class="btn btn-outline" style="font-size:12px; background:white;" onclick="document.getElementById('reschedule-area').style.display='block'; this.style.display='none';">✏️ 修改</button></div><div style="font-size:1.2rem; color:#2c3e50; margin-top:5px; font-weight:bold;">${new Date(b.scheduled_at).toLocaleString()}</div><div id="reschedule-area" style="display:none; margin-top:10px;"><div style="display:flex; gap:10px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認變更</button></div></div>`;
-            } else if(b.status === 'paid' || b.status === 'awaiting_service') {
-                scheduleBox = `<div style="background:#fff3e0; padding:12px; border-left:4px solid #f39c12; border-radius:4px; margin-top:15px;"><strong style="color:#e67e22;">⏳ 等待排程</strong><div style="display:flex; gap:10px; margin-top:5px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認鎖定時段</button></div>`;
+                    <div class="force-wrap" style="margin-top:5px; line-height:1.6; color:#444; font-size:14px;">${b.case_story}</div>
+                </div>` : ''
             }
 
-            const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
-
-            // 5. 渲染彈窗
-            document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;
-            document.getElementById('m-content').innerHTML = `
-                <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;"><div style="width:50px; height:50px; background:var(--forest); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px; font-weight:bold;">${extractName[0]}</div><div><div style="font-weight:bold; font-size:1.1rem;">${extractName}</div><div style="color:#666;">${b.temp_phone}</div><div style="color:#888; font-size:0.8rem;">${extractEmail}</div></div></div>
-                
-                <div style="background:#fafafa; padding:15px; border-radius:8px; border:1px solid #eee;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div style="flex:1;">${serviceHtml}</div>
-                        <b style="color:#d35400; font-size:1.2rem; white-space:nowrap;">$${b.price}</b>
-                    </div>
-                    ${couponBadge}
-                </div>
-
-                <div style="margin-top:15px; padding:10px; background:white; border:1px solid #eee; border-radius:4px;">
-                    <label style="color:#999; font-size:12px;">數據與備註</label>
-                    <div style="margin-top:5px; line-height:1.5; font-size:14px;">${displayData || '無'}</div>
-                    <div style="margin-top:5px; font-weight:bold; color:#e67e22;">許願時間：${b.sleep_time || '無'}</div>
-                    <div style="margin-top:10px; padding-top:5px; border-top:1px dashed #eee;">${screenshotBtn}</div>
-                </div>
-
-                ${storyHtml} 
-
-                ${scheduleBox}${reportArea}
-                
-                <div style="margin-top:20px; text-align:right;">${renderActionButtons(b)}</div>`;
-            
-            document.getElementById('modal').style.display = 'flex';
-            // 🔥 強制讓彈窗內容回到最上面
-            document.querySelector('.modal-body').scrollTop = 0;
-
-        } catch (e) { console.error(e); alert("詳情開啟失敗: " + e.message); }
+            ${scheduleBox}
+            ${reportArea}
+            <div style="margin-top:20px; text-align:right;">
+                ${renderActionButtons(b)}
+            </div>
+        `;
+        
+        document.getElementById('modal').style.display = 'flex';
+        document.querySelector('.modal-body').scrollTop = 0;
     }
-    // ================= KB 功能 (修復編輯功能) =================
-    
+        
     function toggleKbSidebar() { document.querySelector('.kb-layout').classList.toggle('collapsed'); }
-
-    // 🔥 編輯文章 (修復版)
     async function editKb(id) {
-        try {
-            const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single();
-            if(error || !data) { alert("讀取失敗"); return; }
-            document.getElementById('kb-id').value = data.id;
-            document.getElementById('kb-title').value = data.title;
-            document.getElementById('kb-big').value = data.big_category;
-            document.getElementById('kb-mid').value = data.mid_category;
-            document.getElementById('kb-pub').checked = data.is_published;
-            if(quill) { quill.root.innerHTML = data.body || ''; }
-            document.getElementById('btn-kb-del').style.display = 'inline-block';
-            document.getElementById('mode-title').innerText = "編輯文章";
-        } catch (e) { console.error(e); alert("開啟文章失敗: " + e.message); }
+        try { const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single(); if(error || !data) return alert("讀取失敗"); document.getElementById('kb-id').value = data.id; document.getElementById('kb-title').value = data.title; document.getElementById('kb-big').value = data.big_category; document.getElementById('kb-mid').value = data.mid_category; document.getElementById('kb-pub').checked = data.is_published; if(quill) quill.root.innerHTML = data.body || ''; document.getElementById('btn-kb-del').style.display = 'inline-block'; document.getElementById('mode-title').innerText = "編輯文章"; } catch (e) { alert("開啟文章失敗: " + e.message); }
     }
-
     function resetKbForm(){ document.getElementById('kb-id').value=''; document.getElementById('kb-title').value=''; document.getElementById('kb-big').value=''; document.getElementById('kb-mid').value=''; if(quill) quill.root.innerHTML=''; document.getElementById('btn-kb-del').style.display='none'; document.getElementById('mode-title').innerText="新增文章"; }
-async function saveArticle() {
-        // 防呆：如果是 HTML 模式，先把 textarea 的字寫回 quill
-        if (typeof isHtmlMode !== 'undefined' && isHtmlMode) {
-            quill.root.innerHTML = document.getElementById('html-textarea').value;
-        }
-
-        const p = {
-            title: document.getElementById('kb-title').value,
-            big_category: document.getElementById('kb-big').value,
-            mid_category: document.getElementById('kb-mid').value,
-            is_published: document.getElementById('kb-pub').checked,
-            body: quill ? quill.root.innerHTML : ''
-        };
+    async function saveArticle() {
+        if (typeof isHtmlMode !== 'undefined' && isHtmlMode) quill.root.innerHTML = document.getElementById('html-textarea').value;
+        const p = { title: document.getElementById('kb-title').value, big_category: document.getElementById('kb-big').value, mid_category: document.getElementById('kb-mid').value, is_published: document.getElementById('kb-pub').checked, body: quill ? quill.root.innerHTML : '' };
         const id = document.getElementById('kb-id').value;
-
-        if (!p.title || !p.big_category) { alert("標題/分類必填"); return; }
-
-        try {
-            if (id) {
-                await myDB.from('kb_articles').update(p).eq('id', id);
-            } else {
-                const { data } = await myDB.from('kb_articles').select('sort_order').order('sort_order', { ascending: false }).limit(1);
-                p.sort_order = (data && data.length) ? data[0].sort_order + 1 : 1;
-                await myDB.from('kb_articles').insert([p]);
-            }
-            alert("✅ 已儲存");
-            fetchAll();
-            if (!id) resetKbForm();
-        } catch (e) {
-            alert("儲存失敗: " + e.message);
-        }
+        if (!p.title || !p.big_category) return alert("標題/分類必填");
+        try { if (id) await myDB.from('kb_articles').update(p).eq('id', id); else { const { data } = await myDB.from('kb_articles').select('sort_order').order('sort_order', { ascending: false }).limit(1); p.sort_order = (data && data.length) ? data[0].sort_order + 1 : 1; await myDB.from('kb_articles').insert([p]); } alert("✅ 已儲存"); fetchAll(); if (!id) resetKbForm(); } catch (e) { alert("儲存失敗: " + e.message); }
     }
     async function delArticle(){ if(confirm("確定刪除？")) { await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value); alert("已刪除"); resetKbForm(); fetchAll(); } }
     function previewArticle() { const title=document.getElementById('kb-title').value, html=quill ? quill.root.innerHTML : '', isPub=document.getElementById('kb-pub').checked; document.getElementById('m-title').innerText="前台預覽"; document.getElementById('m-content').innerHTML=`<div style="font-family:sans-serif;padding:10px;">${!isPub?'<div style="color:red">(隱藏)</div>':''}<h1>${title}</h1><div class="ql-editor" style="padding:0;">${html}</div></div>`; document.getElementById('modal').style.display='flex'; }
-
-    // 圖庫
     async function openGallery(){document.getElementById('gallery-modal').style.display='flex';loadGalleryImages();}
     function closeGallery(){document.getElementById('gallery-modal').style.display='none';}
     function switchBucket(){currentBucket=document.getElementById('bucket-select').value;loadGalleryImages();}
@@ -1475,154 +984,54 @@ async function saveArticle() {
     function insertImageToEditor(u){if(quill){const r=quill.getSelection(true);quill.insertEmbed(r?r.index:quill.getLength(),'image',u);}closeGallery();}
     async function uploadImage(){const f=document.getElementById('upload-input').files[0];if(!f)return;await myDB.storage.from(currentBucket).upload(`${Date.now()}_${f.name}`,f);loadGalleryImages();}
 
-    // 🔥 排序 (變數名修正 complete)
-function syncKbOrderKeys() {
-        let c = false;
-        // 確保 hide_note 存在
-        if (!kbCatOrder.hide_note) { kbCatOrder.hide_note = []; c = true; }
-
-        const ct = {};
-        cache.articles.forEach(a => {
-            if (!ct[a.big_category]) ct[a.big_category] = new Set();
-            ct[a.big_category].add(a.mid_category);
-        });
-        Object.keys(ct).forEach(b => {
-            if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); c = true; }
-        });
-        Object.keys(ct).forEach(b => {
-            if (!kbCatOrder.mid[b]) kbCatOrder.mid[b] = [];
-            [...ct[b]].forEach(m => {
-                if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); c = true; }
-            });
-        });
+    function syncKbOrderKeys() {
+        let c = false; if (!kbCatOrder.hide_note) { kbCatOrder.hide_note = []; c = true; }
+        const ct = {}; cache.articles.forEach(a => { if (!ct[a.big_category]) ct[a.big_category] = new Set(); ct[a.big_category].add(a.mid_category); });
+        Object.keys(ct).forEach(b => { if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); c = true; } });
+        Object.keys(ct).forEach(b => { if (!kbCatOrder.mid[b]) kbCatOrder.mid[b] = []; [...ct[b]].forEach(m => { if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); c = true; } }); });
         if (c) saveKbOrderConfig();
     }    
     function renderKbTree() {
-        const t = {};
-        cache.articles.forEach(a => {
-            if (!t[a.big_category]) t[a.big_category] = {};
-            if (!t[a.big_category][a.mid_category]) t[a.big_category][a.mid_category] = [];
-            t[a.big_category][a.mid_category].push(a);
-        });
-
+        const t = {}; cache.articles.forEach(a => { if (!t[a.big_category]) t[a.big_category] = {}; if (!t[a.big_category][a.mid_category]) t[a.big_category][a.mid_category] = []; t[a.big_category][a.mid_category].push(a); });
         document.getElementById('kb-tree').innerHTML = kbCatOrder.big.filter(b => t[b]).map(b => {
-            // 判斷隱藏狀態
-            const isHidden = (kbCatOrder.hide_note || []).includes(b);
-            const noteIcon = isHidden ? '🔇' : '📢';
+            const isHidden = (kbCatOrder.hide_note || []).includes(b); const noteIcon = isHidden ? '🔇' : '📢';
             const noteBtn = `<span onclick="toggleKbNote('${b}', event)" style="cursor:pointer; margin-right:8px; font-size:14px; opacity:0.8;" title="切換便利貼">${noteIcon}</span>`;
-
             const ms = (kbCatOrder.mid[b] || []).filter(m => t[b][m]).map(m => {
                 const as = t[b][m].map(a => `<div class="article-item ${a.is_published ? '' : 'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
                 return `<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
             }).join('');
-            
             return `<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>${noteBtn} 📂 ${b}</summary>${ms}</details>`;
         }).join('');
-
         document.getElementById('kb-big-list').innerHTML = kbCatOrder.big.map(v => `<option value="${v}">`).join('');
-        const allMids = new Set();
-        Object.values(kbCatOrder.mid).forEach(a => a.forEach(m => allMids.add(m)));
+        const allMids = new Set(); Object.values(kbCatOrder.mid).forEach(a => a.forEach(m => allMids.add(m)));
         document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v => `<option value="${v}">`).join('');
     }
 
     async function moveBig(n,d,e){e.stopPropagation();const i=kbCatOrder.big.indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.big.length)return;[kbCatOrder.big[i],kbCatOrder.big[i+d]]=[kbCatOrder.big[i+d],kbCatOrder.big[i]];renderKbTree();await saveKbOrderConfig();}
     async function moveMid(b,n,d,e){e.stopPropagation();const i=kbCatOrder.mid[b].indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.mid[b].length)return;[kbCatOrder.mid[b][i],kbCatOrder.mid[b][i+d]]=[kbCatOrder.mid[b][i+d],kbCatOrder.mid[b][i]];renderKbTree();await saveKbOrderConfig();}
-// 🔥 修復版：文章排序 (補上必填欄位，解決 SQL 報錯)
     async function moveArt(id, dir, e) {
-        e.stopPropagation();
-        
-        // 1. 找到目標文章
-        const art = cache.articles.find(a => a.id === id);
-        if (!art) return;
+        e.stopPropagation(); const art = cache.articles.find(a => a.id === id); if (!art) return;
+        const siblings = cache.articles.filter(a => a.big_category === art.big_category && a.mid_category === art.mid_category);
+        const idx = siblings.findIndex(a => a.id === id); if (idx === -1 || idx + dir < 0 || idx + dir >= siblings.length) return;
+        const temp = siblings[idx]; siblings[idx] = siblings[idx + dir]; siblings[idx + dir] = temp;
+        const updates = siblings.map((a, index) => { a.sort_order = index; return { id: a.id, sort_order: index, title: a.title, big_category: a.big_category, mid_category: a.mid_category }; });
+        cache.articles.sort((a, b) => a.sort_order - b.sort_order); renderKbTree();
+        try { await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' }); console.log("✅ 排序已更新"); } catch (err) { alert("排序儲存失敗: " + err.message); }
+    }    
+    async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
 
-        // 2. 找出同分類的所有兄弟文章
-        const siblings = cache.articles.filter(a => 
-            a.big_category === art.big_category && 
-            a.mid_category === art.mid_category
-        );
-
-        // 3. 找到自己在兄弟中的位置
-        const idx = siblings.findIndex(a => a.id === id);
-        
-        // 防呆
-        if (idx === -1 || idx + dir < 0 || idx + dir >= siblings.length) return;
-
-        // 4. 交換位置
-        const temp = siblings[idx];
-        siblings[idx] = siblings[idx + dir];
-        siblings[idx + dir] = temp;
-
-        // 5. 🔥 關鍵修復：除了 sort_order，把必填欄位也帶上！
-        // 這樣 Supabase 就不會因為「缺少必填欄位」而報錯了
-        const updates = siblings.map((a, index) => {
-            a.sort_order = index; // 更新快取
-            return { 
-                id: a.id, 
-                sort_order: index,
-                // 👇 這三行是為了安撫資料庫的檢查機制 👇
-                title: a.title,
-                big_category: a.big_category,
-                mid_category: a.mid_category
-            }; 
-        });
-
-        // 6. 更新快取排序
-        cache.articles.sort((a, b) => a.sort_order - b.sort_order);
-
-        // 7. 渲染
-        renderKbTree();
-
-        // 8. 寫入資料庫
-        try {
-            const { error } = await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' });
-            if (error) throw error;
-            console.log("✅ 排序已更新");
-        } catch (err) {
-            console.error(err);
-            alert("排序儲存失敗: " + err.message);
-        }
-    }    async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
-
-    // 其他原有功能
     function loadSlotsForBooking(date) { const slots = cache.slots.filter(s => s.slot_date === date && !s.is_booked); const sel = document.getElementById('book-slot'); sel.innerHTML = slots.length ? slots.map(s => `<option value="${s.id}" data-t="${s.slot_date} ${s.slot_time}">${s.slot_time.slice(0,5)}</option>`).join('') : '<option>無空檔</option>'; }
     async function confirmSchedule(bid) { const sel = document.getElementById('book-slot'); if(!sel.value || sel.value.includes("先選")) return alert("請選擇時段"); const t = sel.options[sel.selectedIndex].dataset.t; await myDB.from('bookings').update({scheduled_at: t, status: 'awaiting_service'}).eq('id', bid); await myDB.from('schedule_slots').update({is_booked: true}).eq('id', sel.value); alert("✅ 排程成功"); closeModal(); fetchAll(); }
     async function deleteBooking(id) { if(confirm("確定刪除？")) { await myDB.from('bookings').delete().eq('id',id); fetchAll(); } }
-async function sendPayLink(id) {
-    if(confirm("確定發送？")) {
-        const t = new Date().toLocaleString();
-        const b = cache.bks.find(x => x.id === id);
-        
-        await myDB.from('bookings').update({ 
-            status: 'awaiting_payment', 
-            wish_detail: `${b.wish_detail} | [QR已傳: ${t}]` 
-        }).eq('id', id);
-        
-        // 🔥 關鍵：不關彈窗，直接刷新資料庫並重開詳情
-        await fetchAll(); 
-        openBooking(id); 
-        alert("✅ 付款碼狀態已更新");
-    }
-}
+    async function sendPayLink(id) { if(confirm("確定發送？")) { const t = new Date().toLocaleString(); const b = cache.bks.find(x => x.id === id); await myDB.from('bookings').update({ status: 'awaiting_payment', wish_detail: `${b.wish_detail} | [QR已傳: ${t}]` }).eq('id', id); await fetchAll(); openBooking(id); alert("✅ 付款碼狀態已更新"); } }
     function renderActionButtons(b) { if (b.status === 'paid') return `<button class="btn" style="background:#ccc;">待排程</button>`; if (b.status === 'awaiting_service') return `<button class="btn btn-forest" onclick="updateS('${b.id}','completed')">✅ 結案</button>`; if (b.status === 'completed') return `<button class="btn" style="background:#ccc;">已結案</button>`; if (b.status === 'pending') return `<button class="btn btn-info" onclick="sendPayLink('${b.id}')">📧 傳付款碼</button>`; if (b.status === 'awaiting_payment' || b.payment_method === 'shopee' || b.ota_order_id) return `<button class="btn btn-success" onclick="updateS('${b.id}','paid')">💰 確認入帳</button>`; return ""; }
     
-    // 🔥 CRM: 補回歷史與刪除按鈕 🔥
     function renderPro() { 
         const k = document.getElementById('search-member').value.toLowerCase(); 
         document.getElementById('pro-list').innerHTML = cache.pros.filter(p => !k || (p.full_name && p.full_name.includes(k)) || p.phone.includes(k)).map(p => { 
             const ub = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); 
             const t = ub.filter(b => b.status === 'paid' || b.status === 'completed').reduce((s, b) => s + (b.price || 0), 0); 
-            return `<tr>
-                <td><b>${p.full_name}</b></td>
-                <td>${p.phone}</td>
-                <td><small>${p.email||'-'}</small></td>
-                <td style="color:#d35400;">$${t.toLocaleString()}</td>
-                <td>${ub.length?ub[0].created_at.slice(0,10):'-'}</td>
-                <td>
-                    <button class="btn btn-forest" onclick="showHistory('${p.id}', '${p.full_name}')">📜</button>
-                    <button class="btn btn-warning" onclick="editProfile('${p.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="deleteMember('${p.id}', '${p.full_name}')">🗑️</button>
-                </td>
-            </tr>`; 
+            return `<tr><td><b>${p.full_name}</b></td><td>${p.phone}</td><td><small>${p.email||'-'}</small></td><td style="color:#d35400;">$${t.toLocaleString()}</td><td>${ub.length?ub[0].created_at.slice(0,10):'-'}</td><td><button class="btn btn-forest" onclick="showHistory('${p.id}', '${p.full_name}')">📜</button><button class="btn btn-warning" onclick="editProfile('${p.id}')">✏️</button><button class="btn btn-danger" onclick="deleteMember('${p.id}', '${p.full_name}')">🗑️</button></td></tr>`; 
         }).join(''); 
     }
     
@@ -1631,789 +1040,143 @@ async function sendPayLink(id) {
     async function resetMemberPassword(uid, phone) { if(!confirm(`確定要重置密碼嗎？\n預設為：guest${phone.slice(-4)}`)) return; const newPw = 'guest' + phone.slice(-4); const { error } = await myDB.from('profiles').update({ password: newPw }).eq('id', uid); if(error) alert("失敗: " + error.message); else alert("✅ 密碼已重置"); }
     async function deleteMember(uid, name) { if(confirm(`⚠️ 確定刪除會員 ${name}？`)) { await myDB.from('profiles').delete().eq('id', uid); fetchAll(); } }
     function showHistory(uid, name) { const p = cache.pros.find(x => x.id === uid); const userBks = cache.bks.filter(b => b.user_id === uid || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); let html = userBks.length === 0 ? "<p style='color:#999; text-align:center;'>無訂單紀錄</p>" : userBks.map(b => ` <div onclick="openBooking('${b.id}')" class="history-card"> <div style="display:flex; justify-content:space-between;"> <b style="color:var(--forest);">${b.service_item}</b> ${STATUS_MAP[b.status] || b.status} </div> <div style="font-size:12px; color:#666; margin-top:5px;">${b.created_at.slice(0,10)} | $${b.price}</div> </div> `).join(''); document.getElementById('m-title').innerText = `${name} 的歷史訂單`; document.getElementById('m-content').innerHTML = `<div style="max-height:400px; overflow-y:auto;">${html}</div>`; document.getElementById('modal').style.display = 'flex'; }
-
-    // 🔥 Finance: 補回 OTA 刪除按鈕 🔥
     function renderFinance() { 
         document.getElementById('ota-list').innerHTML = cache.otas.map(o => `<tr><td>${o.name}</td><td>${o.code}</td><td>${o.commission_rate}%</td><td>-</td><td><button class="btn btn-info" onclick="editOTA('${o.id}')">修</button><button class="btn btn-danger" onclick="delData('ota_settings', '${o.id}')">刪</button></td></tr>`).join(''); 
         document.getElementById('cp-list').innerHTML = cache.coupons.map(c => `<tr><td>${c.name}</td><td>${c.code}</td><td>${c.discount_value}</td><td>${c.expires_at||'無'}</td><td>-</td><td>${c.usage_count}</td><td><button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button><button class="btn btn-danger" onclick="delData('coupons', '${c.id}')">刪</button></td></tr>`).join(''); 
     }
 
-    // ==========================================
-    // 🔥 V168 補丁：大類管理 (列表渲染 + 刪除 + 隱藏)
-    // ==========================================
-
-    // 1. 渲染設定表格 (大類列表)
     function renderConfigTables() {
-        // A. 更新下拉選單 (給細項用的)
-        const s = document.getElementById('svc-cat-filter');
-        // 只顯示「啟用中」的大類給細項選，避免選到已暫停的
-        const activeCats = cache.cats.filter(c => c.is_active !== false);
-        s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-
-        // B. 渲染大類列表 (含刪除與隱藏按鈕)
+        const s = document.getElementById('svc-cat-filter'); const activeCats = cache.cats.filter(c => c.is_active !== false); s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         document.getElementById('cat-list').innerHTML = cache.cats.map(c => {
-            // 判斷狀態 (預設 true, 若為 false 則視為暫停)
-            const isActive = c.is_active !== false; 
-            
-            // 樣式調整
-            const rowStyle = isActive ? '' : 'background:#eee; color:#999;';
-            const statusLabel = isActive ? '' : '<span style="font-size:12px; color:red; font-weight:bold;">(已暫停)</span>';
-            const toggleBtnText = isActive ? '🚫 暫停' : '👁️ 啟用';
-            const toggleBtnClass = isActive ? 'btn-warning' : 'btn-success';
-
-            return `<tr style="${rowStyle}">
-                <td>
-                    ${c.name} ${statusLabel}
-                    <div style="font-size:12px; color:#aaa;">${c.terms ? '(含規範)' : ''}</div>
-                </td>
-                <td style="text-align:right;">
-                    <button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯">✏️</button>
-                    <button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="font-size:12px;">${toggleBtnText}</button>
-                    <button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除">🗑️</button>
-                </td>
-            </tr>`;
+            const isActive = c.is_active !== false; const rowStyle = isActive ? '' : 'background:#eee; color:#999;'; const statusLabel = isActive ? '' : '<span style="font-size:12px; color:red; font-weight:bold;">(已暫停)</span>'; const toggleBtnText = isActive ? '🚫 暫停' : '👁️ 啟用'; const toggleBtnClass = isActive ? 'btn-warning' : 'btn-success';
+            return `<tr style="${rowStyle}"><td>${c.name} ${statusLabel}<div style="font-size:12px; color:#aaa;">${c.terms ? '(含規範)' : ''}</div></td><td style="text-align:right;"><button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯">✏️</button><button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="font-size:12px;">${toggleBtnText}</button><button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除">🗑️</button></td></tr>`;
         }).join('');
     }
-
-    // 2. 切換大類狀態 (暫停/啟用)
-    async function toggleCatStatus(id, newStatus) {
-        const { error } = await myDB.from('service_categories').update({ is_active: newStatus }).eq('id', id);
-        if (error) {
-            alert("更新失敗: " + error.message);
-        } else {
-            // 不彈窗擾民，直接刷新
-            fetchAll();
-        }
-    }
-
-    // 3. 刪除大類
-    async function deleteCat(id) {
-        // 防呆警告
-        if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？\n\n注意：如果這個大類底下還有「服務細項」，它們會變成孤兒！\n建議先使用「暫停」功能即可。")) return;
-
-        const { error } = await myDB.from('service_categories').delete().eq('id', id);
-        if (error) {
-            alert("刪除失敗 (可能有關聯資料): " + error.message);
-        } else {
-            alert("✅ 已刪除");
-            fetchAll();
-        }
-    }
-    // 🔥 Services: 補回排序功能與細項顯示 🔥
-    function filterServiceList(){ 
-        const c=document.getElementById('svc-cat-filter').value; 
-        document.getElementById('svc-list-container').innerHTML=cache.svcs.filter(s=>s.category_id===c).map((s,i)=>`
-            <div class="admin-row">
-                <div style="display:flex; flex-direction:column; margin-right:10px;">
-                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',-1)">▲</button>
-                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',1)">▼</button>
-                </div>
-                <div style="flex:1">
-                    <b>${s.title}</b> $${s.price} 
-                    ${s.sub_options ? `<div style="font-size:12px; color:#666;">└ ${s.sub_options}</div>` : ''}
-                </div>
-                <button class="btn btn-info" onclick="editSvc('${s.id}')">修</button>
-                <button class="btn btn-danger" onclick="delData('services','${s.id}')">刪</button>
-            </div>`).join(''); 
-    }
+    async function toggleCatStatus(id, newStatus) { const { error } = await myDB.from('service_categories').update({ is_active: newStatus }).eq('id', id); if (error) alert("更新失敗: " + error.message); else fetchAll(); }
+    async function deleteCat(id) { if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？")) return; const { error } = await myDB.from('service_categories').delete().eq('id', id); if (error) alert("刪除失敗 (可能有關聯資料): " + error.message); else { alert("✅ 已刪除"); fetchAll(); } }
     
+    function filterServiceList(){ const c=document.getElementById('svc-cat-filter').value; document.getElementById('svc-list-container').innerHTML=cache.svcs.filter(s=>s.category_id===c).map((s,i)=>`<div class="admin-row"><div style="display:flex; flex-direction:column; margin-right:10px;"><button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',-1)">▲</button><button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',1)">▼</button></div><div style="flex:1"><b>${s.title}</b> $${s.price} ${s.sub_options ? `<div style="font-size:12px; color:#666;">└ ${s.sub_options}</div>` : ''}</div><button class="btn btn-info" onclick="editSvc('${s.id}')">修</button><button class="btn btn-danger" onclick="delData('services','${s.id}')">刪</button></div>`).join(''); }
     async function moveSvc(id, dir) {
-        const c = document.getElementById('svc-cat-filter').value;
-        const list = cache.svcs.filter(s => s.category_id === c);
-        const idx = list.findIndex(s => s.id === id);
-        if (idx === -1 || idx + dir < 0 || idx + dir >= list.length) return;
-        const target = list[idx + dir];
-        const temp = list[idx].sort_order;
-        list[idx].sort_order = target.sort_order;
-        target.sort_order = temp;
-        await Promise.all([
-            myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id),
-            myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id)
-        ]);
-        fetchAll();
+        const c = document.getElementById('svc-cat-filter').value; const list = cache.svcs.filter(s => s.category_id === c); const idx = list.findIndex(s => s.id === id); if (idx === -1 || idx + dir < 0 || idx + dir >= list.length) return;
+        const target = list[idx + dir]; const temp = list[idx].sort_order; list[idx].sort_order = target.sort_order; target.sort_order = temp;
+        await Promise.all([ myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id), myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id) ]); fetchAll();
     }
 
-    function renderTimeGrid(){
-    let h='';
-    for(let i=13;i<=25;i++){
-        ['00','30'].forEach(m=>{
-            let hh=i>=24?i-24:i;
-            let t=`${hh.toString().padStart(2,'0')}:${m}`;
-            let v=`${i}:${m}`;
-            // 這裡生成 input + label 結構配合 CSS
-            h+=`<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`;
-        })
-    }
-    document.getElementById('time-grid').innerHTML=h;
-    }
+    function renderTimeGrid(){ let h=''; for(let i=13;i<=25;i++){ ['00','30'].forEach(m=>{ let hh=i>=24?i-24:i; let t=`${hh.toString().padStart(2,'0')}:${m}`; let v=`${i}:${m}`; h+=`<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`; }) } document.getElementById('time-grid').innerHTML=h; }
     function toggleAllSlots(c){document.querySelectorAll('input[name="ts"]').forEach(e=>e.checked=c);}
     async function batchAddSchedule() {
-        const d1 = document.getElementById('batch-start').value;
-        const d2 = document.getElementById('batch-end').value || d1;
-        // 抓取有勾選的 input
-        const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value);
-
-        if (!d1 || !ts.length) return alert("請選擇日期區間與時段");
-
-        let ins = [];
-        let skipped = 0; // 紀錄跳過的重複項
-        let c = new Date(d1);
-        let e = new Date(d2);
-
-        // 迴圈跑日期
+        const d1 = document.getElementById('batch-start').value; const d2 = document.getElementById('batch-end').value || d1; const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value); if (!d1 || !ts.length) return alert("請選擇日期區間與時段");
+        let ins = []; let skipped = 0; let c = new Date(d1); let e = new Date(d2);
         while (c <= e) {
-            const dateStr = c.toISOString().split('T')[0]; // YYYY-MM-DD
-
+            const dateStr = c.toISOString().split('T')[0];
             ts.forEach(t => {
-                let [hh, mm] = t.split(':').map(Number);
-                let ad = new Date(c);
-                
-                // 處理跨日 (24:00, 25:00)
-                if (hh >= 24) {
-                    ad.setDate(ad.getDate() + 1);
-                    hh -= 24;
-                }
-                const finalDate = ad.toISOString().split('T')[0];
-                const finalTime = `${hh.toString().padStart(2, '0')}:${mm}:00`;
-
-                // 🔥 關鍵檢查：比對 cache.slots 是否已有此時段
+                let [hh, mm] = t.split(':').map(Number); let ad = new Date(c); if (hh >= 24) { ad.setDate(ad.getDate() + 1); hh -= 24; }
+                const finalDate = ad.toISOString().split('T')[0]; const finalTime = `${hh.toString().padStart(2, '0')}:${mm}:00`;
                 const exists = cache.slots.some(s => s.slot_date === finalDate && s.slot_time.startsWith(finalTime.slice(0,5)));
-
-                if (!exists) {
-                    ins.push({
-                        slot_date: finalDate,
-                        slot_time: finalTime,
-                        is_booked: false
-                    });
-                } else {
-                    skipped++;
-                }
-            });
-            c.setDate(c.getDate() + 1);
+                if (!exists) ins.push({ slot_date: finalDate, slot_time: finalTime, is_booked: false }); else skipped++;
+            }); c.setDate(c.getDate() + 1);
         }
-
-        if (ins.length === 0) {
-            alert(`所有選定時段均已存在，無須新增。(跳過 ${skipped} 筆)`);
-            return;
-        }
-
-        const { error } = await myDB.from('schedule_slots').insert(ins);
-        if (error) {
-            alert("生成失敗: " + error.message);
-        } else {
-            alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : ""));
-            fetchAll(); // 重新讀取
-            // 清空勾選
-            toggleAllSlots(false);
-        }
+        if (ins.length === 0) return alert(`所有選定時段均已存在。(跳過 ${skipped} 筆)`);
+        const { error } = await myDB.from('schedule_slots').insert(ins); if (error) alert("生成失敗: " + error.message); else { alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : "")); fetchAll(); toggleAllSlots(false); }
     }
- // V155 修正：月曆渲染 (修復括號錯誤、過去日期反灰、休假顯示)
-// V156 修正：月曆渲染 (補上星期幾標頭)
-    function renderCalendar() {
-        const t = new Date();
-        document.getElementById('cal-title').innerText = `${currentYear}/${currentMonth}`;
-        
-        const fd = new Date(currentYear, currentMonth - 1, 1).getDay();
-        const dim = new Date(currentYear, currentMonth, 0).getDate();
-        const today = new Date().toISOString().split('T')[0];
 
-        // 1. 先畫星期幾 (Header)
-        const weeks = ['日', '一', '二', '三', '四', '五', '六'];
-        let h = '';
-        
-        weeks.forEach(w => {
-            h += `<div class="cal-week-header">${w}</div>`;
-        });
-        
-        // 2. 補前面的空白格
-        for (let i = 0; i < fd; i++) {
-            h += '<div class="cal-cell" style="background:#f9f9f9; border:none; cursor:default;"></div>';
-        }
-        
-        // 3. 渲染日期
+    function renderCalendar() {
+        const t = new Date(); document.getElementById('cal-title').innerText = `${currentYear}/${currentMonth}`;
+        const fd = new Date(currentYear, currentMonth - 1, 1).getDay(); const dim = new Date(currentYear, currentMonth, 0).getDate(); const today = new Date().toISOString().split('T')[0];
+        const weeks = ['日', '一', '二', '三', '四', '五', '六']; let h = ''; weeks.forEach(w => { h += `<div class="cal-week-header">${w}</div>`; });
+        for (let i = 0; i < fd; i++) h += '<div class="cal-cell" style="background:#f9f9f9; border:none; cursor:default;"></div>';
         for (let d = 1; d <= dim; d++) {
             const ds = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
-            const s = cache.slots.filter(x => x.slot_date === ds);
-            
-            const isOff = s.some(x => x.type === 'off');
-            const f = s.filter(x => !x.is_booked && x.type !== 'off').length;
-            const bk = s.filter(x => x.is_booked && x.type !== 'off').length;
-            
-            const isPast = ds < today;
-            const activeClass = ds === selectedDateStr ? 'active' : '';
-            const pastClass = isPast ? 'cal-past' : '';
-
-            h += `<div class="cal-cell ${activeClass} ${pastClass}" onclick="selectDate('${ds}')">
-                    <div class="cal-date">${d}</div>
-                    ${isOff ? `<div class="cal-stat st-off">☕ 休假中</div>` : ''}
-                    ${!isOff && f ? `<div class="cal-stat st-free">空檔 ${f}</div>` : ''}
-                    ${!isOff && bk ? `<div class="cal-stat st-book">預約 ${bk}</div>` : ''}
-                </div>`;
+            const s = cache.slots.filter(x => x.slot_date === ds); const isOff = s.some(x => x.type === 'off'); const f = s.filter(x => !x.is_booked && x.type !== 'off').length; const bk = s.filter(x => x.is_booked && x.type !== 'off').length; const isPast = ds < today; const activeClass = ds === selectedDateStr ? 'active' : ''; const pastClass = isPast ? 'cal-past' : '';
+            h += `<div class="cal-cell ${activeClass} ${pastClass}" onclick="selectDate('${ds}')"><div class="cal-date">${d}</div>${isOff ? `<div class="cal-stat st-off">☕ 休假中</div>` : ''}${!isOff && f ? `<div class="cal-stat st-free">空檔 ${f}</div>` : ''}${!isOff && bk ? `<div class="cal-stat st-book">預約 ${bk}</div>` : ''}</div>`;
         }
-        
         document.getElementById('calendar-body').innerHTML = h;
     }
     function changeMonth(o){currentMonth+=o;if(currentMonth>12){currentMonth=1;currentYear++}else if(currentMonth<1){currentMonth=12;currentYear--}renderCalendar();}
-    // 🔥 3. 點擊日期顯示詳情 (V147 修正：刪除空檔文字，只留紅框+時間)
-    // V152 修正：點擊日期 (支援休假顯示)
-    // V152 修正：點擊日期 (支援休假顯示)
+    
     function selectDate(d) {
-        selectedDateStr = d;
-        renderCalendar();
-        document.getElementById('detail-date-title').innerText = `${d}`;
-        document.getElementById('detail-actions').style.display = 'flex';
-        
-        const s = cache.slots.filter(x => x.slot_date === d);
-        
-        // 1. 檢查是否為休假日
-        const dayOffRecord = s.find(x => x.type === 'off');
-
-        if (dayOffRecord) {
-            document.getElementById('day-detail-container').innerHTML = `
-                <div class="day-off-state">
-                    <div class="day-off-icon">☕</div>
-                    <h3>本日已設為休假</h3>
-                    <p style="font-size:12px; color:#ccc;">未來首頁將顯示為不開放</p>
-                    <button class="btn btn-outline" onclick="cancelDayOff('${dayOffRecord.id}')" style="margin-top:15px;">❌ 取消休假</button>
-                </div>
-            `;
-            return; // 如果是休假，執行到這裡就結束
-        }
-
-        // 2. 正常排程顯示 (若無資料)
-        if (s.length === 0) {
-            document.getElementById('day-detail-container').innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">本日無排程</p>';
-            return;
-        }
-
-        // 3. 正常排程顯示 (有資料)
+        selectedDateStr = d; renderCalendar(); document.getElementById('detail-date-title').innerText = `${d}`; document.getElementById('detail-actions').style.display = 'flex';
+        const s = cache.slots.filter(x => x.slot_date === d); const dayOffRecord = s.find(x => x.type === 'off');
+        if (dayOffRecord) { document.getElementById('day-detail-container').innerHTML = `<div class="day-off-state"><div class="day-off-icon">☕</div><h3>本日已設為休假</h3><p style="font-size:12px; color:#ccc;">未來首頁將顯示為不開放</p><button class="btn btn-outline" onclick="cancelDayOff('${dayOffRecord.id}')" style="margin-top:15px;">❌ 取消休假</button></div>`; return; }
+        if (s.length === 0) { document.getElementById('day-detail-container').innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">本日無排程</p>'; return; }
         const sortedS = s.sort((a, b) => a.slot_time.localeCompare(b.slot_time));
-        document.getElementById('day-detail-container').innerHTML = sortedS.map(x => `
-            <div class="detail-row ${x.is_booked ? 'booked' : ''}" style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:4px; ${x.is_booked ? 'background:#ffebee; border-color:#ef9a9a;' : ''}">
-                <input type="checkbox" class="detail-chk" value="${x.id}" ${x.is_booked ? 'disabled' : ''}>
-                <span style="font-weight:bold; font-size:1.1rem; ${x.is_booked ? 'text-decoration:line-through; color:#c62828;' : ''}">${x.slot_time.slice(0, 5)}</span>
-            </div>
-        `).join('');
+        document.getElementById('day-detail-container').innerHTML = sortedS.map(x => `<div class="detail-row ${x.is_booked ? 'booked' : ''}" style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:4px; ${x.is_booked ? 'background:#ffebee; border-color:#ef9a9a;' : ''}"><input type="checkbox" class="detail-chk" value="${x.id}" ${x.is_booked ? 'disabled' : ''}><span style="font-weight:bold; font-size:1.1rem; ${x.is_booked ? 'text-decoration:line-through; color:#c62828;' : ''}">${x.slot_time.slice(0, 5)}</span></div>`).join('');
     }
 
-    function toggleDetailChecks(checked) {
-        document.querySelectorAll('.detail-chk:not(:disabled)').forEach(el => el.checked = checked);
-    }
-
-    // 批量刪除選中的時段
-    async function deleteSelectedSlots() {
-        const ids = Array.from(document.querySelectorAll('.detail-chk:checked')).map(e => e.value);
-        
-        if (ids.length === 0) return alert("請先勾選要刪除的時段");
-        if (!confirm(`確定要刪除這 ${ids.length} 個時段嗎？`)) return;
-
-        const { error } = await myDB.from('schedule_slots').delete().in('id', ids);
-        
-        if (error) {
-            alert("刪除失敗: " + error.message);
-        } else {
-            // alert("已刪除"); // 省略彈窗提升體驗
-            fetchAll(); // 刷新資料
-            // 稍等一下重新渲染右側 (因為 fetchAll 是非同步，這裡簡單延遲或直接從 cache 移除)
-            setTimeout(() => {
-                if(selectedDateStr) selectDate(selectedDateStr);
-            }, 500); 
-        }
-    }
-    // V152 新增：設定休假
-    async function setDayOff() {
-        if (!selectedDateStr) return alert("請先選擇日期");
-        
-        // 檢查當天是否已有「真人預約」
-        const hasRealBooking = cache.slots.some(s => s.slot_date === selectedDateStr && s.is_booked && s.type !== 'off');
-        if (hasRealBooking) return alert("⚠️ 無法休假：當天已有客戶預約，請先手動取消訂單。");
-
-        if (!confirm(`確定要將 ${selectedDateStr} 設為休假嗎？\n(將會清除當天所有空檔)`)) return;
-
-        // 1. 刪除當天所有舊時段
-        await myDB.from('schedule_slots').delete().eq('slot_date', selectedDateStr);
-
-        // 2. 插入一筆「休假」專用紀錄 (時間設為 00:00 佔位)
-        const { error } = await myDB.from('schedule_slots').insert([{
-            slot_date: selectedDateStr,
-            slot_time: '00:00:00',
-            is_booked: true, // 設為 true 防止被意外撈取
-            type: 'off'      // 🔥 關鍵標記
-        }]);
-
-        if (error) alert("設定失敗: " + error.message);
-        else {
-            fetchAll(); // 刷新
-            // 簡單延遲確保畫面更新
-            setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500);
-        }
-    }
-
-    // V152 新增：取消休假
-    async function cancelDayOff(id) {
-        if (!confirm("確定取消休假？\n(取消後您需要重新安排時段)")) return;
-        
-        await myDB.from('schedule_slots').delete().eq('id', id);
-        fetchAll();
-        setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500);
-    }
-    async function delSlot(id){if(confirm("刪?"))await myDB.from('schedule_slots').delete().eq('id',id);fetchAll();}
+    function toggleDetailChecks(checked) { document.querySelectorAll('.detail-chk:not(:disabled)').forEach(el => el.checked = checked); }
+    async function deleteSelectedSlots() { const ids = Array.from(document.querySelectorAll('.detail-chk:checked')).map(e => e.value); if (ids.length === 0) return alert("請先勾選要刪除的時段"); if (!confirm(`確定要刪除這 ${ids.length} 個時段嗎？`)) return; const { error } = await myDB.from('schedule_slots').delete().in('id', ids); if (error) alert("刪除失敗: " + error.message); else { fetchAll(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); } }
+    async function setDayOff() { if (!selectedDateStr) return alert("請先選擇日期"); const hasRealBooking = cache.slots.some(s => s.slot_date === selectedDateStr && s.is_booked && s.type !== 'off'); if (hasRealBooking) return alert("⚠️ 無法休假：當天已有客戶預約，請先手動取消訂單。"); if (!confirm(`確定要將 ${selectedDateStr} 設為休假嗎？`)) return; await myDB.from('schedule_slots').delete().eq('slot_date', selectedDateStr); const { error } = await myDB.from('schedule_slots').insert([{ slot_date: selectedDateStr, slot_time: '00:00:00', is_booked: true, type: 'off' }]); if (error) alert("設定失敗: " + error.message); else { fetchAll(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); } }
+    async function cancelDayOff(id) { if (!confirm("確定取消休假？")) return; await myDB.from('schedule_slots').delete().eq('id', id); fetchAll(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); }
     function render7DaySchedule(){const t=new Date();let h='';for(let i=0;i<7;i++){const d=new Date(t);d.setDate(t.getDate()+i);const ds=d.toISOString().split('T')[0];const s=cache.slots.filter(x=>x.slot_date===ds).sort((a,b)=>a.slot_time.localeCompare(b.slot_time));if(s.length)h+=`<div class="upcoming-day"><div class="upcoming-day-header">${ds}</div><div class="upcoming-slots">${s.map(x=>`<span class="u-slot ${x.is_booked?'booked':''}">${x.slot_time.slice(0,5)}</span>`).join('')}</div></div>`}document.getElementById('dashboard-7day-schedule').innerHTML=h||"無";}
     function closeModal(){document.getElementById('modal').style.display='none';}
     function switchTab(id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+id).classList.add('active');}
     async function delData(table, id){if(confirm("刪除？")){await myDB.from(table).delete().eq('id',id);fetchAll();}}
-    // V161 修正：更新狀態 (結案前強制檢查是否有報告)
-    window.updateS = async function(id, status) {
-    const b = cache.bks.find(x => x.id === id);
-    
-    if (status === 'completed') {
-        const hasReport = b.wish_detail && b.wish_detail.includes('[報告已生成');
-        if (!hasReport) return alert("⚠️ 無法結案！請先生成服務報告並存檔。");
-    }
-
-    if (confirm("確定要更新狀態嗎？")) {
-        await myDB.from('bookings').update({ status: status }).eq('id', id);
-        
-        // 🔥 關鍵：原地刷新，讓按鈕跟狀態直接在彈窗裡變掉
-        await fetchAll();
-        openBooking(id); 
-        console.log("✅ 狀態更新完成");
-    }
-    }
-    async function linkUser(u,b){if(confirm("歸戶?"))await myDB.from('bookings').update({user_id:u}).eq('id',b);fetchAll();}
+    window.updateS = async function(id, status) { const b = cache.bks.find(x => x.id === id); if (status === 'completed') { const hasReport = b.wish_detail && b.wish_detail.includes('[報告已生成'); if (!hasReport) return alert("⚠️ 無法結案！請先生成服務報告並存檔。"); } if (confirm("確定要更新狀態嗎？")) { await myDB.from('bookings').update({ status: status }).eq('id', id); await fetchAll(); openBooking(id); } }
     function copyCode(el) { navigator.clipboard.writeText(el.innerText).then(() => alert("指令已複製！")); }
     function toggleMainSidebar() { document.body.classList.toggle('hide-nav'); }
- // ==========================================
-    // 🔥 V170 升級：大類管理 (資料需求改為複選邏輯)
-    // ==========================================
 
-    // 1. 儲存大類 (將勾選狀態組合成字串存入)
     async function saveCategory() {
-        const id = document.getElementById('cat-id-edit').value;
-        const name = document.getElementById('cat-name').value.trim();
-        const type = document.getElementById('cat-type').value;
-        const terms = document.getElementById('cat-terms').value;
-
-        if (!name) return alert("❌ 大類名稱為必填！");
-
-        // 🔥 收集勾選框狀態
-        let reqs = [];
-        if (document.getElementById('req-birth').checked) reqs.push('birth');
-        if (document.getElementById('req-image').checked) reqs.push('image');
-        
-        // 轉成字串存入 (例如 "birth,image" 或 "birth")
-        // 如果都沒勾，預設給 "birth" 避免出錯
-        const dataReqStr = reqs.length > 0 ? reqs.join(',') : 'birth';
-
-        const payload = {
-            name: name,
-            question_type: type,
-            data_requirement: dataReqStr, // 寫入組合字串
-            terms: terms
-        };
-
-        let error = null;
-        if (id) {
-            const res = await myDB.from('service_categories').update(payload).eq('id', id);
-            error = res.error;
-        } else {
-            const res = await myDB.from('service_categories').insert([payload]);
-            error = res.error;
-        }
-
-        if (error) {
-            alert("儲存失敗: " + error.message);
-        } else {
-            alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
-            cancelEdit('cat');
-            fetchAll();
-        }
+        const id = document.getElementById('cat-id-edit').value; const name = document.getElementById('cat-name').value.trim(); const type = document.getElementById('cat-type').value; const terms = document.getElementById('cat-terms').value; if (!name) return alert("❌ 大類名稱為必填！");
+        let reqs = []; if (document.getElementById('req-birth').checked) reqs.push('birth'); if (document.getElementById('req-image').checked) reqs.push('image'); const dataReqStr = reqs.length > 0 ? reqs.join(',') : 'birth';
+        const payload = { name: name, question_type: type, data_requirement: dataReqStr, terms: terms };
+        let error = null; if (id) { const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; } else { const res = await myDB.from('service_categories').insert([payload]); error = res.error; }
+        if (error) alert("儲存失敗: " + error.message); else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('cat'); fetchAll(); }
     }
-
-    // 2. 編輯回填 (解析字串並勾選)
     function editCat(id) {
-        const c = cache.cats.find(x => x.id === id);
-        if (!c) return;
-
-        document.getElementById('cat-id-edit').value = c.id;
-        document.getElementById('cat-name').value = c.name;
-        document.getElementById('cat-type').value = c.question_type || 'sleep';
-        document.getElementById('cat-terms').value = c.terms || '';
-
-        // 🔥 解析資料需求字串
-        const reqStr = c.data_requirement || 'birth'; // 預設 birth
-        document.getElementById('req-birth').checked = reqStr.includes('birth');
-        document.getElementById('req-image').checked = reqStr.includes('image');
-
-        document.getElementById('btn-cat-save').innerText = "💾 儲存修改";
-        document.getElementById('btn-cat-save').className = "btn btn-warning";
-        document.getElementById('btn-cat-cancel').style.display = "inline-block";
-        document.getElementById('card-cat').scrollIntoView({ behavior: 'smooth' });
+        const c = cache.cats.find(x => x.id === id); if (!c) return;
+        document.getElementById('cat-id-edit').value = c.id; document.getElementById('cat-name').value = c.name; document.getElementById('cat-type').value = c.question_type || 'sleep'; document.getElementById('cat-terms').value = c.terms || '';
+        const reqStr = c.data_requirement || 'birth'; document.getElementById('req-birth').checked = reqStr.includes('birth'); document.getElementById('req-image').checked = reqStr.includes('image');
+        document.getElementById('btn-cat-save').innerText = "💾 儲存修改"; document.getElementById('btn-cat-save').className = "btn btn-warning"; document.getElementById('btn-cat-cancel').style.display = "inline-block"; document.getElementById('card-cat').scrollIntoView({ behavior: 'smooth' });
     }
-
-    // 3. 取消重置 (回復預設狀態)
     function cancelEdit(type) {
-        if (type === 'cat') {
-            document.getElementById('cat-id-edit').value = '';
-            document.getElementById('cat-name').value = '';
-            document.getElementById('cat-terms').value = '';
-            document.getElementById('cat-type').value = 'sleep';
-            
-            // 🔥 重置勾選框 (預設只勾出生)
-            document.getElementById('req-birth').checked = true;
-            document.getElementById('req-image').checked = false;
-            
-            document.getElementById('btn-cat-save').innerText = "＋ 新增";
-            document.getElementById('btn-cat-save').className = "btn btn-forest";
-            document.getElementById('btn-cat-cancel').style.display = "none";
-        } else if (type === 'svc') {
-            // (服務細項邏輯不變)
-            document.getElementById('svc-id-edit').value = '';
-            document.getElementById('i-name').value = '';
-            document.getElementById('i-price').value = '';
-            document.getElementById('i-sub-opts').value = '';
-            document.getElementById('i-report-tpl').value = '';
-            document.getElementById('i-is-main').checked = false;
-            toggleSubOptionInput();
-            document.getElementById('btn-svc-save').innerText = "＋ 新增項目";
-            document.getElementById('btn-svc-save').className = "btn btn-forest";
-            document.getElementById('btn-svc-cancel').style.display = 'none';
-        }
-    }
-    // ==========================================
-    // 🔥 公告管理系統 (Admin JS)
-    // ==========================================
-    
-    // 1. 讀取公告列表
-    async function fetchAnnouncements() {
-        const { data, error } = await myDB.from('announcements')
-            .select('*')
-            .order('sort_order', { ascending: true });
-            
-        if (error) { console.error(error); return; }
-        
-        const list = document.getElementById('announce-list');
-        list.innerHTML = data.map(item => `
-            <tr>
-                <td><span class="badge badge-secondary">${item.sort_order}</span></td>
-                <td style="font-weight:bold; color:var(--forest);">${item.title}</td>
-                <td>
-                    ${item.is_active 
-                        ? '<span class="tag tag-paid">🟢 上架中</span>' 
-                        : '<span class="tag tag-wait">🔴 已隱藏</span>'}
-                </td>
-                <td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td>
-                <td>
-                    <button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button>
-                    <button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button>
-                </td>
-            </tr>
-        `).join('');
+        if (type === 'cat') { document.getElementById('cat-id-edit').value = ''; document.getElementById('cat-name').value = ''; document.getElementById('cat-terms').value = ''; document.getElementById('cat-type').value = 'sleep'; document.getElementById('req-birth').checked = true; document.getElementById('req-image').checked = false; document.getElementById('btn-cat-save').innerText = "＋ 新增"; document.getElementById('btn-cat-save').className = "btn btn-forest"; document.getElementById('btn-cat-cancel').style.display = "none"; } 
+        else if (type === 'svc') { document.getElementById('svc-id-edit').value = ''; document.getElementById('i-name').value = ''; document.getElementById('i-price').value = ''; document.getElementById('i-sub-opts').value = ''; document.getElementById('i-report-tpl').value = ''; document.getElementById('i-is-main').checked = false; toggleSubOptionInput(); document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; document.getElementById('btn-svc-save').className = "btn btn-forest"; document.getElementById('btn-svc-cancel').style.display = 'none'; }
     }
 
-    // 2. 開啟編輯視窗
-    function openAnnounceModal() {
-        document.getElementById('anc-id').value = '';
-        document.getElementById('anc-title').value = '';
-        document.getElementById('anc-order').value = '10';
-        document.getElementById('anc-content').value = '';
-        document.getElementById('anc-active').value = 'true';
-        document.getElementById('anc-modal-title').innerText = "新增公告";
-        document.getElementById('announce-modal').style.display = 'flex';
-    }
+    async function fetchAnnouncements() { const { data, error } = await myDB.from('announcements').select('*').order('sort_order', { ascending: true }); if (error) { console.error(error); return; } const list = document.getElementById('announce-list'); list.innerHTML = data.map(item => `<tr><td><span class="badge badge-secondary">${item.sort_order}</span></td><td style="font-weight:bold; color:var(--forest);">${item.title}</td><td>${item.is_active ? '<span class="tag tag-paid">🟢 上架中</span>' : '<span class="tag tag-wait">🔴 已隱藏</span>'}</td><td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td><td><button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button><button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button></td></tr>`).join(''); }
+    function openAnnounceModal() { document.getElementById('anc-id').value = ''; document.getElementById('anc-title').value = ''; document.getElementById('anc-order').value = '10'; document.getElementById('anc-content').value = ''; document.getElementById('anc-active').value = 'true'; document.getElementById('anc-modal-title').innerText = "新增公告"; document.getElementById('announce-modal').style.display = 'flex'; }
+    function closeAnnounceModal() { document.getElementById('announce-modal').style.display = 'none'; }
+    async function editAnnouncement(id) { const { data } = await myDB.from('announcements').select('*').eq('id', id).single(); if (data) { document.getElementById('anc-id').value = data.id; document.getElementById('anc-title').value = data.title; document.getElementById('anc-order').value = data.sort_order; document.getElementById('anc-content').value = data.content; document.getElementById('anc-active').value = data.is_active.toString(); document.getElementById('anc-type').value = data.type || 'must_read'; document.getElementById('anc-modal-title').innerText = "編輯公告"; document.getElementById('announce-modal').style.display = 'flex'; } }
+    async function saveAnnouncement() { const id = document.getElementById('anc-id').value; const typeVal = document.getElementById('anc-type').value; const payload = { title: document.getElementById('anc-title').value, sort_order: parseInt(document.getElementById('anc-order').value), content: document.getElementById('anc-content').value, is_active: document.getElementById('anc-active').value === 'true', type: typeVal }; if (!payload.title) return alert("標題必填！"); let error; if (id) { const res = await myDB.from('announcements').update(payload).eq('id', id); error = res.error; } else { const res = await myDB.from('announcements').insert([payload]); error = res.error; } if (error) alert("儲存失敗: " + error.message); else { alert("✅ 公告已儲存！"); closeAnnounceModal(); fetchAnnouncements(); } }
+    async function deleteAnnouncement(id) { if (confirm("⚠️ 確定要刪除此公告嗎？刪除後無法復原！")) { await myDB.from('announcements').delete().eq('id', id); fetchAnnouncements(); } }
 
-    function closeAnnounceModal() {
-        document.getElementById('announce-modal').style.display = 'none';
-    }
-
-    // 3. 編輯現有公告 (回填資料)
-    // 3. 編輯現有公告 (回填資料 - 修正版：補上 type 回填)
-    async function editAnnouncement(id) {
-        const { data } = await myDB.from('announcements').select('*').eq('id', id).single();
-        if (data) {
-            document.getElementById('anc-id').value = data.id;
-            document.getElementById('anc-title').value = data.title;
-            document.getElementById('anc-order').value = data.sort_order;
-            document.getElementById('anc-content').value = data.content;
-            document.getElementById('anc-active').value = data.is_active.toString();
-            
-            // 🔥🔥🔥 補上這行：把資料庫裡的分類 (must_read/temp) 填回選單
-            // 如果舊資料沒有 type，就預設給 must_read
-            document.getElementById('anc-type').value = data.type || 'must_read';
-            
-            document.getElementById('anc-modal-title').innerText = "編輯公告";
-            document.getElementById('announce-modal').style.display = 'flex';
-        }
-    }
-
-    // 4. 儲存公告 (修正版：補上 type 寫入)
-    async function saveAnnouncement() {
-        const id = document.getElementById('anc-id').value;
-        
-        // 🔥🔥🔥 關鍵修正：這裡要抓取 type 選單的值
-        const typeVal = document.getElementById('anc-type').value;
-
-        const payload = {
-            title: document.getElementById('anc-title').value,
-            sort_order: parseInt(document.getElementById('anc-order').value),
-            content: document.getElementById('anc-content').value,
-            is_active: document.getElementById('anc-active').value === 'true',
-            type: typeVal // 👈 這裡把分類寫進去！
-        };
-
-        if (!payload.title) return alert("標題必填！");
-
-        let error;
-        if (id) {
-            const res = await myDB.from('announcements').update(payload).eq('id', id);
-            error = res.error;
-        } else {
-            const res = await myDB.from('announcements').insert([payload]);
-            error = res.error;
-        }
-
-        if (error) {
-            alert("儲存失敗: " + error.message);
-        } else {
-            alert("✅ 公告已儲存！");
-            closeAnnounceModal();
-            fetchAnnouncements(); // 刷新列表
-        }
-    }
-    
-    // 5. 刪除公告
-    async function deleteAnnouncement(id) {
-        if (confirm("⚠️ 確定要刪除此公告嗎？刪除後無法復原！")) {
-            await myDB.from('announcements').delete().eq('id', id);
-            fetchAnnouncements();
-        }
-    }
-
-    // 🔥 記得把 fetchAnnouncements() 加入到原本的 fetchAll() 裡面，讓它一進來就讀取
-    // 或者在 switchTab('announce') 的時候呼叫它
-    // ==========================================
-    // 🔥 V167 修復：服務細項管理 (新增/修改/UI切換)
-    // ==========================================
-
-    // 1. 儲存服務細項
     async function saveItem() {
-        const id = document.getElementById('svc-id-edit').value;
-        const catId = document.getElementById('svc-cat-filter').value; // 必須先選大類
-        const title = document.getElementById('i-name').value.trim();
-        const price = document.getElementById('i-price').value;
-        const isMain = document.getElementById('i-is-main').checked;
-        const reportTpl = document.getElementById('i-report-tpl').value.trim();
-        const subOpts = document.getElementById('i-sub-opts').value.trim();
-
-        // 防呆檢查
-        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！");
-        if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
-
-        const payload = {
-            category_id: catId,
-            title: title,
-            price: parseInt(price),
-            is_main: isMain,
-            report_template: reportTpl,
-            sub_options: subOpts
-        };
-
-        let error = null;
-
-        if (id) {
-            // A. 修改模式 (Update)
-            const res = await myDB.from('services').update(payload).eq('id', id);
-            error = res.error;
-        } else {
-            // B. 新增模式 (Insert)
-            // 先抓目前的數量來做排序 (放在最後面)
-            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true });
-            payload.sort_order = count ? count + 1 : 1;
-            
-            const res = await myDB.from('services').insert([payload]);
-            error = res.error;
-        }
-
-        if (error) {
-        alert("儲存失敗: " + error.message);
-    } else {
-        alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
-        cancelEdit('svc'); 
-        // 🔥 改成 await，確保資料抓回來了才往下走
-        await fetchAll(); 
-        // 🔥 手動再補一發，確保畫面刷新
-        filterServiceList(); 
+        const id = document.getElementById('svc-id-edit').value; const catId = document.getElementById('svc-cat-filter').value; const title = document.getElementById('i-name').value.trim(); const price = document.getElementById('i-price').value; const isMain = document.getElementById('i-is-main').checked; const reportTpl = document.getElementById('i-report-tpl').value.trim(); const subOpts = document.getElementById('i-sub-opts').value.trim();
+        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！"); if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
+        const payload = { category_id: catId, title: title, price: parseInt(price), is_main: isMain, report_template: reportTpl, sub_options: subOpts };
+        let error = null; if (id) { const res = await myDB.from('services').update(payload).eq('id', id); error = res.error; } else { const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }); payload.sort_order = count ? count + 1 : 1; const res = await myDB.from('services').insert([payload]); error = res.error; }
+        if (error) alert("儲存失敗: " + error.message); else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('svc'); await fetchAll(); filterServiceList(); }
     }
-    }
-
-    // 2. 編輯服務細項 (資料回填)
     function editSvc(id) {
-        const s = cache.svcs.find(x => x.id === id);
-        if (!s) return;
-
-        // 必須先把下拉選單切換到該服務的大類，不然儲存會錯亂
-        document.getElementById('svc-cat-filter').value = s.category_id;
-        filterServiceList(); // 觸發列表刷新，讓當前編輯的項目顯示出來
-
-        // 回填資料
-        document.getElementById('svc-id-edit').value = s.id;
-        document.getElementById('i-name').value = s.title;
-        document.getElementById('i-price').value = s.price;
-        document.getElementById('i-is-main').checked = s.is_main;
-        document.getElementById('i-report-tpl').value = s.report_template || '';
-        document.getElementById('i-sub-opts').value = s.sub_options || '';
-
-        // 根據是否為主項目，切換顯示輸入框
-        toggleSubOptionInput();
-
-        // 切換按鈕
-        document.getElementById('btn-svc-save').innerText = "💾 儲存修改";
-        document.getElementById('btn-svc-save').className = "btn btn-warning";
-        document.getElementById('btn-svc-cancel').style.display = 'inline-block';
-
-        // 貼心滑動
-        document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
+        const s = cache.svcs.find(x => x.id === id); if (!s) return;
+        document.getElementById('svc-cat-filter').value = s.category_id; filterServiceList();
+        document.getElementById('svc-id-edit').value = s.id; document.getElementById('i-name').value = s.title; document.getElementById('i-price').value = s.price; document.getElementById('i-is-main').checked = s.is_main; document.getElementById('i-report-tpl').value = s.report_template || ''; document.getElementById('i-sub-opts').value = s.sub_options || '';
+        toggleSubOptionInput(); document.getElementById('btn-svc-save').innerText = "💾 儲存修改"; document.getElementById('btn-svc-save').className = "btn btn-warning"; document.getElementById('btn-svc-cancel').style.display = 'inline-block'; document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
     }
-
-    // 3. UI 切換 (主項目填報告樣板 / 加購項目填子選項)
-    function toggleSubOptionInput() {
-        const isMain = document.getElementById('i-is-main').checked;
-        // 如果是主項目 -> 顯示「報告檔案」欄位，隱藏「子選項」
-        document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none';
-        // 如果是加購 -> 顯示「子選項」，隱藏「報告檔案」
-        document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block';
-    }
-    function editOTA(id) { const o = cache.otas.find(x => x.id === id); document.getElementById('ota-id').value = o.id; document.getElementById('ota-name').value = o.name; document.getElementById('ota-code').value = o.code; document.getElementById('ota-rate').value = o.commission_rate; document.getElementById('ota-front').value = o.front_url || ''; document.getElementById('ota-admin').value = o.admin_url || ''; document.getElementById('btn-ota-save').innerText = "更新平台"; document.getElementById('btn-ota-cancel').style.display = 'inline-block'; }
-    function cancelOTA() { document.getElementById('ota-id').value = ''; document.getElementById('ota-name').value = ''; document.getElementById('ota-code').value = ''; document.getElementById('ota-front').value = ''; document.getElementById('ota-admin').value = ''; document.getElementById('btn-ota-save').innerText = "💾 儲存設定"; document.getElementById('btn-ota-cancel').style.display = 'none'; }
-    async function saveOTA() { const id = document.getElementById('ota-id').value; const p = { name: document.getElementById('ota-name').value, code: document.getElementById('ota-code').value, commission_rate: document.getElementById('ota-rate').value, front_url: document.getElementById('ota-front').value, admin_url: document.getElementById('ota-admin').value }; if(!p.name) return alert("名稱必填"); if(id) await myDB.from('ota_settings').update(p).eq('id', id); else await myDB.from('ota_settings').insert([p]); cancelOTA(); fetchAll(); }
-    function toggleCpExp() { const noLimit = document.getElementById('cp-no-limit').checked; const expInput = document.getElementById('cp-exp'); expInput.disabled = noLimit; if(noLimit) expInput.value = ''; }
-    function updateCpHint() { const type = document.getElementById('cp-type').value; document.getElementById('cp-val-hint').innerText = type === 'percentage' ? "折扣數值 (90=9折)" : "折抵金額 (100=折100)"; }
-    async function saveCoupon() { const id = document.getElementById('cp-edit-id').value; const p = { name: document.getElementById('cp-name').value, code: document.getElementById('cp-code').value, discount_type: document.getElementById('cp-type').value, discount_value: document.getElementById('cp-val').value, expires_at: document.getElementById('cp-no-limit').checked ? null : document.getElementById('cp-exp').value, allow_member: document.getElementById('cp-mem').checked, allow_guest: document.getElementById('cp-guest').checked }; if(!p.name || !p.code) return alert("資料不全"); if(id) await myDB.from('coupons').update(p).eq('id', id); else await myDB.from('coupons').insert([p]); resetCouponForm(); fetchAll(); }
-    function editCoupon(id) { const c = cache.coupons.find(x => x.id === id); document.getElementById('cp-edit-id').value = c.id; document.getElementById('cp-name').value = c.name; document.getElementById('cp-code').value = c.code; document.getElementById('cp-val').value = c.discount_value; document.getElementById('cp-mem').checked = c.allow_member; document.getElementById('cp-guest').checked = c.allow_guest; if(!c.expires_at) { document.getElementById('cp-no-limit').checked = true; document.getElementById('cp-exp').disabled = true; } else { document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').value = c.expires_at.slice(0,10); document.getElementById('cp-exp').disabled = false; } document.getElementById('btn-cp-save').innerText = "更新"; document.getElementById('btn-cp-cancel').style.display = "inline-block"; }
-    function resetCouponForm() { document.getElementById('cp-edit-id').value = ''; document.getElementById('cp-name').value = ''; document.getElementById('cp-code').value = ''; document.getElementById('cp-val').value = ''; document.getElementById('cp-exp').value = ''; document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').disabled = false; document.getElementById('btn-cp-save').innerText = "建立"; document.getElementById('btn-cp-cancel').style.display = "none"; }
-    async function testCoupon() { const c = document.getElementById('test-cp-code').value; const p = document.getElementById('test-cp-price').value; const { data } = await myDB.from('coupons').select('*').eq('code', c).single(); if(!data) return alert("無效代碼"); let f = p; if(data.discount_type === 'percentage') f = Math.round(p * (data.discount_value/100)); else f = p - data.discount_value; alert(`原價 $${p} -> 折後 $${f}`); }
+    function toggleSubOptionInput() { const isMain = document.getElementById('i-is-main').checked; document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none'; document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block'; }
+    function copySqlCode() { const code = document.getElementById('sql-code-block').innerText; navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！")); }
+    function switchFinanceSub(tab) { document.getElementById('sub-ota').style.display = tab === 'ota' ? 'block' : 'none'; document.getElementById('sub-coupon').style.display = tab === 'coupon' ? 'block' : 'none'; document.getElementById('btn-sub-ota').className = tab === 'ota' ? 'active' : ''; document.getElementById('btn-sub-coupon').className = tab === 'coupon' ? 'active' : ''; }
     
-    // SQL 複製功能
-    function copySqlCode() {
-        const code = document.getElementById('sql-code-block').innerText;
-        navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！"));
-    }
-    
-    // 解決優惠券 Tab 切換問題 (關鍵修正)
-    function switchFinanceSub(tab) {
-        // 切換顯示
-        document.getElementById('sub-ota').style.display = tab === 'ota' ? 'block' : 'none';
-        document.getElementById('sub-coupon').style.display = tab === 'coupon' ? 'block' : 'none';
-        
-        // 切換按鈕樣式
-        document.getElementById('btn-sub-ota').className = tab === 'ota' ? 'active' : '';
-        document.getElementById('btn-sub-coupon').className = tab === 'coupon' ? 'active' : '';
-    }
-    // ================= 新增功能 (HTML & 樣式) =================
-
-    // 1. 註冊樣式白名單 (防止存檔後樣式被洗掉)
-    try {
-        var Parchment = Quill.import('parchment');
-        var BoxedClass = new Parchment.Attributor.Class('boxed', 'title-boxed', {
-            scope: Parchment.Scope.BLOCK
-        });
-        Quill.register(BoxedClass, true);
-    } catch(e) { console.log("樣式註冊略過"); }
-    // 1. 切換便利貼顯示
-    async function toggleKbNote(cat, e) {
-        e.stopPropagation();
-        if (!kbCatOrder.hide_note) kbCatOrder.hide_note = [];
-        const idx = kbCatOrder.hide_note.indexOf(cat);
-        if (idx > -1) kbCatOrder.hide_note.splice(idx, 1);
-        else kbCatOrder.hide_note.push(cat);
-        renderKbTree();
-        await saveKbOrderConfig();
-    }
-    // 2. 切換 HTML 模式
+    async function toggleKbNote(cat, e) { e.stopPropagation(); if (!kbCatOrder.hide_note) kbCatOrder.hide_note = []; const idx = kbCatOrder.hide_note.indexOf(cat); if (idx > -1) kbCatOrder.hide_note.splice(idx, 1); else kbCatOrder.hide_note.push(cat); renderKbTree(); await saveKbOrderConfig(); }
     let isHtmlMode = false;
     function toggleHtmlMode() {
-        const editorEl = document.getElementById('editor');
-        const textareaEl = document.getElementById('html-textarea');
-        const btn = document.getElementById('btn-html-view');
-
-        if (!isHtmlMode) {
-            // 轉成 HTML 代碼
-            textareaEl.value = quill.root.innerHTML;
-            editorEl.style.display = 'none';
-            textareaEl.style.display = 'block';
-            btn.classList.replace('btn-outline', 'btn-warning');
-            isHtmlMode = true;
-        } else {
-            // 轉回 編輯器
-            quill.root.innerHTML = textareaEl.value;
-            editorEl.style.display = 'block';
-            textareaEl.style.display = 'none';
-            btn.classList.replace('btn-warning', 'btn-outline');
-            isHtmlMode = false;
-        }
+        const editorEl = document.getElementById('editor'); const textareaEl = document.getElementById('html-textarea'); const btn = document.getElementById('btn-html-view');
+        if (!isHtmlMode) { textareaEl.value = quill.root.innerHTML; editorEl.style.display = 'none'; textareaEl.style.display = 'block'; btn.classList.replace('btn-outline', 'btn-warning'); isHtmlMode = true; } 
+        else { quill.root.innerHTML = textareaEl.value; editorEl.style.display = 'block'; textareaEl.style.display = 'none'; btn.classList.replace('btn-warning', 'btn-outline'); isHtmlMode = false; }
     }
-
-    // 3. 套用外框標題
     function applyBoxedTitle(level) {
-        const range = quill.getSelection();
-        if (!range) return alert("請先點選一行文字");
-        const headerLevel = level === 'h2' ? 2 : 3;
-        const className = level === 'h2' ? 'title-boxed-h2' : 'title-boxed-h3';
-
-        quill.format('header', headerLevel);
-        setTimeout(() => {
-            const [line, offset] = quill.getLine(range.index);
-            if (line && line.domNode) {
-                line.domNode.classList.remove('title-boxed-h2', 'title-boxed-h3');
-                line.domNode.classList.add(className);
-            }
-        }, 10);
+        const range = quill.getSelection(); if (!range) return alert("請先點選一行文字"); const headerLevel = level === 'h2' ? 2 : 3; const className = level === 'h2' ? 'title-boxed-h2' : 'title-boxed-h3';
+        quill.format('header', headerLevel); setTimeout(() => { const [line, offset] = quill.getLine(range.index); if (line && line.domNode) { line.domNode.classList.remove('title-boxed-h2', 'title-boxed-h3'); line.domNode.classList.add(className); } }, 10);
     }
-
-    // 4. 改寫存檔函式 (為了支援 HTML 模式下直接存檔)
-    const _oldSave = saveArticle;
-    saveArticle = async function() {
-        if (isHtmlMode) {
-            quill.root.innerHTML = document.getElementById('html-textarea').value;
-        }
-        await _oldSave();
-    };
-    // ==========================================
-    // 🔥 V180 升級：即時監聽 (Realtime Listener)
-    // 當 SRT 報告按結案時，這裡會自動刷新
-    // ==========================================
+    const _oldSave = saveArticle; saveArticle = async function() { if (isHtmlMode) { quill.root.innerHTML = document.getElementById('html-textarea').value; } await _oldSave(); };
     function initRealtimeListener() {
         console.log("📡 啟動訂單監聽系統...");
-        
-        myDB.channel('custom-all-channel')
-        .on(
-            'postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'bookings' },
-            (payload) => {
-                // 偵測到訂單狀態變為 'completed' (結案)
-                if (payload.new.status === 'completed' && payload.old.status !== 'completed') {
-                    console.log("🔔 偵測到自動結案，正在刷新列表...");
-                    
-                    // 1. 播放一個提示音效 (可選，不需要可刪除)
-                    // const audio = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
-                    // audio.play().catch(e=>{}); 
-
-                    // 2. 顯示不干擾的小通知
-                    const notify = document.createElement('div');
-                    notify.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1a2f23; color:white; padding:15px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; animation: fadeIn 0.5s;";
-                    notify.innerHTML = `✅ 訂單已自動結案，列表已刷新`;
-                    document.body.appendChild(notify);
-                    setTimeout(() => notify.remove(), 3000);
-
-                    // 3. 執行刷新
-                    fetchAll(); 
-                }
+        myDB.channel('custom-all-channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings' }, (payload) => {
+            if (payload.new.status === 'completed' && payload.old.status !== 'completed') {
+                const notify = document.createElement('div'); notify.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1a2f23; color:white; padding:15px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; animation: fadeIn 0.5s;"; notify.innerHTML = `✅ 訂單已自動結案，列表已刷新`; document.body.appendChild(notify); setTimeout(() => notify.remove(), 3000); fetchAll(); 
             }
-        )
-        .subscribe();
+        }).subscribe();
     }
-
-    // 🔥 記得啟動它！ (放在 window.onload 裡面，或是 script 的最後面)
     initRealtimeListener();
 </script>
 </body>

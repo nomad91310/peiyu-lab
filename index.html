@@ -6,10 +6,10 @@
     <title>培癒試驗室</title>
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
     <link rel="preload" as="image" href="logo.png">
     <link rel="preload" as="image" href="logohuman.png">
 
@@ -34,11 +34,24 @@
         background-color: var(--cream); margin: 0; 
         color: var(--text-main); line-height: 1.7; letter-spacing: 0.02em;
     }
-    #home { padding-bottom: 220px; }
+    
     h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
+    #home { padding-bottom: 220px; }
+
+    /* 動畫容器 & Section */
+    .section { 
+        display: none; padding: 40px 20px 100px 20px; 
+        max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 80px); 
+        animation: fadeSlideUp 0.6s ease-out; 
+    }
+    .section.active { display: block; }
+    @keyframes fadeSlideUp { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
 
     /* ======================================================
-       2. 導航與佈局 (Nav & Layout)
+       2. 導航 (Nav) & Footer
        ====================================================== */
     nav { 
         background: var(--forest); padding: 0 40px; 
@@ -66,18 +79,6 @@
     .nav-links button.active::after { width: 100%; background-color: var(--white); }
     .hamburger-btn { display: none; background: none; border: none; color: var(--white); font-size: 28px; cursor: pointer; padding: 5px; }
 
-    /* 動畫容器 */
-    .section { 
-        display: none; padding: 40px 20px 100px 20px; 
-        max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 80px); 
-        animation: fadeSlideUp 0.6s ease-out; 
-    }
-    .section.active { display: block; }
-    @keyframes fadeSlideUp { 
-        from { opacity: 0; transform: translateY(20px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
-
     /* Footer */
     .footer-banner { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; background-color: var(--forest); border-top: 3px solid var(--accent); padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
     .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -87,9 +88,9 @@
     .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
     /* ======================================================
-       3. 通用元件 (Components)
+       3. 通用元件 (UI Components)
        ====================================================== */
-    /* 按鈕 (一般) */
+    /* Buttons */
     .btn-primary { 
         padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
         color: var(--white); border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; 
@@ -97,10 +98,10 @@
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.4); }
     .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    
     .btn-secondary { padding: 10px 25px; background: transparent; color: var(--forest); border: 2px solid var(--forest); border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 10px; }
     .btn-secondary:hover { background: var(--forest); color: var(--white); }
 
-    /* 返回膠囊按鈕 */
     .btn-back-capsule, .kb-internal-back {
         display: inline-flex; align-items: center; gap: 8px;
         color: var(--forest); background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
@@ -110,7 +111,6 @@
         text-decoration: none; transition: all 0.3s ease;
     }
     .kb-internal-back { margin-bottom: 5px; } 
-    
     .btn-back-capsule:hover, .kb-internal-back:hover { 
         color: #ffffff; background: var(--forest); border-color: var(--forest); 
         transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); 
@@ -118,7 +118,6 @@
     .btn-back-capsule:hover i, .kb-internal-back:hover i { transform: translateX(-3px); }
     .btn-back-capsule i, .kb-internal-back i { transition: transform 0.3s ease; }
 
-    /* 懸浮按鈕 (FAB) */
     .kb-fab-back {
         position: fixed; bottom: 40px; right: 25px;
         width: 60px; height: 60px; border-radius: 50%;
@@ -130,9 +129,8 @@
     }
     .kb-fab-back:active { transform: scale(0.9); background: var(--accent); color: var(--forest); }
     @keyframes fabPopIn { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-    @media (min-width: 769px) { .kb-fab-back { display: none; } }
 
-    /* 卡片與表單 */
+    /* Cards & Forms */
     .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; margin-bottom: 30px; position: relative; }
     .form-group { margin-bottom: 25px; }
     label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
@@ -141,7 +139,7 @@
     input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
     input:disabled { background: #eee; cursor: not-allowed; color: #999; }
 
-    /* 彈窗 */
+    /* Overlays & Modals */
     .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.4s; }
     .result-overlay.active { display: flex; opacity: 1; }
     .text-modal-card { position: relative; width: 90%; max-width: 650px; max-height: 85vh; background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); opacity: 0; transition: all 0.4s ease; }
@@ -150,341 +148,157 @@
     .close-modal-btn { display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; padding: 14px 0; background: var(--text-main); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
     .close-modal-btn:hover { background: var(--error); }
 
-    /* ======================================================
-       4. 通用標題樣式 (Brand Headers - V900 底部對齊版)
-       ====================================================== */
-    .brand-section-header, .draw-section-header {
-        text-align: center;
-        margin-bottom: 45px;
-        padding-top: 15px;
-    }
-
-    /* 中文大標 */
+    /* Brand Headers */
+    .brand-section-header, .draw-section-header { text-align: center; margin-bottom: 45px; padding-top: 15px; }
     .brand-h3-zh, .draw-title-zh {
-        display: inline-block !important;
-        font-family: 'Noto Serif TC', serif !important;
-        font-size: 2.2rem !important; 
-        color: var(--forest);
-        margin: 0 !important;
-        font-weight: 900;
-        letter-spacing: 5px;
-        text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.15);
-        /* 🔥 關鍵：底部對齊 */
+        display: inline-block !important; font-family: 'Noto Serif TC', serif !important;
+        font-size: 2.2rem !important; color: var(--forest); margin: 0 !important;
+        font-weight: 900; letter-spacing: 5px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.15);
         vertical-align: baseline !important;
     }
-    
-    /* 英文陪襯 */
     .brand-h2-en, .draw-title-h2 {
-        display: inline-block !important;
-        font-family: 'Cinzel', serif !important;
-        font-size: 1.1rem !important; /* 👈 稍微縮一點，讓高低落差更有層次 */
-        color: var(--forest);
-        margin-left: 15px !important; 
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        opacity: 0.4; 
-        /* 🔥 關鍵：底部對齊 */
-        vertical-align: baseline !important;
-        text-shadow: none !important;
+        display: inline-block !important; font-family: 'Cinzel', serif !important;
+        font-size: 1.1rem !important; color: var(--forest); margin-left: 15px !important;
+        font-weight: 700; letter-spacing: 1.5px; opacity: 0.4;
+        vertical-align: baseline !important; text-shadow: none !important;
     }
-
-    /* 金邊膠囊 */
     .brand-capsule, .draw-desc-p {
-        display: table !important;
-        margin: 10px auto 0 auto !important; 
-        font-family: 'Noto Serif TC', serif !important;
-        font-size: 0.85rem !important;
-        color: #777;
-        background: #fffdf9;
-        padding: 4px 22px !important;
-        border-radius: 50px;
-        border: 1px solid rgba(198, 168, 124, 0.4) !important;
+        display: table !important; margin: 10px auto 0 auto !important;
+        font-family: 'Noto Serif TC', serif !important; font-size: 0.85rem !important;
+        color: #777; background: #fffdf9; padding: 4px 22px !important;
+        border-radius: 50px; border: 1px solid rgba(198, 168, 124, 0.4) !important;
         box-shadow: 0 4px 10px rgba(198, 168, 124, 0.1);
     }
-
-    
-    
-    .brand-capsule::before, .brand-capsule::after, 
-    .draw-desc-p::before, .draw-desc-p::after {
+    .brand-capsule::before, .brand-capsule::after, .draw-desc-p::before, .draw-desc-p::after {
         content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem;
     }
 
     /* ======================================================
-       5. 首頁與 Hero 區塊
+       4. 首頁區塊 (Hero & Home)
        ====================================================== */
     .hero-section {
-        flex-direction: column;
-        text-align: center;
-        padding: 40px 20px 60px 20px;
-        gap: 20px;
-        background: linear-gradient(180deg, #fffcf5 0%, #f4f7f6 100%);
-        border-radius: 0 0 40px 40px;
-        margin-bottom: 50px;
-        border-bottom: none;
+        flex-direction: column; text-align: center; padding: 40px 20px 60px 20px;
+        gap: 20px; background: linear-gradient(180deg, #fffcf5 0%, #f4f7f6 100%);
+        border-radius: 0 0 40px 40px; margin-bottom: 50px; border-bottom: none;
     }
-
-    /* 培培頭像 */
     .hero-img { 
-        margin: 0 auto; 
-        width: 220px; height: 220px; 
-        border-radius: 50%; 
-        overflow: hidden; 
-        border: 6px solid white; 
-        box-shadow: 0 15px 35px rgba(198, 168, 124, 0.25);
-        animation: floatImg 6s ease-in-out infinite;
-        display: flex; justify-content: center; align-items: center;
-        background-color: white; 
-        position: relative;
+        margin: 0 auto; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; 
+        border: 6px solid white; box-shadow: 0 15px 35px rgba(198, 168, 124, 0.25);
+        animation: floatImg 6s ease-in-out infinite; display: flex; justify-content: center; align-items: center;
+        background-color: white; position: relative;
     }
-    .hero-img img { 
-        width: 110% !important; height: 110% !important; 
-        object-fit: contain; border-radius: 60%; 
-        transition: transform 0.3s ease; 
-    }
+    .hero-img img { width: 110% !important; height: 110% !important; object-fit: contain; border-radius: 60%; transition: transform 0.3s ease; }
     .hero-img:hover img { transform: scale(1.1); }
     @keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-    /* 歡迎標題 */
     .hero-text { flex: 1; max-width: 600px; z-index: 2; display: flex; flex-direction: column; align-items: center; margin: 0 auto; }
-    .hero-text h1 { 
-        font-size: 2.2rem; margin-bottom: 5px; color: var(--forest); letter-spacing: 2px;
-        text-shadow: none; width: 100%;
-    }
-    .hero-text h2 { 
-        font-size: 1.1rem; color: #888; font-weight: normal; margin-bottom: 25px; 
-        position: relative; display: inline-block; width: 100%;
-    }
-    .hero-text h2::after {
-        content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-        width: 40px; height: 3px; background: var(--accent); border-radius: 2px;
-    }
+    .hero-text h1 { font-size: 2.2rem; margin-bottom: 5px; color: var(--forest); letter-spacing: 2px; text-shadow: none; width: 100%; }
+    .hero-text h2 { font-size: 1.1rem; color: #888; font-weight: normal; margin-bottom: 25px; position: relative; display: inline-block; width: 100%; }
+    .hero-text h2::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background: var(--accent); border-radius: 2px; }
     
-    /* 公告卡片區 */
-   /* =========================================
-       🔥 V310 必讀公告區防撞補丁 (終極加寬版)
-       ========================================= */
-    
-    /* 1. 外框：上方內距開到 70px，絕對夠寬 */
-    /* 1. 外框：這裡控制標題與按鈕的距離 */
+    /* 公告與按鈕容器 */
     #announcement-wrapper, #must-read-wrapper, #temp-wrapper {
-        background: white;
-        border: 1px solid rgba(198, 168, 124, 0.3);
-        border-radius: 20px;
-        
-        /* 🔥 改這裡：把 70px 改成 50px (或是您覺得舒服的數字) */
-        padding: 40px 20px 30px 20px !important; 
-        
-        box-shadow: 0 15px 40px rgba(26, 47, 35, 0.06);
-        width: 100%;
-        max-width: 500px;
-        margin: 35px auto 0 auto !important;
-        position: relative;
-        text-align: center;
+        background: white; border: 1px solid rgba(198, 168, 124, 0.3); border-radius: 20px;
+        padding: 40px 20px 30px 20px !important; box-shadow: 0 15px 40px rgba(26, 47, 35, 0.06);
+        width: 100%; max-width: 500px; margin: 35px auto 0 auto !important; position: relative; text-align: center;
     }
-    
-    /* 2. 標題：稍微往上提一點，不要壓那麼低 */
     .announce-badge {
-        position: absolute; 
-        top: -20px; /* 🔥 改這裡：原本 -15px 改成 -20px，讓它浮高一點 */
-        left: 50%; 
-        transform: translateX(-50%);
-        padding: 8px 25px;
-        border-radius: 50px;
-        font-size: 0.95rem; 
-        font-weight: 900; 
-        letter-spacing: 1.5px;
-        box-shadow: 0 5px 15px rgba(26, 47, 35, 0.2);
-        background: var(--forest);
-        color: var(--accent);
-        border: 2px solid white;
-        z-index: 20; 
-        white-space: nowrap;
-        display: block !important;
+        position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+        padding: 8px 25px; border-radius: 50px; font-size: 0.95rem; font-weight: 900; 
+        letter-spacing: 1.5px; box-shadow: 0 5px 15px rgba(26, 47, 35, 0.2);
+        background: var(--forest); color: var(--accent); border: 2px solid white;
+        z-index: 20; white-space: nowrap; display: block !important;
     }
-
-    /* 3. 按鈕容器：再加個上邊距保險 */
-    #hero-btn-container, #must-read-container, #temp-container { 
-        display: flex; 
-        gap: 15px; 
-        justify-content: center; 
-        flex-wrap: wrap; 
-        margin-top: 5px; /* 這裡稍微縮小，因為 padding 已經夠大了 */
-    }
-    .btn-primary {
+    #hero-btn-container, #must-read-container, #temp-container { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
+    #hero-btn-container .btn-primary, #must-read-container .btn-primary, #temp-container .btn-primary {
         background: white; color: var(--forest); border: 2px solid var(--forest);
         box-shadow: none; padding: 10px 25px; font-size: 1rem; transition: all 0.2s;
     }
-    .btn-primary:hover {
-        background: var(--forest); color: white; transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(26, 47, 35, 0.2);
+    #hero-btn-container .btn-primary:hover, #must-read-container .btn-primary:hover, #temp-container .btn-primary:hover {
+        background: var(--forest); color: white; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.2);
     }
 
     /* 三大功能選單 */
-    .hero-menu-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        width: 100%;
-        max-width: 800px;
-        margin: 30px auto 0 auto;
-    }
+    .hero-menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 800px; margin: 30px auto 0 auto; }
     .hero-menu-item {
-        background: white;
-        border: 2px solid rgba(255, 255, 255, 0.8);
-        border-radius: 20px;
-        padding: 20px 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05);
-        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        background: white; border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 20px;
+        padding: 20px 10px; text-align: center; cursor: pointer; transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05); display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
     .hero-menu-item:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(26, 47, 35, 0.15); border-color: var(--accent); }
-    
     .hero-menu-icon {
         font-size: 2.2rem; color: var(--forest); background: #f4f7f6;
-        width: 70px; height: 70px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
+        width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
         margin-bottom: 5px; transition: 0.3s;
     }
     .hero-menu-item:hover .hero-menu-icon { background: var(--forest); color: var(--accent); transform: scale(1.1) rotate(10deg); }
-    
     .hero-menu-text { font-size: 1.1rem; font-weight: 900; color: var(--forest); letter-spacing: 1px; }
     .hero-menu-desc { font-size: 0.9rem; color: #777; line-height: 1.5; margin-top: 5px; font-weight: normal; }
 
     /* ======================================================
-       6. 預約流程與表單樣式 (V1000 品牌質感最終校準版)
+       5. 預約流程與表單 (Booking)
        ====================================================== */
-    
-    /* 類別選擇卡片：增加移動幅度與金色陰影 */
     .cat-card { 
-        border: 1px solid rgba(0,0,0,0.05); 
-        padding: 22px 30px; 
-        border-radius: 16px; 
-        margin-bottom: 15px; 
-        cursor: pointer; 
-        background: var(--white); 
+        border: 1px solid rgba(0,0,0,0.05); padding: 22px 30px; border-radius: 16px; 
+        margin-bottom: 15px; cursor: pointer; background: var(--white); 
         transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between;
-        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.03); /* 極淡的綠色系陰影 */
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.03);
     }
-    .cat-card:hover { 
-        border-color: var(--accent); 
-        background: #fffdf9; 
-        transform: translateX(8px); /* 👈 讓進入感更明顯 */
-        box-shadow: 0 10px 25px rgba(198, 168, 124, 0.15); /* 金色調陰影 */
-    }
+    .cat-card:hover { border-color: var(--accent); background: #fffdf9; transform: translateX(8px); box-shadow: 0 10px 25px rgba(198, 168, 124, 0.15); }
     .cat-card h3 { margin: 0; border: none; padding: 0; font-size: 1.25rem; color: var(--forest); font-weight: bold; }
     
-    /* 服務細項卡片：改為更柔和的背景 */
-    .service-card { 
-        background: #ffffff; 
-        border: 1px solid #f0f0f0; 
-        padding: 20px; 
-        border-radius: 15px; 
-        margin-bottom: 15px; 
-        transition: all 0.2s ease; 
-    }
-    .service-card:hover { 
-        border-color: var(--accent); 
-        box-shadow: 0 8px 20px rgba(26, 47, 35, 0.05); 
-    }
+    .service-card { background: #ffffff; border: 1px solid #f0f0f0; padding: 20px; border-radius: 15px; margin-bottom: 15px; transition: all 0.2s ease; }
+    .service-card:hover { border-color: var(--accent); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.05); }
     .service-card.disabled-card { opacity: 0.4; filter: grayscale(1); }
     
     .service-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .service-info { 
-        display: flex; 
-        align-items: center; 
-        gap: 15px; 
-        font-weight: bold; 
-        font-size: 1.1rem; 
-        cursor: pointer; 
-        flex: 1; 
-        color: var(--forest);
-    }
+    .service-info { display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; color: var(--forest); }
     .service-info input { width: 22px; height: 22px; cursor: pointer; accent-color: var(--forest); }
     
-    /* 價格標籤：改成金棕色字，更有價值感 */
-    .price-badge { 
-        background: var(--forest); 
-        color: var(--accent); /* 👈 關鍵：深綠配金字 */
-        padding: 4px 14px; 
-        border-radius: 8px; 
-        font-size: 14px; 
-        font-weight: 900;
-        font-family: 'Cinzel', serif;
-        letter-spacing: 1px;
-    }
-    
+    .price-badge { background: var(--forest); color: var(--accent); padding: 4px 14px; border-radius: 8px; font-size: 14px; font-weight: 900; font-family: 'Cinzel', serif; letter-spacing: 1px; }
     .service-desc { font-size: 0.95rem; color: #888; margin-left: 38px; padding-top: 5px; line-height: 1.5; }
     
-    /* 加購區網格：背景改為超淡森林綠 */
-    .sub-check-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-        gap: 12px; 
-        margin-top: 15px; 
-        padding: 18px; 
-        background: rgba(26, 47, 35, 0.04); /* 👈 5% 濃度的森林綠 */
-        border-radius: 12px; 
-        border: 1px solid rgba(26, 47, 35, 0.05);
-    }
+    /* 加購區與特殊佈局 */
+    .sub-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; padding: 18px; background: rgba(26, 47, 35, 0.04); border-radius: 12px; border: 1px solid rgba(26, 47, 35, 0.05); }
     .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--forest-light); font-weight: 500; }
     .sub-opt-label input { width: 18px; height: 18px; accent-color: var(--accent); }
-    
-    /* 結算區：回歸主色調，移除橘色 */
-    .total-box { 
-        text-align: right; 
-        font-size: 2rem; 
-        font-weight: 900; 
-        color: var(--forest); /* 👈 回歸深綠色，顯得專業稳重 */
-        border-top: 2px dashed #eee; 
-        padding-top: 25px; 
-        margin-top: 35px; 
-        font-family: 'Cinzel', serif; 
-        letter-spacing: 1px;
-    }
-    
-    /* 優惠券區：改為實線淡金邊 */
-    .coupon-box { 
+
+    .service-setting-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: end; background: #fffcf5; padding: 20px; border-radius: 12px; border: 1px solid #fae1c3; margin: 25px 0; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr; gap: 20px; margin-bottom: 20px; align-items: start; }
+
+    /* 結算區 */
+    .checkout-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #eee; margin-top: 30px; padding-top: 20px; }
+.checkout-footer .coupon-box { 
+        margin: 0 !important; 
+        flex: 0 0 320px; 
         background: #fffdf9; 
         padding: 15px 20px; 
         border-radius: 12px; 
-        border: 1px solid rgba(198, 168, 124, 0.4); /* 👈 實線比虛線更高級 */
-        margin-top: 25px; 
+        border: 1px solid rgba(198, 168, 124, 0.4); 
+        
+        /* 關鍵修改：改成垂直排列 */
         display: flex; 
-        gap: 15px; 
-        align-items: center; 
+        flex-direction: column; 
+        gap: 10px; 
+        /* 讓內容撐滿寬度 */
+        align-items: stretch; 
     }
+        .checkout-footer .total-box { margin: 0 !important; padding: 0 !important; border: none !important; text-align: right; font-size: 2rem; font-weight: 900; color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px; }
     .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
-    /* 故事與規則文字 */
+
+    /* 規則與條款 */
     .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
     .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0; }
-    .rule-item { margin-bottom: 30px; }
-    .rule-head { color: var(--accent); font-size: 1.3rem; margin-bottom: 12px; display: flex; align-items: center; font-weight: bold; }
-    .rule-num { background: var(--forest); color: var(--accent); width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 18px; font-weight: bold; flex-shrink: 0; }
-    .rule-body { font-size: 1.05rem; color: #555; line-height: 1.8; margin-left: 50px; }
-    .hd-chart-container { text-align: center; margin: 30px 0; }
-    .hd-chart-container img { max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #ddd; box-shadow: var(--shadow-soft); }
-    .hd-caption { font-size: 13px; color: #888; margin-top: 8px; font-style: italic; }
     .disclaimer-box { background-color: #fffcf5; border: 2px dashed var(--accent); border-radius: 8px; padding: 15px 20px; margin: 20px auto 30px auto; text-align: center; max-width: 90%; width: 600px; position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(198, 168, 124, 0.15); }
     .disclaimer-box::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background-color: var(--accent); }
     .disclaimer-box p { margin: 5px 0; color: var(--forest); font-weight: bold; font-size: 1rem; line-height: 1.6; }
 
     /* ======================================================
-       7. 培癒寶典 (Knowledge Base)
+       6. 培癒寶典 (Knowledge Base)
        ====================================================== */
-    .kb-cat-view, .kb-article-view {
-        background: #fdfaf5; min-height: 80vh; padding: 40px 20px;
-        position: relative; overflow: visible !important; 
-    }
-    .kb-article-view {
-        background: #ffffff; padding: 40px 50px; 
-        border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
-        border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; 
-    }
+    .kb-cat-view, .kb-article-view { background: #fdfaf5; min-height: 80vh; padding: 40px 20px; position: relative; overflow: visible !important; }
+    .kb-article-view { background: #ffffff; padding: 40px 50px; border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
     .kb-cat-header { text-align: center; margin-bottom: 40px; }
     .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
     .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
@@ -492,34 +306,26 @@
     .kb-reading-mode .kb-header { display: none !important; }
     .kb-reading-mode #kb-container { padding-top: 30px; }
 
-    /* 🔥 修復：便利貼 (Sticky Note) */
+    /* 便利貼 (Sticky Note) */
     .kb-tiny-note {
-        position: absolute; 
-        top: 25px; 
-        right: 30px; 
-        z-index: 99; /* 👈 拉高層級，確保不被蓋住 */
-        background: #ffffff; 
-        border: 2px dashed var(--accent); 
-        padding: 15px 20px; 
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
+        position: absolute; top: 25px; right: 30px; z-index: 99;
+        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 20px; 
+        border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
         font-size: 12px; color: #888; text-align: left; line-height: 1.7; font-family: sans-serif;
         max-width: 300px; transform: rotate(1deg); transition: transform 0.3s ease;
     }
     .kb-tiny-note:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25); }
 
-    /* KB 分類列表 */
+    /* KB 列表與卡片 */
     .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 5px 0; }
-    .kb-article-card { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #f0f0f0; border-left: 6px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
-    .kb-article-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(26, 47, 35, 0.15); border-left-color: var(--forest); }
-/* KB 卡片內容區 - 改為橫向排列 */
-    .kb-card-content { 
-        display: flex; 
-        flex-direction: row !important; /* 👈 強制橫向 */
-        align-items: center !important; /* 👈 垂直置中 */
-        gap: 12px; /* 👈 數字與文字的間距 */
-        text-align: left;
+    .kb-article-card { 
+        background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #f0f0f0; 
+        border-left: 6px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: space-between; 
+        align-items: center; position: relative; overflow: hidden; 
     }
+    .kb-article-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(26, 47, 35, 0.15); border-left-color: var(--forest); }
+    .kb-card-content { display: flex; flex-direction: row !important; align-items: center !important; gap: 12px; text-align: left; }
     .kb-card-num { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--accent); font-weight: 900; line-height: 1; }
     .kb-card-text { font-size: 1.1rem; font-weight: bold; color: var(--forest); letter-spacing: 0.05em; }
     .kb-arrow { color: #ddd; font-size: 1.5rem; transition: 0.3s; }
@@ -529,7 +335,12 @@
     summary.kb-mid-separator { display: flex; align-items: center; justify-content: center; cursor: pointer; list-style: none; margin-bottom: 25px; outline: none; position: relative; }
     summary.kb-mid-separator::-webkit-details-marker { display: none; }
     summary.kb-mid-separator::before, summary.kb-mid-separator::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
-    .kb-mid-badge { background: var(--forest); color: var(--accent); padding: 10px 35px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; font-family: 'Noto Serif TC', serif; box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); display: flex; align-items: center; gap: 10px; transition: 0.3s; border: 2px solid transparent; }
+    .kb-mid-badge { 
+        background: var(--forest); color: var(--accent); padding: 10px 35px; border-radius: 50px; 
+        font-size: 1.2rem; font-weight: bold; font-family: 'Noto Serif TC', serif; 
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); display: flex; align-items: center; gap: 10px; 
+        transition: 0.3s; border: 2px solid transparent; 
+    }
     summary.kb-mid-separator:hover .kb-mid-badge { background: #fff; color: var(--forest); border-color: var(--forest); transform: translateY(-3px); }
     .kb-mid-badge::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s; }
     details[open] summary .kb-mid-badge::after { transform: rotate(180deg); }
@@ -540,35 +351,7 @@
     .kb-tag-mid { background: #fffcf5; color: var(--accent); border: 1px solid var(--accent); }
     .kb-divider { color: #ccc; font-size: 0.8rem; }
 
-    /* ======================================================
-       8. 抽卡系統 & 編輯器
-       ====================================================== */
-    #draw-area { display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; perspective: 1000px; width: 100%; max-width: 800px; margin: 0 auto; justify-content: center; }
-    .card-back { width: 130%; justify-self: center; aspect-ratio: 3/5; height: auto; background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png'); background-repeat: no-repeat; background-position: center; background-size: cover; border-radius: 4px; cursor: pointer; position: relative; box-shadow: -2px 0 6px rgba(0,0,0,0.3); z-index: 1; will-change: transform; transition: transform 0.2s ease-out; }
-    .card-back.is-selected { transform: translateY(-30px) !important; z-index: 200 !important; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); filter: brightness(1.1); }
-    @keyframes cardShuffleIn { from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); } to { opacity: 1; transform: translateX(0) rotateY(0); } }
-    @keyframes cardDrawUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); } }
-    .card-back.is-drawing { animation: cardDrawUp 0.6s ease-out forwards; z-index: 999 !important; pointer-events: none; }
-    @media (min-width: 1025px) { .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); } }
-
-    .card-reveal { position: relative; width: 340px; height: 580px; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
-    .close-card-btn { position: fixed; top: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5); color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2002; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-    .close-card-btn:hover { background: var(--accent); color: var(--forest); transform: rotate(90deg); border-color: var(--forest); }
-    
-    /* 🔥 修復：卡片背景圖 (原本預設透明度0導致看不見) */
-    .layer-bg { 
-        width: 100%; height: 100%; object-fit: cover; 
-        position: absolute; top:0; left:0; z-index: 0; 
-        opacity: 1; /* 👈 改為 1，確保沒載入完成也能看見 */
-        background-color: var(--cream); 
-    }
-    .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
-    .img-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; color: var(--accent); font-size: 40px; display: none; }
-    .fa-spinner { animation: spin 2s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    /* 編輯器 */
+    /* KB 內容編輯器樣式 */
     .ql-editor { padding: 0; color: #333; font-size: 16px; line-height: 1.8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-wrap: break-word; }
     .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
@@ -587,214 +370,182 @@
     .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; }
     .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
     strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
-/* ======================================================
-       9. 手機版 RWD (最終完美結合版 - 還原原始比例)
+
+    /* ======================================================
+       7. 抽卡系統 (Card Draw)
+       ====================================================== */
+    #draw-area { display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; perspective: 1000px; width: 100%; max-width: 800px; margin: 0 auto; justify-content: center; }
+    .card-back { width: 130%; justify-self: center; aspect-ratio: 3/5; height: auto; background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png'); background-repeat: no-repeat; background-position: center; background-size: cover; border-radius: 4px; cursor: pointer; position: relative; box-shadow: -2px 0 6px rgba(0,0,0,0.3); z-index: 1; will-change: transform; transition: transform 0.2s ease-out; }
+    .card-back.is-selected { transform: translateY(-30px) !important; z-index: 200 !important; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); filter: brightness(1.1); }
+    @keyframes cardShuffleIn { from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); } to { opacity: 1; transform: translateX(0) rotateY(0); } }
+    @keyframes cardDrawUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); } }
+    .card-back.is-drawing { animation: cardDrawUp 0.6s ease-out forwards; z-index: 999 !important; pointer-events: none; }
+    /* Desktop Hover Effect */
+    @media (min-width: 1025px) { .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); } }
+
+    .card-reveal { position: relative; width: 340px; height: 580px; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
+    .close-card-btn { position: fixed; top: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5); color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2002; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+    .close-card-btn:hover { background: var(--accent); color: var(--forest); transform: rotate(90deg); border-color: var(--forest); }
+    
+    .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; opacity: 1; background-color: var(--cream); }
+    .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
+
+    /* ======================================================
+       8. 手機版 RWD (Mobile Styles)
        ====================================================== */
     @media (max-width: 768px) {
-        /* Nav & 🔥 漢堡按鈕加大 (植入新需求：32px 確保好按) */
+        /* Nav & Menu */
         nav { padding: 0 20px; height: 80px; display: flex; justify-content: space-between; align-items: center; }
-        .hamburger-btn { 
-            display: block !important; 
-            font-size: 32px !important; 
-            padding: 10px !important; 
-            color: var(--white);
-            z-index: 1001;
-            cursor: pointer;
-        }
-        .nav-links { 
-            display: none; position: absolute; top: 80px; left: 0; width: 100%; 
-            background: var(--forest); flex-direction: column; padding: 20px 0; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); 
-        }
+        .hamburger-btn { display: block !important; font-size: 32px !important; padding: 10px !important; color: var(--white); z-index: 1001; cursor: pointer; }
+        .nav-links { display: none; position: absolute; top: 80px; left: 0; width: 100%; background: var(--forest); flex-direction: column; padding: 20px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
         .nav-links.active { display: flex; }
         .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* Hero & Home (✅ 還原你原本最穩的設定) */
-        .hero-section { flex-direction: column-reverse; gap: 30px; }
-        .hero-img { 
-            margin: 0 auto !important; /* 👈 這裡之前寫錯了，改成 margin: 0 auto 就會置中了 */
-            width: 180px; 
-            height: 180px; 
-        }
-        .hero-text h1 { font-size: 1.8rem; line-height: 1.4; margin-bottom: 15px; }
-        /* 5. 三大功能選單：手機版強制「一個按鈕一行」 */
-        .hero-menu-grid { 
-            grid-template-columns: 1fr !important; /* 👈 強制一列一個 */
-            gap: 15px !important; 
-            width: 100% !important;
-            max-width: 340px !important; /* 限制最大寬度，避免在大手機上寬到難看 */
-            margin: 30px auto 0 auto !important; 
-        }
-        .hero-menu-item { 
-            width: 100% !important;
-            padding: 25px 20px !important; /* 加厚按鈕，觸感更好 */
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            border-radius: 20px !important;
-            box-shadow: 0 5px 15px rgba(26, 47, 35, 0.05) !important;
-        }
-        .hero-menu-icon {
-            width: 60px !important;
-            height: 60px !important;
-            font-size: 2rem !important;
-            margin-bottom: 10px !important;
-        }
-        .hero-menu-text { font-size: 1.1rem !important; font-weight: 900 !important; }
-        .hero-menu-desc { font-size: 0.9rem !important; margin-top: 5px !important; }
-        /* 🔥 公告專區：植入一行一個按鈕 (垂直排版) */
-        #must-read-container, #temp-container { 
-            flex-direction: column !important; 
-            gap: 12px !important; 
-            align-items: center !important;
-        }
-        #must-read-container button, #temp-container button {
-            width: 100% !important; 
-            max-width: 280px; 
-            padding: 12px 20px !important; 
-            display: block !important;
-        }
-        /* 4. 公告區比例同步縮小 */
-        #announcement-wrapper, #must-read-wrapper, #temp-wrapper {
-            padding: 45px 15px 20px 15px !important; 
-            margin-top: 25px !important;
-        }
-        .announce-badge { 
-            top: -12px !important; 
-            font-size: 0.8rem !important; 
-            padding: 5px 18px !important; 
-        }
-        /* KB 內容與比例 (✅ 全部還原) */
-        .kb-article-view { padding: 30px 20px; }
-        .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
-        
-        /* KB 便利貼 (✅ 還原騎在邊緣的風格) */
-        /* KB 便利貼 (修正 max-width 屬性) */
-        .kb-tiny-note {
-            position: absolute; 
-            top: -12px; 
-            right: -5px; 
-            width: fit-content; 
-            max-width: 55%; /* 👈 這裡之前誤打成 max-content，請改成 max-width */
-            padding: 8px 10px; 
-            text-align: left; 
-            font-size: 10px; 
-            line-height: 1.4;
-            transform: rotate(2deg); 
-            z-index: 999; 
-            margin: 0; 
-            transition: none;
-        }
-        .kb-tiny-note:hover { transform: rotate(2deg); }
-        .kb-internal-back { margin-top: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
-
-        /* 🔥 抽卡專區 (✅ 鎖死還原 8 欄設定) */
-        #draw-area { 
-            grid-template-columns: repeat(8, 1fr) !important; 
-            gap: 6px 0 !important; 
-            width: 92% !important; 
-            margin: 0 auto !important; 
-            padding: 15px 0 !important; 
-        }
-        .card-back { width: 115% !important; }
-        .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
-
-    /* 修正 1：手機版 Footer 固定最底 */
-        .footer-banner {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        z-index: 1001 !important;
-        padding: 10px 0 !important;
-        background: #1a2f23 !important;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.2) !important;
-        border-top: 2px solid #c6a87c !important;
-    }
-        /* Brand Headers (✅ 還原標題與膠囊設定) */
-        /* 1. 標題層級修正：讓中文當主角，英文變裝飾副標 */
-        .brand-h2-en, .draw-title-h2 { 
-            font-size: 0.9rem !important;  /* 👈 英文縮小成副標感 */
-            color: #999 !important;        /* 👈 顏色變淡，不搶戲 */
-            text-shadow: none !important;
-            letter-spacing: 2px;
-            margin-bottom: 2px;
-        }
-        .brand-h3-zh, .draw-title-zh { 
-            font-size: 1.3rem !important;  /* 👈 中文放大，變成視覺主標 */
-            margin-top: 0 !important;
-            margin-bottom: 12px !important;
-            letter-spacing: 1.5px;
-            font-weight: 900;
-        }
-        .brand-capsule, .draw-desc-p { 
-            font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; 
-            display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; 
-        }
-        /* 2. 培癒寶典：卡片與列表極致瘦身 */
-        .kb-list-container { 
-            gap: 10px !important; /* 縮小卡片之間的間距 */
-        }
-        .kb-article-card { 
-            padding: 10px 15px !important; /* 👈 縮減內距，讓卡片變薄 */
-            margin-bottom: 0px;
-            border-left-width: 4px !important; /* 側邊條變細 */
-        }
-        .kb-card-num { 
-            font-size: 1.1rem !important; 
-            min-width: 30px; /* 縮小數字佔位 */
-        }
-        .kb-card-text { 
-            font-size: 0.95rem !important; 
-        }
-        .kb-section-group { 
-            margin-bottom: 25px !important; 
-        }
-        .kb-mid-badge { 
-            padding: 4px 15px !important; 
-            font-size:
-             0.9rem !important; 
-        }
-        /* 解決出生地區與時區在手機版擠在一起的問題 */
-    #flow-data div[style*="grid-template-columns"] {
-        grid-template-columns: 1fr !important; /* 強制變一行 */
-        gap: 15px !important; /* 增加上下間距 */
-    }
-
-    /* 調整輸入框寬度與字體，避免在小螢幕太擁擠 */
-    #flow-data input, #flow-data select {
-        font-size: 14px !important;
-        padding: 10px !important;
-    }
-
-    #flow-data {
-        padding: 15px !important; /* 縮小內距，留更多空間給輸入框 */
-    }
-        /* 5. 其他元件 */
+        /* Layout & Common */
         .section { padding: 20px 15px 60px 15px !important; }
         .card { padding: 20px 15px !important; border-radius: 12px !important; }
         .btn-primary { padding: 12px 30px !important; font-size: 1rem !important; }
+        .kb-fab-back { display: none; } /* Hide Desktop FAB on Mobile if needed, or customize */
         
-        .footer-banner { padding-bottom: 15px; position: static !important; width: 100%; border-radius: 15px 15px 0 0; }
-        .copyright { margin-top: 10px; }
-        /* 3. 服務預約細項縮放 */
+        /* Hero & Home */
+        .hero-section { flex-direction: column-reverse; gap: 30px; }
+        .hero-img { margin: 0 auto !important; width: 180px; height: 180px; }
+        .hero-text h1 { font-size: 1.8rem; line-height: 1.4; margin-bottom: 15px; }
+        
+        .hero-menu-grid { grid-template-columns: 1fr !important; gap: 15px !important; width: 100% !important; max-width: 340px !important; margin: 30px auto 0 auto !important; }
+        .hero-menu-item { width: 100% !important; padding: 25px 20px !important; display: flex !important; flex-direction: column !important; align-items: center !important; border-radius: 20px !important; box-shadow: 0 5px 15px rgba(26, 47, 35, 0.05) !important; }
+        .hero-menu-icon { width: 60px !important; height: 60px !important; font-size: 2rem !important; margin-bottom: 10px !important; }
+        
+        /* Announcements */
+        #announcement-wrapper, #must-read-wrapper, #temp-wrapper { padding: 45px 15px 20px 15px !important; margin-top: 25px !important; }
+        .announce-badge { top: -12px !important; font-size: 0.8rem !important; padding: 5px 18px !important; }
+        #must-read-container, #temp-container { flex-direction: column !important; gap: 12px !important; align-items: center !important; }
+        #must-read-container button, #temp-container button { width: 100% !important; max-width: 280px; padding: 12px 20px !important; display: block !important; }
+
+        /* Booking & Forms */
+        .info-grid, .service-setting-grid, .checkout-footer, #birth-geo-group, #birth-time-group { display: block !important; }
+        .service-setting-grid { padding: 15px; }
+        .info-grid .form-group { margin-bottom: 15px; }
+        
+        #flow-data div[style*="grid-template-columns"], 
+        #flow-data div[style*="display: grid"], 
+        #flow-data div[style*="display: flex"] { 
+            display: block !important; grid-template-columns: 1fr !important; gap: 15px !important; 
+        }
+        #flow-data { padding: 12px !important; }
+        #flow-data .form-group { width: 100% !important; margin-bottom: 15px !important; }
+        #flow-data input, #flow-data select { font-size: 14px !important; padding: 10px !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; margin-bottom: 5px !important; }
+        
         .cat-card { padding: 15px !important; }
         .service-card { padding: 10px !important; }
         .service-info { font-size: 0.95rem !important; }
         .service-desc { font-size: 0.85rem !important; margin-left: 30px; line-height: 1.4; }
-        /* 標題框 RWD (✅ 全部還原) */
-        .ql-editor h2.title-boxed-h2, 
-        .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
+
+        /* Knowledge Base (KB) */
+        .kb-article-view { padding: 30px 20px; }
+        .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
+        .kb-list-container { gap: 10px !important; }
+        .kb-article-card { padding: 10px 15px !important; margin-bottom: 0px; border-left-width: 4px !important; }
+        .kb-card-num { font-size: 1.1rem !important; min-width: 30px; }
+        .kb-card-text { font-size: 0.95rem !important; }
+        .kb-section-group { margin-bottom: 25px !important; }
+        .kb-mid-badge { padding: 4px 15px !important; font-size: 0.9rem !important; }
+        
+        .kb-tiny-note {
+            position: absolute; top: -12px; right: -5px; width: fit-content; max-width: 55%; 
+            padding: 8px 10px; text-align: left; font-size: 10px; line-height: 1.4;
+            transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
+        }
+        .kb-tiny-note:hover { transform: rotate(2deg); }
+        .kb-internal-back { margin-top: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
+
+        .ql-editor h2.title-boxed-h2, .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
         .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
         .ql-editor h3.title-boxed-h3 { font-size: 1rem; }
-    }
 
-    /* 橫向補丁還原 */
+        /* Draw Area */
+        #draw-area { grid-template-columns: repeat(8, 1fr) !important; gap: 6px 0 !important; width: 92% !important; margin: 0 auto !important; padding: 15px 0 !important; }
+        .card-back { width: 115% !important; }
+        .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
+
+        /* Footer Sticky */
+        .footer-banner { position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 1001 !important; padding: 10px 0 !important; background: #1a2f23 !important; box-shadow: 0 -4px 15px rgba(0,0,0,0.2) !important; border-top: 2px solid #c6a87c !important; border-radius: 15px 15px 0 0; }
+        .copyright { margin-top: 10px; }
+        
+        /* Brand Headers Mobile Adjustment */
+        .brand-h2-en, .draw-title-h2 { font-size: 0.9rem !important; color: #999 !important; text-shadow: none !important; letter-spacing: 2px; margin-bottom: 2px; }
+        .brand-h3-zh, .draw-title-zh { font-size: 1.3rem !important; margin-top: 0 !important; margin-bottom: 12px !important; letter-spacing: 1.5px; font-weight: 900; }
+        .brand-capsule, .draw-desc-p { font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; }
+    }
+    /* ======================================================
+       9. 會員中心 - 歷史訂單卡片優化 (Healing UI)
+       ====================================================== */
+    .history-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        position: relative;
+        box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .history-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(26, 47, 35, 0.12);
+    }
+    /* 左側狀態條 */
+    .history-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+    }
+    .history-card.status-pending::before { background-color: #f39c12; } /* 待付款 - 橘 */
+    .history-card.status-paid::before { background-color: #9b59b6; }    /* 已付款/待排程 - 紫 */
+    .history-card.status-awaiting_service::before { background-color: #3498db; } /* 服務中 - 藍 */
+    .history-card.status-completed::before { background-color: #27ae60; } /* 已結案 - 綠 */
+
+    .history-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 12px;
+    }
+    .history-date { font-size: 0.85rem; color: #999; letter-spacing: 1px; }
+    .history-id { font-family: monospace; color: #ccc; font-size: 0.8rem; }
+    
+    .history-title {
+        font-family: 'Noto Serif TC', serif; font-size: 1.2rem; 
+        color: var(--forest); font-weight: 900; margin-bottom: 5px;
+    }
+    .history-sub { font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.5; }
+    
+    .history-footer {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 15px; padding-top: 15px; border-top: 1px solid #f5f5f5;
+    }
+    .history-price { font-family: 'Cinzel', serif; font-weight: bold; color: var(--forest); font-size: 1.1rem; }
+    
+    /* 狀態小標籤 */
+    .status-badge {
+        font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold;
+        display: inline-block; vertical-align: middle;
+    }
+    .sb-pending { background: #fff3e0; color: #e67e22; }
+    .sb-paid { background: #f3e5f5; color: #8e44ad; }
+    .sb-completed { background: #e8f5e9; color: #2e7d32; }
+
+    /* 查看報告按鈕 */
+    .btn-view-report {
+        background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%);
+        color: white; border: none; padding: 8px 20px; border-radius: 30px;
+        font-size: 0.9rem; cursor: pointer; text-decoration: none;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2); transition: 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }    
+    /* Landscape Patch */
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note { top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; }
     }
-
- 
 </style>
 
 </head>
@@ -885,9 +636,6 @@
     
 </div>
 
-    
-     
-
 <div id="booking-step-1" class="section">
     
     <div class="brand-section-header">
@@ -909,125 +657,142 @@
             <i class="fa-solid fa-arrow-left"></i> 返回類別
         </button>
 
-        <h2 id="active-cat-name" style="margin-top:0;">服務詳情</h2>
+        <h2 id="active-cat-name" style="margin-top:0; color:var(--forest);">服務詳情</h2>
         
-        <div class="payment-notice-box">
-            <div class="form-group" style="margin-bottom:15px;">
-                <label>🔶 付款狀態選擇</label>
-                <select id="pay-status" onchange="toggleOTA()"> 
+        <div class="payment-notice-box" style="background:#e0f7fa; padding:15px; border-radius:10px; margin-bottom:20px; border-left:5px solid #26c6da;">
+            <div class="form-group" style="margin-bottom:0;">
+                <label style="color:#006064; font-weight:bold;">🔶 付款狀態選擇</label>
+                <select id="pay-status" onchange="toggleOTA()" style="background:white;"> 
                     <option value="unpaid">🔗 我還沒付款 (預約後請傳連結給我)</option>
                     <option value="ota">🛒 我已於其他網路平台付款</option> 
                 </select>
             </div>
             
             <div id="ota-area" style="display:none; border-top:1px dashed #26c6da; padding-top:15px; margin-top:10px;">
-                <div class="form-group">
-                    <label style="color:#006064;">選擇付款平台</label>
-                    <select id="ota-source-select" style="background:white; border:1px solid #26c6da;"></select>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <label style="color:#006064;">訂單編號 (必填)</label>
-                    <input type="text" id="ota-order-id" placeholder="請貼上該平台的訂單編號" style="background:white; border:1px solid #26c6da;">
+                <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:10px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:13px;">付款平台</label>
+                        <select id="ota-source-select" style="background:white; border:1px solid #26c6da;"></select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:13px;">訂單編號</label>
+                        <input type="text" id="ota-order-id" placeholder="貼上編號" style="background:white; border:1px solid #26c6da;">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div>
-        <div class="form-group">
-            <label class="required">手機號碼 (將作為登入帳號)</label>
-            <input type="tel" id="c-phone" onblur="checkPhoneMembership()" placeholder="09xxxxxxxx (需10碼數字)">
-            <small id="phone-status" style="display:block; margin-top:8px; font-weight:bold;"></small>
-        </div>
-        <div class="form-group"><label class="required">E-mail (接收報告通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div>
-                
-        <hr style="border:0; border-top:1px dashed #ddd; margin: 40px 0;">
-        
-        <label style="font-size:1.4rem; color:var(--forest); margin-bottom:20px;">1. 選擇方案內容與加購</label>
-        <div id="items-area" style="margin-bottom:40px;"></div>
-        
-        <div class="coupon-box" style="margin-top: 25px;">
-            <input type="text" id="coupon-code" placeholder="輸入優惠代碼 (若無可跳過)" style="flex:1; border:1px solid #ccc; background:#fff;">
-            <button class="btn-secondary" onclick="verifyCoupon()" style="margin:0; padding:12px 25px;">套用</button>
-        </div>
-        <div id="coupon-msg" class="coupon-msg"></div>
-        <div id="coupon-msg" class="coupon-msg"></div>
-
-        <div id="conditional-question" style="background:#fcf8f2; padding:30px; border-radius:15px; margin:30px 0; border:1px solid #eee;"></div>
-        
-        <div class="form-group" id="data-flow-wrapper" style="display:none;">
-            <label>🔶 請選擇資料提供方式</label>
-            <select id="data-flow" onchange="toggleFlow()">
-                </select>
-        </div>
-        <div id="flow-data" style="background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
-            <div class="form-group"><label>出生日期</label><input type="date" id="b-date"></div>
-            <div class="form-group">
-                <label>出生精確時間</label>
-                <input type="time" id="b-time" value="12:00">
-                <small style="color:#d32f2f; display:block; margin-top:5px;">✅ 請確認是上午或下午</small>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 20px;">
-                <div class="form-group">
-                    <label>出生地區/城市</label>
-                    <input type="text" id="b-place" placeholder="例：台北、上海、洛杉磯">
-                </div>
-                <div class="form-group">
-                    <label>當地時區 (GMT)</label>
-                    <select id="b-timezone">
-                        <option value="+8">GMT+8 (台灣/中港澳/新馬)</option>
-                        <option value="+9">GMT+9 (日本/韓國)</option>
-                        <option value="+7">GMT+7 (泰國/印尼)</option>
-                        <option value="+10">GMT+10 (澳洲-布里斯本)</option>
-                        <option value="+0">GMT+0 (英國/倫敦)</option>
-                        <option value="+1">GMT+1 (德/法/義/瑞/西)</option>
-                        <option value="-5">GMT-5 (美東-紐約/波士頓)</option>
-                        <option value="-6">GMT-6 (美中-芝加哥)</option>
-                        <option value="-7">GMT-7 (美山-丹佛)</option>
-                        <option value="-8">GMT-8 (美西-洛杉磯/溫哥華)</option>
-                        <option value="other">其他 (請於備註說明)</option>
-                    </select>
-                </div>
-            </div>
-            <small style="color:#666; display:block; margin-top:-10px;">⚠️ 若不確定夏令時間，請依出生當下醫院紀錄為主。</small>
-        </div>
-        
-        <div id="flow-upload" style="display:none; background:#f9f9f9; padding:25px; border-radius:15px; margin-bottom:20px; border:1px solid #eee;">
+        <div class="info-grid">
+            <div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="真實姓名"></div>
             
+            <div class="form-group">
+                <label class="required">手機號碼 (登入帳號)</label>
+                <input type="tel" id="c-phone" onblur="checkPhoneMembership()" placeholder="09xxxxxxxx">
+                <small id="phone-status" style="display:block; margin-top:5px; font-weight:bold;"></small>
+            </div>
+            
+            <div class="form-group"><label class="required">E-mail (接收通知)</label><input type="email" id="c-email" placeholder="example@mail.com"></div>
+        </div>
+                
+        <hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;">
+        
+        <label style="font-size:1.2rem; color:var(--forest); font-weight:900; margin-bottom:15px; display:block;">第一步：選擇方案內容與加購</label>
+        <div id="items-area" style="margin-bottom:10px;"></div>
+        
+        <div class="service-setting-grid">
+            <div id="conditional-question" style="background:#fcf8f2; padding:15px; border-radius:10px; border:1px solid #eee; margin:0;"></div>
+            
+            <div class="form-group" id="data-flow-wrapper" style="margin:0; background:#f4f7f6; padding:15px; border-radius:10px; border:1px solid #eee;">
+                <label style="font-weight:bold;">🔶 請選擇資料提供方式</label>
+                <select id="data-flow" onchange="toggleFlow()" style="background:white;"></select>
+            </div>
+        </div>
+
+        <div id="flow-data" style="background:#fdfdfd; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="birth-time-group">
+        <div class="form-group">
+            <label>出生日期</label>
+            <input type="date" id="b-date">
+        </div>
+        <div class="form-group">
+            <label>出生精確時間</label>
+            <input type="time" id="b-time" value="12:00">
+            <small style="color:#d32f2f; display:block; margin-top:5px; font-size:12px;">✅ 請確認是上午或下午</small>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;" id="birth-geo-group">
+        <div class="form-group">
+            <label>出生地區/城市</label>
+            <input type="text" id="b-place" placeholder="例：台北">
+        </div>
+        <div class="form-group">
+            <label>當地時區</label>
+            <select id="b-timezone">
+                <option value="+8">GMT+8 (台/港/新馬)</option>
+                <option value="+9">GMT+9 (日本/韓國)</option>
+                <option value="+7">GMT+7 (泰國/印尼)</option>
+                <option value="+10">GMT+10 (澳洲-布里斯本)</option>
+                <option value="+0">GMT+0 (英國/倫敦)</option>
+                <option value="+1">GMT+1 (德/法/義/瑞/西)</option>
+                <option value="-5">GMT-5 (美東-紐約/波士頓)</option>
+                <option value="-6">GMT-6 (美中-芝加哥)</option>
+                <option value="-7">GMT-7 (美山-丹佛)</option>
+                <option value="-8">GMT-8 (美西-洛杉磯/溫哥華)</option>
+                <option value="other">其他 (請於故事說明)</option>
+            </select>
+        </div>
+    </div>
+    
+    <small style="color:#999; display:block; margin-top:10px; font-size:12px;">⚠️ 若不確定夏令時間，請依出生當下醫院紀錄為主。</small>
+</div>
+        
+        <div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
             <div style="margin-bottom: 15px; border-left: 4px solid var(--accent); padding-left: 15px;">
                 <p style="margin:0; font-weight:bold; color:var(--forest);">第一步：取得圖檔</p>
-                <p style="margin:5px 0 0 0; font-size:0.95rem;">請前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:var(--shopee); text-decoration:underline; font-weight:bold;">亞洲人類圖學院 (點擊前往)</a></p>
+                <p style="margin:5px 0 0 0; font-size:0.9rem;">前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:var(--shopee); text-decoration:underline;">亞洲人類圖學院</a></p>
             </div>
-
             <div style="margin-bottom: 20px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; padding: 15px; text-align: center;">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#555; font-size:14px;">👀 上傳範本參考 (網站可直接下載圖檔)</p>
-                <img src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/my_hd_chart.png" 
-                     alt="截圖範本" 
-                     style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain; border: 1px solid #eee;">
+                <p style="margin:0 0 10px 0; font-weight:bold; color:#555; font-size:14px;">👀 上傳範本參考</p>
+                <img src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/my_hd_chart.png" style="max-width: 100%; max-height: 250px; object-fit: contain;">
             </div>
-
-            <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳剛才下載的圖檔</label>
+            <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳圖檔</label>
             <input type="file" id="c-file" accept="image/*" style="background:#fff; border:1px solid #ccc; width:100%; padding:10px; border-radius:8px;">
         </div>
+
         <div class="form-group" style="margin-top: 25px;">
-    <label>📖 寫下您的故事 / 現況</label>
-    <textarea id="c-story" placeholder="可以簡單分享想調整的原因、最近遇到的困難或對自己的期許..." style="height: 100px; line-height: 1.6;"></textarea>
-</div>
-        <div class="card" style="background:#fffcf5; border-top:none; padding:30px; margin-bottom:0; border:1px solid #fae1c3;">
+            <label>📖 寫下您的故事 / 現況 (選填)</label>
+            <textarea id="c-story" placeholder="可以簡單分享想調整的原因、最近遇到的困難..." style="height: 100px; line-height: 1.6;"></textarea>
+        </div>
+
+        <div class="card" style="background:#fffcf5; border-top:none; padding:20px; margin-bottom:0; border:1px solid #fae1c3;">
             <label>📜 服務規範</label>
-            <div id="terms-box" style="height:150px; overflow-y:auto; border:1px solid #e0e0e0; padding:15px; font-size:14px; background:#fff; border-radius:8px; line-height:1.8;"></div>
-            <label class="agree-wrapper" style="margin-top:20px; font-size:1.1rem;">
-                <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)">
+            <div id="terms-box" style="height:120px; overflow-y:auto; border:1px solid #e0e0e0; padding:10px; font-size:13px; background:#fff; border-radius:8px; margin:10px 0;"></div>
+            <label class="agree-wrapper" style="margin-top:15px; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;">
+                <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)" style="width:18px; height:18px;">
                 <span>我已詳細閱讀並同意</span>
             </label>
         </div>
         
-        <div class="total-box">
-            <div id="original-price-row" style="font-size:1rem; color:#999; text-decoration:line-through; display:none; margin-bottom:5px;">原價: $<span id="original-price">0</span></div>
-            應付總額：$<span id="total-price">0</span>
+        <div class="checkout-footer">
+            <div class="coupon-box" style="width:100%; max-width:320px;">
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="coupon-code" placeholder="優惠代碼" style="flex:1; margin:0; border:1px solid #ccc;">
+                    <button class="btn-secondary" onclick="verifyCoupon()" style="margin:0; padding:10px 15px; white-space:nowrap;">套用</button>
+                </div>
+                <div id="coupon-msg" class="coupon-msg"></div>
+            </div>
+
+            <div class="total-box" style="text-align:right;">
+                <div id="original-price-row" style="font-size:13px; color:#999; text-decoration:line-through; display:none; margin-bottom:5px;">原價: $<span id="original-price">0</span></div>
+                <span style="font-size:1rem; font-weight:bold; color:#444;">應付總額：</span>
+                <span style="color:#d35400; font-size:1.8rem;">$<span id="total-price">0</span></span>
+            </div>
         </div>
-        <div style="text-align:right; margin-top:20px;">
-            <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled>請先勾選同意規範</button>
+
+        <div style="text-align:center; margin-top:25px;">
+            <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled style="width:100%; max-width:450px; font-size:1.2rem; padding:15px 0;">➔ 送出預約</button>
         </div>
     </div>
 </div>
@@ -1169,61 +934,49 @@
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
     function showSection(id) { 
-        // 1. 切換區塊顯示
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
         
-        // 2. 切換導航按鈕狀態
         document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         const baseId = id.split('-')[0]; 
         const navBtn = document.getElementById('nav-' + baseId);
         if(navBtn) navBtn.classList.add('active');
         
-        // 3. 自動關閉手機選單
         document.getElementById('nav-menu').classList.remove('active');
         
-        // 🔥🔥🔥 關鍵修復：如果是點擊「培癒寶典」，強制回到目錄首頁 🔥🔥🔥
         if (id === 'knowledge') {
-            renderKbHome(); // 這一行救了整個導航！
+            renderKbHome(); 
         }
-        
-        // 4. 捲動到最上方
         window.scrollTo(0,0); 
     }
 
     window.onload = async () => {
-        // 1. 初始化資料 (原本的邏輯)
         await initBookingData(); 
         initDrawData(); 
         initKbData(); 
         loadSiteAssets();
         checkSession(); 
+        loadHeroAnnouncements();
 
-        // 🔥🔥🔥 新增：網址傳送門偵測雷達 🔥🔥🔥
-        // 取得網址參數 (例如: ?view=draw)
         const params = new URLSearchParams(window.location.search);
         const targetView = params.get('view');
 
-        // 如果網址有指定去哪一頁 (且該頁面 ID 存在)
         if (targetView && document.getElementById(targetView)) {
-            showSection(targetView); // 直接切換過去
+            showSection(targetView); 
         } else {
-            // 沒指定，或者亂打，就預設回首頁
             showSection('home');
         }
     };
     
-    // 手機版選單開關
     function toggleMenu() {
         const menu = document.getElementById('nav-menu');
         menu.classList.toggle('active');
     }
     async function checkSession() {
-        const saved = sessionStorage.getItem('peiyu_session'); // 👈 改用 session
+        const saved = sessionStorage.getItem('peiyu_session'); 
         if (saved) {
             try {
                 const { phone, pass } = JSON.parse(saved);
-                // 自動填入並登入，確保狀態延續
                 document.getElementById('l-phone').value = phone;
                 document.getElementById('l-pass').value = pass;
                 await doLogin(); 
@@ -1315,26 +1068,19 @@
     }
 
     async function initBookingData() {
-        // 1. 讀取大類
         const { data: c } = await myDB.from('service_categories').select('*').order('created_at'); 
         
-        // 🔥 關鍵修正：只保留「啟用中 (is_active !== false)」的大類
-        // 這樣後台按暫停的，這裡就會自動消失
         cats = (c || []).filter(x => x.is_active !== false);
 
-        // 2. 讀取細項
         const { data: i } = await myDB.from('services').select('*').order('sort_order'); 
         items = i || [];
         
-        // 3. 讀取 OTA 設定
         const { data: o } = await myDB.from('ota_settings').select('*'); 
         otas = o || [];
         
-        // 4. 渲染 OTA 選單
         const otaSelect = document.getElementById('ota-source-select');
         if(otaSelect) otaSelect.innerHTML = otas.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
 
-        // 5. 渲染大類列表 (Category List)
         document.getElementById('category-list').innerHTML = cats.map(c => `
             <div class="cat-card" onclick="selectCat('${c.id}')">
                 <h3>${c.name}</h3>
@@ -1349,7 +1095,6 @@
         document.getElementById('agree-check').checked = false; toggleSubmitBtn(false);
         document.getElementById('coupon-code').value = ""; document.getElementById('coupon-msg').innerText = ""; currentCoupon = null;
 
-        // 1. 渲染細項與互斥勾選邏輯 (維持 V162)
         const sub = items.filter(x => x.category_id === id);
         let hasCheckedMain = false;
 
@@ -1365,12 +1110,10 @@
         
         document.getElementById('conditional-question').innerHTML = activeCat.question_type === 'sleep' ? `<label>🌙 睡眠時間</label><input type="text" id="q-val" placeholder="例如：23:30 ~ 07:00">` : `<label>📅 希望諮詢時間</label><input type="text" id="q-val" placeholder="例如：平日晚上">`;
 
-        // 2. 🔥 V171 核心：動態決定資料提供方式 🔥
-        const reqStr = activeCat.data_requirement || 'birth'; // 預設 birth
+        const reqStr = activeCat.data_requirement || 'birth'; 
         const flowSelect = document.getElementById('data-flow');
         const flowWrapper = document.getElementById('data-flow-wrapper');
         
-        // 清空並重建選項
         flowSelect.innerHTML = '';
         
         if (reqStr.includes('birth')) {
@@ -1386,16 +1129,12 @@
             flowSelect.add(opt);
         }
 
-        // 判斷是否顯示下拉選單
-        // 如果同時有 birth 和 image (長度>1)，就顯示選單讓客人選
-        // 如果只有一種，就隱藏選單 (但值還在，所以邏輯會通)
         if (reqStr.includes('birth') && reqStr.includes('image')) {
             flowWrapper.style.display = 'block';
         } else {
             flowWrapper.style.display = 'none';
         }
 
-        // 強制觸發一次切換，讓下方的表單 (出生框 vs 上傳框) 顯示正確
         toggleFlow();
 
         calcTotal(); 
@@ -1403,13 +1142,10 @@
     }
 
     function handleServiceCheck(el) {
-        // 🔥 V162 修正：主項目單選互斥邏輯
-        // 如果現在勾選的是「主項目」，就去把其他也是「主項目」的勾勾取消掉
         if (el.dataset.isMain === 'true' && el.checked) {
             document.querySelectorAll('input[name="svc"][data-is-main="true"]').forEach(i => {
                 if (i !== el) { 
-                    i.checked = false; // 自動取消別人，不用再手動取消了
-                    // 移除之前的 disabled 樣式 (防呆，確保乾淨)
+                    i.checked = false; 
                     if(document.getElementById(`card-${i.value}`)) {
                         document.getElementById(`card-${i.value}`).classList.remove('disabled-card');
                     }
@@ -1419,29 +1155,17 @@
         }
         calcTotal();
     }
-    // 🔥 防呆 2：當使用者點擊細項時，自動把父級大項勾起來
-function handleSubCheck(el) {
-    const parentId = el.dataset.parentId;
-    const parentCheckbox = document.querySelector(`input[name="svc"][value="${parentId}"]`);
     
-    if (el.checked && parentCheckbox) {
-        parentCheckbox.checked = true;
-    }
-    
-    calcTotal(); // 重新計算總金額
-}
-
     function handleSubCheck(el) {
-    const parentId = el.dataset.parentId;
-    const parentCheckbox = document.querySelector(`input[name="svc"][value="${parentId}"]`);
-    
-    // 🔥 如果點了細項，就把父項目勾起來
-    if (el.checked && parentCheckbox) {
-        parentCheckbox.checked = true;
+        const parentId = el.dataset.parentId;
+        const parentCheckbox = document.querySelector(`input[name="svc"][value="${parentId}"]`);
+        
+        if (el.checked && parentCheckbox) {
+            parentCheckbox.checked = true;
+        }
+        
+        calcTotal(); 
     }
-    
-    calcTotal(); // 重新計算金額
-}
 
     function calcTotal() {
         let t = 0;
@@ -1483,18 +1207,15 @@ function handleSubCheck(el) {
 async function doSubmit() {
     if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「個案專區」登入！");
     
-    // 🔥 防呆 1：檢查勾選了大項卻沒選細項的情況
     const selectedSvcs = document.querySelectorAll('input[name="svc"]:checked');
     for (let svc of selectedSvcs) {
-        // 找出這個項目底下的所有細項勾選框
         const subBoxes = document.querySelectorAll(`.sub-opt-item[data-parent-id="${svc.value}"]`);
         if (subBoxes.length > 0) {
-            // 如果這項服務有細項，檢查是否有任何一個細項被勾選
             const checkedSubs = document.querySelectorAll(`.sub-opt-item[data-parent-id="${svc.value}"]:checked`);
             if (checkedSubs.length === 0) {
                 alert(`❌ 您勾選了「${svc.dataset.title}」，請記得選擇具體的加購內容唷！`);
-                svc.scrollIntoView({ behavior: 'smooth' }); // 貼心捲動到該位置
-                return; // 擋住，不讓送出
+                svc.scrollIntoView({ behavior: 'smooth' }); 
+                return; 
             }
         }
     }
@@ -1502,7 +1223,7 @@ async function doSubmit() {
     const name = document.getElementById('c-name').value.trim();
     const phone = document.getElementById('c-phone').value.trim();
     const email = document.getElementById('c-email').value.trim();
-    const qVal = document.getElementById('q-val').value.trim(); // 修正變數名統一
+    const qVal = document.getElementById('q-val').value.trim(); 
     const story = document.getElementById('c-story').value.trim();
 
     if (!name || !phone || !email) return alert("請填寫完整基本資料");
@@ -1526,7 +1247,6 @@ async function doSubmit() {
     btn.innerText = "資料處理中...";
 
     try {
-        // 1. 圖片/資料處理 (維持原樣)
         if (flow === 'upload') {
             const fileInput = document.getElementById('c-file');
             if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
@@ -1545,7 +1265,6 @@ async function doSubmit() {
             finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;
         }
 
-        // 2. 主項目與加購項目分流
         const checkedInputs = document.querySelectorAll('input[name="svc"]:checked');
         let details = [];
         let specificMainService = "";
@@ -1562,7 +1281,6 @@ async function doSubmit() {
             }
         });
 
-        // 3. 優惠券 (維持原樣)
         let couponInfoText = null;
         if (currentCoupon) {
             let desc = currentCoupon.discount_type === 'percentage' ? `${currentCoupon.discount_value}折` : `折$${currentCoupon.discount_value}`;
@@ -1570,7 +1288,6 @@ async function doSubmit() {
             await myDB.from('coupons').update({ usage_count: currentCoupon.usage_count + 1 }).eq('id', currentCoupon.id);
         }
 
-        // 4. 寫入資料庫
         const myBookingId = "OD" + Date.now(); 
 
         const { error } = await myDB.from('bookings').insert([{
@@ -1592,7 +1309,6 @@ async function doSubmit() {
         }]);
 
         if(!error) { 
-            // LINE Notify 及 成功彈窗邏輯維持不變...
             try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });} catch (e) {}
 
             document.getElementById('success-order-id').innerText = myBookingId;
@@ -1603,8 +1319,7 @@ async function doSubmit() {
                 e.preventDefault(); 
                 navigator.clipboard.writeText(`預約編號：${myBookingId}`).then(() => {
                     lineBtn.innerHTML = `<i class="fa-solid fa-check"></i> <b>編號已複製！正在開啟...</b>`;
-                    setTimeout(() => { window.location.href = lineUrl; }, 600);
-                });
+                    setTimeout(() => { window.open(lineUrl, '_blank'); }, 600);                });
             };
 
             document.getElementById('sub-btn').disabled = false;
@@ -1622,29 +1337,24 @@ async function doSubmit() {
 
 
     function openModal(id) {
-    const modal = document.getElementById(id);
-    modal.classList.add('active');
-    
-    // 解決彈窗捲軸殘留問題
-    const card = modal.querySelector('.text-modal-card');
-    if (card) {
-        card.scrollTop = 0;
+        const modal = document.getElementById(id);
+        modal.classList.add('active');
+        const card = modal.querySelector('.text-modal-card');
+        if (card) {
+            card.scrollTop = 0;
+        }
     }
-}
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function toggleOTA() { const isOTA = document.getElementById('pay-status').value === 'ota'; document.getElementById('ota-area').style.display = isOTA ? 'block' : 'none'; }
     function toggleFlow() { const isD=document.getElementById('data-flow').value==='data'; document.getElementById('flow-data').style.display=isD?'block':'none'; document.getElementById('flow-upload').style.display=isD?'none':'block'; }
     function toggleSubmitBtn(c) { if(isMemberBlocked) return; document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
 
-    // 🔥 修改：讀取文章 + 讀取後台設定 (排序 & 隱藏清單)
     async function initKbData() {
-        // 1. 抓文章
         const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true).order('sort_order', { ascending: true });
         
-        // 2. 抓設定 (這裡是新增的重點！)
         const { data: cfg } = await myDB.from('site_content').select('content').eq('title', 'kb_category_order').single();
         if (cfg && cfg.content) {
-            kbCatOrder = cfg.content; // 把後台設定 (含 hide_note) 存入前台變數
+            kbCatOrder = cfg.content; 
         }
 
         if (data) {
@@ -1658,8 +1368,6 @@ async function doSubmit() {
         }
     }
 
-
-    // 🔥 V106 培癒寶典首頁：加入精緻品牌標題區
     function renderKbHome() {
         kbState.level = 0;
         kbState.big = null;
@@ -1676,7 +1384,6 @@ async function doSubmit() {
             </div>`;
         }).join('');
 
-        // 🔥 V107：直接使用 kb-cat-view，不再套用內層 .card
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="brand-section-header">
@@ -1697,18 +1404,14 @@ async function doSubmit() {
         window.scrollTo(0,0);
     }
 
-    // 🔥 修改：根據後台設定決定是否顯示便利貼
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
         
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 1. 判斷是否隱藏便利貼
-        // 檢查 hide_note 陣列是否存在，且是否包含目前的大分類名稱
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(big);
         
-        // 如果隱藏就給空字串，否則顯示便利貼 HTML
         const noteHtml = isHidden ? '' : `
             <div class="kb-tiny-note">
                 如果內容有誤 歡迎協助修正<br>
@@ -1717,7 +1420,6 @@ async function doSubmit() {
                 請直接關閉 謝謝掰掰 👋
             </div>`;
 
-        // 2. 排序邏輯 (沿用您的設定)
         let sortedMids = [];
         if (kbCatOrder && kbCatOrder.mid && kbCatOrder.mid[big]) {
             sortedMids = kbCatOrder.mid[big].filter(m => kbTree[big] && kbTree[big][m]);
@@ -1749,7 +1451,6 @@ async function doSubmit() {
             </details>`;
         }).join('');
         
-        // 3. 組合畫面 (把 noteHtml 放進去)
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
@@ -1768,7 +1469,7 @@ async function doSubmit() {
         `;
         window.scrollTo(0, 0);
     }
-    // 🔥 V92 文章內頁：調整排版順序 (按鈕 -> 便利貼)
+
     async function readArt(id) {
         const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
         if (error || !data) { console.error(error); alert("讀取失敗"); return; }
@@ -1776,7 +1477,6 @@ async function doSubmit() {
         kbState.activeMid = data.mid_category;
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 1. 判斷是否隱藏 (檢查這篇文章的大分類)
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(data.big_category);
         
         const noteHtml = isHidden ? '' : `
@@ -1814,22 +1514,17 @@ async function doSubmit() {
         window.scrollTo(0, 0);
     }
     
-    // 🔥 返回功能 (V78：退出閱讀模式)
     function kbGoBack() {
-        // 1. 退出「閱讀模式」：把外部 Header 叫回來
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
-
         if (kbState.level === 2) {
-            // 如果原本是在看文章，返回到「該大分類的列表」
             enterKb(kbState.big);
         } else {
-            // 否則回首頁
             renderKbHome();
         }
     }
+
     async function initDrawData() { const { data } = await myDB.from('card_pool').select('*'); allCards = data || []; renderDrawTable(); }
     
-   // 抽卡核心邏輯 (含 0.8秒 安全鎖)
     function renderDrawTable() { 
         const table = document.getElementById('draw-area'); 
         if (!table) return; 
@@ -1837,11 +1532,8 @@ async function doSubmit() {
         
         const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
         const shuffled = deck.sort(() => Math.random() - 0.5); 
-        
-        // 判定：只有支援 hover 的才算電腦 (這樣最準)
         const isDesktop = window.matchMedia('(hover: hover)').matches;
 
-        // 安全鎖
         let isInputLocked = true;
         setTimeout(() => { isInputLocked = false; }, 800);
 
@@ -1853,21 +1545,14 @@ async function doSubmit() {
             el.onclick = function() { 
                 if (isInputLocked) return;
 
-                // === 情況 A: 電腦版 (直接抽) OR 手機版確認抽取 ===
                 if (isDesktop || el.classList.contains('is-selected')) {
                     el.classList.remove('is-selected');
                     el.classList.add('is-drawing'); 
                     isInputLocked = true; 
                     setTimeout(() => { drawCard(card); }, 600); 
-                } 
-                // === 情況 B: 手機版選取 ===
-                else {
-                    // 🩸 止血鉗：先把所有其他的 is-selected 全部移除！
-                    // 這行會強制把上一張「幽靈懸停」的牌壓下去
+                } else {
                     const allActive = document.querySelectorAll('.card-back.is-selected');
                     allActive.forEach(c => c.classList.remove('is-selected'));
-
-                    // 只讓現在這張浮起來
                     el.classList.add('is-selected');
                 }
             }; 
@@ -1875,39 +1560,27 @@ async function doSubmit() {
             table.appendChild(el); 
         }); 
     }
-    // 🔥 V175 修正：成功彈窗關閉並跳回首頁
+
     function closeSuccessModal() {
-        // 1. 關閉彈窗
         closeModal('success-overlay');
-        // 2. 強制切換回首頁區塊
         showSection('home');
-        // 3. 畫面捲回最上方 (避免在首頁底部)
         window.scrollTo(0, 0);
     }
 
-    // 順便檢查原本的 closeSuccessModal 是否有點錯，
-    // 確保 HTML 裡的按鈕 onclick="closeSuccessModal()" 能對應到上面這個。
     async function drawCard(card) { document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; document.getElementById('p-zodiac').innerText = card.zodiac || ''; document.getElementById('p-quote').innerText = card.quote || ''; if (card.image_url) { document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; } const style = card.style_config || defaultStyle; applyStyle('gate', style.gate || defaultStyle.gate); applyStyle('info', style.info || defaultStyle.info); applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); applyStyle('quote', style.quote || defaultStyle.quote); document.getElementById('overlay').classList.add('active'); }
     function applyStyle(id, s) { const el = document.getElementById(`p-${id}`); const def = defaultStyle[id]; const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; el.style.left = val('x') + '%'; el.style.top = val('y') + '%'; el.style.fontSize = val('size') + 'px'; el.style.fontFamily = val('font'); el.style.color = val('color'); const str = val('stroke'); el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; }
     function closeResult() { document.getElementById('overlay').classList.remove('active'); setTimeout(() => { renderDrawTable(); document.getElementById('p-bg').src = ""; }, 500); }
-    // 🔥 V113 圖片極速載入邏輯 (請確保資料夾內有 logo.png 和 logohuman.png)
+    
     async function loadSiteAssets() { 
-        // 1. 這裡不做任何事，因為 HTML 已經寫死 src="logo.png" 了
-        // 瀏覽器一打開就會直接顯示本地圖片，不用等 JS，這才是真正的 0 秒載入
-
-        // 2. 背景默默連線資料庫，檢查有沒有「新版本」的圖要換
         const { data } = await myDB.from('site_content').select('*').eq('category', 'site_asset'); 
         
         if (data) { 
             data.forEach(item => { 
-                // 這裡我們「偷偷」下載新圖片，使用者這時候還在看舊圖，完全無感
                 const img = new Image();
                 img.src = item.image_url;
                 
-                // 等新圖片下載好之後，才無縫替換掉舊的
                 img.onload = () => {
                     if (item.title === 'logo') {
-                        // 只有當圖片真的不一樣時才替換，避免閃爍
                         const el = document.getElementById('site-logo');
                         if(el.src !== item.image_url) el.src = item.image_url;
                     }
@@ -1940,7 +1613,6 @@ async function doSubmit() {
             currentUser = user; 
             isMemberBlocked = false; 
 
-            // 🔥 關鍵修正：存入 sessionStorage (關掉網頁會自動刪除，但切換頁面會留著)
             sessionStorage.setItem('peiyu_session', JSON.stringify({ phone: phone, pass: pass }));
             
             document.getElementById('login-box').style.display = 'none'; 
@@ -1954,88 +1626,105 @@ async function doSubmit() {
     }
 
    function renderDashboard(user) {
-        document.getElementById('dash-welcome').innerText = `您好，${user.full_name}`;
+        document.getElementById('dash-welcome').innerText = `🌿 歡迎回來，${user.full_name}`;
         
-        // 排序訂單：由新到舊
+        // 按時間倒序排列
         const allBookings = user.bookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        let historyHtml = "<div style='color:#666;padding:10px;'>目前尚無預約紀錄</div>";
+        let historyHtml = "<div style='color:#999; text-align:center; padding:40px;'>🍃 目前尚無預約紀錄，期待您的光臨</div>";
 
         if (allBookings.length > 0) {
             historyHtml = allBookings.map(b => {
                 const dateStr = new Date(b.created_at).toLocaleDateString();
                 const title = b.service_item || '服務預約';
                 
-                const stMap = { 
-                    'pending': '<span style="color:red">未付款</span>', 
-                    'paid': '<span style="color:green">已付款</span>', 
-                    'completed': '<span style="color:#333">已結案</span>' 
-                };
-                const statusBadge = stMap[b.status] || b.status;
-                
+                // 狀態對應樣式與文字
+                let statusClass = `status-${b.status}`;
+                let statusText = "處理中";
+                let statusBadgeClass = "sb-pending";
+
+                if (b.status === 'pending') { statusText = "等待付款"; statusBadgeClass = "sb-pending"; }
+                else if (b.status === 'paid' || b.status === 'awaiting_service') { statusText = "已預約 / 服務中"; statusBadgeClass = "sb-paid"; }
+                else if (b.status === 'completed') { statusText = "✨ 旅程完成"; statusBadgeClass = "sb-completed"; }
+
+                // 處理服務細節顯示
                 const rawDetail = b.service_detail || "";
-                const details = rawDetail.split('|').map(s => s.trim().split('(')[0].trim()).join(' + ');
+                // 過濾掉價格字串，只留項目名稱
+                const details = rawDetail.split('|')
+                    .map(s => s.replace(/\(\$\d+\)/g, '').trim())
+                    .join(' ✦ ');
 
-                let originalPrice = 0;
-                const priceMatches = rawDetail.match(/\$(\d+)/g);
-                if (priceMatches) priceMatches.forEach(m => originalPrice += parseInt(m.replace('$', '')));
-                if (originalPrice < b.price || originalPrice === 0) originalPrice = b.price;
-
-                let priceInfoHtml = b.coupon_info ?
-                    `<div style="font-size:12px;color:#999;margin-top:5px;">原價 <span style="text-decoration:line-through;">$${originalPrice}</span></div><div style="font-size:12px;color:#27ae60;">🎟️ ${b.coupon_info}</div><div style="font-weight:bold;color:#d35400;">實付 $${b.price}</div>` :
-                    `<div style="font-weight:bold;color:#333;margin-top:5px;">$${b.price}</div>`;
-
+                // 檢查是否有報告
                 const reportMatch = (b.wish_detail || "").match(/\[報告已生成 ID:(.*?)\]/);
                 const currentReportId = reportMatch ? reportMatch[1] : null;
 
-                let scheduleHtml = "";
-                let btnHtml = `<div style="font-size:12px; margin-top:5px;">${statusBadge}</div>`;
-
+                // 底部按鈕區邏輯
+                let actionBtn = "";
                 if (currentReportId) {
-                    scheduleHtml = `<div style="color:var(--success); font-weight:bold; font-size:13px; margin-top:4px; background:#e8f5e9; padding:3px 6px; border-radius:4px; display:inline-block;">✨ 服務已完成</div>`;
+                    // 自動判斷對應的報告範本 (預設為 srt_report.html)
                     const matchedCat = cats.find(c => b.service_item === c.name);
                     const specificSvc = items.find(s => s.category_id === matchedCat?.id && b.service_detail.includes(s.title) && s.is_main);
                     const templateFile = (specificSvc && specificSvc.report_template) ? specificSvc.report_template : "srt_report.html";
+                    
+                    // 這裡加上 mode=view 讓客人直接看圖
                     let targetUrl = `${templateFile}?id=${currentReportId}&mode=view`;
-                    btnHtml = `<button class="btn-primary" style="font-size:13px;padding:6px 15px;height:fit-content;" onclick="window.open('${targetUrl}')">查看報告</button>`;
+                    
+                    actionBtn = `
+                        <button class="btn-view-report" onclick="window.open('${targetUrl}')">
+                            <i class="fa-solid fa-scroll"></i> 查看能量報告
+                        </button>`;
+                } else if (b.status === 'pending') {
+                    actionBtn = `<span style="font-size:0.85rem; color:#e67e22; font-weight:bold;">請聯繫官方 LINE 確認付款</span>`;
                 } else if (b.scheduled_at) {
                     const t = new Date(b.scheduled_at);
-                    const timeStr = `${t.getFullYear()}/${t.getMonth() + 1}/${t.getDate()} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`;
-                    scheduleHtml = `<div style="color:#6a1b9a; font-weight:bold; font-size:13px; margin-top:4px; background:#f3e5f5; padding:3px 6px; border-radius:4px; display:inline-block;">🕒 預計服務：${timeStr}</div>`;
+                    const timeStr = `${t.getMonth() + 1}/${t.getDate()} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`;
+                    actionBtn = `<span style="font-size:0.85rem; color:#8e44ad; font-weight:bold;"><i class="fa-regular fa-clock"></i> 預約時間：${timeStr}</span>`;
+                }
+
+                // 價格顯示 (若有優惠券則標示)
+                let priceDisplay = `$${b.price}`;
+                if (b.coupon_info) {
+                    priceDisplay += ` <small style="color:#e91e63; font-size:0.7rem;">(含優惠)</small>`;
                 }
 
                 return `
-                <div style="border-bottom:1px solid #eee;padding:15px 10px;display:flex;justify-content:space-between;align-items:flex-start;">
-                    <div style="flex:1;padding-right:10px;">
-                        <span style="font-weight:bold;font-size:15px;display:block;color:var(--forest);">${title}</span>
-                        <small style="color:#666;display:block;margin-top:2px;">${details}</small>
-                        ${scheduleHtml}
-                        <small style="color:#999; display:block; margin-top:5px;">下單日：${dateStr}</small>
-                        ${priceInfoHtml}
+                <div class="history-card ${statusClass}">
+                    <div class="history-header">
+                        <span class="history-date">${dateStr}</span>
+                        <span class="history-id">#${b.booking_id.slice(-6)}</span>
                     </div>
-                    <div style="text-align:right">${btnHtml}</div>
+                    
+                    <div class="history-title">${title}</div>
+                    <div class="history-sub">${details}</div>
+                    
+                    <div style="margin-bottom:10px;">
+                        <span class="status-badge ${statusBadgeClass}">${statusText}</span>
+                    </div>
+
+                    <div class="history-footer">
+                        <div class="history-price">${priceDisplay}</div>
+                        <div>${actionBtn}</div>
+                    </div>
                 </div>`;
             }).join('');
         }
 
         document.getElementById('dash-history').innerHTML = historyHtml;
+        
+        // 填入個資欄位
         document.getElementById('c-name').value = user.full_name;
         document.getElementById('c-phone').value = user.phone;
         document.getElementById('c-email').value = user.email || "";
         document.getElementById('c-phone').disabled = true;
+        
+        // UI 狀態微調
         document.getElementById('c-name').style.backgroundColor = "#e8f5e9";
-
         const statusEl = document.getElementById('phone-status');
         if (statusEl) statusEl.innerHTML = "";
-        const phoneInput = document.getElementById('c-phone');
-        if (phoneInput) {
-            phoneInput.style.borderColor = "#ddd";
-            phoneInput.style.backgroundColor = "#eee";
-        }
     }
 
     function doLogout() { 
         currentUser = null; 
-        sessionStorage.removeItem('peiyu_session'); // 🔥 登出就清空
+        sessionStorage.removeItem('peiyu_session'); 
         document.getElementById('login-box').style.display = 'block'; 
         document.getElementById('dash').style.display = 'none'; 
         document.getElementById('c-name').value = ""; 
@@ -2078,10 +1767,7 @@ async function doSubmit() {
             closeModal('edit-profile-overlay'); 
         } 
     }
-    // 🔥 V210 新增：首頁動態公告區 (改讀取 announcements 表)
-    // 🔥 V215 新增：讀取公告並控制顯示
-    // 🔥 V290 升級：公告分流 (必讀 vs 臨時)
-   // 🔥 V290 升級版：公告分流
+
     async function loadHeroAnnouncements() {
         const mustContainer = document.getElementById('must-read-container');
         const mustWrapper = document.getElementById('must-read-wrapper');
@@ -2112,21 +1798,17 @@ async function doSubmit() {
                     btn.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
                     btn.onclick = () => openDynamicAnnouncement(item.title, item.content);
 
-                    // 🔥🔥🔥 關鍵分流邏輯在這裡！ 🔥🔥🔥
                     if (item.type === 'temp') {
-                        // 這是臨時公告 (橘色)
                         btn.style.border = "1px solid #e67e22";
                         btn.style.color = "#d35400";
                         tempContainer.appendChild(btn);
-                        hasTemp = true; // 標記有資料
+                        hasTemp = true; 
                     } else {
-                        // 這是必讀公告 (綠色)
                         mustContainer.appendChild(btn);
-                        hasMust = true; // 標記有資料
+                        hasMust = true; 
                     }
                 });
 
-                // 🔥 有資料才顯示框框，沒資料就隱藏
                 mustWrapper.style.display = hasMust ? 'block' : 'none';
                 tempWrapper.style.display = hasTemp ? 'block' : 'none';
 
@@ -2138,32 +1820,12 @@ async function doSubmit() {
             console.error("公告載入失敗:", e);
         }
     }
-    // 🔥 處理點擊後的彈窗內容填充
+
     function openDynamicAnnouncement(title, contentHtml) {
         document.getElementById('dyn-modal-title').innerText = title; 
         document.getElementById('dyn-modal-content').innerHTML = contentHtml || "無內容";
         openModal('dynamic-overlay');
     }
-
-    // 🔥 記得修改 window.onload
-    window.onload = async () => {
-        await initBookingData(); 
-        initDrawData(); 
-        initKbData(); 
-        loadSiteAssets();
-        checkSession(); 
-        
-        // 👇 換成呼叫新函式
-        loadHeroAnnouncements();
-
-        const params = new URLSearchParams(window.location.search);
-        const targetView = params.get('view');
-        if (targetView && document.getElementById(targetView)) {
-            showSection(targetView);
-        } else {
-            showSection('home');
-        }
-    };
 </script>
 </body>
 </html>

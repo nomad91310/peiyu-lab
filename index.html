@@ -694,13 +694,53 @@
         .footer-banner { position: relative !important; padding-bottom: 30px; margin-top: 40px; }
 
         /* Brand Headers (✅ 還原標題與膠囊設定) */
-        .brand-h2-en, .draw-title-h2 { font-size: 1.5rem !important; letter-spacing: 1px; margin-bottom: 5px; }
-        .brand-h3-zh, .draw-title-zh { font-size: 1.1rem !important; margin-top: 0 !important; margin-bottom: 15px !important; letter-spacing: 2px; }
+        /* 1. 標題層級修正：讓中文當主角，英文變裝飾副標 */
+        .brand-h2-en, .draw-title-h2 { 
+            font-size: 0.9rem !important;  /* 👈 英文縮小成副標感 */
+            color: #999 !important;        /* 👈 顏色變淡，不搶戲 */
+            text-shadow: none !important;
+            letter-spacing: 2px;
+            margin-bottom: 2px;
+        }
+        .brand-h3-zh, .draw-title-zh { 
+            font-size: 1.3rem !important;  /* 👈 中文放大，變成視覺主標 */
+            margin-top: 0 !important;
+            margin-bottom: 12px !important;
+            letter-spacing: 1.5px;
+            font-weight: 900;
+        }
         .brand-capsule, .draw-desc-p { 
             font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; 
             display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; 
         }
-
+        /* 2. 培癒寶典：卡片與列表極致瘦身 */
+        .kb-list-container { 
+            gap: 10px !important; /* 縮小卡片之間的間距 */
+        }
+        .kb-article-card { 
+            padding: 10px 15px !important; /* 👈 縮減內距，讓卡片變薄 */
+            margin-bottom: 0px;
+            border-left-width: 4px !important; /* 側邊條變細 */
+        }
+        .kb-card-num { 
+            font-size: 1.1rem !important; 
+            min-width: 30px; /* 縮小數字佔位 */
+        }
+        .kb-card-text { 
+            font-size: 0.95rem !important; 
+        }
+        .kb-section-group { 
+            margin-bottom: 25px !important; 
+        }
+        .kb-mid-badge { 
+            padding: 4px 15px !important; 
+            font-size: 0.9rem !important; 
+        }
+        /* 3. 服務預約細項縮放 */
+        .cat-card { padding: 15px !important; }
+        .service-card { padding: 10px !important; }
+        .service-info { font-size: 0.95rem !important; }
+        .service-desc { font-size: 0.85rem !important; margin-left: 30px; line-height: 1.4; }
         /* 標題框 RWD (✅ 全部還原) */
         .ql-editor h2.title-boxed-h2, 
         .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }

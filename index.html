@@ -110,15 +110,17 @@
         cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         text-decoration: none; transition: all 0.3s ease;
     }
-    .kb-internal-back { margin-bottom: 5px; } 
+
     .btn-back-capsule:hover, .kb-internal-back:hover { 
         color: #ffffff; background: var(--forest); border-color: var(--forest); 
-        transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); 
+        transform: translateY(-2px); box-shadow: 
+        0 6px 15px rgba(26, 47, 35, 0.15); 
     }
     .btn-back-capsule:hover i, .kb-internal-back:hover i { transform: translateX(-3px); }
     .btn-back-capsule i, .kb-internal-back i { transition: transform 0.3s ease; }
 
     .kb-fab-back {
+        display: none !important;
         position: fixed; bottom: 40px; right: 25px;
         width: 60px; height: 60px; border-radius: 50%;
         background: var(--forest); color: var(--accent); border: 2px solid var(--accent);
@@ -390,6 +392,46 @@
     
     .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; opacity: 1; background-color: var(--cream); }
     .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
+    /* --- 回到頂部小按鈕 --- */
+    #back-to-top {
+        position: fixed;
+        bottom: 90px; /* 👈 設定在 Footer 上方 (避開手機底部選單) */
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(26, 47, 35, 0.8); /* 半透明森林綠 */
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 998; /* 層級比 Footer 低一點點，避免蓋住重要功能 */
+        
+        /* 隱藏狀態 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+        
+        /* 排版 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* 顯示狀態 (由 JS 控制) */
+    #back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* 滑鼠懸停效果 */
+    #back-to-top:hover {
+        background: var(--accent); /* 變金棕色 */
+        transform: translateY(-3px);
+    }
 
     /* ======================================================
        8. 手機版 RWD (Mobile Styles)
@@ -406,8 +448,28 @@
         .section { padding: 20px 15px 60px 15px !important; }
         .card { padding: 20px 15px !important; border-radius: 12px !important; }
         .btn-primary { padding: 12px 30px !important; font-size: 1rem !important; }
-        .kb-fab-back { display: none; } /* Hide Desktop FAB on Mobile if needed, or customize */
-        
+        /* --- 手機版顯示切換 --- */
+
+    /* 1. 圓形懸浮按鈕：手機版要「出現」 */
+    .kb-fab-back {
+        display: flex !important; /* 讓它跑出來 */
+        position: fixed;
+        bottom: 90px; /* 位置在 Footer 上方 */
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--forest);
+        color: var(--accent);
+        border: 2px solid var(--accent);
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1002;
+        font-size: 1.2rem;
+    }
+
+    /* 2. 左上角文字按鈕：手機版可以「隱藏」(因為有圓形按鈕了，省空間) */
         /* Hero & Home */
         .hero-section { flex-direction: column-reverse; gap: 30px; }
         .hero-img { margin: 0 auto !important; width: 180px; height: 180px; }
@@ -481,7 +543,13 @@
             transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
         }
         .kb-tiny-note:hover { transform: rotate(2deg); }
-        .kb-internal-back { margin-top: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
+        .kb-internal-back {
+        display: inline-flex !important; /* 強制叫出來 */
+        margin-top: 15px;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 5;
+        }
 
         .ql-editor h2.title-boxed-h2, .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
         .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
@@ -498,9 +566,49 @@
         .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
 
         /* Footer Sticky */
-        .footer-banner { position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 1001 !important; padding: 10px 0 !important; background: #1a2f23 !important; box-shadow: 0 -4px 15px rgba(0,0,0,0.2) !important; border-top: 2px solid #c6a87c !important; border-radius: 15px 15px 0 0; }
-        .copyright { margin-top: 10px; }
-        
+        /* --- 手機版 Footer 極限瘦身 --- */
+    .footer-banner {
+        padding: 5px 0 8px 0 !important; /* 上下內距縮到最小 */
+        background: #1a2f23 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 1001 !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.15) !important;
+        border-top: 2px solid #c6a87c !important;
+        border-radius: 0 !important; /* 移除圓角，讓它貼底更自然 */
+    }
+
+    .footer-content {
+        padding: 0 10px !important;
+        gap: 4px !important; /* 元件之間的距離縮小 */
+        /* 讓內容盡量緊湊 */
+        display: flex !important;
+        flex-direction: column !important; 
+        justify-content: center !important;
+    }
+
+    /* 按鈕變小顆 */
+    .social-btn {
+        padding: 4px 10px !important;
+        font-size: 12px !important; /* 字變小 */
+        border-radius: 20px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+    }
+    
+    /* Line/IG/Threads 圖示微調 */
+    .social-btn i {
+        font-size: 12px !important; 
+    }
+
+    /* 版權文字縮小並貼緊 */
+    .copyright {
+        margin-top: 4px !important;
+        font-size: 10px !important;
+        opacity: 0.5 !important;
+        line-height: 1 !important;
+    }
         /* Brand Headers Mobile Adjustment */
         .brand-h2-en, .draw-title-h2 { font-size: 0.9rem !important; color: #999 !important; text-shadow: none !important; letter-spacing: 2px; margin-bottom: 2px; }
         .brand-h3-zh, .draw-title-zh { font-size: 1.3rem !important; margin-top: 0 !important; margin-bottom: 12px !important; letter-spacing: 1.5px; font-weight: 900; }
@@ -569,6 +677,13 @@
         box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2); transition: 0.2s;
         display: inline-flex; align-items: center; gap: 5px;
     }
+    #back-to-top {
+            width: 35px; /* 手機版再小一點 */
+            height: 35px;
+            font-size: 16px;
+            bottom: 80px; /* 配合瘦身後的 Footer 高度 */
+            right: 15px;
+        }
     .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }    
     /* Landscape Patch */
     @media (max-width: 768px) and (orientation: landscape) {
@@ -1854,6 +1969,29 @@ async function doSubmit() {
         document.getElementById('dyn-modal-content').innerHTML = contentHtml || "無內容";
         openModal('dynamic-overlay');
     }
+    // === 回到頂部按鈕邏輯 ===
+    
+    // 監聽捲動事件
+    window.onscroll = function() {
+        const btn = document.getElementById('back-to-top');
+        // 當捲動超過 300px 時顯示按鈕
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            btn.classList.add('show');
+        } else {
+            btn.classList.remove('show');
+        }
+    };
+
+    // 點擊回到頂部
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth' // 平滑捲動
+        });
+    }
 </script>
+<button id="back-to-top" onclick="scrollToTop()">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
 </body>
 </html>

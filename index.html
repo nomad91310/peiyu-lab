@@ -452,12 +452,12 @@
 
     /* 1. 圓形懸浮按鈕：手機版要「出現」 */
     .kb-fab-back {
-        display: flex !important; /* 讓它跑出來 */
+        display: flex !important;
         position: fixed;
-        bottom: 90px; /* 位置在 Footer 上方 */
-        right: 20px;
-        width: 50px;
-        height: 50px;
+        bottom: 90px !important;  /* 👈 放在回到最上的下面 */
+        right: 15px !important;   /* 靠右 */
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: var(--forest);
         color: var(--accent);
@@ -467,6 +467,17 @@
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         z-index: 1002;
         font-size: 1.2rem;
+
+        /* 🔥 關鍵：預設隱藏 (跟回到最上一樣) */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+    }
+    .kb-fab-back.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
     /* 2. 左上角文字按鈕：手機版可以「隱藏」(因為有圓形按鈕了，省空間) */
@@ -678,12 +689,12 @@
         display: inline-flex; align-items: center; gap: 5px;
     }
     #back-to-top {
-            width: 35px; /* 手機版再小一點 */
-            height: 35px;
-            font-size: 16px;
-            bottom: 80px; /* 配合瘦身後的 Footer 高度 */
-            right: 15px;
-        }
+        bottom: 150px !important; /* 👈 拉高 */
+        right: 15px !important;   /* 靠右 */
+        width: 40px !important;
+        height: 40px !important;
+        /* 確保它預設是隱藏的 (繼承原本電腦版設定即可) */
+    }
     .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }    
     /* Landscape Patch */
     @media (max-width: 768px) and (orientation: landscape) {
@@ -1972,13 +1983,30 @@ async function doSubmit() {
     // === 回到頂部按鈕邏輯 ===
     
     // 監聽捲動事件
+    // === 雙按鈕滑動監聽邏輯 ===
     window.onscroll = function() {
-        const btn = document.getElementById('back-to-top');
-        // 當捲動超過 300px 時顯示按鈕
-        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-            btn.classList.add('show');
-        } else {
-            btn.classList.remove('show');
+        const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+        const isScrolled = scrollTop > 300; // 滑動超過 300px
+
+        // 1. 控制「回到最上」按鈕 (全站通用)
+        const topBtn = document.getElementById('back-to-top');
+        if (topBtn) {
+            if (isScrolled) topBtn.classList.add('show');
+            else topBtn.classList.remove('show');
+        }
+
+        // 2. 控制「回上一頁」按鈕 (只在培癒寶典出現)
+        // 因為這按鈕是動態生成的，所以用 querySelector 抓
+        const backBtn = document.querySelector('.kb-fab-back');
+        const knowledgeSection = document.getElementById('knowledge');
+        
+        // 檢查：(1)按鈕存在 (2)目前在培癒寶典分頁 (3)有滑動
+        if (backBtn && knowledgeSection.classList.contains('active')) {
+            if (isScrolled) {
+                backBtn.classList.add('show');
+            } else {
+                backBtn.classList.remove('show');
+            }
         }
     };
 

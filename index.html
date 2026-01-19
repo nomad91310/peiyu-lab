@@ -452,28 +452,32 @@
 
     /* 1. 圓形懸浮按鈕：手機版要「出現」 */
     .kb-fab-back {
+        /* 位置設定 */
         display: flex !important;
         position: fixed;
-        bottom: 90px !important;  /* 👈 放在回到最上的下面 */
-        right: 15px !important;   /* 靠右 */
-        width: 40px;
-        height: 40px;
+        bottom: 125px !important; /* 👈 70px + 45px + 10px間距 */
+        right: 15px !important;
+        
+        /* 樣式統一 (跟上面一模一樣) */
+        width: 40px !important;
+        height: 40px !important;
         border-radius: 50%;
         background: var(--forest);
         color: var(--accent);
         border: 2px solid var(--accent);
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         z-index: 1002;
         font-size: 1.2rem;
+        justify-content: center;
+        align-items: center;
 
-        /* 🔥 關鍵：預設隱藏 (跟回到最上一樣) */
+        /* 隱藏設定 */
         opacity: 0;
         visibility: hidden;
         transform: translateY(20px);
         transition: all 0.4s ease;
     }
+    #back-to-top.show, 
     .kb-fab-back.show {
         opacity: 1;
         visibility: visible;
@@ -689,11 +693,32 @@
         display: inline-flex; align-items: center; gap: 5px;
     }
     #back-to-top {
-        bottom: 150px !important; /* 👈 拉高 */
-        right: 15px !important;   /* 靠右 */
+        /* 位置設定 */
+        position: fixed !important;
+        bottom: 70px !important;  /* 👈 貼近底部 Footer */
+        right: 15px !important;
+        
+        /* 樣式統一 (深綠底金邊) */
         width: 40px !important;
         height: 40px !important;
-        /* 確保它預設是隱藏的 (繼承原本電腦版設定即可) */
+        border-radius: 50% !important;
+        background: var(--forest) !important;
+        color: var(--accent) !important;
+        border: 2px solid var(--accent) !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+        z-index: 1002 !important;
+        
+        /* 排版 */
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem !important;
+        
+        /* 隱藏設定 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
     }
     .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }    
     /* Landscape Patch */

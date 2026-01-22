@@ -707,7 +707,22 @@
         border: 2px solid var(--accent) !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
         z-index: 1002 !important;
-        
+            /* 手機版急救：防止圖片爆框 */
+    .hd-chart-container, .story-text, #dyn-modal-content {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+    
+    .hd-chart-container img, 
+    .story-text img, 
+    #dyn-modal-content img {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
+        display: block !important;
+        border-radius: 8px !important;
+    }
+
         /* 排版 */
         display: flex !important;
         justify-content: center;

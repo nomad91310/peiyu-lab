@@ -353,23 +353,90 @@
     .kb-tag-mid { background: #fffcf5; color: var(--accent); border: 1px solid var(--accent); }
     .kb-divider { color: #ccc; font-size: 0.8rem; }
 
-    /* KB 內容編輯器樣式 */
-    .ql-editor { padding: 0; color: #333; font-size: 16px; line-height: 1.8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-wrap: break-word; }
-    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
-    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; line-height: 1.3 !important; padding-bottom: 0px !important; }
-    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
-    .ql-editor li::before { margin-right: 0.3em !important; width: 1.2em !important; text-align: center !important; display: inline-block !important; }
-    .ql-editor .ql-indent-1 { padding-left: 2em; }
-    .ql-editor .ql-indent-2 { padding-left: 4em; }
-    .ql-editor .ql-indent-3 { padding-left: 6em; }
+    /* =========================================
+       KB 內容編輯器樣式 (前台最終版)
+       ========================================= */
+    .ql-editor { 
+        padding: 0; 
+        color: #2c3e50; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; 
+        overflow-wrap: break-word; 
+    }
+
+    /* 🔥 補上：字體支援 (這兩行之前漏了) */
+    .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
+    .ql-font-monospace { font-family: 'Courier New', monospace !important; }
+
+    /* 圖片與 Tab 縮排 (跟後台一致) */
+    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .ql-editor .ql-indent-1 { padding-left: 3em !important; }
+    .ql-editor .ql-indent-2 { padding-left: 6em !important; }
+    .ql-editor .ql-indent-3 { padding-left: 9em !important; }
+
+    /* 列表修正 */
+    /* =========================================
+       🔥 列表間距還原 (您原本調好的黃金比例)
+       ========================================= */
+    .ql-editor ul, .ql-editor ol { 
+        padding-left: 5px !important; 
+        margin-bottom: 5px !important; 
+        margin-top: 0 !important; 
+    }
+
+    .ql-editor li { 
+        padding-left: 1.2em !important; /* 原本的 1.2em */
+        margin-bottom: 0px !important; 
+        line-height: 1.3 !important; 
+        list-style-position: outside !important;
+    }
+
+    /* 消除多餘 P 標籤影響 */
+    .ql-editor li > p { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        display: inline-block !important; 
+        line-height: 1.3 !important; 
+    }
+
+    /* 🔥 關鍵：原本的點點位置設定 (我剛剛不小心刪掉的元兇) */
+    .ql-editor li::before { 
+        margin-right: 0.3em !important; 
+        width: 1.2em !important; 
+        text-align: center !important; 
+        display: inline-block !important; 
+    }
+    /* 字級與標題 (間距修正) */
     .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
-    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 30px; margin-bottom: 10px; line-height: 1.4; display: block; color: var(--forest); }
+    
+    /* 大標題：上方歸零 */
+    .ql-editor .ql-size-large { 
+        font-size: 1.5rem; font-weight: 900; 
+        margin-top: 0px !important; /* 👈 緊貼上方 */
+        margin-bottom: 15px; 
+        line-height: 1.4; display: block; color: var(--forest); 
+    }
+    
     .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
     .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
-    .ql-editor h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
-    .ql-editor h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex !important; align-items: center !important; justify-content: center; padding: 8px 35px !important; margin: 25px 0 15px 0; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
-    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; }
+    
+    /* 特殊標題框 */
+    .ql-editor h2.title-boxed-h2 { 
+        border-left: 8px solid var(--accent); background: var(--forest); color: #fff; 
+        padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; 
+        font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; 
+        display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); 
+    }
+    .ql-editor h3.title-boxed-h3 { 
+        border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); 
+        display: inline-flex !important; align-items: center !important; justify-content: center; 
+        padding: 8px 35px !important; margin: 25px 0 5px 0 !important; /* 👈 下方留 5px */
+        border-radius: 50px; 
+        font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; 
+    }
+    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; color: inherit !important; }
+
     .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
     strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
@@ -707,22 +774,7 @@
         border: 2px solid var(--accent) !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
         z-index: 1002 !important;
-    
-    /* ⚡️⚡️ 手機版圖片強制縮小 (針對人類圖) ⚡️⚡️ */
-    @media (max-width: 768px) {
-        .hd-chart-container, 
-        .hd-chart-container img, 
-        #hd-chart-img,
-        .story-text img {
-            width: 100% !important;      /* 寬度強制跟手機一樣寬 */
-            max-width: 100% !important;  /* 絕對不能超過 */
-            height: auto !important;     /* 高度自動 */
-            display: block !important;   /* 避免被文字擠壓 */
-            margin: 10px auto !important; /* 上下留點空隙 */
-        }
-    }
-
-
+        
         /* 排版 */
         display: flex !important;
         justify-content: center;
@@ -1144,7 +1196,8 @@
         window.scrollTo(0,0); 
     }
 
-    window.onload = async () => {
+   window.onload = async () => {
+        // 1. 初始化資料
         await initBookingData(); 
         initDrawData(); 
         initKbData(); 
@@ -1152,12 +1205,25 @@
         checkSession(); 
         loadHeroAnnouncements();
 
+        // 🔥🔥🔥 關鍵修正：網址路由偵測 🔥🔥🔥
         const params = new URLSearchParams(window.location.search);
-        const targetView = params.get('view');
+        const targetView = params.get('view');    // 抓 ?view=...
+        const targetArticle = params.get('article'); // 抓 ?article=...
 
-        if (targetView && document.getElementById(targetView)) {
-            showSection(targetView); 
-        } else {
+        // 情境 A：如果有指定文章 ID (例如點了社群連結)
+        if (targetArticle) {
+            showSection('knowledge'); // 先切換到寶典區塊
+            // 等一下下讓資料載入，然後直接打開文章
+            setTimeout(() => {
+                readArt(targetArticle);
+            }, 500);
+        }
+        // 情境 B：只有指定頁面 (例如 ?view=draw)
+        else if (targetView && document.getElementById(targetView)) {
+            showSection(targetView);
+        } 
+        // 情境 C：什麼都沒有，回首頁
+        else {
             showSection('home');
         }
     };
@@ -1664,15 +1730,33 @@ async function doSubmit() {
         window.scrollTo(0, 0);
     }
 
-    async function readArt(id) {
-        const { data, error } = await myDB.from('kb_articles').select('*').eq('id', id).single();
-        if (error || !data) { console.error(error); alert("讀取失敗"); return; }
+    // 🔥 全自動短網址版：優先使用 SQL 自動產生的 8 碼 slug
+    async function readArt(idOrSlug) {
+        // 1. 判斷是用 UUID (長) 還是 Slug (短) 查文章
+        // 如果長度超過 20 肯定就是那串討厭的 UUID，不然就是我們的新短碼
+        const isUUID = idOrSlug.length > 20; 
+
+        let query = myDB.from('kb_articles').select('*');
+        if (isUUID) {
+            query = query.eq('id', idOrSlug);
+        } else {
+            query = query.eq('slug', idOrSlug);
+        }
+
+        const { data, error } = await query.single();
+        if (error || !data) { console.error(error); alert("找不到文章！"); return; }
+
+        // 2. 網址列修飾：優先顯示那串只有 8 碼的短代碼 (slug)
+        // 這樣您的網址就會變成 ...?article=9f2a4c1b 看起來舒服多了
+        const displayId = data.slug ? data.slug : data.id;
+        const newUrl = `${window.location.pathname}?view=knowledge&article=${displayId}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
 
         kbState.activeMid = data.mid_category;
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
+        // 內容顯示邏輯 (維持不變)
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(data.big_category);
-        
         const noteHtml = isHidden ? '' : `
             <div class="kb-tiny-note">
                 如果內容有誤 歡迎協助修正<br>
@@ -1685,34 +1769,87 @@ async function doSubmit() {
             <div class="kb-article-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
 
-                <div onclick="kbGoBack()" class="kb-internal-back">
-                    <i class="fa-solid fa-arrow-left"></i> 返回目錄
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
+                    <div onclick="kbGoBack()" class="kb-internal-back" 
+                         style="cursor:pointer; display:inline-flex; align-items:center; margin-bottom: 0 !important; height: 40px;">
+                        <i class="fa-solid fa-arrow-left" style="margin-right:5px;"></i> 返回目錄
+                    </div>
+
+                    <button id="kb-share-btn" onclick="copyArtLink()" 
+                        style="
+                            width: 40px; height: 40px; border-radius: 50%; 
+                            background: var(--forest); border: 1px solid var(--accent); color: var(--accent);
+                            display: flex; justify-content: center; align-items: center;
+                            cursor: pointer; transition: all 0.3s ease;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 0;
+                        "
+                        title="複製文章連結"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.background='var(--accent)'; this.style.color='var(--forest)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.background='var(--forest)'; this.style.color='var(--accent)';"
+                    >
+                        <i class="fa-solid fa-share-nodes" style="font-size: 16px;"></i>
+                    </button>
                 </div>
 
                 ${noteHtml}
-
                 <h1 class="kb-article-title-h1">${data.title}</h1>
-                
                 <div class="kb-meta-row">
                     <span class="kb-tag kb-tag-big">${data.big_category}</span>
                     <span class="kb-divider">●</span>
                     <span class="kb-tag kb-tag-mid">${data.mid_category}</span>
                 </div>
-                
-                <div class="ql-editor">
-                    ${data.body}
-                </div>
+                <div class="ql-editor">${data.body}</div>
             </div>`;
             
         kbState.level = 2;
         window.scrollTo(0, 0);
     }
+
+    // 🔥 小圖示專用版：複製連結 + 轉圈圈特效
+    // 🔥 懶人複製版：直接複製當下的短網址
+    async function copyArtLink() {
+        const btn = document.getElementById('kb-share-btn');
+        const icon = btn.querySelector('i');
+        
+        // 直接抓現在網址列上的網址 (因為 readArt 已經幫我們變短了)
+        // 例如：.../index.html?article=a1b2c3d4
+        const currentUrl = window.location.href;
+
+        // 視覺特效：變綠色打勾
+        btn.style.background = '#27ae60';
+        btn.style.color = '#fff';
+        btn.style.border = '1px solid #27ae60';
+        icon.className = 'fa-solid fa-check';
+
+        try {
+            await navigator.clipboard.writeText(currentUrl);
+        } catch (err) {
+            console.error(err);
+            alert("複製失敗");
+        } finally {
+            setTimeout(() => {
+                icon.className = 'fa-solid fa-share-nodes';
+                btn.style.background = 'var(--forest)';
+                btn.style.color = 'var(--accent)';
+                btn.style.border = '1px solid var(--accent)';
+            }, 1500);
+        }
+    }
     
+    // 🔥 修改版：返回時清理網址
     function kbGoBack() {
+        // 1. 退出閱讀模式
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
+
+        // 2. 清理網址列 (變回乾淨的 / 或 ?view=knowledge)
+        const cleanUrl = window.location.pathname + "?view=knowledge";
+        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+
         if (kbState.level === 2) {
+            // 如果原本是在看文章，返回到「該大分類的列表」
             enterKb(kbState.big);
         } else {
+            // 否則回首頁
             renderKbHome();
         }
     }

@@ -205,31 +205,83 @@
     .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
 
     /* ======================================================
-       5. 編輯器樣式 (Quill Editor)
+       5. 編輯器樣式 (後台修正版：保留介面設定 + 統一內容樣式)
        ====================================================== */
     #editor-container { flex: 1; min-height: 200px; display: flex; flex-direction: column; background: white; margin-bottom: 0; border: 1px solid #ccc; overflow: hidden; position: relative; }
     .ql-container { flex: 1; overflow-y: auto; font-size: 16px; font-family: "Microsoft JhengHei", sans-serif; }
-    .ql-editor { padding: 20px 30px; color: #333; font-size: 16px; line-height: 1.8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-wrap: break-word; }
     
-    /* 字體與列表修正 */
+    /* 編輯器本體 (後台留白多一點，方便編輯) */
+    .ql-editor { 
+        padding: 30px 40px; 
+        color: #333; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+        overflow-wrap: break-word; 
+    }
+
+    /* 🔥 1. 介面與字體設定 (保留您原本的，這很重要) */
     .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
     .ql-font-monospace { font-family: 'Courier New', monospace !important; }
+    /* 工具列中文化 (後台專用) */
     .ql-picker-item[data-value="serif"]::before, .ql-picker-label[data-value="serif"]::before { font-family: 'Noto Serif TC', serif !important; content: '宋體 (Serif)' !important; }
     .ql-picker-item[data-value="monospace"]::before { font-family: 'Courier New', monospace !important; content: '等寬 (Mono)' !important; }
 
-    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
-    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; line-height: 1.3 !important; }
-    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
-    .ql-editor li::before { margin-right: 0.3em !important; width: 1.2em !important; text-align: center !important; display: inline-block !important; }
+    /* 🔥 2. 圖片與列表 (統一縮排邏輯) */
+    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    /* 修正 Tab 縮排 (讓前後台一致) */
+    .ql-editor .ql-indent-1 { padding-left: 3em !important; }
+    .ql-editor .ql-indent-2 { padding-left: 6em !important; }
+    .ql-editor .ql-indent-3 { padding-left: 9em !important; }
 
-    /* 字級與標題 */
+    /* 列表修正 (防止亂跑) */
+    /* =========================================
+       🔥 列表間距還原 (您原本調好的黃金比例)
+       ========================================= */
+    .ql-editor ul, .ql-editor ol { 
+        padding-left: 5px !important; 
+        margin-bottom: 5px !important; 
+        margin-top: 0 !important; 
+    }
+
+    .ql-editor li { 
+        padding-left: 1.2em !important; /* 原本的 1.2em */
+        margin-bottom: 0px !important; 
+        line-height: 1.3 !important; 
+        list-style-position: outside !important;
+    }
+
+    /* 消除多餘 P 標籤影響 */
+    .ql-editor li > p { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        display: inline-block !important; 
+        line-height: 1.3 !important; 
+    }
+
+    /* 🔥 關鍵：原本的點點位置設定 (我剛剛不小心刪掉的元兇) */
+    .ql-editor li::before { 
+        margin-right: 0.3em !important; 
+        width: 1.2em !important; 
+        text-align: center !important; 
+        display: inline-block !important; 
+    }
+    /* 🔥 3. 字級與標題 (修正間距問題) */
     .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
-    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 30px; margin-bottom: 10px; line-height: 1.4; display: block; color: var(--forest); }
+    
+    /* 大標題：上方歸零，為了緊貼上面的膠囊 */
+    .ql-editor .ql-size-large { 
+        font-size: 1.5rem; font-weight: 900; 
+        margin-top: 0px !important; /* 👈 改這裡 */
+        margin-bottom: 15px; 
+        line-height: 1.4; display: block; color: var(--forest); 
+    }
+    
     .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
     .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
 
-    /* 特殊標題框樣式 */
+    /* 🔥 4. 特殊膠囊標題 (後台也要長得一樣) */
     .ql-editor h2.title-boxed-h2 { 
         border-left: 8px solid var(--accent); background: var(--forest); color: #fff; 
         padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; 
@@ -239,11 +291,12 @@
     .ql-editor h3.title-boxed-h3 { 
         border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); 
         display: inline-flex !important; align-items: center !important; justify-content: center; 
-        padding: 8px 35px !important; margin: 25px 0 15px 0; border-radius: 50px; 
+        padding: 8px 35px !important; margin: 25px 0 5px 0 !important; /* 👈 下方留 5px */
+        border-radius: 50px; 
         font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; 
     }
-    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; }
-
+    /* 修正膠囊內的字 */
+    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; color: inherit !important; }
     /* 格式刷與 HTML 編輯 */
     .painter-active { cursor: copy !important; user-select: none; }
     .ql-format-painter.active { color: var(--forest) !important; font-weight: bold; }

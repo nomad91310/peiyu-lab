@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>培癒中控室 V60 | 穩定回歸版</title>
+    <title>培癒試驗室 後台管理系統</title>
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
@@ -301,7 +301,30 @@
     .painter-active { cursor: copy !important; user-select: none; }
     .ql-format-painter.active { color: var(--forest) !important; font-weight: bold; }
     .html-editor { width: 100%; height: 100%; display: none; background: #1e1e1e; color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; padding: 20px; border: none; line-height: 1.5; resize: none; outline: none; position: absolute; top: 0; left: 0; z-index: 10; }
+    /* =========================================
+       🔥 數值顯示標準化 (全站統一)
+       ========================================= */
+    /* 1. 金額 (綠色 + 粗體 + 等寬字) */
+    .num-money { 
+        color: #27ae60; 
+        font-weight: 900; 
+        font-family: 'Consolas', 'Monaco', monospace; 
+        letter-spacing: -0.5px;
+    }
+    
+    /* 2. 趴數/佣金 (橘色 + 粗體) */
+    .num-rate { 
+        color: #d35400; 
+        font-weight: 900; 
+        font-family: 'Consolas', 'Monaco', monospace;
+    }
 
+    /* 3. 折扣/打折 (桃紅色 + 粗體) */
+    .num-discount { 
+        color: #e91e63; 
+        font-weight: 900; 
+        font-family: 'Consolas', 'Monaco', monospace;
+    }
     /* 強制換行工具：對付長網址、長文字、沒空格的亂碼 */
     .force-wrap {
         white-space: pre-wrap !important;    /* 保留換行並自動換行 */
@@ -310,12 +333,154 @@
         max-width: 100% !important;          /* 限制寬度不准撐開 */
         display: block !important;           /* 確保佔滿容器 */
     }
+    /* ======================================================
+       📱 RWD 行動版與平板強力優化補丁
+       (針對 Schedule 排程、KB 知識庫、表格做總整理)
+       ====================================================== */
+    
+    /* 通用：表格優化 (讓表格可以橫向滑動，不會撐爆畫面) */
+    .card { overflow-x: auto; } 
+    table { min-width: 600px; } /* 強制表格保持寬度，用滑的看 */
+
+    /* ------------------------------------------------------
+       iPad 直向與手機 (寬度 1024px 以下)
+       ------------------------------------------------------ */
+    @media (max-width: 1024px) {
+        /* 1. 側邊選單 (Sidebar) 改為漢堡選單模式 */
+        body.hide-nav .sidebar { width: 0; }
+        .sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 2000; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+        /* 預設隱藏側邊欄，點按鈕才叫出來 */
+        body:not(.hide-nav) .sidebar { width: 240px; } 
+        body:not(.hide-nav) .main::before {
+            content: ''; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); z-index: 1999;
+        }
+
+        /* 2. 排程管理 (Schedule) - 這是最難用的地方，改為上下堆疊 */
+        #tab-schedule > div {
+            flex-direction: column !important; /* 強制變成直排 */
+            height: auto !important;
+            padding-bottom: 50px;
+        }
+        /* 三大區塊 (快速排班、月曆、詳情) 全部寬度 100% */
+        #tab-schedule .card { width: 100% !important; margin-bottom: 20px; min-height: auto; }
+        
+        /* 月曆格子加大，方便手指點擊 */
+        .cal-cell { min-height: 80px; }
+        
+        /* 詳情區塊高度限制 */
+        #day-detail-container { max-height: 300px; }
+
+        /* 3. 知識庫 (KB) - 改為上下堆疊 */
+        .kb-layout { 
+            display: flex !important; 
+            flex-direction: column; 
+            height: auto !important; 
+        }
+        .kb-sidebar { 
+            height: 300px; /* 樹狀選單給固定高度 */
+            min-height: 300px; 
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        /* 編輯器區域 */
+        #editor-container { min-height: 500px; }
+        
+        /* 4. 財務設定 (Finance) - 左右欄位改直排 */
+        #sub-ota input, #sub-ota select, 
+        #sub-coupon input, #sub-coupon select { 
+            font-size: 16px; /* 防止 iOS 自動放大 */
+        }
+        #sub-ota > div > div, 
+        #sub-coupon > div > div {
+            display: block !important; /* 讓原本併排的欄位變換行 */
+            margin-bottom: 15px;
+        }
+        #sub-ota > div > div > div,
+        #sub-coupon > div > div > div {
+            width: 100% !important;
+            margin-bottom: 10px;
+        }
+    }
+
+    /* ------------------------------------------------------
+       手機版專用 (寬度 768px 以下)
+       ------------------------------------------------------ */
+    @media (max-width: 768px) {
+        .main { padding: 15px; } /* 縮小邊距 */
+        
+        /* 標題字體縮小 */
+        h2, h3 { font-size: 1.2rem; }
+        
+        /* 隱藏非必要資訊 (例如 ID) 以節省空間 */
+        .admin-row { flex-direction: column; align-items: flex-start; }
+        .admin-row > div { width: 100%; margin-bottom: 5px; }
+        .admin-row button { width: 100%; margin: 2px 0; }
+
+        /* 知識庫編輯器工具列 - 讓它可以橫向滑動，不要擠成一團 */
+        .ql-toolbar {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 5px !important;
+        }
+        .ql-formats { display: inline-block; margin-right: 5px !important; }
+
+        /* 彈窗 (Modal) 優化 */
+        .modal-body { width: 95%; padding: 15px; max-height: 85vh; }
+        
+        /* 列表按鈕加大 (手指好按) */
+        .btn { padding: 10px 15px; font-size: 14px; }
+        
+        /* 排程 - 快速排班格子 */
+        .batch-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+   /* ======================================================
+       📱 手機版選單按鈕：移動到左下角 (修正版)
+       ====================================================== */
+    @media (max-width: 1024px) {
+        
+        /* 🔥 修正選擇器名稱：必須跟 HTML 的 onclick 一模一樣 */
+        button[onclick="toggleMainSidebar()"] {
+            position: fixed !important;
+            
+            /* 位置：左下角 */
+            bottom: 30px !important;
+            left: 20px !important;
+            top: auto !important;
+            
+            /* 樣式：圓形大按鈕 */
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            background-color: var(--forest) !important;
+            color: #fff !important;
+            border: 2px solid var(--accent) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+            z-index: 3000 !important;
+            
+            /* 內容置中 */
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 圖示放大 */
+        button[onclick="toggleMainSidebar()"] i { font-size: 24px !important; margin: 0 !important; }
+        
+        /* 隱藏文字，只留圖示 (如果 HTML 內有 icon 的話，沒有也沒關係) */
+        button[onclick="toggleMainSidebar()"] { font-size: 0 !important; } /* 隱藏 "選單開關" 文字 */
+        button[onclick="toggleMainSidebar()"]::after {
+            content: '☰'; /* 強制加上漢堡圖示 */
+            font-size: 24px;
+            color: #fff;
+        }
+    }
 </style>
 </head>
 <body>
 
 <div id="admin-lock">
-    <h2 style="color:var(--accent);">🔒 培癒中控室 V60</h2>
+    <h2 style="color:var(--accent);">🔒 培癒試驗室後台管理</h2>
     <input type="password" id="admin-pwd" placeholder="請輸入密碼">
     <button class="btn btn-warning" onclick="checkAdmin()">進入系統</button>
 </div>
@@ -342,7 +507,7 @@
 </div>
 
 <div class="sidebar">
-    <h2>培癒控制中心</h2>
+    <h2>培癒試驗室後台</h2>
     <button onclick="switchTab('bks')" id="nav-bks" class="active">📅 預約看板</button>
     <button onclick="switchTab('schedule')" id="nav-schedule">🕒 排程管理</button>
     <button onclick="switchTab('pro')" id="nav-pro">👤 個案 CRM</button>
@@ -576,11 +741,11 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th width="10%">排序</th>
-                        <th width="30%">按鈕標題</th>
-                        <th width="15%">狀態</th>
-                        <th width="20%">建立時間</th>
-                        <th width="25%">操作</th>
+                        <th width="8%">排序</th>
+                        <th width="27%">按鈕標題</th>
+                        <th width="15%">類型</th> <th width="15%">狀態</th>
+                        <th width="15%">建立時間</th>
+                        <th width="20%">操作</th>
                     </tr>
                 </thead>
                 <tbody id="announce-list"></tbody>
@@ -1093,10 +1258,113 @@
     async function resetMemberPassword(uid, phone) { if(!confirm(`確定要重置密碼嗎？\n預設為：guest${phone.slice(-4)}`)) return; const newPw = 'guest' + phone.slice(-4); const { error } = await myDB.from('profiles').update({ password: newPw }).eq('id', uid); if(error) alert("失敗: " + error.message); else alert("✅ 密碼已重置"); }
     async function deleteMember(uid, name) { if(confirm(`⚠️ 確定刪除會員 ${name}？`)) { await myDB.from('profiles').delete().eq('id', uid); fetchAll(); } }
     function showHistory(uid, name) { const p = cache.pros.find(x => x.id === uid); const userBks = cache.bks.filter(b => b.user_id === uid || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); let html = userBks.length === 0 ? "<p style='color:#999; text-align:center;'>無訂單紀錄</p>" : userBks.map(b => ` <div onclick="openBooking('${b.id}')" class="history-card"> <div style="display:flex; justify-content:space-between;"> <b style="color:var(--forest);">${b.service_item}</b> ${STATUS_MAP[b.status] || b.status} </div> <div style="font-size:12px; color:#666; margin-top:5px;">${b.created_at.slice(0,10)} | $${b.price}</div> </div> `).join(''); document.getElementById('m-title').innerText = `${name} 的歷史訂單`; document.getElementById('m-content').innerHTML = `<div style="max-height:400px; overflow-y:auto;">${html}</div>`; document.getElementById('modal').style.display = 'flex'; }
+    // 🔥 優化版：讓優惠券金額顯示看得懂 (打折顯示「折」，扣款顯示「-$」)
+    // 🔥 終極統一版：套用標準 CSS Class，不再手寫 style
+    // 🔥 終極統一版：OTA 編輯區與列表樣式，全部與優惠券對齊！
     function renderFinance() { 
-        document.getElementById('ota-list').innerHTML = cache.otas.map(o => `<tr><td>${o.name}</td><td>${o.code}</td><td>${o.commission_rate}%</td><td>-</td><td><button class="btn btn-info" onclick="editOTA('${o.id}')">修</button><button class="btn btn-danger" onclick="delData('ota_settings', '${o.id}')">刪</button></td></tr>`).join(''); 
-        document.getElementById('cp-list').innerHTML = cache.coupons.map(c => `<tr><td>${c.name}</td><td>${c.code}</td><td>${c.discount_value}</td><td>${c.expires_at||'無'}</td><td>-</td><td>${c.usage_count}</td><td><button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button><button class="btn btn-danger" onclick="delData('coupons', '${c.id}')">刪</button></td></tr>`).join(''); 
+        // ------------------------------------------------
+        // 1. OTA 列表 (包含上方的編輯表單)
+        // ------------------------------------------------
+        
+        // ★★★ 重點修改：這裡把編輯區 HTML 改成跟優惠券一樣的暖色系 Grid 排版 ★★★
+        const otaFormHtml = `
+            <div style="background:#fffcf5; padding:25px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
+                <h4 style="margin-top:0; color:#e65100; border-bottom:1px dashed #e65100; padding-bottom:10px; margin-bottom:20px;">➕ 新增 / 修改平台</h4>
+                <input type="hidden" id="ota-id">
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                    <div>
+                        <label>平台名稱</label>
+                        <input type="text" id="ota-name" placeholder="例: 蝦皮購物">
+                    </div>
+                    <div>
+                        <label>英文代號 (Code)</label>
+                        <input type="text" id="ota-code" placeholder="例: shopee">
+                    </div>
+                    
+                    <div>
+                        <label>佣金費率 (%)</label>
+                        <input type="number" id="ota-rate" placeholder="5.5">
+                    </div>
+                    <div>
+                        <label>前台網址 (客人看的)</label>
+                        <input type="text" id="ota-front" placeholder="https://...">
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <label>後台網址 (您登入用的)</label>
+                        <input type="text" id="ota-admin" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div style="text-align:right; margin-top:25px; padding-top:15px; border-top:1px dashed #fae1c3;">
+                    <button class="btn btn-outline" id="btn-ota-cancel" onclick="cancelOTA()" style="display:none; margin-right:5px;">取消</button>
+                    <button class="btn btn-warning" id="btn-ota-save" onclick="saveOTA()" style="width:150px;">💾 儲存設定</button>
+                </div>
+            </div>
+        `;
+
+        const otaTableRows = cache.otas.map(o => `
+            <tr>
+                <td style="font-weight:bold; color:#2c3e50;">${o.name}</td>
+                
+                <td><span class="tag tag-ota">${o.code}</span></td>
+                
+                <td><span class="num-rate">${o.commission_rate}%</span></td>
+                
+                <td style="font-size:12px; color:#999; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    ${o.front_url || '-'}
+                </td>
+                
+                <td>
+                    <button class="btn btn-info" onclick="editOTA('${o.id}')">修</button>
+                    <button class="btn btn-danger" onclick="delData('ota_settings', '${o.id}')">刪</button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('sub-ota').innerHTML = `
+            ${otaFormHtml}
+            <table>
+                <thead><tr><th width="15%">平台名稱</th><th width="10%">代號</th><th width="10%">佣金</th><th width="45%">網址連結</th><th width="20%">操作</th></tr></thead>
+                <tbody id="ota-list">${otaTableRows}</tbody>
+            </table>
+        `;
+
+        // ------------------------------------------------
+        // 2. 優惠券列表 (邏輯不變，保持統一的列表樣式)
+        // ------------------------------------------------
+        document.getElementById('cp-list').innerHTML = cache.coupons.map(c => {
+            let displayVal = "";
+            
+            if (c.discount_type === 'percentage') {
+                let zhe = c.discount_value / 10;
+                displayVal = `<span class="num-discount">${zhe} 折</span>`; 
+            } else {
+                displayVal = `<span class="num-money">-$${c.discount_value}</span>`;
+            }
+
+            let roleText = `<span style="color:#666; font-size:12px;">不限</span>`;
+            if (c.allowed_roles && c.allowed_roles.includes('member')) {
+                roleText = `<span style="color:#2980b9; font-weight:bold; font-size:12px;">僅會員</span>`;
+            }
+
+            return `
+            <tr>
+                <td style="font-weight:bold; color:#2c3e50;">${c.name}</td>
+                <td><span class="tag tag-coupon">${c.code}</span></td>
+                <td>${displayVal}</td>
+                <td style="font-size:13px;">${c.expires_at ? c.expires_at.slice(0,10) : '<span style="color:#ccc">無期限</span>'}</td>
+                <td>${roleText}</td>
+                <td style="font-size:13px; color:#555;">${c.usage_count} 次</td>
+                <td>
+                    <button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button>
+                    <button class="btn btn-danger" onclick="delData('coupons', '${c.id}')">刪</button>
+                </td>
+            </tr>`;
+        }).join(''); 
     }
+
 
     function renderConfigTables() {
         const s = document.getElementById('svc-cat-filter'); const activeCats = cache.cats.filter(c => c.is_active !== false); s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -1186,7 +1454,43 @@
         else if (type === 'svc') { document.getElementById('svc-id-edit').value = ''; document.getElementById('i-name').value = ''; document.getElementById('i-price').value = ''; document.getElementById('i-sub-opts').value = ''; document.getElementById('i-report-tpl').value = ''; document.getElementById('i-is-main').checked = false; toggleSubOptionInput(); document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; document.getElementById('btn-svc-save').className = "btn btn-forest"; document.getElementById('btn-svc-cancel').style.display = 'none'; }
     }
 
-    async function fetchAnnouncements() { const { data, error } = await myDB.from('announcements').select('*').order('sort_order', { ascending: true }); if (error) { console.error(error); return; } const list = document.getElementById('announce-list'); list.innerHTML = data.map(item => `<tr><td><span class="badge badge-secondary">${item.sort_order}</span></td><td style="font-weight:bold; color:var(--forest);">${item.title}</td><td>${item.is_active ? '<span class="tag tag-paid">🟢 上架中</span>' : '<span class="tag tag-wait">🔴 已隱藏</span>'}</td><td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td><td><button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button><button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button></td></tr>`).join(''); }
+    // 🔥 修正版：列表補上「公告類型」顯示
+    async function fetchAnnouncements() { 
+        const { data, error } = await myDB.from('announcements').select('*').order('sort_order', { ascending: true }); 
+        if (error) { console.error(error); return; } 
+        
+        const list = document.getElementById('announce-list'); 
+        list.innerHTML = data.map(item => {
+            
+            // 判斷類型顯示標籤
+            let typeHtml = '';
+            if (item.type === 'must_read') {
+                typeHtml = `<span style="color:#2980b9; font-weight:bold; font-size:13px;">📘 必讀</span>`;
+            } else if (item.type === 'temp') {
+                typeHtml = `<span style="color:#d35400; font-weight:bold; font-size:13px;">🔥 快訊</span>`;
+            } else {
+                typeHtml = `<span style="color:#999; font-size:13px;">一般</span>`;
+            }
+
+            return `
+            <tr>
+                <td><span class="badge badge-secondary" style="background:#eee; padding:2px 6px; border-radius:4px;">${item.sort_order}</span></td>
+                
+                <td style="font-weight:bold; color:var(--forest);">${item.title}</td>
+                
+                <td>${typeHtml}</td>
+                
+                <td>${item.is_active ? '<span class="tag tag-paid">🟢 上架中</span>' : '<span class="tag tag-wait">🔴 已隱藏</span>'}</td>
+                
+                <td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td>
+                
+                <td>
+                    <button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button>
+                    <button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button>
+                </td>
+            </tr>`;
+        }).join(''); 
+    }
     function openAnnounceModal() { document.getElementById('anc-id').value = ''; document.getElementById('anc-title').value = ''; document.getElementById('anc-order').value = '10'; document.getElementById('anc-content').value = ''; document.getElementById('anc-active').value = 'true'; document.getElementById('anc-modal-title').innerText = "新增公告"; document.getElementById('announce-modal').style.display = 'flex'; }
     function closeAnnounceModal() { document.getElementById('announce-modal').style.display = 'none'; }
     async function editAnnouncement(id) { const { data } = await myDB.from('announcements').select('*').eq('id', id).single(); if (data) { document.getElementById('anc-id').value = data.id; document.getElementById('anc-title').value = data.title; document.getElementById('anc-order').value = data.sort_order; document.getElementById('anc-content').value = data.content; document.getElementById('anc-active').value = data.is_active.toString(); document.getElementById('anc-type').value = data.type || 'must_read'; document.getElementById('anc-modal-title').innerText = "編輯公告"; document.getElementById('announce-modal').style.display = 'flex'; } }
@@ -1231,6 +1535,27 @@
         }).subscribe();
     }
     initRealtimeListener();
+    // ==========================================
+    // 📱 手機版互動優化腳本 (請貼在 script 最下面)
+    // ==========================================
+
+    // 1. 手機版載入時，預設「隱藏選單」
+    if (window.innerWidth <= 1024) {
+        document.body.classList.add('hide-nav');
+    }
+
+    // 2. 點擊「右側內容區 (Main)」時，自動關閉選單
+    document.querySelector('.main').addEventListener('click', function(e) {
+        // 如果是手機版 且 選單目前是打開的 (沒有 hide-nav class)
+        if (window.innerWidth <= 1024 && !document.body.classList.contains('hide-nav')) {
+            
+            // 避免點到「選單開關按鈕」時重複觸發
+            if (e.target.closest('button[onclick="toggleMainSidebar()"]')) return;
+            
+            // 執行關閉
+            toggleMainSidebar();
+        }
+    });
 </script>
 </body>
 </html>

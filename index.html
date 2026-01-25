@@ -12,6 +12,8 @@
     
     <link rel="preload" as="image" href="logo.png">
     <link rel="preload" as="image" href="logohuman.png">
+    <link rel="preload" as="image" href="logoloading.png">
+
 
 <style>
     /* ======================================================
@@ -1305,33 +1307,48 @@
         window.scrollTo(0,0); 
     }
 
-   // 🔥 window.onload 最終修正：先切換畫面，再抓資料 (解決閃爍問題)
-    window.onload = async () => {
-        // 1. 第一件事：先檢查網址！
+   // 🔥 光速攔截版：HTML 一讀完馬上執行，不準等圖片！
+    document.addEventListener("DOMContentLoaded", async () => {
+        
+        // 1. 第一件事：馬上檢查網址，攔截畫面！
         const params = new URLSearchParams(window.location.search);
         const targetArticle = params.get('article');
         const targetView = params.get('view'); 
 
-        // 🚀 關鍵邏輯：如果是「直達文章」，馬上動手改畫面！
+        // 🚀 如果有文章 ID，立刻把首頁殺掉，換成轉圈圈！
         if (targetArticle) {
-            // A. 強制切換到 knowledge 分頁 (這行執行瞬間，首頁就會消失)
-            // 參數 true 代表「靜音模式」，不要畫目錄
-            showSection('knowledge', true); 
+            // A. 強制把首頁藏起來 (移除 active)
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             
-            // B. 馬上加上閱讀模式 class (這行執行瞬間，醜醜的「📘 培癒寶典」標題就會隱藏)
-            document.getElementById('knowledge').classList.add('kb-reading-mode');
+            // B. 強制顯示知識庫分頁 (靜音模式，不畫目錄)
+            const kbSection = document.getElementById('knowledge');
+            kbSection.classList.add('active');
+            kbSection.classList.add('kb-reading-mode'); // 隱藏標題
             
-            // C. 把「載入中...」換成漂亮的轉圈圈動畫
+            // C. 塞入您的專用 Logo 轉圈圈 (這是原本 HTML 沒有的，所以要馬上塞)
             document.getElementById('kb-container').innerHTML = `
                 <div style="height: 80vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                    <div style="font-size: 40px; animation: spin 1s infinite linear;">🔮</div>
-                    <div style="margin-top: 15px; color: var(--forest); font-weight: bold; letter-spacing: 1px;">正在調閱資料...</div>
+                    <img src="logoloading.png" 
+                         style="width: 100px; height: 100px; object-fit: contain; 
+                                animation: spin 2s infinite linear; 
+                                filter: drop-shadow(0 0 15px rgba(198, 168, 124, 0.5));">
+                    <div style="margin-top: 20px; color: var(--forest); font-weight: 900; letter-spacing: 2px; font-family: 'Noto Serif TC', serif;">
+                        資料調閱中...
+                    </div>
                 </div>
                 <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
             `;
+        } 
+        // 如果指定要去別頁 (例如抽卡)
+        else if (targetView && document.getElementById(targetView)) {
+            showSection(targetView);
+        }
+        // 如果什麼都沒有，才乖乖顯示首頁
+        else {
+            showSection('home');
         }
 
-        // 2. 畫面處理好了，現在才開始悠哉地去抓資料 (背景執行)
+        // 2. 畫面卡位成功後，才開始在背景慢慢抓資料
         const p1 = initBookingData(); 
         initDrawData(); 
         const p3 = initKbData(); 
@@ -1339,19 +1356,14 @@
         checkSession(); 
         loadHeroAnnouncements();
 
-        // 3. 等待資料庫回應 (這時候使用者看到的是漂亮的水晶球轉圈圈)
+        // 3. 等資料庫回應
         await p3; 
 
         // 4. 資料回來了！正式填入內容
         if (targetArticle) {
             readArt(targetArticle);
-        } else if (targetView && document.getElementById(targetView)) {
-            showSection(targetView);
-        } else {
-            // 只有沒指定文章時，才顯示首頁
-            if (!targetArticle) showSection('home');
         }
-    };
+    });
     
     function toggleMenu() {
         const menu = document.getElementById('nav-menu');

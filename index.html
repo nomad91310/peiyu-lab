@@ -1903,34 +1903,40 @@ async function doSubmit() {
         window.scrollTo(0, 0);
     }
 
-    // 🔥 最終進化版：自動抓取「當前文章標題」進行分享
+    // 🔥 最終修復：手機版操作結束後直接離開，絕不執行電腦版邏輯
     async function copyArtLink() {
         const btn = document.getElementById('kb-share-btn');
         const icon = btn.querySelector('i');
         
-        // 1. 🔥 關鍵修改：去抓現在畫面上的 H1 標題
         const titleEl = document.querySelector('.kb-article-title-h1');
-        const currentTitle = titleEl ? titleEl.innerText : '能量指引'; // 如果沒抓到就用預設值
+        const currentTitle = titleEl ? titleEl.innerText : '能量指引';
 
-        // 2. 準備要分享的資料 (把標題塞進去！)
         const shareData = {
             title: `培癒試驗室 - ${currentTitle}`,
-            text: `培癒試驗室 - ${currentTitle} `, // 👈 手機分享時，這段文字會自動帶入
+            text: `推薦你看這篇：${currentTitle} ✨`,
             url: window.location.href
         };
 
-        // 3. 手機原生分享 (Line / IG / FB)
+        // 1. 手機版優先執行
         if (navigator.share) {
             try {
                 await navigator.share(shareData);
-                return; 
+                console.log('分享成功');
             } catch (err) {
-                console.log('分享取消，轉為複製連結');
+                // 這裡通常是使用者按了「取消」
+                // 我們只記錄 log，不做任何事情，安靜結束
+                console.log('使用者取消分享或分享失敗', err); 
             }
+            
+            // ⚠️ 關鍵修正：無論成功或取消，手機版任務到此結束！
+            // 直接 return，絕對不讓它往下跑去執行電腦版的複製
+            return; 
         }
 
-        // 4. 電腦版複製連結
-        // (電腦版通常只能複製網址，無法複製標題文字，這是瀏覽器限制)
+        // ==========================================
+        // 👇 以下只有「不支援分享功能的電腦」才會執行
+        // ==========================================
+
         const originalBg = btn.style.background;
         const originalColor = btn.style.color;
         const originalBorder = btn.style.border;
@@ -1942,10 +1948,9 @@ async function doSubmit() {
 
         try {
             await navigator.clipboard.writeText(shareData.url);
-            // 這裡可以加個小提示，或者就靠按鈕變色
         } catch (err) {
             console.error(err);
-            alert("複製失敗");
+            alert("複製失敗，請手動複製網址");
         } finally {
             setTimeout(() => {
                 icon.className = 'fa-solid fa-share-nodes';
@@ -1954,8 +1959,9 @@ async function doSubmit() {
                 btn.style.border = '1px solid var(--accent)';
             }, 1500);
         }
-    }
-    
+    }    
+
+
     // 🔥 kbGoBack 修正版：返回時重置標題
     function kbGoBack() {
         // ✅ 改回原本的網站標題

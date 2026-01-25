@@ -1852,7 +1852,7 @@ async function doSubmit() {
         if (error || !data) { console.error(error); alert("找不到文章！"); return; }
 
         // ✅ 這裡修改標題！
-        document.title = `培癒試驗室 - ${data.title}`;
+        document.title = `培癒試驗室 ${data.title}`;
 
         // 狀態與網址處理
         kbState.activeBig = data.big_category; 
@@ -1912,8 +1912,8 @@ async function doSubmit() {
         const currentTitle = titleEl ? titleEl.innerText : '能量指引';
 
         const shareData = {
-            title: `培癒試驗室 - ${currentTitle}`,
-            text: `推薦你看這篇：${currentTitle} ✨`,
+            title: `培癒試驗室 ${currentTitle}`,
+            text: `培癒試驗室 ${currentTitle}`,
             url: window.location.href
         };
 

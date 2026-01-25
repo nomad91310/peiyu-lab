@@ -1305,40 +1305,51 @@
         window.scrollTo(0,0); 
     }
 
-   // 🔥 window.onload 最終版：智慧路由，直達文章
+   // 🔥 window.onload 最終修正：先切換畫面，再抓資料 (解決閃爍問題)
     window.onload = async () => {
-        // 1. 平行載入所有資料 (加快速度)
+        // 1. 第一件事：先檢查網址！
+        const params = new URLSearchParams(window.location.search);
+        const targetArticle = params.get('article');
+        const targetView = params.get('view'); 
+
+        // 🚀 關鍵邏輯：如果是「直達文章」，馬上動手改畫面！
+        if (targetArticle) {
+            // A. 強制切換到 knowledge 分頁 (這行執行瞬間，首頁就會消失)
+            // 參數 true 代表「靜音模式」，不要畫目錄
+            showSection('knowledge', true); 
+            
+            // B. 馬上加上閱讀模式 class (這行執行瞬間，醜醜的「📘 培癒寶典」標題就會隱藏)
+            document.getElementById('knowledge').classList.add('kb-reading-mode');
+            
+            // C. 把「載入中...」換成漂亮的轉圈圈動畫
+            document.getElementById('kb-container').innerHTML = `
+                <div style="height: 80vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                    <div style="font-size: 40px; animation: spin 1s infinite linear;">🔮</div>
+                    <div style="margin-top: 15px; color: var(--forest); font-weight: bold; letter-spacing: 1px;">正在調閱資料...</div>
+                </div>
+                <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+            `;
+        }
+
+        // 2. 畫面處理好了，現在才開始悠哉地去抓資料 (背景執行)
         const p1 = initBookingData(); 
         initDrawData(); 
-        const p3 = initKbData(); // 開始抓文章資料
+        const p3 = initKbData(); 
         loadSiteAssets();
         checkSession(); 
         loadHeroAnnouncements();
 
-        // ⚠️ 重要：一定要等文章樹狀圖 (kbTree) 抓完
-        // 不然等一下如果使用者按「返回」，會因為沒資料而報錯
+        // 3. 等待資料庫回應 (這時候使用者看到的是漂亮的水晶球轉圈圈)
         await p3; 
 
-        // 2. 檢查網址，看看使用者想去哪
-        const params = new URLSearchParams(window.location.search);
-        const targetView = params.get('view');    
-        const targetArticle = params.get('article'); 
-
-        // 🚀 情境 A：網址有帶文章 ID (別人點分享連結進來)
+        // 4. 資料回來了！正式填入內容
         if (targetArticle) {
-            // 切換到寶典分頁，但參數 true 告訴它：「安靜！不要畫目錄！」
-            showSection('knowledge', true); 
-            
-            // 直接開始讀取並顯示文章
             readArt(targetArticle);
-        }
-        // 🚀 情境 B：指定頁面 (例如 ?view=draw)
-        else if (targetView && document.getElementById(targetView)) {
+        } else if (targetView && document.getElementById(targetView)) {
             showSection(targetView);
-        } 
-        // 🚀 情境 C：什麼都沒有，乖乖回首頁
-        else {
-            showSection('home');
+        } else {
+            // 只有沒指定文章時，才顯示首頁
+            if (!targetArticle) showSection('home');
         }
     };
     

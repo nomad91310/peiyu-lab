@@ -1273,14 +1273,22 @@
     let isMemberBlocked = false; 
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
-    // 🔥 showSection 修正版：切換分頁時重置標題
-    function showSection(id) { 
-        // ✅ 切換分頁時，統一改回原標題
+    // 🔥 showSection 修正版：支援「不渲染目錄」的純切換模式
+    function showSection(id, isDirectArticle = false) { 
+        // 1. 改回原標題
         document.title = "培癒試驗室";
 
+        // 2. 網址清理 (只有在「非直接看文章」的情況下才清空，避免把文章連結洗掉)
+        if (!isDirectArticle) {
+             const cleanUrl = window.location.pathname;
+             window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+        }
+
+        // 3. 切換顯示區塊
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
         document.getElementById(id).classList.add('active'); 
         
+        // 4. 處理導航按鈕狀態
         document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         const baseId = id.split('-')[0]; 
         const navBtn = document.getElementById('nav-' + baseId);
@@ -1288,39 +1296,47 @@
         
         document.getElementById('nav-menu').classList.remove('active');
         
-        if (id === 'knowledge') {
+        // 🔥 關鍵修改：
+        // 只有在「不是」直接看文章的情況下，才畫出目錄
+        // 這樣就不會發生「先看到目錄 -> 才變成文章」的怪異跳轉
+        if (id === 'knowledge' && !isDirectArticle) {
             renderKbHome(); 
         }
         window.scrollTo(0,0); 
     }
 
-   window.onload = async () => {
-        // 1. 初始化資料
-        await initBookingData(); 
+   // 🔥 window.onload 最終版：智慧路由，直達文章
+    window.onload = async () => {
+        // 1. 平行載入所有資料 (加快速度)
+        const p1 = initBookingData(); 
         initDrawData(); 
-        initKbData(); 
+        const p3 = initKbData(); // 開始抓文章資料
         loadSiteAssets();
         checkSession(); 
         loadHeroAnnouncements();
 
-        // 🔥🔥🔥 關鍵修正：網址路由偵測 🔥🔥🔥
-        const params = new URLSearchParams(window.location.search);
-        const targetView = params.get('view');    // 抓 ?view=...
-        const targetArticle = params.get('article'); // 抓 ?article=...
+        // ⚠️ 重要：一定要等文章樹狀圖 (kbTree) 抓完
+        // 不然等一下如果使用者按「返回」，會因為沒資料而報錯
+        await p3; 
 
-        // 情境 A：如果有指定文章 ID (例如點了社群連結)
+        // 2. 檢查網址，看看使用者想去哪
+        const params = new URLSearchParams(window.location.search);
+        const targetView = params.get('view');    
+        const targetArticle = params.get('article'); 
+
+        // 🚀 情境 A：網址有帶文章 ID (別人點分享連結進來)
         if (targetArticle) {
-            showSection('knowledge'); // 先切換到寶典區塊
-            // 等一下下讓資料載入，然後直接打開文章
-            setTimeout(() => {
-                readArt(targetArticle);
-            }, 500);
+            // 切換到寶典分頁，但參數 true 告訴它：「安靜！不要畫目錄！」
+            showSection('knowledge', true); 
+            
+            // 直接開始讀取並顯示文章
+            readArt(targetArticle);
         }
-        // 情境 B：只有指定頁面 (例如 ?view=draw)
+        // 🚀 情境 B：指定頁面 (例如 ?view=draw)
         else if (targetView && document.getElementById(targetView)) {
             showSection(targetView);
         } 
-        // 情境 C：什麼都沒有，回首頁
+        // 🚀 情境 C：什麼都沒有，乖乖回首頁
         else {
             showSection('home');
         }
@@ -1707,6 +1723,7 @@ async function doSubmit() {
     function toggleFlow() { const isD=document.getElementById('data-flow').value==='data'; document.getElementById('flow-data').style.display=isD?'block':'none'; document.getElementById('flow-upload').style.display=isD?'none':'block'; }
     function toggleSubmitBtn(c) { if(isMemberBlocked) return; document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
 
+    // 🔥 initKbData 修正版：只負責備料，不負責上菜 (移除渲染邏輯)
     async function initKbData() {
         const { data } = await myDB.from('kb_articles').select('id,title,big_category,mid_category').eq('is_published', true).order('sort_order', { ascending: true });
         
@@ -1722,7 +1739,8 @@ async function doSubmit() {
                 if (!kbTree[i.big_category][i.mid_category]) kbTree[i.big_category][i.mid_category] = [];
                 kbTree[i.big_category][i.mid_category].push(i);
             });
-            renderKbHome();
+            // ❌ 這裡原本會呼叫 renderKbHome()，我把它拿掉了！
+            // 這樣載入時就不會先閃一下目錄了。
         }
     }
 
@@ -1762,7 +1780,7 @@ async function doSubmit() {
         window.scrollTo(0,0);
     }
 
-    // 🔥 enterKb 修正版：按鈕樣式同步 + 自動捲動
+    // 🔥 enterKb 修正版：移除自動定位，改為強制回到最頂端
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
@@ -1792,6 +1810,7 @@ async function doSubmit() {
                 let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
                 const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
                 if (match) displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
+                
                 return `
                 <div class="kb-article-card" onclick="event.stopPropagation(); readArt('${a.id}')">
                     <div class="kb-card-content">${displayHtml}</div>
@@ -1800,6 +1819,7 @@ async function doSubmit() {
             }).join('');
 
             const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
+
             return `
             <details id="${safeMidId}" class="kb-section-group" open>
                 <summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary>
@@ -1813,7 +1833,7 @@ async function doSubmit() {
 
                 <div class="kb-header-actions">
                     <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
-                        <i class="fa-solid fa-arrow-left"></i> 返回
+                        <i class="fa-solid fa-arrow-left"></i> 返回首頁
                     </div>
                 </div>
 
@@ -1825,20 +1845,9 @@ async function doSubmit() {
             </div>
         `;
         
-        // 自動捲動邏輯
-        if (kbState.activeMid) {
-            setTimeout(() => {
-                const targetId = `mid-group-${kbState.activeMid.replace(/\s+/g, '-')}`;
-                const el = document.getElementById(targetId);
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    window.scrollTo(0, 0);
-                }
-            }, 100);
-        } else {
-            window.scrollTo(0, 0);
-        }
+        // 🔥 這裡改掉了！
+        // 不管有沒有 activeMid，全部強制滾到最上面 (0, 0)
+        window.scrollTo(0, 0);
     }
 
 
@@ -1962,18 +1971,31 @@ async function doSubmit() {
     }    
 
 
-    // 🔥 kbGoBack 修正版：返回時重置標題
+    // 🔥 kbGoBack 最終防呆版：萬一抓不到分類，自動回首頁，絕不報錯
     function kbGoBack() {
-        // ✅ 改回原本的網站標題
+        // 1. 改回原標題
         document.title = "培癒試驗室";
 
+        // 2. 退出閱讀模式 CSS
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
+        
+        // 3. 網址清乾淨
         const cleanUrl = window.location.pathname + "?view=knowledge";
         window.history.pushState({ path: cleanUrl }, '', cleanUrl);
 
+        // 4. 判斷返回路徑
         if (kbState.level === 2) {
-            enterKb(kbState.activeBig || kbState.big);
+            // 檢查：如果 activeBig 有值，才進去分類
+            if (kbState.activeBig) {
+                enterKb(kbState.activeBig);
+            } 
+            // ⚠️ 安全氣囊：萬一真的沒有抓到分類 (NULL)，就乖乖回首頁
+            else {
+                console.log("查無分類狀態，返回首頁");
+                renderKbHome();
+            }
         } else {
+            // 從列表返回 -> 回首頁
             renderKbHome();
         }
     }

@@ -271,7 +271,7 @@
 
     /* 結算區 */
     .checkout-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #eee; margin-top: 30px; padding-top: 20px; }
-.checkout-footer .coupon-box { 
+    .checkout-footer .coupon-box { 
         margin: 0 !important; 
         flex: 0 0 320px; 
         background: #fffdf9; 
@@ -286,7 +286,7 @@
         /* 讓內容撐滿寬度 */
         align-items: stretch; 
     }
-        .checkout-footer .total-box { margin: 0 !important; padding: 0 !important; border: none !important; text-align: right; font-size: 2rem; font-weight: 900; color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px; }
+    .checkout-footer .total-box { margin: 0 !important; padding: 0 !important; border: none !important; text-align: right; font-size: 2rem; font-weight: 900; color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px; }
     .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
 
     /* 規則與條款 */
@@ -499,6 +499,45 @@
         background: var(--accent); /* 變金棕色 */
         transform: translateY(-3px);
     }
+    .kb-header-actions {
+        display: flex !important;
+        align-items: center !important; /* 🔥 關鍵：這行讓按鈕垂直置中對齊 */
+        gap: 15px !important;
+        margin-bottom: 25px !important;
+        width: 100% !important;
+    }
+    /* 2. 電腦版返回按鈕：去除多餘邊距，確保對齊 */
+    .kb-internal-back {
+        display: inline-flex !important;
+        align-items: center !important;
+        margin: 0 !important; /* 歸零，防止被往下推 */
+        height: 40px !important; /* 跟分享按鈕一樣高 */
+    }
+
+    /* 2. 分享按鈕：深綠色金邊圓形 */
+    #kb-share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--forest);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        padding: 0;
+    }
+
+    /* 3. 電腦版滑鼠移過去的特效 (手機通常看不到這個) */
+    #kb-share-btn:hover {
+        transform: translateY(-2px);
+        background: var(--accent);
+        color: var(--forest);
+        box-shadow: 0 5px 15px rgba(198, 168, 124, 0.4);
+    }
 
     /* ======================================================
        8. 手機版 RWD (Mobile Styles)
@@ -549,9 +588,9 @@
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
-    }
+         }
 
-    /* 2. 左上角文字按鈕：手機版可以「隱藏」(因為有圓形按鈕了，省空間) */
+        /* 2. 左上角文字按鈕：手機版可以「隱藏」(因為有圓形按鈕了，省空間) */
         /* Hero & Home */
         .hero-section { flex-direction: column-reverse; gap: 30px; }
         .hero-img { margin: 0 auto !important; width: 180px; height: 180px; }
@@ -625,13 +664,67 @@
             transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
         }
         .kb-tiny-note:hover { transform: rotate(2deg); }
-        .kb-internal-back {
-        display: inline-flex !important; /* 強制叫出來 */
-        margin-top: 15px;
-        margin-bottom: 25px;
-        position: relative;
-        z-index: 5;
+        /* 1. 讓按鈕容器緊湊排列 */
+        .kb-header-actions {
+            gap: 10px !important;
+            margin-bottom: 20px !important;
         }
+
+        
+        /* 1. 統一樣式：KB返回鍵 & 預約單返回鍵 & 分享鍵 */
+        /* 讓它們高度、邊框、圓角全部一致 */
+        .kb-internal-back, .btn-back-capsule, #kb-share-btn {
+            height: 36px !important;      /* 統一高度 */
+            border-radius: 50px !important; /* 統一圓角 */
+            border: 1px solid rgba(0,0,0,0.1) !important; /* 統一邊框 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+            margin-top: 0 !important;     /* 移除多餘頭頂空間 */
+            margin-bottom: 0 !important;
+        }
+
+        /* 2. 返回按鈕專屬設定 (KB & 預約單) */
+        .kb-internal-back, .btn-back-capsule {
+            display: inline-flex !important;
+            width: auto !important;       /* 寬度隨文字伸縮 */
+            padding: 0 15px !important;   /* 左右留白 */
+            font-size: 13px !important;   /* 字體大小適中 */
+            background: #fff !important;  /* 白底 */
+            color: var(--forest) !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* 修正箭頭與文字的距離 */
+        .kb-internal-back i, .btn-back-capsule i {
+            margin-right: 6px !important;
+            font-size: 13px !important;
+            transform: none !important;
+        }
+
+        /* 3. 分享按鈕專屬設定 (KB 才有) */
+        #kb-share-btn {
+            width: 36px !important; /* 圓形 */
+            padding: 0 !important;
+            background: var(--forest) !important; /* 深綠底 */
+            color: var(--accent) !important;      /* 金色圖示 */
+            border: 1px solid var(--accent) !important;
+        }
+
+        /* 4. KB 頂部容器排版 (靠左對齊) */
+        .kb-header-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;          /* 按鈕之間的間距 */
+            margin-bottom: 20px !important;
+            width: 100% !important;
+        }
+
+        /* 5. 預約單標題微調 (避免跟按鈕太近) */
+        #booking-step-2 h2 {
+            margin-top: 20px !important;
+        }
+
+    
 
         .ql-editor h2.title-boxed-h2, .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
         .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
@@ -695,7 +788,7 @@
         .brand-h2-en, .draw-title-h2 { font-size: 0.9rem !important; color: #999 !important; text-shadow: none !important; letter-spacing: 2px; margin-bottom: 2px; }
         .brand-h3-zh, .draw-title-zh { font-size: 1.3rem !important; margin-top: 0 !important; margin-bottom: 12px !important; letter-spacing: 1.5px; font-weight: 900; }
         .brand-capsule, .draw-desc-p { font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; }
-    }
+    
     /* ======================================================
        9. 會員中心 - 歷史訂單卡片優化 (Healing UI)
        ====================================================== */
@@ -791,6 +884,7 @@
     /* Landscape Patch */
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note { top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; }
+    }
     }
 </style>
 
@@ -900,7 +994,7 @@
 <div id="booking-step-2" class="section">
     <div class="card">
         <button class="btn-back-capsule" onclick="showSection('booking-step-1')">
-            <i class="fa-solid fa-arrow-left"></i> 返回類別
+            <i class="fa-solid fa-arrow-left"></i> 返回
         </button>
 
         <h2 id="active-cat-name" style="margin-top:0; color:var(--forest);">服務詳情</h2>
@@ -1664,6 +1758,7 @@ async function doSubmit() {
         window.scrollTo(0,0);
     }
 
+    // 🔥 enterKb 修正版：按鈕樣式同步 + 自動捲動
     function enterKb(big) {
         kbState.level = 1;
         kbState.big = big;
@@ -1671,7 +1766,6 @@ async function doSubmit() {
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(big);
-        
         const noteHtml = isHidden ? '' : `
             <div class="kb-tiny-note">
                 如果內容有誤 歡迎協助修正<br>
@@ -1683,9 +1777,7 @@ async function doSubmit() {
         let sortedMids = [];
         if (kbCatOrder && kbCatOrder.mid && kbCatOrder.mid[big]) {
             sortedMids = kbCatOrder.mid[big].filter(m => kbTree[big] && kbTree[big][m]);
-            if(kbTree[big]) {
-                Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); });
-            }
+            if(kbTree[big]) { Object.keys(kbTree[big]).forEach(k => { if (!sortedMids.includes(k)) sortedMids.push(k); }); }
         } else if (kbTree[big]) {
             sortedMids = Object.keys(kbTree[big]);
         }
@@ -1696,7 +1788,6 @@ async function doSubmit() {
                 let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
                 const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
                 if (match) displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
-                
                 return `
                 <div class="kb-article-card" onclick="event.stopPropagation(); readArt('${a.id}')">
                     <div class="kb-card-content">${displayHtml}</div>
@@ -1704,8 +1795,9 @@ async function doSubmit() {
                 </div>`;
             }).join('');
 
+            const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
             return `
-            <details class="kb-section-group" open>
+            <details id="${safeMidId}" class="kb-section-group" open>
                 <summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary>
                 <div class="kb-list-container">${articlesHtml}</div>
             </details>`;
@@ -1715,47 +1807,56 @@ async function doSubmit() {
             <div class="kb-cat-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
 
-                <div onclick="kbGoBack()" class="kb-internal-back">
-                    <i class="fa-solid fa-arrow-left"></i> 返回首頁
+                <div class="kb-header-actions">
+                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
+                        <i class="fa-solid fa-arrow-left"></i> 返回
+                    </div>
                 </div>
-
-                ${noteHtml}
 
                 <div class="kb-cat-header">
                     <h1 class="kb-cat-title-h1">${big}</h1>
+                    ${noteHtml}
                 </div>
                 ${contentHtml}
             </div>
         `;
-        window.scrollTo(0, 0);
+        
+        // 自動捲動邏輯
+        if (kbState.activeMid) {
+            setTimeout(() => {
+                const targetId = `mid-group-${kbState.activeMid.replace(/\s+/g, '-')}`;
+                const el = document.getElementById(targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            }, 100);
+        } else {
+            window.scrollTo(0, 0);
+        }
     }
 
-    // 🔥 全自動短網址版：優先使用 SQL 自動產生的 8 碼 slug
-    async function readArt(idOrSlug) {
-        // 1. 判斷是用 UUID (長) 還是 Slug (短) 查文章
-        // 如果長度超過 20 肯定就是那串討厭的 UUID，不然就是我們的新短碼
-        const isUUID = idOrSlug.length > 20; 
 
+    // 🔥 readArt 修正版：手機有字小膠囊 + 平行對齊
+    async function readArt(idOrSlug) {
+        const isUUID = idOrSlug.length > 20; 
         let query = myDB.from('kb_articles').select('*');
-        if (isUUID) {
-            query = query.eq('id', idOrSlug);
-        } else {
-            query = query.eq('slug', idOrSlug);
-        }
+        if (isUUID) { query = query.eq('id', idOrSlug); } else { query = query.eq('slug', idOrSlug); }
 
         const { data, error } = await query.single();
         if (error || !data) { console.error(error); alert("找不到文章！"); return; }
 
-        // 2. 網址列修飾：優先顯示那串只有 8 碼的短代碼 (slug)
-        // 這樣您的網址就會變成 ...?article=9f2a4c1b 看起來舒服多了
+        kbState.activeBig = data.big_category; 
+        kbState.activeMid = data.mid_category;
+        kbState.level = 2;
+
         const displayId = data.slug ? data.slug : data.id;
         const newUrl = `${window.location.pathname}?view=knowledge&article=${displayId}`;
         window.history.pushState({ path: newUrl }, '', newUrl);
 
-        kbState.activeMid = data.mid_category;
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         
-        // 內容顯示邏輯 (維持不變)
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(data.big_category);
         const noteHtml = isHidden ? '' : `
             <div class="kb-tiny-note">
@@ -1766,42 +1867,33 @@ async function doSubmit() {
             </div>`;
         
         document.getElementById('kb-container').innerHTML = `
-            <div class="kb-article-view">
+            <div class="kb-article-view" style="position: relative;">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
 
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
-                    <div onclick="kbGoBack()" class="kb-internal-back" 
-                         style="cursor:pointer; display:inline-flex; align-items:center; margin-bottom: 0 !important; height: 40px;">
-                        <i class="fa-solid fa-arrow-left" style="margin-right:5px;"></i> 返回目錄
+                <div class="kb-header-actions">
+                    
+                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
+                        <i class="fa-solid fa-arrow-left"></i> 返回
                     </div>
 
-                    <button id="kb-share-btn" onclick="copyArtLink()" 
-                        style="
-                            width: 40px; height: 40px; border-radius: 50%; 
-                            background: var(--forest); border: 1px solid var(--accent); color: var(--accent);
-                            display: flex; justify-content: center; align-items: center;
-                            cursor: pointer; transition: all 0.3s ease;
-                            box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 0;
-                        "
-                        title="複製文章連結"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.background='var(--accent)'; this.style.color='var(--forest)';"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.background='var(--forest)'; this.style.color='var(--accent)';"
-                    >
-                        <i class="fa-solid fa-share-nodes" style="font-size: 16px;"></i>
+                    <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結">
+                        <i class="fa-solid fa-share-nodes"></i>
                     </button>
                 </div>
 
                 ${noteHtml}
-                <h1 class="kb-article-title-h1">${data.title}</h1>
+
+                <h1 class="kb-article-title-h1" style="margin-top: 10px;">${data.title}</h1>
+                
                 <div class="kb-meta-row">
                     <span class="kb-tag kb-tag-big">${data.big_category}</span>
                     <span class="kb-divider">●</span>
                     <span class="kb-tag kb-tag-mid">${data.mid_category}</span>
                 </div>
+                
                 <div class="ql-editor">${data.body}</div>
             </div>`;
             
-        kbState.level = 2;
         window.scrollTo(0, 0);
     }
 
@@ -1836,20 +1928,16 @@ async function doSubmit() {
         }
     }
     
-    // 🔥 修改版：返回時清理網址
     function kbGoBack() {
-        // 1. 退出閱讀模式
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
-
-        // 2. 清理網址列 (變回乾淨的 / 或 ?view=knowledge)
         const cleanUrl = window.location.pathname + "?view=knowledge";
         window.history.pushState({ path: cleanUrl }, '', cleanUrl);
 
         if (kbState.level === 2) {
-            // 如果原本是在看文章，返回到「該大分類的列表」
-            enterKb(kbState.big);
+            // 從文章返回 -> 回到該大分類列表 (enterKb 會自動滾動)
+            // 優先使用 activeBig，沒有的話用 big
+            enterKb(kbState.activeBig || kbState.big);
         } else {
-            // 否則回首頁
             renderKbHome();
         }
     }

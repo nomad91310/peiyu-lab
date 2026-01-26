@@ -1307,62 +1307,75 @@
         window.scrollTo(0,0); 
     }
 
-   // 🔥 光速攔截版：HTML 一讀完馬上執行，不準等圖片！
+   // 🔥 最終全能版：連預約單載入都加上 Logo 轉圈圈，消滅任何停頓感
     document.addEventListener("DOMContentLoaded", async () => {
         
-        // 1. 第一件事：馬上檢查網址，攔截畫面！
         const params = new URLSearchParams(window.location.search);
         const targetArticle = params.get('article');
         const targetView = params.get('view'); 
 
-        // 🚀 如果有文章 ID，立刻把首頁殺掉，換成轉圈圈！
-        if (targetArticle) {
-            // A. 強制把首頁藏起來 (移除 active)
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            
-            // B. 強制顯示知識庫分頁 (靜音模式，不畫目錄)
-            const kbSection = document.getElementById('knowledge');
-            kbSection.classList.add('active');
-            kbSection.classList.add('kb-reading-mode'); // 隱藏標題
-            
-            // C. 塞入您的專用 Logo 轉圈圈 (這是原本 HTML 沒有的，所以要馬上塞)
-            document.getElementById('kb-container').innerHTML = `
-                <div style="height: 80vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                    <img src="logoloading.png" 
-                         style="width: 100px; height: 100px; object-fit: contain; 
-                                animation: spin 2s infinite linear; 
-                                filter: drop-shadow(0 0 15px rgba(198, 168, 124, 0.5));">
-                    <div style="margin-top: 20px; color: var(--forest); font-weight: 900; letter-spacing: 2px; font-family: 'Noto Serif TC', serif;">
-                        資料調閱中...
-                    </div>
+        // 定義統一的 Logo Loading HTML
+        const loadingHtml = `
+            <div style="height: 70vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                <img src="logoloading.png" 
+                     style="width: 100px; height: 100px; object-fit: contain; 
+                            animation: spin 2s infinite linear; 
+                            filter: drop-shadow(0 0 15px rgba(198, 168, 124, 0.5));">
+                <div style="margin-top: 20px; color: var(--forest); font-weight: 900; letter-spacing: 2px; font-family: 'Noto Serif TC', serif;">
+                    資料調閱中...
                 </div>
-                <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
-            `;
+            </div>
+            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+        `;
+
+        // 🚀 情境 1: 直達文章
+        if (targetArticle) {
+            showSection('knowledge', true); 
+            document.getElementById('knowledge').classList.add('kb-reading-mode');
+            document.getElementById('kb-container').innerHTML = loadingHtml;
         } 
-        // 如果指定要去別頁 (例如抽卡)
+        // 🚀 情境 2: 直達寶典目錄 (?view=knowledge)
+        else if (targetView === 'knowledge') {
+            showSection('knowledge', true); 
+            document.getElementById('knowledge').classList.add('kb-reading-mode'); 
+            document.getElementById('kb-container').innerHTML = loadingHtml;
+        }
+        // 🚀 情境 3: 直達預約單 (?view=booking-step-1)
+        else if (targetView === 'booking-step-1') {
+            // 先切換過去
+            showSection('booking-step-1');
+            // 把原本那個醜醜的「載入資料中...」換成 Logo 轉圈
+            document.getElementById('category-list').innerHTML = loadingHtml;
+        }
+        // 🚀 情境 4: 其他頁面 (如抽卡)
         else if (targetView && document.getElementById(targetView)) {
             showSection(targetView);
         }
-        // 如果什麼都沒有，才乖乖顯示首頁
+        // 🚀 情境 5: 回首頁
         else {
             showSection('home');
         }
 
-        // 2. 畫面卡位成功後，才開始在背景慢慢抓資料
-        const p1 = initBookingData(); 
+        // 2. 開始背景抓資料
+        const p1 = initBookingData(); // 👈 預約單資料在這裡抓
         initDrawData(); 
         const p3 = initKbData(); 
         loadSiteAssets();
         checkSession(); 
         loadHeroAnnouncements();
 
-        // 3. 等資料庫回應
-        await p3; 
+        // 3. 等待關鍵資料回來 (文章跟預約單都等)
+        await Promise.all([p1, p3]); 
 
-        // 4. 資料回來了！正式填入內容
+        // 4. 資料全部到位，繪製畫面
         if (targetArticle) {
             readArt(targetArticle);
+        } 
+        else if (targetView === 'knowledge') {
+            renderKbHome(); 
         }
+        // 💡 預約單的部分，initBookingData 內部已經有寫繪製邏輯了，
+        // 所以這邊只要確保資料抓完，它就會自動把 Logo 換成服務類別。
     });
     
     function toggleMenu() {

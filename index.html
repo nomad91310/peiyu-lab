@@ -345,53 +345,83 @@
     /* ======================================================
        6. 培癒寶典 (Knowledge Base)
        ====================================================== */
-    .kb-cat-view, .kb-article-view { background: #fdfaf5; min-height: 80vh; padding: 40px 20px; position: relative; overflow: visible !important; }
-    .kb-article-view { background: #ffffff; padding: 40px 50px; border-radius: 16px; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
-    .kb-cat-header { text-align: center; margin-bottom: 40px; }
+
+    /* 2. 箱子內的按鈕列：強制靠右 */
+    .kb-inner-header-row {
+        display: flex !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        margin-bottom: 30px;
+    }
+    /* 文章內容頁 (.kb-article-view) 建議保留白色底，這樣讀長文才舒服 */
+    .kb-article-view { 
+        background: #ffffff; 
+        padding: 40px 50px; 
+        border-radius: 16px; 
+        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
+        max-width: 900px; 
+        margin: 0 auto 60px auto; 
+    }.kb-cat-header { text-align: center; margin-bottom: 40px; }
     .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
     .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
-    
-    .kb-reading-mode .kb-header { display: none !important; }
-    .kb-reading-mode #kb-container { padding-top: 30px; }
 
-    /* 便利貼 */
+
+    /* --- 培癒寶典：便利貼修正版 (加粗 + 防模糊 + 會轉動) --- */
     .kb-tiny-note {
         position: absolute; top: 25px; right: 30px; z-index: 99;
-        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 20px; 
+        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 25px;
         border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
-        font-size: 12px; color: #888; text-align: left; line-height: 1.7; font-family: sans-serif;
-        max-width: 300px; transform: rotate(1deg); transition: transform 0.3s ease;
+        
+        /* 🔥 你的神建議：加粗字體，解決細線失真問題 */
+        font-weight: bold !important; 
+        font-size: 13px; color: #555; text-align: left; line-height: 1.7; font-family: sans-serif;
+        max-width: 300px;
+        
+        /* 🔥 解決靜止模糊：使用 scale(1) 搭配平滑渲染濾鏡 */
+        transform: rotate(1.2deg);
+        -webkit-font-smoothing: antialiased; 
+        backface-visibility: hidden;
+        filter: drop-shadow(0 0 0 transparent); /* 強制重繪 */
+        
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .kb-tiny-note:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 8px 25px rgba(198, 168, 124, 0.25); }
 
+    /* 🔥 確保滑鼠移入會「轉一下」而且變超清楚 */
+    .kb-tiny-note:hover { 
+        transform: rotate(0deg) scale(1.05) !important; 
+        box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3);
+        color: var(--forest);
+        z-index: 100;
+    }
     /* 🔥 KB 列表與卡片 (統一瘦身版) */
     .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 5px 0; }
     
-    .kb-article-card { 
-        background: #ffffff; 
-        padding: 12px 25px; /* 上下 12，左右 25 */
-        border-radius: 12px; 
-        border: 1px solid #f0f0f0; 
-        border-left: 6px solid var(--accent); 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-        cursor: pointer; 
-        transition: all 0.3s ease; 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        position: relative; 
-        overflow: hidden; 
-        min-height: 60px;
-    }
+    
 
     .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.1); border-left-color: var(--forest); }
     
-    /* 🔥 確保內部排列一致 */
-    .kb-card-content { display: flex; flex-direction: row !important; align-items: center !important; gap: 12px; text-align: left; }
-    
-    .kb-card-num { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--accent); font-weight: 900; line-height: 1; }
-    .kb-card-text { font-size: 1.05rem; font-weight: bold; color: var(--forest); letter-spacing: 0.05em; }
-    .kb-arrow { color: #ddd; font-size: 1.2rem; transition: 0.3s; }
+    .kb-card-content {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-width: 0 !important; /* 觸發 ellipsis 關鍵 */
+    }
+
+    .kb-card-text {
+        font-size: 1.05rem !important;
+        font-weight: bold !important;
+        color: var(--forest) !important;
+        white-space: nowrap !important;   /* 🔥 強制一行 */
+        overflow: hidden !important;      /* 🔥 超出隱藏 */
+        text-overflow: ellipsis !important; /* 🔥 超出變 ... */
+        flex: 1 !important;
+    }
+    /* ➔ 箭頭也優化一下 */
+    .kb-arrow {
+        font-size: 1.5rem !important;
+        color: var(--accent) !important; /* 箭頭改用金色 */
+        opacity: 0.6;
+    }
     .kb-article-card:hover .kb-arrow { color: var(--forest); transform: translateX(5px); }
 
     /* 中分類分隔 (原本目錄頁的樣式) */
@@ -668,26 +698,21 @@
         vertical-align: middle;
     }
 
-    /* 🔥 深綠色搜尋按鈕 (綠底白字 -> 金底白字) */
+    /* 3. 按鈕文字瘦身 (500) + 字距，防止糊在一起 */
     .btn-pill-search {
-        background: var(--forest);       /* 綠底 */
-        color: #ffffff;                  /* 白字 */
-        border: 1px solid var(--forest); /* 綠框 */
-        
-        padding: 6px 20px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        font-family: 'Noto Serif TC', serif;
+        background-color: var(--forest) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--accent) !important;
+        border-radius: 50px !important;
+        padding: 8px 25px !important;
+        font-weight: 500 !important;
+        letter-spacing: 1px;
         cursor: pointer;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-        transition: all 0.3s; /* 動畫順暢一點 */
-        text-decoration: none;
-        line-height: 1.5;
-        white-space: nowrap; /* 不准換行 */
+        font-family: 'Noto Sans TC', sans-serif !important;
     }
 
     /* 滑鼠移過去的效果 */
@@ -718,30 +743,30 @@
         white-space: nowrap;  /* 不准換行 */
     }
 
-    /* 深綠色按鈕樣式 */
-    .btn-pill-search {
-        background: var(--forest);
-        color: var(--accent);
-        border: 1px solid var(--forest);
-        padding: 6px 20px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        font-family: 'Noto Serif TC', serif;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-        transition: all 0.2s;
-        text-decoration: none;
-        line-height: 1.5;
-    }
-    .btn-pill-search:hover {
-        transform: translateY(-2px);
-        background: #2a4032;
-        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
-    }
+    /* 3. 🔥 完全還原您原本的「深綠底金字」按鈕樣式 */
+.btn-pill-search {
+    background: var(--forest) !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--forest) !important;
+    padding: 6px 20px !important;
+    border-radius: 50px !important;
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    font-family: 'Noto Serif TC', serif !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+    transition: all 0.2s;
+    text-decoration: none;
+    line-height: 1.5;
+}
+.btn-pill-search:hover {
+    transform: translateY(-2px);
+    background: #2a4032 !important;
+    box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
+}
     /* =========================================
        KB 內容編輯器樣式 (前台最終版)
        ========================================= */
@@ -921,6 +946,137 @@
     border-color: #ccc !important;
     cursor: not-allowed !important;
 }
+
+    /* 2. 修正能量抽卡：對齊服務預約的視覺高度 */
+    #draw-area {
+        padding-top: 10 !important;     /* 拿掉抽卡區上方的 40px 留白 */
+    }
+
+    /* 3. 移除 HTML 標籤內多餘的硬排間距 */
+    #draw .brand-section-header {
+        margin-bottom: 40px !important; /* 強制將抽卡標題的底距縮小至滿意寬度 */
+    }
+    /* ======================================================
+       培癒寶典：卡片樣式分流
+       ====================================================== */
+
+    /* --- 1. 大類別專屬 (Big Category) --- */
+    .kb-big-cat-card {
+        min-height: 140px !important;
+        padding: 20px 35px !important;
+        border-radius: 20px !important;
+        border-left: 8px solid var(--accent) !important;
+    }
+    .kb-big-cat-card .kb-avatar {
+        width: 100px !important;
+        height: 100px !important;
+        margin-right: 25px !important;
+        flex-shrink: 0;
+        object-fit: contain;
+        filter: drop-shadow(4px 4px 10px rgba(26, 47, 35, 0.12));
+    }
+    .kb-big-cat-card .kb-card-text {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 1.6rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 3px !important;
+        color: var(--forest) !important;
+    }
+
+    /* --- 2. 文章列表專屬 (Article List) --- */
+    .kb-article-card {
+        background: #ffffff;
+        padding: 12px 25px;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        border-left: 6px solid var(--accent);
+        min-height: 60px; /* 恢復輕薄高度 */
+        margin-bottom: 0px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.3s;
+    }
+    /* ======================================================
+       培癒寶典：終極對齊、防模糊、純白內容版
+       ====================================================== */
+
+    /* 1. 列表箱子：米色底 (Knowledge Base List) */
+    .kb-cat-view { 
+        background: #fdfaf5 !important; 
+        padding: 40px 25px 25px 25px !important; 
+        border-radius: 24px; 
+        margin-top: 0 !important; 
+        position: relative !important; 
+        box-shadow: inset 0 0 20px rgba(26, 47, 35, 0.02);
+    }
+
+    /* 2. 🔥 文章內容箱子：絕對純白，內容置中優化 (Article Content) */
+    .kb-article-view { 
+        background: #ffffff !important; 
+        padding: 50px 40px !important; 
+        border-radius: 24px; 
+        margin: 0 auto !important; 
+        max-width: 100% !important; 
+        position: relative !important; 
+        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important;
+        border: 1px solid #eee;
+    }
+
+    /* 3. 🔥 解決「1」對不齊：靠右對齊才是唯一解 */
+    .kb-card-num {
+        font-family: 'Cinzel', serif !important;
+        font-size: 1.45rem !important;
+        color: var(--accent) !important;
+        font-weight: 900 !important;
+        flex: 0 0 85px !important;       /* 停車格 85px */
+        display: inline-flex !important;
+        justify-content: flex-end !important; /* 👈 靠右排隊，數字尾巴對齊，文字起跑線才會統一 */
+        align-items: center;
+        margin-right: 20px !important; 
+        font-variant-numeric: tabular-nums !important;
+        line-height: 1;
+    }
+
+    /* 4. 🔥 解決便利貼模糊：加粗字體 + 移除 translate3d */
+    .kb-tiny-note {
+        position: absolute; top: 25px; right: 30px; z-index: 99;
+        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 25px;
+        border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
+        font-family: sans-serif; font-size: 13px; color: #444; text-align: left; line-height: 1.7;
+        max-width: 300px;
+        
+        font-weight: bold !important;      /* 👈 你的神建議：加粗抗模糊 */
+        transform: rotate(1.2deg);         /* 靜止角度 */
+        backface-visibility: hidden;
+        filter: blur(0);                   /* 強制瀏覽器精細渲染 */
+        outline: 1px solid transparent;    /* 輔助文字銳利化 */
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    /* 滑鼠移入：順暢轉正 */
+    .kb-tiny-note:hover { 
+        transform: rotate(0deg) scale(1.05) !important; 
+        box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3);
+        z-index: 100;
+    }
+
+    /* 5. 其他 KB 元件樣式 */
+    .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+    .kb-article-card { 
+        background: #ffffff !important; padding: 12px 20px !important; border-radius: 12px !important; 
+        border: 1px solid #f0f0f0; border-left: 6px solid var(--accent) !important; min-height: 65px; 
+        display: flex; align-items: center; transition: 0.3s; cursor: pointer;
+    }
+    .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26,47,35,0.1); }
+    
+    .kb-card-content { display: flex; align-items: center; width: 100%; min-width: 0; }
+    .kb-card-text { 
+        font-size: 1.05rem; font-weight: bold; color: var(--forest); flex: 1;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    }
+    .kb-arrow { font-size: 1.2rem; color: var(--accent); opacity: 0.5; flex-shrink: 0; }
+    
+    
     /* RWD: Mobile (Max 768px) */
     @media (max-width: 768px) {
         nav { padding: 0 20px; height: 80px; display: flex; justify-content: space-between; align-items: center; }
@@ -962,16 +1118,32 @@
         .service-info { font-size: 0.95rem !important; }
         .service-desc { font-size: 0.85rem !important; margin-left: 30px; line-height: 1.4; }
 
-        .kb-article-view { padding: 30px 20px; }
+       .kb-article-view {
+        background: #ffffff !important;
+        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important;
+    }
         .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
         .kb-list-container { gap: 10px !important; }
-        .kb-article-card { padding: 10px 15px !important; margin-bottom: 0px; border-left-width: 4px !important; }
-        .kb-card-num { font-size: 1.1rem !important; min-width: 30px; }
+        /* 調整卡片整體高度與圓角，撐起 100px 的圖 */
+    .kb-article-card {
+        padding: 20px 35px !important;
+        min-height: 140px !important;     /* 配合 100px 圖片的高度 */
+        border-radius: 20px !important;   /* 圓角再大一點才可愛 */
+        background: #ffffff !important;
+        border-left-width: 8px !important; /* 左側金邊加厚 */
+    }
         .kb-card-text { font-size: 0.95rem !important; }
         .kb-section-group { margin-bottom: 25px !important; }
         .kb-mid-badge { padding: 4px 15px !important; font-size: 0.9rem !important; }
-        .kb-tiny-note { position: absolute; top: -12px; right: -5px; width: fit-content; max-width: 55%; padding: 8px 10px; text-align: left; font-size: 10px; line-height: 1.4; transform: rotate(2deg); z-index: 999; margin: 0; transition: none; }
-        .kb-tiny-note:hover { transform: rotate(2deg); }
+        /* 手機版便利貼修正 */
+        
+        .kb-article-card { padding: 15px !important; min-height: 80px !important; }
+        .kb-card-num { flex: 0 0 65px !important; font-size: 1.1rem !important; margin-right: 12px !important; text-align: right !important; }
+        .kb-tiny-note { 
+            position: absolute !important; top: -12px !important; right: -5px !important; 
+            max-width: 55% !important; transform: rotate(2deg) !important; 
+            transition: none !important; /* 手機版關閉動畫避免模糊 */
+        }
         .kb-header-actions { gap: 10px !important; margin-bottom: 20px !important; }
         .kb-internal-back, .btn-back-capsule, #kb-share-btn { height: 36px !important; border-radius: 50px !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; margin-top: 0 !important; margin-bottom: 0 !important; }
         .kb-internal-back, .btn-back-capsule { display: inline-flex !important; width: auto !important; padding: 0 15px !important; font-size: 13px !important; background: #fff !important; color: var(--forest) !important; align-items: center !important; justify-content: center !important; }
@@ -1067,6 +1239,19 @@
         min-width: 220px;
         padding: 10px 30px !important;
     }
+    .kb-avatar {
+            width: 80px !important;
+            height: 80px !important;
+            margin-right: 15px !important;
+        }
+        .kb-article-card .kb-card-text {
+            font-size: 1.3rem !important;
+            letter-spacing: 1px !important;
+        }
+        .kb-article-card {
+            min-height: 110px !important;
+            padding: 15px 20px !important;
+        }
 }
     
     @media (max-width: 768px) and (orientation: landscape) {
@@ -1394,16 +1579,11 @@
 </div>
 
 <div id="knowledge" class="section">
-    <div class="kb-header">
-        <button id="kb-back-btn" class="kb-back-btn" onclick="kbGoBack()">← 返回</button>
-        <h2 class="kb-title">📘 培癒寶典</h2>
-        <div style="width:70px;"></div> 
-    </div>
-
     <div id="kb-container">載入中...</div>
-</div> 
+</div>
+
 <div id="draw" class="section">
-    <div class="brand-section-header" style="margin-bottom: 60px;"> 
+    <div class="brand-section-header"> 
                 <div class="brand-h3-zh">64 閘門能量指引</div>
 
         <div class="brand-h2-en">ORACLE GUIDANCE</div>
@@ -2303,38 +2483,38 @@ function tryOldSchoolCopy(text, callback) {
     }
 
     function renderKbHome() {
-        kbState.level = 0;
-        kbState.big = null;
-        kbState.activeMid = null;
-        kbState.searchQuery = null; 
-
+        kbState.level = 0; kbState.big = null; kbState.activeMid = null; kbState.searchQuery = null; 
         const bigCats = Object.keys(kbTree);
-        const listHtml = bigCats.map(cat => {
-            return `<div class="kb-article-card" onclick="enterKb('${cat}')" style="padding: 35px 30px;">
-                        <div class="kb-card-content"><div class="kb-card-text" style="font-size: 1.4rem;">${cat}</div></div>
+        
+        // 1. 12 星座洗牌，確保首頁不重複
+        const zodiacPool = Array.from({length: 12}, (_, i) => 
+            `https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/zodiac_${i+1}.png`
+        ).sort(() => Math.random() - 0.5); 
+
+        const listHtml = bigCats.map((cat, idx) => {
+            const myImg = zodiacPool[idx % zodiacPool.length];
+            return `<div class="kb-article-card kb-big-cat-card" onclick="enterKb('${cat}')">
+                        <div class="kb-card-content">
+                            <img src="${myImg}" class="kb-avatar" alt="zodiac">
+                            <div class="kb-card-text">${cat}</div>
+                        </div>
                         <div class="kb-arrow">➔</div>
                     </div>`;
         }).join('');
 
         document.getElementById('kb-container').innerHTML = `
+            <div class="brand-section-header">
+                 <div class="brand-h3-zh">培癒寶典</div>                    
+                 <div class="brand-h2-en">PY JOURNEY</div>
+                 <div class="brand-capsule center-fix" style="margin: 15px auto !important;">探索自我的導引手冊</div>
+            </div>
             <div class="kb-cat-view">
-                <div class="brand-section-header">
-                     <div class="brand-h3-zh">培癒寶典</div>                    
-                    <div class="brand-h2-en">PY JOURNEY</div>
+                <div class="kb-inner-header-row">
+                    <button class="btn-pill-search" onclick="openSearchPanel()"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
                 </div>
-
-                <div class="kb-header-grid">
-                    <div></div>
-                    <div class="brand-capsule center-fix">探索自我的導引手冊</div>
-                    <div class="kb-header-right">
-                        <button class="btn-pill-search" onclick="openSearchPanel()">
-                            <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
-                        </button>
-                    </div>
-                </div>
-                
                 <div class="kb-list-container">${listHtml}</div>
             </div>`;
+        
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         window.scrollTo(0,0);
     }
@@ -2422,84 +2602,56 @@ function tryOldSchoolCopy(text, callback) {
 
     function renderSearchResults(searchData) {
         document.getElementById('knowledge').classList.add('kb-reading-mode');
-        let finalHtml = "";
-        let totalCount = 0;
-
+        let finalHtml = ""; let totalCount = 0;
         searchData.forEach((group) => {
             const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-            const results = kbArticlesFlat.filter(art => {
-                return keywords.some(k => {
-                    if (/^\d+$/.test(k)) {
-                        const cleanNum = parseInt(k, 10).toString();
-                        // 🔥 修正：允許數字後方跟著點號或非數字，解決 10 查不到 10.58 的問題
-                        const regex = new RegExp(`(^|[^0-9])0?${cleanNum}(\\.|$|[^0-9])`);
-                        return regex.test(art.title);
-                    } else {
-                        return art.title.includes(k);
-                    }
-                });
-            });
+            const results = kbArticlesFlat.filter(art => keywords.some(k => {
+                if (/^\d+$/.test(k)) {
+                    const cleanNum = parseInt(k, 10).toString();
+                    return new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`).test(art.title);
+                } else { return art.title.includes(k); }
+            }));
             totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
-            let contentHtml = "";
-
-            if (results.length === 0) {
-                contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
-            } else {
+            let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>` : "";
+            if (results.length > 0) {
                 const grouped = {};
-                results.forEach(art => {
-                    const mid = art.mid_category || '其他';
-                    if (!grouped[mid]) grouped[mid] = [];
-                    grouped[mid].push(art);
-                });
+                results.forEach(art => { const mid = art.mid_category || '其他'; if (!grouped[mid]) grouped[mid] = []; grouped[mid].push(art); });
                 Object.keys(grouped).forEach(midCat => {
-                    const articles = grouped[midCat];
-                    const cards = articles.map(a => {
-                        let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
-                        const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                        if (match) { displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`; }
-                        return `<div class="kb-article-card" onclick="readArt('${a.id}')">
-                                    <div class="kb-card-content">${displayHtml}</div>
-                                    <div class="kb-arrow">➔</div>
-                                </div>`;
+                    const cards = grouped[midCat].map(a => {
+                        let disp = "";
+                        const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+                        if (m) {
+                            disp = `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>`;
+                        } else {
+                            // 🔥 搜尋結果也補上起跑線對齊
+                            disp = `<div class="kb-card-num" style="font-size:1rem; opacity:0.5;">✦</div><div class="kb-card-text">${a.title}</div>`;
+                        }
+                        return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${disp}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
-                    contentHtml += `<div class="kb-search-mid-group">
-                                        <div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div>
-                                        <div class="kb-list-container">${cards}</div>
-                                    </div>`;
+                    contentHtml += `<div class="kb-search-mid-group"><div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div><div class="kb-list-container">${cards}</div></div>`;
                 });
             }
-            finalHtml += `<div class="kb-result-section">
-                            <div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>
-                            ${contentHtml}
-                          </div>`;
+            finalHtml += `<div class="kb-result-section"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
         });
 
-        // 🔥 組合修正：Grid 獨立出來，寬度 100% 才能推到最右邊
-        const headerHtml = `
-            <div class="kb-search-line-wrapper">
-                <div class="brand-section-header" style="margin-bottom: 0;">
+        document.getElementById('kb-container').innerHTML = `
+            <div class="kb-search-results-wrapper">
+                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
+                <div class="brand-section-header" style="position: relative; min-height: 110px;">
+                    <div style="position: absolute; left: 0; top: 0;">
+                        <button onclick="kbGoBack()" class="kb-internal-back"><i class="fa-solid fa-arrow-left"></i> 返回寶典</button>
+                    </div>
                     <div class="brand-h3-zh">文章搜尋結果</div>                    
                     <div class="brand-h2-en">SEARCH RESULTS</div>
+                    <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
                 </div>
-                <div class="kb-header-grid">
-                    <div></div>
-                    <div class="brand-capsule center-fix">共搜尋到 ${totalCount} 篇文章</div>
-                    <div class="kb-header-right">
-                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)">
-                            <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
-                        </button>
+                <div class="kb-cat-view">
+                    <div class="kb-inner-header-row">
+                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
                     </div>
+                    ${finalHtml}
                 </div>
-            </div>`;
-
-        document.getElementById('kb-container').innerHTML = `
-            <div class="kb-cat-view">
-                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-                <div class="kb-header-actions">
-                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> 返回首頁</div>
-                </div>
-                ${headerHtml}${finalHtml}
             </div>`;
         window.scrollTo(0, 0);
     }
@@ -2531,9 +2683,16 @@ function tryOldSchoolCopy(text, callback) {
         const contentHtml = sortedMids.map(mid => {
             const arts = kbTree[big][mid]; 
             const articlesHtml = arts.map(a => {
-                let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
+                let displayHtml = "";
                 const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                if (match) displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
+                
+                if (match) {
+                    // 有數字：靠右顯示在停車格裡
+                    displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
+                } else {
+                    // 沒有數字：補一個同樣 75px 寬的 ✦ 佔位，起跑線才會絕對對齊
+                    displayHtml = `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
+                }
                 
                 return `
                 <div class="kb-article-card" onclick="event.stopPropagation(); readArt('${a.id}')">

@@ -1045,8 +1045,6 @@
         border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
         font-family: sans-serif; font-size: 13px; color: #444; text-align: left; line-height: 1.7;
         max-width: 300px;
-        
-        font-weight: bold !important;      /* 👈 你的神建議：加粗抗模糊 */
         transform: rotate(1.2deg);         /* 靜止角度 */
         backface-visibility: hidden;
         filter: blur(0);                   /* 強制瀏覽器精細渲染 */
@@ -1120,33 +1118,41 @@
 
        .kb-article-view {
         background: #ffffff !important;
-        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important;
+        box-shadow: 0 0px 0px rgba(26, 47, 35, 0.08) !important;
     }
+        .kb-cat-view, .kb-article-view { 
+            padding: 30px 12px 20px 12px !important; /* 👈 縮小左右內距，寬度就出來了 */
+            border-radius: 16px !important;
+        }
         .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
         .kb-list-container { gap: 10px !important; }
         /* 調整卡片整體高度與圓角，撐起 100px 的圖 */
-    .kb-article-card {
-        padding: 20px 35px !important;
-        min-height: 140px !important;     /* 配合 100px 圖片的高度 */
-        border-radius: 20px !important;   /* 圓角再大一點才可愛 */
-        background: #ffffff !important;
-        border-left-width: 8px !important; /* 左側金邊加厚 */
-    }
+        .kb-article-card { padding: 15px !important; min-height: 40px !important; }
+        .kb-big-cat-card { min-height: 110px !important; }
         .kb-card-text { font-size: 0.95rem !important; }
         .kb-section-group { margin-bottom: 25px !important; }
         .kb-mid-badge { padding: 4px 15px !important; font-size: 0.9rem !important; }
         /* 手機版便利貼修正 */
-        
-        .kb-article-card { padding: 15px !important; min-height: 80px !important; }
-        .kb-card-num { flex: 0 0 65px !important; font-size: 1.1rem !important; margin-right: 12px !important; text-align: right !important; }
-        .kb-tiny-note { 
-            position: absolute !important; top: -12px !important; right: -5px !important; 
-            max-width: 55% !important; transform: rotate(2deg) !important; 
-            transition: none !important; /* 手機版關閉動畫避免模糊 */
+        .kb-card-num { flex: 0 0 70px !important; font-size: 1.1rem !important; margin-right: 12px !important; }
+        /* 手機版便利貼：固定位置、不轉動避免模糊 */
+       .kb-tiny-note {
+            position: absolute; top: -12px; right: -5px; width: fit-content; max-width: 55%; 
+            padding: 8px 10px; text-align: left; font-size: 10px; line-height: 1.4;
+            transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
         }
+        .kb-tiny-note:hover { transform: rotate(2deg); }
         .kb-header-actions { gap: 10px !important; margin-bottom: 20px !important; }
         .kb-internal-back, .btn-back-capsule, #kb-share-btn { height: 36px !important; border-radius: 50px !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; margin-top: 0 !important; margin-bottom: 0 !important; }
-        .kb-internal-back, .btn-back-capsule { display: inline-flex !important; width: auto !important; padding: 0 15px !important; font-size: 13px !important; background: #fff !important; color: var(--forest) !important; align-items: center !important; justify-content: center !important; }
+        .kb-internal-back, .btn-back-capsule {
+            background-color: var(--forest) !important; /* 👈 綠底 */
+            color: #ffffff !important;                   /* 👈 白字 */
+            border: 1px solid var(--accent) !important;  /* 👈 金框 */
+            display: inline-flex !important;
+            padding: 0 15px !important;
+            height: 36px !important;
+            border-radius: 50px !important;
+            font-size: 13px !important;
+        }
         .kb-internal-back i, .btn-back-capsule i { margin-right: 6px !important; font-size: 13px !important; transform: none !important; }
         #kb-share-btn { width: 36px !important; padding: 0 !important; background: var(--forest) !important; color: var(--accent) !important; border: 1px solid var(--accent) !important; }
         .kb-header-actions { display: flex !important; align-items: center !important; gap: 8px !important; margin-bottom: 20px !important; width: 100% !important; }
@@ -1248,10 +1254,7 @@
             font-size: 1.3rem !important;
             letter-spacing: 1px !important;
         }
-        .kb-article-card {
-            min-height: 110px !important;
-            padding: 15px 20px !important;
-        }
+    
 }
     
     @media (max-width: 768px) and (orientation: landscape) {

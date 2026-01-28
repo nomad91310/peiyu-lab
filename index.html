@@ -1046,15 +1046,28 @@
             width: 25px; height: 25px;
             border-radius: 50%;
         }
-        .kb-header-grid {
-            display: flex;
-            flex-direction: column; /* 變垂直排列 */
-            gap: 12px;
-        }
-        .kb-header-right {
-            align-self: flex-end; /* 按鈕還是要靠右 */
-        }
+        /* 手機版標題網格：由橫向改為垂直排列 */
+    .kb-header-grid {
+        display: flex !important;
+        flex-direction: column !important; /* 🔥 強制換行 */
+        align-items: center !important;
+        gap: 15px !important;
+        width: 100% !important;
+        margin: 15px 0 !important;
     }
+
+    /* 手機版按鈕容器：取消靠右，改為置中並佔滿適度寬度 */
+    .kb-header-right {
+        display: flex !important;
+        justify-content: center !important; /* 換行後置中 */
+        width: 100% !important;
+    }
+    .kb-header-right .btn-pill-search {
+        width: auto !important;
+        min-width: 220px;
+        padding: 10px 30px !important;
+    }
+}
     
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note { top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; }

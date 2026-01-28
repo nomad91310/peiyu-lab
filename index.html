@@ -2615,12 +2615,22 @@ function tryOldSchoolCopy(text, callback) {
         let finalHtml = ""; let totalCount = 0;
         const displayTitle = searchData.reportTitle || "文章搜尋結果";
 
-        searchData.groups.forEach((group) => {
-            const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-            let pool = kbArticlesFlat;
-            if (searchData.filterCat) pool = pool.filter(a => a.big_category === searchData.filterCat);
-            const results = pool.filter(art => keywords.some(k => art.title.includes(k)));
-            totalCount += results.length;
+        // 在 renderSearchResults 函式內
+    searchData.groups.forEach((group) => {
+        const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
+        let pool = kbArticlesFlat;
+        
+        // 如果有選大分類，先過濾大分類
+        if (searchData.filterCat) {
+            pool = pool.filter(a => a.big_category === searchData.filterCat);
+        }
+
+        // 🔥 修正後的邏輯：移除嚴格數字匹配，改回通用包含判斷
+        const results = pool.filter(art => keywords.some(k => {
+            return art.title.toLowerCase().includes(k.toLowerCase());
+        }));
+        
+        totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
             let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(無相關文章)</div>` : "";
             if (results.length > 0) {
@@ -2662,6 +2672,91 @@ function tryOldSchoolCopy(text, callback) {
         </div>`;
         window.scrollTo(0, 0);
     }
+function renderSearchResults(searchData) {
+    document.getElementById('knowledge').classList.add('kb-reading-mode');
+    let finalHtml = "";
+    let totalCount = 0;
+    const displayTitle = searchData.reportTitle || "文章搜尋結果";
+
+    // searchData 現在是一個物件 { reportTitle, filterCat, groups }
+    searchData.groups.forEach((group) => {
+        const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
+        
+        // 1. 先篩選出所有符合的文章
+        let pool = kbArticlesFlat;
+        
+        // 🔥 大分類篩選邏輯
+        if (searchData.filterCat) {
+            pool = pool.filter(a => a.big_category === searchData.filterCat);
+        }
+
+        const results = pool.filter(art => {
+            return keywords.some(k => {
+                if (/^\d+$/.test(k)) {
+                    // 🔥 精確數字正則：確保「1」只會對到「1」或「01」，不會對到「10」或「21」
+                    const cleanNum = parseInt(k, 10).toString();
+                    const regex = new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`);
+                    return regex.test(art.title);
+                } else {
+                    return art.title.includes(k);
+                }
+            });
+        });
+        
+        totalCount += results.length;
+        const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
+        let contentHtml = "";
+
+        if (results.length === 0) {
+            contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
+        } else {
+            // 2. 依照「中分類 (mid_category)」進行分組
+            const grouped = {};
+            results.forEach(art => {
+                const mid = art.mid_category || '其他';
+                if (!grouped[mid]) grouped[mid] = [];
+                grouped[mid].push(art);
+            });
+
+            Object.keys(grouped).forEach(midCat => {
+                const articles = grouped[midCat];
+                const cards = articles.map(a => {
+                    let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
+                    const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+                    if (match) {
+                        displayHtml = `<div class="kb-card-num" style="margin-right:15px;">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
+                    }
+                    return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
+                }).join('');
+
+                contentHtml += `<div class="kb-search-mid-group"><div class="kb-search-mid-header">${midCat}</div><div class="kb-list-container">${cards}</div></div>`;
+            });
+        }
+
+        finalHtml += `<div class="kb-result-section"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
+    });
+
+    // 3. 渲染最終畫面 (左二右一佈局)
+    document.getElementById('kb-container').innerHTML = `
+        <div class="kb-search-results-wrapper">
+            <div class="brand-section-header">
+                <div class="brand-h3-zh">${displayTitle}</div>                    
+                <div class="brand-h2-en">SEARCH RESULTS</div>
+                <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
+            </div>
+            <div class="kb-cat-view">
+                <div class="kb-inner-header-row">
+                    <div class="kb-action-group">
+                        <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回</button>
+                        <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告"><i class="fa-solid fa-share-nodes"></i></button>
+                    </div>
+                    <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 搜尋文章</button>
+                </div>
+                ${finalHtml}
+            </div>
+        </div>`;
+    window.scrollTo(0, 0);
+}
 
     // 🔥 enterKb 修正版：移除自動定位，改為強制回到最頂端
     function enterKb(big) {

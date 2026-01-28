@@ -574,6 +574,174 @@
         margin-bottom: 15px; /* 跟下面文章的距離 */
         box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15);
     }
+    /* 🔥 搜尋結果頁：上方編輯區 */
+    .kb-search-edit-box {
+        background: #f0f4f1; /* 淺綠灰底 */
+        border: 1px solid #dcebdc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .kb-result-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    
+    .kb-result-input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    /* 按鈕群組 */
+    .kb-edit-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #ccc;
+    }
+    /* 🔥 膠囊與按鈕的並排容器 */
+    .kb-action-row {
+        display: flex;
+        justify-content: center; /* 置中 */
+        align-items: center;     /* 垂直對齊 */
+        gap: 15px;               /* 兩個東西中間的距離 */
+        margin-top: 15px;
+        flex-wrap: wrap;         /* 手機版如果不夠寬會自動換行 */
+    }
+
+    /* 🔥 深綠色藥丸按鈕 (統一風格) */
+    .btn-pill-dark {
+        background: var(--forest);
+        color: var(--accent);
+        border: 1px solid var(--forest);
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        font-family: 'Noto Serif TC', serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        text-decoration: none;
+        line-height: 1.5; /* 確保高度跟隔壁膠囊差不多 */
+    }
+    
+    .btn-pill-dark:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
+        background: #2a4032; /*稍微變亮一點點*/
+    }
+
+    /* 微調原本的 brand-capsule 讓它乖乖排隊 */
+    .brand-capsule.in-row {
+        margin: 0 !important; /* 拿掉原本的置中 margin */
+        display: inline-flex !important;
+    }
+    /* 🔥 1. 強制並排容器 */
+    .kb-action-row {
+        display: flex;
+        justify-content: center; /* 整組置中 */
+        align-items: center;     /* 垂直對齊 */
+        gap: 15px;               /* 按鈕跟文字的距離 */
+        margin-top: 15px;
+        flex-wrap: wrap;         /* 手機版空間不夠自動換行 */
+    }
+
+    /* 🔥 2. 膠囊樣式修正 (強制解除原本的置中與表格屬性) */
+    .brand-capsule.in-row {
+        display: inline-flex !important; /* 變成行內元素 */
+        margin: 0 !important;            /* 拿掉原本的 auto margin */
+        width: auto !important;          /* 寬度自動 */
+        line-height: 1.5;                /* 跟按鈕高度對齊 */
+        vertical-align: middle;
+    }
+
+    /* 🔥 深綠色搜尋按鈕 (綠底白字 -> 金底白字) */
+    .btn-pill-search {
+        background: var(--forest);       /* 綠底 */
+        color: #ffffff;                  /* 白字 */
+        border: 1px solid var(--forest); /* 綠框 */
+        
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        font-family: 'Noto Serif TC', serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        transition: all 0.3s; /* 動畫順暢一點 */
+        text-decoration: none;
+        line-height: 1.5;
+        white-space: nowrap; /* 不准換行 */
+    }
+
+    /* 滑鼠移過去的效果 */
+    .btn-pill-search:hover {
+        transform: translateY(-2px);
+        background: var(--accent);       /* 變金底 */
+        border-color: var(--accent);     /* 變金框 */
+        color: #ffffff;                  /* 保持白字 */
+        box-shadow: 0 6px 15px rgba(198, 168, 124, 0.4); /* 金色光暈 */
+    }
+    /* 1. 修正標題網格：強制中間置中、右邊推到底 */
+.kb-header-grid {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important; /* 左右等寬分掉空間，中間才會在正中間 */
+    width: 100% !important;
+    align-items: center !important;
+    margin: 25px 0 !important;
+}
+
+.kb-header-right {
+    display: flex !important;
+    justify-content: flex-end !important; /* 🔥 關鍵：把按鈕推到最右邊邊緣 */
+}
+
+    /* 恢復金色膠囊原本的樣子 */
+    .brand-capsule.center-fix {
+        margin: 0 !important; /* 因為 Grid 會幫它置中，所以 margin 歸零 */
+        white-space: nowrap;  /* 不准換行 */
+    }
+
+    /* 深綠色按鈕樣式 */
+    .btn-pill-search {
+        background: var(--forest);
+        color: var(--accent);
+        border: 1px solid var(--forest);
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        font-family: 'Noto Serif TC', serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        transition: all 0.2s;
+        text-decoration: none;
+        line-height: 1.5;
+    }
+    .btn-pill-search:hover {
+        transform: translateY(-2px);
+        background: #2a4032;
+        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
+    }
     /* =========================================
        KB 內容編輯器樣式 (前台最終版)
        ========================================= */
@@ -585,7 +753,7 @@
     .ql-editor .ql-indent-2 { padding-left: 6em !important; }
     .ql-editor .ql-indent-3 { padding-left: 9em !important; }
     .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
-    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; line-height: 1.3 !important; list-style-position: outside !important; }
+    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; margin-top: 8px !important; line-height: 1.3 !important; list-style-position: outside !important; }
     .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
     .ql-editor li::before { margin-right: 0.3em !important; width: 1.2em !important; text-align: center !important; display: inline-block !important; }
     .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
@@ -650,7 +818,109 @@
     .sb-completed { background: #e8f5e9; color: #2e7d32; }
     .btn-view-report { background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); color: white; border: none; padding: 8px 20px; border-radius: 30px; font-size: 0.9rem; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2); transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
     .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }
+    /* ======================================================
+   🔥 按鈕樣式最終整理（僅針對按鈕、不影響便利貼與文章）
+   ====================================================== */
 
+/* 1. 統一所有功能按鈕：綠底、白字、細金框 */
+.btn-primary, 
+.btn-secondary,
+.btn-back-capsule, 
+.kb-internal-back,
+.btn-pill-search,
+.btn-open-search,
+.kb-action-btn,
+.btn-add-group,
+.btn-do-search,
+.close-modal-btn,
+.btn-view-report,
+#kb-share-btn,
+#back-to-top,
+.kb-fab-back,
+.close-card-btn, 
+#success-close-x,
+#line-super-btn,
+#term-btn,
+#sub-btn {
+    background-color: var(--forest) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--accent) !important; /* 極細金框 */
+    border-radius: 50px !important;            /* 強制圓角，解決正方形問題 */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+}
+
+/* 2. 統一 Hover 效果：變金底、白字 */
+.btn-primary:hover, 
+.btn-secondary:hover,
+.btn-back-capsule:hover, 
+.kb-internal-back:hover,
+.btn-pill-search:hover,
+.btn-open-search:hover,
+.kb-action-btn:hover,
+.btn-add-group:hover,
+.btn-do-search:hover,
+.close-modal-btn:hover,
+.btn-view-report:hover,
+#kb-share-btn:hover,
+#back-to-top:hover,
+.kb-fab-back:hover,
+.close-card-btn:hover, 
+#success-close-x:hover,
+#line-super-btn:hover,
+#term-btn:not(:disabled):hover,
+#sub-btn:not(:disabled):hover {
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+/* 3. 修正公告專區樣式（還原白底色框，不要變綠色） */
+#hero-btn-container .btn-primary, 
+#must-read-container .btn-primary, 
+#temp-container .btn-primary {
+    background-color: #ffffff !important;
+    color: var(--forest) !important;
+    border: 2px solid var(--forest) !important;
+    box-shadow: none !important;
+    padding: 8px 20px !important;
+}
+/* 橘色快訊公告 */
+#temp-container .btn-primary {
+    color: #d35400 !important;
+    border-color: #d35400 !important;
+}
+#hero-btn-container .btn-primary:hover, 
+#must-read-container .btn-primary:hover {
+    background-color: var(--forest) !important;
+    color: #fff !important;
+}
+#temp-container .btn-primary:hover {
+    background-color: #d35400 !important;
+    color: #fff !important;
+}
+
+/* 4. 修正彈窗底部關閉按鈕：強制置中 */
+.close-modal-btn {
+    display: block !important; /* 必須是 block 才能用 margin auto */
+    margin: 40px auto 0 auto !important; 
+    width: fit-content !important;
+    min-width: 200px;
+}
+
+/* 5. 針對禁用按鈕的顯示（例如未勾選同意時） */
+#term-btn:disabled, #sub-btn:disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    cursor: not-allowed !important;
+}
     /* RWD: Mobile (Max 768px) */
     @media (max-width: 768px) {
         nav { padding: 0 20px; height: 80px; display: flex; justify-content: space-between; align-items: center; }
@@ -756,6 +1026,33 @@
             font-size: 1.4rem;
             border-bottom: none; /* 手機版拿掉線條比較乾淨 */
             background: linear-gradient(transparent 70%, #fff3e0 70%); /* 改用螢光筆效果 */
+        }
+        .kb-result-row {
+            flex-direction: column;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            position: relative;
+        }
+        .kb-result-input { width: 100%; }
+        .kb-remove-row-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffebee;
+            color: #d32f2f;
+            border: none;
+            width: 25px; height: 25px;
+            border-radius: 50%;
+        }
+        .kb-header-grid {
+            display: flex;
+            flex-direction: column; /* 變垂直排列 */
+            gap: 12px;
+        }
+        .kb-header-right {
+            align-self: flex-end; /* 按鈕還是要靠右 */
         }
     }
     
@@ -1359,26 +1656,27 @@
 
         await Promise.all([p1, p3]); 
 
+        // ... 前面不變 ...
         if (targetArticle) {
             readArt(targetArticle);
         } 
         else if (targetView === 'knowledge') {
-            // 🔥🔥🔥 修改這裡：Base64 解碼邏輯 (含舊版相容) 🔥🔥🔥
+            // 🔥 解析 JSON 搜尋資料 (修正版)
             if (targetQ) {
                 try {
-                    // 1. 先嘗試當作 Base64 解碼 (新版網址)
-                    // atob: Base64 轉回字串 -> escape -> decodeURIComponent: 轉回中文
-                    const decodedJson = decodeURIComponent(escape(atob(targetQ)));
+                    // 1. 嘗試用萬用解碼器 (新版)
+                    const decodedJson = safeB64Decode(targetQ);
                     const searchData = JSON.parse(decodedJson);
                     doKbSearch(searchData);
                 } catch(e) {
-                    console.log("非 Base64 格式，嘗試舊版解析...");
+                    console.log("新版解析失敗，嘗試舊版...");
                     try {
-                        // 2. 如果失敗，嘗試當作舊版 (JSON) 解析 (相容舊連結)
+                        // 2. 嘗試舊版 JSON 解析 (相容舊網址)
                         const searchData = JSON.parse(decodeURIComponent(targetQ));
                         doKbSearch(searchData);
                     } catch (e2) {
                         console.error("網址解析完全失敗", e2);
+                        // 解析失敗就顯示首頁，不要讓畫面全白
                         renderKbHome();
                     }
                 }
@@ -1991,7 +2289,6 @@ function tryOldSchoolCopy(text, callback) {
         }
     }
 
-    // 🔥 renderKbHome 修正版：首頁只留「開啟按鈕」，不直接顯示表單
     function renderKbHome() {
         kbState.level = 0;
         kbState.big = null;
@@ -2000,44 +2297,52 @@ function tryOldSchoolCopy(text, callback) {
 
         const bigCats = Object.keys(kbTree);
         const listHtml = bigCats.map(cat => {
-            return `
-            <div class="kb-article-card" onclick="enterKb('${cat}')" style="padding: 35px 30px;">
-                <div class="kb-card-content">
-                    <div class="kb-card-text" style="font-size: 1.4rem;">${cat}</div>
-                </div>
-                <div class="kb-arrow">➔</div>
-            </div>`;
+            return `<div class="kb-article-card" onclick="enterKb('${cat}')" style="padding: 35px 30px;">
+                        <div class="kb-card-content"><div class="kb-card-text" style="font-size: 1.4rem;">${cat}</div></div>
+                        <div class="kb-arrow">➔</div>
+                    </div>`;
         }).join('');
 
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="brand-section-header">
-                     <div class="brand-h3-zh">培癒寶典</div>                   
+                     <div class="brand-h3-zh">培癒寶典</div>                    
                     <div class="brand-h2-en">PY JOURNEY</div>
-                    <div class="brand-capsule">探索自我的導引手冊</div>
                 </div>
 
-                <button class="btn-open-search" onclick="openSearchPanel()">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> 開啟文章搜尋生成器
-                </button>
-                
-                <div class="kb-list-container">
-                    ${listHtml}
+                <div class="kb-header-grid">
+                    <div></div>
+                    <div class="brand-capsule center-fix">探索自我的導引手冊</div>
+                    <div class="kb-header-right">
+                        <button class="btn-pill-search" onclick="openSearchPanel()">
+                            <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
-        
+                
+                <div class="kb-list-container">${listHtml}</div>
+            </div>`;
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         window.scrollTo(0,0);
     }
 
-    // 🔥 新功能：打開搜尋彈窗 (並重置內容)
-    function openSearchPanel() {
+    // 🔥 修改：打開搜尋彈窗 (支援帶入舊資料)
+    function openSearchPanel(existingData = null) {
         const area = document.getElementById('modal-search-groups-area');
-        if (!area) return console.error("找不到 modal-search-groups-area，請檢查 HTML ID");
+        if (!area) return;
         
-        area.innerHTML = ''; // 清空舊的
-        addSearchGroup(); // 加一組預設的
+        area.innerHTML = ''; // 先清空
+
+        if (existingData && Array.isArray(existingData) && existingData.length > 0) {
+            // A. 如果有舊資料 (從結果頁按進來的)，就自動填入
+            existingData.forEach(item => {
+                addSearchGroup(item.title, item.keys);
+            });
+        } else {
+            // B. 如果沒有 (從首頁按的)，就給一個空的
+            addSearchGroup(); 
+        }
+        
         openModal('search-overlay');
     }
 
@@ -2057,15 +2362,18 @@ function tryOldSchoolCopy(text, callback) {
         area.appendChild(div);
     }
 
-    // 🔥 doKbSearch 修正版：從彈窗抓資料 + 搜尋後自動關閉彈窗
     function doKbSearch(forceData = null) {
+        // 🔥 安全檢查：如果資料庫還沒回來，就不能搜尋
+        if (!kbArticlesFlat || kbArticlesFlat.length === 0) {
+            console.log("資料尚未載入，稍後重試...");
+            return;
+        }
+
         let searchData = [];
 
         if (forceData) {
-            // 從網址帶入的
             searchData = forceData;
         } else {
-            // 從彈窗的輸入框抓取 (注意這裡的選擇器)
             const groups = document.querySelectorAll('#modal-search-groups-area .kb-search-group');
             groups.forEach(g => {
                 const t = g.querySelector('.kb-search-title-input').value.trim();
@@ -2077,11 +2385,12 @@ function tryOldSchoolCopy(text, callback) {
         }
 
         if (searchData.length === 0) {
+            // 如果沒條件，就回首頁
             if (kbState.level === 3) renderKbHome();
             return;
         }
 
-        // 1. 關閉彈窗 (如果是手動按搜尋的話)
+        // 1. 關閉彈窗
         closeModal('search-overlay');
 
         // 2. 更新狀態與網址
@@ -2089,7 +2398,7 @@ function tryOldSchoolCopy(text, callback) {
         kbState.searchQuery = searchData;
 
         const jsonStr = JSON.stringify(searchData);
-        const base64Str = btoa(unescape(encodeURIComponent(jsonStr)));
+        const base64Str = safeB64Encode(jsonStr); // 使用萬用編碼
         
         const newUrl = `${window.location.pathname}?view=knowledge&q=${base64Str}`;
         window.history.pushState({ path: newUrl }, '', newUrl);
@@ -2098,118 +2407,87 @@ function tryOldSchoolCopy(text, callback) {
         renderSearchResults(searchData);
     }
 
-    // 🔥 renderSearchResults 修正版：大標有線條，中分類靠左單純膠囊
     function renderSearchResults(searchData) {
         document.getElementById('knowledge').classList.add('kb-reading-mode');
-
         let finalHtml = "";
         let totalCount = 0;
 
-        // 1. 迴圈處理每一組
-        searchData.forEach((group, index) => {
+        searchData.forEach((group) => {
             const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-            
             const results = kbArticlesFlat.filter(art => {
                 return keywords.some(k => {
                     if (/^\d+$/.test(k)) {
                         const cleanNum = parseInt(k, 10).toString();
-                        const regex = new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`);
+                        // 🔥 修正：允許數字後方跟著點號或非數字，解決 10 查不到 10.58 的問題
+                        const regex = new RegExp(`(^|[^0-9])0?${cleanNum}(\\.|$|[^0-9])`);
                         return regex.test(art.title);
                     } else {
                         return art.title.includes(k);
                     }
                 });
             });
-            
             totalCount += results.length;
-            
-            // 這是「天賦、挑戰」那個標題
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
-
             let contentHtml = "";
 
             if (results.length === 0) {
                 contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
             } else {
-                // 分組
                 const grouped = {};
                 results.forEach(art => {
                     const mid = art.mid_category || '其他';
                     if (!grouped[mid]) grouped[mid] = [];
                     grouped[mid].push(art);
                 });
-
-                // 產生 HTML
                 Object.keys(grouped).forEach(midCat => {
                     const articles = grouped[midCat];
                     const cards = articles.map(a => {
                         let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
                         const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                        if (match) {
-                            displayHtml = `
-                                <div class="kb-card-num">${match[1]}</div>
-                                <div class="kb-card-text">${match[2]}</div>
-                            `;
-                        }
-                        return `
-                        <div class="kb-article-card" onclick="readArt('${a.id}')">
-                            <div class="kb-card-content">${displayHtml}</div>
-                            <div class="kb-arrow">➔</div>
-                        </div>`;
+                        if (match) { displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`; }
+                        return `<div class="kb-article-card" onclick="readArt('${a.id}')">
+                                    <div class="kb-card-content">${displayHtml}</div>
+                                    <div class="kb-arrow">➔</div>
+                                </div>`;
                     }).join('');
-
-                    // 🔥 這裡改了！中分類直接靠左，不用任何線條容器
-                    contentHtml += `
-                        <div class="kb-search-mid-group">
-                            <div style="text-align:left;">
-                                <span class="kb-mid-simple-badge">${midCat}</span>
-                            </div>
-                            <div class="kb-list-container">
-                                ${cards}
-                            </div>
-                        </div>
-                    `;
+                    contentHtml += `<div class="kb-search-mid-group">
+                                        <div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div>
+                                        <div class="kb-list-container">${cards}</div>
+                                    </div>`;
                 });
             }
-
-            // 🔥 這裡保留了大標題的樣式 (CSS 設定了左右線條)
-            finalHtml += `
-                <div class="kb-result-section">
-                    <div class="kb-result-section-title">
-                        <span class="kb-result-section-badge">${sectionTitle}</span>
-                    </div>
-                    ${contentHtml}
-                </div>
-            `;
+            finalHtml += `<div class="kb-result-section">
+                            <div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>
+                            ${contentHtml}
+                          </div>`;
         });
 
-        // 頁面頂部大標題
+        // 🔥 組合修正：Grid 獨立出來，寬度 100% 才能推到最右邊
         const headerHtml = `
             <div class="kb-search-line-wrapper">
                 <div class="brand-section-header" style="margin-bottom: 0;">
-                    <div class="brand-h3-zh">文章搜尋結果</div>                   
+                    <div class="brand-h3-zh">文章搜尋結果</div>                    
                     <div class="brand-h2-en">SEARCH RESULTS</div>
-                    <div class="brand-capsule">
-                        共搜尋到 ${totalCount} 篇文章
+                </div>
+                <div class="kb-header-grid">
+                    <div></div>
+                    <div class="brand-capsule center-fix">共搜尋到 ${totalCount} 篇文章</div>
+                    <div class="kb-header-right">
+                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)">
+                            <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
+                        </button>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
 
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-
                 <div class="kb-header-actions">
-                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
-                        <i class="fa-solid fa-arrow-left"></i> 重新搜尋
-                    </div>
+                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> 返回首頁</div>
                 </div>
-
-                ${headerHtml}
-                ${finalHtml}
-            </div>
-        `;
+                ${headerHtml}${finalHtml}
+            </div>`;
         window.scrollTo(0, 0);
     }
 
@@ -2774,6 +3052,7 @@ function tryOldSchoolCopy(text, callback) {
             }
         }
     };
+    
 
     // 點擊回到頂部
     function scrollToTop() {
@@ -2781,6 +3060,22 @@ function tryOldSchoolCopy(text, callback) {
             top: 0,
             behavior: 'smooth' // 平滑捲動
         });
+    }
+    // 🔥 萬用 Base64 編碼器 (解決中文/符號亂碼問題)
+    function safeB64Encode(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+            function toSolidBytes(match, p1) {
+                return String.fromCharCode('0x' + p1);
+        }));
+    }
+
+    // 🔥 萬用 Base64 解碼器
+    function safeB64Decode(str) {
+        // 1. 先把 URL 可能產生的空白換回 + 號 (避免複製網址時格式跑掉)
+        str = str.replace(/ /g, '+');
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
     }
 </script>
 <button id="back-to-top" onclick="scrollToTop()">

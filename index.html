@@ -1755,22 +1755,32 @@
 <div id="search-overlay" class="result-overlay">
     <div class="text-modal-card" style="max-width: 650px; padding: 30px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:1.5rem; border:none; text-align:left;">🔍 文章搜尋器</h3>
+            <h3 style="margin:0; font-size:1.5rem; border:none; text-align:left;">🔍 文章搜尋生成器</h3>
             <button onclick="closeModal('search-overlay')" style="background:none; border:none; font-size:1.5rem; color:#999; cursor:pointer;">✕</button>
         </div>
         
-        <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">
-            輸入關鍵字 (如: 12,38) 或標題，生成搜尋專屬頁面。<br>
-            可點擊「新增欄位」組合多個區塊。
-        </p>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee;">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.85rem; color: #888;">自訂報告標題 (選填)</label>
+                    <input type="text" id="kb-search-report-title" placeholder="例如：我的天賦報告" style="padding: 10px; margin-top: 5px;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: #888;">篩選大分類</label>
+                    <select id="kb-search-big-cat" style="padding: 10px; margin-top: 5px;">
+                        <option value="">全域搜尋</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <div id="modal-search-groups-area"></div>
 
         <div class="kb-search-actions" style="margin-top:25px;">
-            <button class="kb-action-btn btn-add-group" onclick="addSearchGroup()">
+            <button class="kb-action-btn btn-add-group" onclick="addSearchGroup()" style="background:#fff; color:var(--forest); border:1px solid var(--forest); padding:10px 25px; border-radius:50px; cursor:pointer;">
                 <i class="fa-solid fa-plus"></i> 新增欄位
             </button>
-            <button class="kb-action-btn btn-do-search" onclick="doKbSearch()">
+            <button class="btn-pill-search" onclick="doKbSearch()" style="padding:10px 35px;">
                 <i class="fa-solid fa-magnifying-glass"></i> 執行搜尋
             </button>
         </div>
@@ -2547,20 +2557,22 @@ function tryOldSchoolCopy(text, callback) {
     // 🔥 修改：打開搜尋彈窗 (支援帶入舊資料)
     function openSearchPanel(existingData = null) {
         const area = document.getElementById('modal-search-groups-area');
-        if (!area) return;
+        const bigCatSelect = document.getElementById('kb-search-big-cat');
+        if (!area || !bigCatSelect) return;
         
-        area.innerHTML = ''; // 先清空
+        // 1. 動態填入大分類下拉選單
+        const bigCats = Object.keys(kbTree);
+        bigCatSelect.innerHTML = '<option value="">全域搜尋</option>' + 
+            bigCats.map(c => `<option value="${c}">${c}</option>`).join('');
 
-        if (existingData && Array.isArray(existingData) && existingData.length > 0) {
-            // A. 如果有舊資料 (從結果頁按進來的)，就自動填入
-            existingData.forEach(item => {
-                addSearchGroup(item.title, item.keys);
-            });
+        area.innerHTML = ''; 
+        if (existingData && existingData.groups) {
+            document.getElementById('kb-search-report-title').value = existingData.reportTitle || '';
+            bigCatSelect.value = existingData.filterCat || '';
+            existingData.groups.forEach(item => addSearchGroup(item.title, item.keys));
         } else {
-            // B. 如果沒有 (從首頁按的)，就給一個空的
             addSearchGroup(); 
         }
-        
         openModal('search-overlay');
     }
 
@@ -2581,61 +2593,56 @@ function tryOldSchoolCopy(text, callback) {
     }
 
     function doKbSearch(forceData = null) {
-        // 🔥 安全檢查：如果資料庫還沒回來，就不能搜尋
-        if (!kbArticlesFlat || kbArticlesFlat.length === 0) {
-            console.log("資料尚未載入，稍後重試...");
-            return;
-        }
+        if (!kbArticlesFlat || kbArticlesFlat.length === 0) return;
 
-        let searchData = [];
+        let searchData = { reportTitle: '', filterCat: '', groups: [] };
 
         if (forceData) {
             searchData = forceData;
         } else {
+            searchData.reportTitle = document.getElementById('kb-search-report-title').value.trim();
+            searchData.filterCat = document.getElementById('kb-search-big-cat').value;
             const groups = document.querySelectorAll('#modal-search-groups-area .kb-search-group');
             groups.forEach(g => {
                 const t = g.querySelector('.kb-search-title-input').value.trim();
                 const k = g.querySelector('.kb-search-key-input').value.trim();
-                if (k) {
-                    searchData.push({ title: t, keys: k });
-                }
+                if (k) searchData.groups.push({ title: t, keys: k });
             });
         }
 
-        if (searchData.length === 0) {
-            // 如果沒條件，就回首頁
-            if (kbState.level === 3) renderKbHome();
-            return;
-        }
+        if (searchData.groups.length === 0) return;
 
-        // 1. 關閉彈窗
         closeModal('search-overlay');
-
-        // 2. 更新狀態與網址
         kbState.level = 3;
         kbState.searchQuery = searchData;
 
-        const jsonStr = JSON.stringify(searchData);
-        const base64Str = safeB64Encode(jsonStr); // 使用萬用編碼
-        
+        const base64Str = safeB64Encode(JSON.stringify(searchData));
         const newUrl = `${window.location.pathname}?view=knowledge&q=${base64Str}`;
         window.history.pushState({ path: newUrl }, '', newUrl);
 
-        // 3. 渲染結果
         renderSearchResults(searchData);
     }
 
     function renderSearchResults(searchData) {
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         let finalHtml = ""; let totalCount = 0;
-        searchData.forEach((group) => {
+
+        // 1. 決定標題文字
+        const displayTitle = searchData.reportTitle || "文章搜尋結果";
+
+        // 2. 執行搜尋邏輯 (含大分類過濾)
+        searchData.groups.forEach((group) => {
             const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-            const results = kbArticlesFlat.filter(art => keywords.some(k => {
+            let pool = kbArticlesFlat;
+            if (searchData.filterCat) pool = pool.filter(a => a.big_category === searchData.filterCat);
+
+            const results = pool.filter(art => keywords.some(k => {
                 if (/^\d+$/.test(k)) {
                     const cleanNum = parseInt(k, 10).toString();
                     return new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`).test(art.title);
                 } else { return art.title.includes(k); }
             }));
+            
             totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
             let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>` : "";
@@ -2644,13 +2651,7 @@ function tryOldSchoolCopy(text, callback) {
                 results.forEach(art => { const mid = art.mid_category || '其他'; if (!grouped[mid]) grouped[mid] = []; grouped[mid].push(art); });
                 Object.keys(grouped).forEach(midCat => {
                     const cards = grouped[midCat].map(a => {
-                        let disp = "";
-                        const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                        if (m) {
-                            disp = `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>`;
-                        } else {
-                            disp = `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
-                        }
+                        let disp = a.title.match(/^([0-9\-\.]+)\s+(.*)/) ? `<div class="kb-card-num">${a.title.match(/^([0-9\-\.]+)\s+(.*)/)[1]}</div><div class="kb-card-text">${a.title.match(/^([0-9\-\.]+)\s+(.*)/)[2]}</div>` : `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
                         return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${disp}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
                     contentHtml += `<div class="kb-search-mid-group"><div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div><div class="kb-list-container">${cards}</div></div>`;
@@ -2662,29 +2663,20 @@ function tryOldSchoolCopy(text, callback) {
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-search-results-wrapper">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-                
                 <div class="brand-section-header">
-                    <div class="brand-h3-zh">文章搜尋結果</div>                    
+                    <div class="brand-h3-zh">${displayTitle}</div>                    
                     <div class="brand-h2-en">SEARCH RESULTS</div>
                     <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
                 </div>
-
                 <div class="kb-cat-view">
                     <div class="kb-inner-header-row">
                         <div class="kb-action-group">
-                            <button onclick="kbGoBack()" class="btn-pill-search">
-                                <i class="fa-solid fa-arrow-left"></i> 返回寶典
-                            </button>
-                            <button id="kb-share-btn" class="btn-pill-search" onclick="copyArtLink()" title="分享搜尋結果" style="width:40px; height:40px; border-radius:50%; padding:0; justify-content:center;">
+                            <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回寶典</button>
+                            <button class="btn-pill-search" onclick="copyArtLink()" title="分享此報告" style="width:40px; height:40px; border-radius:50%; padding:0; justify-content:center;">
                                 <i class="fa-solid fa-share-nodes"></i>
                             </button>
                         </div>
-                        
-                        <div class="kb-header-right">
-                            <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)">
-                                <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋器
-                            </button>
-                        </div>
+                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
                     </div>
                     ${finalHtml}
                 </div>

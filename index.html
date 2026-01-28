@@ -482,14 +482,7 @@
     /* KB 頂部按鈕區 */
     .kb-header-actions { display: flex !important; align-items: center !important; gap: 15px !important; margin-bottom: 25px !important; width: 100% !important; }
     
-    #kb-share-btn {
-        width: 40px; height: 40px; border-radius: 50%;
-        background: var(--forest); color: var(--accent); border: 1px solid var(--accent);
-        display: inline-flex; justify-content: center; align-items: center;
-        cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 0;
-    }
-    #kb-share-btn:hover { transform: translateY(-2px); background: var(--accent); color: var(--forest); box-shadow: 0 5px 15px rgba(198, 168, 124, 0.4); }
-
+    
     /* ======================================================
        🔍 搜尋相關樣式 (整合版)
        ====================================================== */
@@ -511,7 +504,6 @@
     .kb-group-remove-btn { background: #ffebee; color: #d32f2f; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     .kb-search-actions { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
-    .kb-action-btn { padding: 10px 25px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 1rem; transition: 0.3s; }
     .btn-add-group { background: #fff; color: var(--forest); border: 1px solid var(--forest); }
     .btn-add-group:hover { background: #f1f8e9; }
     .btn-do-search { background: var(--forest); color: var(--accent); }
@@ -706,31 +698,8 @@
         vertical-align: middle;
     }
 
-    /* 3. 按鈕文字瘦身 (500) + 字距，防止糊在一起 */
-    .btn-pill-search {
-        background-color: var(--forest) !important;
-        color: #ffffff !important;
-        border: 1px solid var(--accent) !important;
-        border-radius: 50px !important;
-        padding: 8px 25px !important;
-        font-weight: 500 !important;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: 'Noto Sans TC', sans-serif !important;
-    }
+    
 
-    /* 滑鼠移過去的效果 */
-    .btn-pill-search:hover {
-        transform: translateY(-2px);
-        background: var(--accent);       /* 變金底 */
-        border-color: var(--accent);     /* 變金框 */
-        color: #ffffff;                  /* 保持白字 */
-        box-shadow: 0 6px 15px rgba(198, 168, 124, 0.4); /* 金色光暈 */
-    }
     /* 1. 修正標題網格：強制中間置中、右邊推到底 */
 .kb-header-grid {
     display: grid !important;
@@ -788,7 +757,7 @@
     .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
     .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; margin-top: 8px !important; line-height: 1.3 !important; list-style-position: outside !important; }
     .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
-    .ql-editor li::before { margin-right: 0.3em !important; width: 1.2em !important; text-align: center !important; display: inline-block !important; }
+    .ql-editor li::before { margin-right: 0em !important; width: 1em !important; text-align: center !important; display: inline-block !important; }
     .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
     .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 0px !important; margin-bottom: 15px; line-height: 1.4; display: block; color: var(--forest); }
     .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
@@ -1065,7 +1034,14 @@
         box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3);
         z-index: 100;
     }
-
+    #kb-share-btn {
+        width: 36px !important; 
+        height: 36px !important; 
+        padding: 0 !important; 
+        border-radius: 50% !important; 
+        min-width: 40px !important;
+        flex-shrink: 0;
+    }
     /* 5. 其他 KB 元件樣式 */
     .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
     .kb-article-card { 
@@ -1128,14 +1104,14 @@
         background: #ffffff !important;
         box-shadow: 0 0px 0px rgba(26, 47, 35, 0.08) !important;
     }
-        .kb-cat-view, .kb-article-view { 
-            padding: 30px 12px 20px 12px !important; /* 👈 縮小左右內距，寬度就出來了 */
-            border-radius: 16px !important;
-        }
+        .kb-cat-view, .kb-article-view { padding: 30px 12px 20px 12px !important; border-radius: 16px !important; }
         .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
         .kb-list-container { gap: 10px !important; }
         /* 調整卡片整體高度與圓角，撐起 100px 的圖 */
-        .kb-article-card { padding: 15px !important; min-height: 40px !important; }
+        .kb-article-card { 
+            padding: 10px 15px !important; /* 👈 縮小上下內距（原為 15px） */
+            min-height: 60px !important;   /* 👈 將 80px 改成 60px 或更小 */
+        }
         .kb-big-cat-card { min-height: 110px !important; }
         .kb-card-text { font-size: 0.95rem !important; }
         .kb-section-group { margin-bottom: 25px !important; }
@@ -1150,7 +1126,7 @@
         }
         .kb-tiny-note:hover { transform: rotate(2deg); }
         .kb-header-actions { gap: 10px !important; margin-bottom: 20px !important; }
-        .kb-internal-back, .btn-back-capsule, #kb-share-btn { height: 36px !important; border-radius: 50px !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+        .kb-internal-back, .btn-back-capsule { height: 36px !important; border-radius: 50px !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; margin-top: 0 !important; margin-bottom: 0 !important; }
         .kb-internal-back, .btn-back-capsule {
             background-color: var(--forest) !important; /* 👈 綠底 */
             color: #ffffff !important;                   /* 👈 白字 */
@@ -1162,19 +1138,16 @@
             font-size: 13px !important;
         }
         /* 手機版按鈕群組微調 */
-        .kb-inner-header-row { flex-direction: column !important; gap: 15px !important; }
-        .kb-action-group { width: 100%; justify-content: center; }
-        .kb-internal-back, .btn-back-capsule, .btn-pill-search {
-            background-color: var(--forest) !important;
-            color: #ffffff !important;
-            border: 1px solid var(--accent) !important;
-            padding: 0 15px !important;
-            height: 38px !important;
-            border-radius: 50px !important;
-            font-size: 13px !important;
+        .kb-inner-header-row { 
+            display: flex !important; 
+            flex-direction: row !important; /* 👈 鎖死同列 */
+            justify-content: space-between !important; 
+            align-items: center !important; 
+            width: 100% !important; 
+            gap: 8px !important;
         }
+        .kb-action-group { display: flex !important; gap: 8px !important; align-items: center !important; }        .kb-internal-back, .btn-back-capsule, .btn-pill-search { font-size: 12px !important; padding: 0 12px !important; height: 34px !important; }
         .kb-internal-back i, .btn-back-capsule i { margin-right: 6px !important; font-size: 13px !important; transform: none !important; }
-        #kb-share-btn { width: 36px !important; padding: 0 !important; background: var(--forest) !important; color: var(--accent) !important; border: 1px solid var(--accent) !important; }
         .kb-header-actions { display: flex !important; align-items: center !important; gap: 8px !important; margin-bottom: 20px !important; width: 100% !important; }
         #booking-step-2 h2 { margin-top: 20px !important; }
         .ota-grid-row {
@@ -1196,9 +1169,11 @@
         .social-btn i { font-size: 12px !important; }
         .copyright { margin-top: 4px !important; font-size: 10px !important; opacity: 0.5 !important; line-height: 1 !important; }
         
-        .brand-h2-en, .draw-title-h2 { font-size: 0.9rem !important; color: #999 !important; text-shadow: none !important; letter-spacing: 2px; margin-bottom: 2px; }
-        .brand-h3-zh, .draw-title-zh { font-size: 1.3rem !important; margin-top: 0 !important; margin-bottom: 12px !important; letter-spacing: 1.5px; font-weight: 900; }
-        .brand-capsule, .draw-desc-p { font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; }
+        /* 尋找這一行，把 0.9rem 改成 0.7rem */
+        .brand-h2-en, .draw-title-h2 { font-size: 0.7rem !important; } 
+
+        /* 尋找這一行，把 1.3rem 改成 1.6rem */
+        .brand-h3-zh, .draw-title-zh { font-size: 1.6rem !important; }.brand-capsule, .draw-desc-p { font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; }
         
         #back-to-top { position: fixed !important; bottom: 70px !important; right: 15px !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; background: var(--forest) !important; color: var(--accent) !important; border: 2px solid var(--accent) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important; z-index: 1002 !important; display: flex !important; justify-content: center; align-items: center; font-size: 1.2rem !important; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.4s ease; }
     
@@ -1253,14 +1228,33 @@
         width: 100% !important;
         margin: 15px 0 !important;
     }
-
+    /* 🔥 分享按鈕：絕對圓形統一版 (與回到最上頁按鈕一致) */
+    #kb-share-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important; /* 👈 鎖死為正圓形 */
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--forest) !important;
+        color: #ffffff !important;      /* 👈 統一為白字 */
+        border: 1px solid var(--accent) !important;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        transition: all 0.3s ease;
+        margin: 0 !important;
+    }
+    #kb-share-btn:hover { background-color: var(--accent) !important; transform: translateY(-2px); }
+    #kb-share-btn i { font-size: 16px !important; color: #ffffff !important; }
     /* 手機版按鈕容器：取消靠右，改為置中並佔滿適度寬度 */
     .kb-header-right {
         display: flex !important;
         justify-content: center !important; /* 換行後置中 */
         width: 100% !important;
     }
-    .kb-header-right .btn-pill-search {
+    .kb-header-right  {
         width: auto !important;
         min-width: 220px;
         padding: 10px 30px !important;
@@ -1274,6 +1268,17 @@
             font-size: 1.3rem !important;
             letter-spacing: 1px !important;
         }
+    /* 4. 縮小按鈕體積以符合手機空間 */
+        .btn-pill-search { 
+            font-size: 12px !important; 
+            padding: 6px 12px !important; 
+            height: 36px !important; 
+            white-space: nowrap !important;
+            color: #ffffff !important; /* 👈 鎖死白字 */
+        }
+
+        .kb-card-num { flex: 0 0 65px !important; font-size: 1.1rem !important; margin-right: 12px !important; text-align: right !important; }
+        .kb-tiny-note { position: absolute !important; top: -12px !important; right: -5px !important; max-width: 55% !important; transform: rotate(2deg) !important; transition: none !important; }
     
 }
     
@@ -1755,7 +1760,7 @@
 <div id="search-overlay" class="result-overlay">
     <div class="text-modal-card" style="max-width: 650px; padding: 30px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:1.5rem; border:none; text-align:left;">🔍 文章搜尋生成器</h3>
+            <h3 style="margin:0; font-size:1.5rem; border:none; text-align:left;">🔍 文章搜尋</h3>
             <button onclick="closeModal('search-overlay')" style="background:none; border:none; font-size:1.5rem; color:#999; cursor:pointer;">✕</button>
         </div>
         
@@ -2518,18 +2523,14 @@ function tryOldSchoolCopy(text, callback) {
     function renderKbHome() {
         kbState.level = 0; kbState.big = null; kbState.activeMid = null; kbState.searchQuery = null; 
         const bigCats = Object.keys(kbTree);
-        
-        // 1. 12 星座洗牌，確保首頁不重複
-        const zodiacPool = Array.from({length: 12}, (_, i) => 
-            `https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/zodiac_${i+1}.png`
-        ).sort(() => Math.random() - 0.5); 
+        const zodiacPool = Array.from({length: 12}, (_, i) => `https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/zodiac_${i+1}.png`).sort(() => Math.random() - 0.5);
 
         const listHtml = bigCats.map((cat, idx) => {
             const myImg = zodiacPool[idx % zodiacPool.length];
             return `<div class="kb-article-card kb-big-cat-card" onclick="enterKb('${cat}')">
                         <div class="kb-card-content">
                             <img src="${myImg}" class="kb-avatar" alt="zodiac">
-                            <div class="kb-card-text">${cat}</div>
+                            <div class="kb-card-text" style="font-family:'Noto Serif TC',serif; font-weight:900;">${cat}</div>
                         </div>
                         <div class="kb-arrow">➔</div>
                     </div>`;
@@ -2544,12 +2545,11 @@ function tryOldSchoolCopy(text, callback) {
             <div class="kb-cat-view">
                 <div class="kb-inner-header-row">
                     <div></div> <button class="btn-pill-search" onclick="openSearchPanel()">
-                        <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋器
+                        <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
                     </button>
                 </div>
                 <div class="kb-list-container">${listHtml}</div>
             </div>`;
-        
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         window.scrollTo(0,0);
     }
@@ -2560,10 +2560,7 @@ function tryOldSchoolCopy(text, callback) {
         const bigCatSelect = document.getElementById('kb-search-big-cat');
         if (!area || !bigCatSelect) return;
         
-        // 1. 動態填入大分類下拉選單
-        const bigCats = Object.keys(kbTree);
-        bigCatSelect.innerHTML = '<option value="">全域搜尋</option>' + 
-            bigCats.map(c => `<option value="${c}">${c}</option>`).join('');
+        bigCatSelect.innerHTML = '<option value="">全域搜尋</option>' + Object.keys(kbTree).map(c => `<option value="${c}">${c}</option>`).join('');
 
         area.innerHTML = ''; 
         if (existingData && existingData.groups) {
@@ -2592,66 +2589,47 @@ function tryOldSchoolCopy(text, callback) {
         area.appendChild(div);
     }
 
+    // 3. 修正搜尋執行：抓取標題與分類
     function doKbSearch(forceData = null) {
         if (!kbArticlesFlat || kbArticlesFlat.length === 0) return;
-
         let searchData = { reportTitle: '', filterCat: '', groups: [] };
-
-        if (forceData) {
-            searchData = forceData;
-        } else {
+        if (forceData) { searchData = forceData; } else {
             searchData.reportTitle = document.getElementById('kb-search-report-title').value.trim();
             searchData.filterCat = document.getElementById('kb-search-big-cat').value;
-            const groups = document.querySelectorAll('#modal-search-groups-area .kb-search-group');
-            groups.forEach(g => {
+            document.querySelectorAll('#modal-search-groups-area .kb-search-group').forEach(g => {
                 const t = g.querySelector('.kb-search-title-input').value.trim();
                 const k = g.querySelector('.kb-search-key-input').value.trim();
                 if (k) searchData.groups.push({ title: t, keys: k });
             });
         }
-
         if (searchData.groups.length === 0) return;
-
         closeModal('search-overlay');
-        kbState.level = 3;
-        kbState.searchQuery = searchData;
-
+        kbState.level = 3; kbState.searchQuery = searchData;
         const base64Str = safeB64Encode(JSON.stringify(searchData));
-        const newUrl = `${window.location.pathname}?view=knowledge&q=${base64Str}`;
-        window.history.pushState({ path: newUrl }, '', newUrl);
-
+        window.history.pushState({ path: window.location.pathname + `?view=knowledge&q=${base64Str}` }, '', window.location.pathname + `?view=knowledge&q=${base64Str}`);
         renderSearchResults(searchData);
     }
 
     function renderSearchResults(searchData) {
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         let finalHtml = ""; let totalCount = 0;
-
-        // 1. 決定標題文字
         const displayTitle = searchData.reportTitle || "文章搜尋結果";
 
-        // 2. 執行搜尋邏輯 (含大分類過濾)
         searchData.groups.forEach((group) => {
             const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
             let pool = kbArticlesFlat;
             if (searchData.filterCat) pool = pool.filter(a => a.big_category === searchData.filterCat);
-
-            const results = pool.filter(art => keywords.some(k => {
-                if (/^\d+$/.test(k)) {
-                    const cleanNum = parseInt(k, 10).toString();
-                    return new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`).test(art.title);
-                } else { return art.title.includes(k); }
-            }));
-            
+            const results = pool.filter(art => keywords.some(k => art.title.includes(k)));
             totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
-            let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>` : "";
+            let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(無相關文章)</div>` : "";
             if (results.length > 0) {
                 const grouped = {};
                 results.forEach(art => { const mid = art.mid_category || '其他'; if (!grouped[mid]) grouped[mid] = []; grouped[mid].push(art); });
                 Object.keys(grouped).forEach(midCat => {
                     const cards = grouped[midCat].map(a => {
-                        let disp = a.title.match(/^([0-9\-\.]+)\s+(.*)/) ? `<div class="kb-card-num">${a.title.match(/^([0-9\-\.]+)\s+(.*)/)[1]}</div><div class="kb-card-text">${a.title.match(/^([0-9\-\.]+)\s+(.*)/)[2]}</div>` : `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
+                        const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+                        let disp = m ? `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>` : `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
                         return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${disp}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
                     contentHtml += `<div class="kb-search-mid-group"><div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div><div class="kb-list-container">${cards}</div></div>`;
@@ -2660,27 +2638,28 @@ function tryOldSchoolCopy(text, callback) {
             finalHtml += `<div class="kb-result-section"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
         });
 
-        document.getElementById('kb-container').innerHTML = `
-            <div class="kb-search-results-wrapper">
-                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-                <div class="brand-section-header">
-                    <div class="brand-h3-zh">${displayTitle}</div>                    
-                    <div class="brand-h2-en">SEARCH RESULTS</div>
-                    <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
-                </div>
-                <div class="kb-cat-view">
-                    <div class="kb-inner-header-row">
-                        <div class="kb-action-group">
-                            <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回寶典</button>
-                            <button class="btn-pill-search" onclick="copyArtLink()" title="分享此報告" style="width:40px; height:40px; border-radius:50%; padding:0; justify-content:center;">
-                                <i class="fa-solid fa-share-nodes"></i>
-                            </button>
-                        </div>
-                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
-                    </div>
-                    ${finalHtml}
-                </div>
-            </div>`;
+        // 尋找 renderSearchResults 函式最後的 innerHTML 位置
+    document.getElementById('kb-container').innerHTML = `
+        <div class="kb-search-results-wrapper">
+            <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
+            <div class="brand-section-header">
+                <div class="brand-h3-zh">${displayTitle}</div>                    
+                <div class="brand-h2-en">SEARCH RESULTS</div>
+                <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
+            </div>
+            <div class="kb-cat-view">
+                <div class="kb-inner-header-row">
+    <div class="kb-action-group">
+        <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回</button>
+        <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告">
+            <i class="fa-solid fa-share-nodes"></i>
+        </button>
+    </div>
+    <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 搜尋文章</button>
+</div>
+                ${finalHtml}
+            </div>
+        </div>`;
         window.scrollTo(0, 0);
     }
 
@@ -2798,15 +2777,14 @@ function tryOldSchoolCopy(text, callback) {
             <div class="kb-article-view" style="position: relative;">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
 
-                <div class="kb-header-actions">
-                    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
-                        <i class="fa-solid fa-arrow-left"></i> 返回
-                    </div>
-                    <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結">
-                        <i class="fa-solid fa-share-nodes"></i>
-                    </button>
-                </div>
-
+            <div class="kb-header-actions">
+    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
+        <i class="fa-solid fa-arrow-left"></i> 返回
+    </div>
+    <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結">
+        <i class="fa-solid fa-share-nodes"></i>
+    </button>
+</div>
                 ${noteHtml}
 
                 <h1 class="kb-article-title-h1" style="margin-top: 10px;">${data.title}</h1>
@@ -2824,62 +2802,39 @@ function tryOldSchoolCopy(text, callback) {
     }
 
     // 🔥 最終修復：手機版操作結束後直接離開，絕不執行電腦版邏輯
-    async function copyArtLink() {
-        const btn = document.getElementById('kb-share-btn');
-        const icon = btn.querySelector('i');
-        
-        const titleEl = document.querySelector('.kb-article-title-h1');
-        const currentTitle = titleEl ? titleEl.innerText : '能量指引';
+   async function copyArtLink() {
+        // 1. 抓取標題：先抓文章標題，抓不到就抓搜尋報告標題
+        const articleTitle = document.querySelector('.kb-article-title-h1');
+        const searchTitle = document.querySelector('.brand-h3-zh');
+        const currentTitle = articleTitle ? articleTitle.innerText : (searchTitle ? searchTitle.innerText : '培癒寶典');
 
         const shareData = {
-            title: `培癒試驗室 ${currentTitle}`,
-            text: `培癒試驗室 ${currentTitle}`,
-            url: window.location.href
+            title: `培癒試驗室 - ${currentTitle}`,
+            text: `培癒試驗室 - ${currentTitle}`,
+            url: window.location.href 
         };
 
-        // 1. 手機版優先執行
+        // 2. 優先執行手機原生分享
         if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-                console.log('分享成功');
-            } catch (err) {
-                // 這裡通常是使用者按了「取消」
-                // 我們只記錄 log，不做任何事情，安靜結束
-                console.log('使用者取消分享或分享失敗', err); 
-            }
-            
-            // ⚠️ 關鍵修正：無論成功或取消，手機版任務到此結束！
-            // 直接 return，絕對不讓它往下跑去執行電腦版的複製
-            return; 
+            try { await navigator.share(shareData); return; } catch (err) { return; }
         }
 
-        // ==========================================
-        // 👇 以下只有「不支援分享功能的電腦」才會執行
-        // ==========================================
-
-        const originalBg = btn.style.background;
-        const originalColor = btn.style.color;
-        const originalBorder = btn.style.border;
-
-        btn.style.background = '#27ae60';
-        btn.style.color = '#fff';
-        btn.style.border = '1px solid #27ae60';
-        icon.className = 'fa-solid fa-check';
-
+        // 3. 電腦版：複製網址並顯示回饋
         try {
             await navigator.clipboard.writeText(shareData.url);
-        } catch (err) {
-            console.error(err);
-            alert("複製失敗，請手動複製網址");
-        } finally {
+            const btn = document.getElementById('kb-share-btn');
+            const icon = btn.querySelector('i');
+            const originalIcon = icon.className;
+            
+            icon.className = 'fa-solid fa-check';
+            btn.style.background = '#27ae60';
+            
             setTimeout(() => {
-                icon.className = 'fa-solid fa-share-nodes';
-                btn.style.background = 'var(--forest)';
-                btn.style.color = 'var(--accent)';
-                btn.style.border = '1px solid var(--accent)';
+                icon.className = originalIcon;
+                btn.style.background = '';
             }, 1500);
-        }
-    }    
+        } catch (err) { alert("網址已複製到剪貼簿！"); }
+    }
 
 
     // 🔥 kbGoBack 最終修正版：支援從文章返回「多組搜尋結果」

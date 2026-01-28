@@ -1363,21 +1363,30 @@
             readArt(targetArticle);
         } 
         else if (targetView === 'knowledge') {
-            // 🔥 解析 JSON 搜尋資料
+            // 🔥🔥🔥 修改這裡：Base64 解碼邏輯 (含舊版相容) 🔥🔥🔥
             if (targetQ) {
                 try {
-                    const searchData = JSON.parse(decodeURIComponent(targetQ));
+                    // 1. 先嘗試當作 Base64 解碼 (新版網址)
+                    // atob: Base64 轉回字串 -> escape -> decodeURIComponent: 轉回中文
+                    const decodedJson = decodeURIComponent(escape(atob(targetQ)));
+                    const searchData = JSON.parse(decodedJson);
                     doKbSearch(searchData);
                 } catch(e) {
-                    console.error("網址解析失敗", e);
-                    renderKbHome();
+                    console.log("非 Base64 格式，嘗試舊版解析...");
+                    try {
+                        // 2. 如果失敗，嘗試當作舊版 (JSON) 解析 (相容舊連結)
+                        const searchData = JSON.parse(decodeURIComponent(targetQ));
+                        doKbSearch(searchData);
+                    } catch (e2) {
+                        console.error("網址解析完全失敗", e2);
+                        renderKbHome();
+                    }
                 }
             } else {
                 renderKbHome(); 
             }
         }
     });
-    
     function toggleMenu() {
         const menu = document.getElementById('nav-menu');
         menu.classList.toggle('active');
@@ -2080,7 +2089,9 @@ function tryOldSchoolCopy(text, callback) {
         kbState.searchQuery = searchData;
 
         const jsonStr = JSON.stringify(searchData);
-        const newUrl = `${window.location.pathname}?view=knowledge&q=${encodeURIComponent(jsonStr)}`;
+        const base64Str = btoa(unescape(encodeURIComponent(jsonStr)));
+        
+        const newUrl = `${window.location.pathname}?view=knowledge&q=${base64Str}`;
         window.history.pushState({ path: newUrl }, '', newUrl);
 
         // 3. 渲染結果

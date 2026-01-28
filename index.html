@@ -1057,7 +1057,25 @@
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     }
     .kb-arrow { font-size: 1.2rem; color: var(--accent); opacity: 0.5; flex-shrink: 0; }
+    /* 將兩個名字寫在一起，用逗號隔開 */
+.kb-action-btn, .btn-pill-search {
+    height: 36px !important;           /* 鎖死高度 */
+    padding: 0 20px !important;        /* 統一內距 */
+    font-size: 13px !important;        /* 統一字體大小 */
+    font-weight: 900 !important;       /* 統一粗細 */
+    font-family: 'Noto Serif TC', serif !important;
     
+    background-color: var(--forest) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: 50px !important;
+    
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
     
     /* RWD: Mobile (Max 768px) */
     @media (max-width: 768px) {

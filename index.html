@@ -349,9 +349,17 @@
     /* 2. 箱子內的按鈕列：強制靠右 */
     .kb-inner-header-row {
         display: flex !important;
-        justify-content: flex-end !important;
+        justify-content: space-between !important; /* 👈 左右撐開：左返回、右功能 */
+        align-items: center !important;
         width: 100% !important;
-        margin-bottom: 30px;
+        margin-bottom: 25px !important;
+        gap: 10px;
+    }
+    /* 統一按鈕與分享鍵的間距 */
+    .kb-action-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
     /* 文章內容頁 (.kb-article-view) 建議保留白色底，這樣讀長文才舒服 */
     .kb-article-view { 
@@ -1150,6 +1158,18 @@
             display: inline-flex !important;
             padding: 0 15px !important;
             height: 36px !important;
+            border-radius: 50px !important;
+            font-size: 13px !important;
+        }
+        /* 手機版按鈕群組微調 */
+        .kb-inner-header-row { flex-direction: column !important; gap: 15px !important; }
+        .kb-action-group { width: 100%; justify-content: center; }
+        .kb-internal-back, .btn-back-capsule, .btn-pill-search {
+            background-color: var(--forest) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--accent) !important;
+            padding: 0 15px !important;
+            height: 38px !important;
             border-radius: 50px !important;
             font-size: 13px !important;
         }
@@ -2513,7 +2533,9 @@ function tryOldSchoolCopy(text, callback) {
             </div>
             <div class="kb-cat-view">
                 <div class="kb-inner-header-row">
-                    <button class="btn-pill-search" onclick="openSearchPanel()"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
+                    <div></div> <button class="btn-pill-search" onclick="openSearchPanel()">
+                        <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
+                    </button>
                 </div>
                 <div class="kb-list-container">${listHtml}</div>
             </div>`;
@@ -2627,8 +2649,7 @@ function tryOldSchoolCopy(text, callback) {
                         if (m) {
                             disp = `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>`;
                         } else {
-                            // 🔥 搜尋結果也補上起跑線對齊
-                            disp = `<div class="kb-card-num" style="font-size:1rem; opacity:0.5;">✦</div><div class="kb-card-text">${a.title}</div>`;
+                            disp = `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
                         }
                         return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${disp}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
@@ -2641,17 +2662,29 @@ function tryOldSchoolCopy(text, callback) {
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-search-results-wrapper">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-                <div class="brand-section-header" style="position: relative; min-height: 110px;">
-                    <div style="position: absolute; left: 0; top: 0;">
-                        <button onclick="kbGoBack()" class="kb-internal-back"><i class="fa-solid fa-arrow-left"></i> 返回寶典</button>
-                    </div>
+                
+                <div class="brand-section-header">
                     <div class="brand-h3-zh">文章搜尋結果</div>                    
                     <div class="brand-h2-en">SEARCH RESULTS</div>
                     <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
                 </div>
+
                 <div class="kb-cat-view">
                     <div class="kb-inner-header-row">
-                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器</button>
+                        <div class="kb-action-group">
+                            <button onclick="kbGoBack()" class="btn-pill-search">
+                                <i class="fa-solid fa-arrow-left"></i> 返回寶典
+                            </button>
+                            <button id="kb-share-btn" class="btn-pill-search" onclick="copyArtLink()" title="分享搜尋結果" style="width:40px; height:40px; border-radius:50%; padding:0; justify-content:center;">
+                                <i class="fa-solid fa-share-nodes"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="kb-header-right">
+                            <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)">
+                                <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
+                            </button>
+                        </div>
                     </div>
                     ${finalHtml}
                 </div>

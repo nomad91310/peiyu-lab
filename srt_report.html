@@ -154,33 +154,66 @@
     .canvas-container { display: none; } /* 隱藏實際繪圖用的 Canvas */
 
     /* ======================================================
-       8. 客人瀏覽模式 (View Mode)
+       8. 客人瀏覽模式 (View Mode) 按鈕大統一
        ====================================================== */
-    .back-btn { position: fixed; top: 20px; left: 20px; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: none; z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: bold; color: #555; }
     
-    body.view-mode .back-btn { display: block; }
+    /* 1. 基礎樣式：強制深綠底、白字、細金框 */
+    .back-btn, #guest-dl-btn {
+        background-color: #1a2f23 !important; /* PY 深綠 */
+        color: #ffffff !important;           /* 純白字 */
+        border: 1px solid #c6a87c !important; /* PY 金邊 */
+        
+        border-radius: 50px !important;       /* 藥丸圓角 */
+        padding: 12px 35px !important;
+        font-weight: bold !important;
+        font-size: 16px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.4) !important;
+        display: none; /* 維持邏輯預設隱藏 */
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
+    }
 
-    /* 隱藏編輯區塊 */
+    /* 2. 滑鼠移入效果：變金底、白字 */
+    .back-btn:hover, #guest-dl-btn:hover {
+        background-color: #c6a87c !important; /* 變 PY 金底 */
+        border-color: #c6a87c !important;     /* 邊框維持金色 */
+        color: #ffffff !important;           /* 維持白字 */
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(198, 168, 124, 0.5) !important;
+    }
+
+    /* 3. 確保位置正確 */
+    .back-btn {
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 9999 !important;
+    }
+
+    #guest-dl-btn {
+        margin: 20px auto !important;
+        width: fit-content !important;
+        min-width: 250px !important;
+    }
+    /* 4. 根據 body class 顯示按鈕 (維持原邏輯) */
+    body.view-mode .back-btn,
+    body.view-mode #guest-dl-btn {
+        display: inline-flex !important;
+    }
+    
+    /* 隱藏其餘編輯介面 */
     body.view-mode h2, body.view-mode h3, 
     body.view-mode .header-inputs, body.view-mode .core-metrics-container, 
     body.view-mode #addon-section-wrapper, body.view-mode #inputs-container, 
     body.view-mode .summary-section, body.view-mode .action-bar,
     body.view-mode .save-hint { display: none !important; }
 
-    /* 調整容器與結果顯示 */
     body.view-mode .container { background: transparent !important; box-shadow: none !important; padding: 0; max-width: 100%; }
     body.view-mode #result-wrapper { display: block !important; margin-top: 0; }
     body.view-mode #final-image { display: block; margin: 0 auto; width: 100%; max-width: 2600px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-
-    /* 客人下載按鈕 */
-    #guest-dl-btn { 
-        display: none; margin: 20px auto; background: #c6a87c; color: white; 
-        font-size: 18px; font-weight: bold; padding: 15px 40px; border: none; 
-        border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(198, 168, 124, 0.4); 
-        transition: transform 0.2s; 
-    }
-    #guest-dl-btn:hover { transform: translateY(-2px); background: #b0936a; }
-    body.view-mode #guest-dl-btn { display: inline-block !important; }
 
     /* ======================================================
        9. 響應式調整 (Mobile)

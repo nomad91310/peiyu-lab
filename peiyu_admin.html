@@ -839,9 +839,14 @@
                 <option value="temp">🔥 臨時快訊 (活動/公休)</option>
             </select>
         </div>
-        <label>彈窗內容 (支援 HTML)</label>
-        <textarea id="anc-content" style="height: 200px; font-family: monospace;" placeholder="請輸入內容 HTML..."></textarea>
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <label style="margin:0;">彈窗內容 (支援 HTML)</label>
+            <button class="btn btn-outline" onclick="copyTemplate()" style="font-size:12px; padding:4px 10px; background:#fff; border:1px solid #666; color:#666;">
+                📋 複製標準範本 (給AI用)
+            </button>
+        </div>
         
+        <textarea id="anc-content" style="height: 200px; font-family: monospace;" placeholder="請輸入內容 HTML..."></textarea>
         <div style="text-align:right; margin-top:20px;">
             <button class="btn btn-forest" onclick="saveAnnouncement()">💾 儲存公告</button>
         </div>
@@ -1431,7 +1436,64 @@
         if (type === 'cat') { document.getElementById('cat-id-edit').value = ''; document.getElementById('cat-name').value = ''; document.getElementById('cat-terms').value = ''; document.getElementById('cat-type').value = 'sleep'; document.getElementById('req-birth').checked = true; document.getElementById('req-image').checked = false; document.getElementById('btn-cat-save').innerText = "＋ 新增"; document.getElementById('btn-cat-save').className = "btn btn-forest"; document.getElementById('btn-cat-cancel').style.display = "none"; } 
         else if (type === 'svc') { document.getElementById('svc-id-edit').value = ''; document.getElementById('i-name').value = ''; document.getElementById('i-price').value = ''; document.getElementById('i-sub-opts').value = ''; document.getElementById('i-report-tpl').value = ''; document.getElementById('i-is-main').checked = false; toggleSubOptionInput(); document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; document.getElementById('btn-svc-save').className = "btn btn-forest"; document.getElementById('btn-svc-cancel').style.display = 'none'; }
     }
+    // 📋 複製公告標準範本 (AI 萬用格式版)
+    function copyTemplate() {
+        const template = `
+<h4>📌 第一部分：主標題 (例如：我的故事 / 服務異動)</h4>
+<p>這裡是前言段落，敘述主要的情境或是發生的背景故事...</p>
 
+<div class="anno-box-tip">
+    <strong>💡 核心觀點：</strong><br>
+    這裡放一句金句，或是你想強調的重點概念。
+</div>
+
+<h4>🔸 第二部分：條列式說明</h4>
+<p>針對細節進行說明：</p>
+<ul>
+    <li><strong>重點一：</strong> 詳細內容敘述...</li>
+    <li><strong>重點二：</strong> 詳細內容敘述...</li>
+    <li><strong>重點三：</strong> 詳細內容敘述...</li>
+</ul>
+
+<div style="text-align: center; margin: 25px 0;">
+    <img src="https://你的圖片網址.jpg" alt="圖片說明" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <div style="font-size: 13px; color: #888; margin-top: 8px;">▲ 圖片註解文字</div>
+</div>
+
+<h4>🔹 第三部分：流程或規範</h4>
+<ol>
+    <li><strong>步驟一：</strong> 先做什麼...</li>
+    <li><strong>步驟二：</strong> 再做什麼...</li>
+</ol>
+
+<div style="background: #f4f7f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <strong>💳 補充資訊：</strong>
+    <ul>
+        <li>資訊 A：內容...</li>
+        <li>資訊 B：內容...</li>
+    </ul>
+</div>
+
+<div class="anno-box-warn">
+    <strong style="font-size: 1.1rem;">⚠️ 重要須知 / 結語</strong>
+    <p style="margin: 10px 0 0 0;">
+        這裡放最後的叮嚀，例如「送出即代表同意」或是「請務必準時」。
+    </p>
+    
+    <div style="text-align:center; margin-top: 20px;">
+        <button class="btn-primary" onclick="closeModal('dynamic-overlay'); showSection('booking-step-1');">
+            ➔ 我已了解，前往預約
+        </button>
+    </div>
+</div>
+`;
+        navigator.clipboard.writeText(template).then(() => {
+            alert("✅ 萬用範本已複製！\n\n您可以貼給 AI 並下指令：\n「請依照這個 HTML 格式，幫我撰寫一篇關於 [主題] 的公告，內容要包含...」");
+        }).catch(err => {
+            console.error('複製失敗', err);
+            alert("❌ 複製失敗");
+        });
+    }
     // 🔥 修正版：列表補上「公告類型」顯示
     async function fetchAnnouncements() { 
         const { data, error } = await myDB.from('announcements').select('*').order('sort_order', { ascending: true }); 

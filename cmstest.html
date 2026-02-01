@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>CMS V43 | 圖片壓縮與KB擴充版</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;900&family=ZCOOL+XiaoWei&family=Shippori+Mincho&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 基礎設定 */
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #2b2b2b; color:#eee; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* 側邊欄 */
+        .sidebar { width: 80px; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; padding-top: 20px; border-right: 1px solid #444; flex-shrink: 0; }
+        .sidebar button { writing-mode: vertical-rl; padding: 15px 10px; background: transparent; border: none; color: #888; cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
+        .sidebar button.active { color: #c6a87c; border-left-color: #c6a87c; background: #222; }
+        
+        /* 主內容 */
+        .main { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .tab-view { display: none; width: 100%; height: 100%; }
+        .tab-view.active { display: flex; }
+
+        /* 設計工坊佈局 */
+        .editor-container { display: flex; width: 100%; height: 100%; }
+        .settings-panel { width: 400px; background: #333; padding: 20px; overflow-y: auto; border-right: 1px solid #444; flex-shrink: 0; }
+        .preview-panel { flex: 1; background: #222; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .list-panel { width: 220px; background: #2a2a2a; border-left: 1px solid #444; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* 自動化工具箱 */
+        .automation-box { background: #3e2723; border: 1px solid #d84315; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .automation-box h4 { margin: 0 0 10px 0; color: #ffab91; font-size: 14px; text-align: center; border-bottom: 1px dashed #d84315; padding-bottom: 5px; }
+        .auto-btn { width: 100%; padding: 10px; margin-bottom: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; text-align: left; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        .btn-link { background: #d84315; }
+        .btn-sync { background: #c62828; }
+        .auto-btn:hover { opacity: 0.9; }
+
+        /* 手風琴 */
+        .accordion { border: 1px solid #444; border-radius: 6px; margin-bottom: 10px; background: #2c2c2c; }
+        .acc-header { padding: 10px; background: #383838; cursor: pointer; font-weight: bold; font-size: 13px; color: #ddd; display: flex; justify-content: space-between; }
+        .acc-content { padding: 10px; display: none; border-top: 1px solid #444; background: #252525; }
+        .acc-content.open { display: block; }
+
+        /* 控制項 */
+        .control-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 12px; color: #aaa; }
+        input[type="range"] { flex: 1; accent-color: #c6a87c; height: 4px; }
+        .val-display { width: 30px; text-align: right; color: #c6a87c; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid #555; color: #fff; padding: 8px; border-radius: 4px; box-sizing: border-box; }
+        
+        /* 預覽區 */
+        .card-stage {
+            position: relative; width: 320px; height: 550px; background: #fff;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); border-radius: 20px; overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; }
+        .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); user-select: none; cursor: default; }
+
+        /* 表格樣式 */
+        .excel-table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; color: #333; }
+        .excel-table th { background: #f0f0f0; padding: 8px; text-align: left; position: sticky; top: 0; z-index: 10; border:1px solid #ddd;}
+        .excel-table td { border: 1px solid #ddd; padding: 0; }
+        .excel-table input, .excel-table textarea { width: 100%; border: none; padding: 8px; background: transparent; outline: none; resize: none; color: #333; border:none; border-radius: 0;}
+        .excel-table tr:hover td { background: #fafafa; }
+
+        /* 列表項目 */
+        .list-item { padding: 10px; background: #333; border-radius: 6px; cursor: pointer; border: 1px solid transparent; font-size: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .list-item.active { border-color: #c6a87c; background: #3a3a3a; }
+        .list-item img { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
+
+        .btn-main { width: 100%; padding: 12px; background: #c6a87c; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        .color-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .color-option { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid #444; }
+        .color-option.active { border-color: #fff; transform: scale(1.2); }
+        .color-option.none { background: #333; border: 1px dashed #666; }
+
+        /* 圖片庫樣式 */
+        .img-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px; 
+            margin-top: 20px;
+        }
+        .img-card { 
+            background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444; 
+            font-size: 11px; text-align: center;
+        }
+        .img-card img { 
+            width: 100%; height: 80px; object-fit: cover; cursor: pointer; opacity: 0.8; transition: 0.2s; 
+        }
+        .img-card img:hover { opacity: 1; }
+        .img-card div { padding: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .del-btn { color: #ff5252; background: none; border: none; cursor: pointer; font-weight: bold; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <button onclick="switchTab('design')" class="active">🎨 設計工坊</button>
+    <button onclick="switchTab('excel')">📊 資料表格</button>
+    <button onclick="switchTab('images')">🖼️ 圖片庫</button>
+</div>
+
+<div class="main">
+    
+    <div id="tab-design" class="tab-view active">
+        <div class="editor-container">
+            
+            <div class="settings-panel">
+                <div class="automation-box">
+                    <h4>⚡ 自動化批次工具</h4>
+                    <button class="auto-btn btn-link" onclick="autoLinkImages()">
+                        🔗 步驟 1: 自動配對圖片<br>
+                        <span style="font-size:10px; opacity:0.8; font-weight:normal;">(將 gate01~64 圖片填入卡片)</span>
+                    </button>
+                    <button class="auto-btn btn-sync" onclick="syncStyleFrom64()">
+                        ⚡ 步驟 2: 同步樣式 (以 Gate 64 為準)<br>
+                        <span style="font-size:10px; opacity:0.8; font-weight:normal;">(將 Gate 64 的排版複製給 1~63)</span>
+                    </button>
+                </div>
+
+                <h3>🛠️ 單張微調</h3>
+                <label>選擇底圖</label>
+                <select id="cfg-bg" onchange="updatePreview()"><option value="">-- 載入中 --</option></select>
+                <hr style="border-color:#444; margin:15px 0;">
+                
+                <div class="accordion"><div class="acc-header" onclick="toggleAcc(this)">1️⃣ GATE 編號</div><div class="acc-content open"><input type="text" id="val-gate" placeholder="1" oninput="updatePreview()"><div id="ctrl-gate"></div></div></div>
+                <div class="accordion"><div class="acc-header" onclick="toggleAcc(this)">2️⃣ 名稱 & 關鍵字</div><div class="acc-content"><input type="text" id="val-name" placeholder="名稱" oninput="updatePreview()"><input type="text" id="val-kw" placeholder="關鍵字" oninput="updatePreview()"><div id="ctrl-info"></div></div></div>
+                <div class="accordion"><div class="acc-header" onclick="toggleAcc(this)">3️⃣ 星座</div><div class="acc-content"><input type="text" id="val-zodiac" placeholder="例如: ♏ 天蠍座" oninput="updatePreview()"><div id="ctrl-zodiac"></div></div></div>
+                <div class="accordion"><div class="acc-header" onclick="toggleAcc(this)">4️⃣ 金句</div><div class="acc-content"><textarea id="val-quote" rows="4" placeholder="輸入金句..." oninput="updatePreview()"></textarea><div id="ctrl-quote"></div></div></div>
+                
+                <button class="btn-main" onclick="saveCard()">💾 儲存 (設為預設)</button>
+            </div>
+            
+            <div class="preview-panel">
+                <div id="card-stage" class="card-stage">
+                    <img id="p-bg" class="layer-bg" src="https://via.placeholder.com/320x550?text=No+Image">
+                    <div id="p-gate" class="layer-text">GATE 1</div>
+                    <div id="p-info" class="layer-text">名稱 / 關鍵字</div>
+                    <div id="p-zodiac" class="layer-text">星座</div>
+                    <div id="p-quote" class="layer-text">金句...</div>
+                </div>
+                <small style="margin-top:10px; color:#666;">* 請先選 Gate 64 調好寬度，存檔後再按「同步樣式」</small>
+            </div>
+
+            <div class="list-panel">
+                <div style="font-weight:bold; color:#c6a87c; margin-bottom:10px;">卡片列表 <button onclick="createNew()" style="float:right; background:none; border:none; color:#c6a87c; cursor:pointer;">+</button></div>
+                <div id="card-list-container">載入中...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-excel" class="tab-view" style="flex-direction:column; padding:0; background:#fff;">
+        <div style="padding:15px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;">📊 64 閘門資料速填表</h3>
+            <button onclick="saveAllBatchData()" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:bold;">💾 全部儲存</button>
+        </div>
+        <div style="flex:1; overflow:auto;">
+            <table class="excel-table">
+                <thead><tr><th style="width:50px;">#</th><th style="width:150px;">名稱</th><th>關鍵字</th><th style="width:100px;">星座</th><th>金句</th><th style="width:80px;">圖</th></tr></thead>
+                <tbody id="batch-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-images" class="tab-view" style="padding:20px; flex-direction:column; overflow-y:auto;">
+        <h3 style="color:#c6a87c;">圖片庫管理</h3>
+        
+        <div style="background:#333; padding:20px; border-radius:8px; margin-bottom:20px; max-width:600px;">
+            <label style="color:#ccc; display:block; margin-bottom:5px;">1. 選擇上傳位置 (會自動分類)</label>
+            <select id="upload-target" style="margin-bottom:15px; background:#444; border:1px solid #666; width:100%; padding:8px;" onchange="updateUploadHint()">
+                <option value="banners">🎴 卡牌底圖 (Bucket: banners)</option>
+                <option value="kb-images">📚 知識庫圖片 (Bucket: kb-images)</option>
+                <option value="site-assets">🌐 網站素材 (Bucket: site-assets)</option>
+            </select>
+            
+            <label style="color:#ccc; display:block; margin-bottom:5px;">2. 圖片 ID (系統自動建議)</label>
+            <input type="text" id="upload-name" placeholder="建議: gate_bg_01" style="width:100%; margin-bottom:15px;">
+            
+            <input type="file" id="upload-file" style="width:100%; margin-bottom:15px;" accept="image/*">
+            <button id="btn-upload" onclick="uploadImage()" style="background:#c6a87c; border:none; padding:10px 20px; cursor:pointer; width:100%; font-weight:bold;">⬆️ 開始上傳</button>
+            <small id="compression-hint" style="display:block; margin-top:10px; color:#aaa;">ℹ️ 系統將自動壓縮圖片至 1200px 寬度 (JPG 格式)</small>
+        </div>
+
+        <hr style="border:0; border-top:1px dashed #555; width:100%; margin:20px 0;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="color:#ccc;">🔍 篩選顯示：</label>
+            <select id="filter-view" style="background:#444; border:1px solid #666; padding:5px 10px;" onchange="renderGallery()">
+                <option value="all">全部顯示</option>
+                <option value="asset">🎴 卡牌底圖 (asset)</option>
+                <option value="kb_asset">📚 知識庫圖片 (kb_asset)</option>
+                <option value="site_asset">🌐 網站素材 (site_asset)</option>
+            </select>
+        </div>
+
+        <div id="gallery-grid" class="img-grid">載入中...</div>
+    </div>
+
+</div>
+
+<script>
+    const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
+    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
+    const myDB = supabase.createClient(SB_URL, SB_KEY);
+
+    let images = [];
+    let cards = [];
+    let currentCardId = null;
+
+    const SECTIONS = ['gate', 'info', 'zodiac', 'quote'];
+    const FONTS = [
+        {name:'思源宋體 (推薦)', val:"'Noto Serif TC', serif"}, 
+        {name:'日系明體 (優雅)', val:"'Shippori Mincho', serif"},
+        {name:'古典藝術 (復古)', val:"'ZCOOL XiaoWei', serif"},
+        {name:'歐式古典 (英文)', val:"'Cinzel', serif"},
+        {name:'毛筆書法 (特色)', val:"'Ma Shan Zheng', cursive"},
+        {name:'系統黑體 (安全)', val:"sans-serif"}
+    ];
+    const COLORS = ['#000000', '#ffffff', '#1a1a1a', '#d4af37', '#8b0000', '#191970', '#006400', 'transparent'];
+    
+    const factoryDefault = {
+        gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" },
+        info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, 
+        zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" },
+        quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 300, lh: 1.6, ls: 0 }
+    };
+
+    window.onload = async function() {
+        initControls();
+        await Promise.all([loadImages(), loadCards()]);
+        renderBatchTable();
+        updateUploadHint();
+        const c64 = cards.find(c => c.gate_id === 64);
+        if(c64) selectCard(c64.id);
+        else if(cards.length > 0) selectCard(cards[0].id);
+    };
+
+    function updateUploadHint() {
+        const target = document.getElementById('upload-target').value;
+        const input = document.getElementById('upload-name');
+        const hint = document.getElementById('compression-hint');
+        
+        if(target === 'banners') {
+            input.placeholder = "建議: gate_bg_01";
+            hint.innerText = "ℹ️ 啟用壓縮：自動轉 JPG (Max 1200px, 80%)，適合底圖";
+        } else if(target === 'kb-images') {
+            input.placeholder = "建議: kb_01, chart_example";
+            hint.innerText = "ℹ️ 啟用壓縮：自動轉 JPG (Max 1200px, 80%)，節省知識庫空間";
+        } else {
+            input.placeholder = "建議: logo, icon_user";
+            hint.innerText = "⚠️ 原始上傳：不壓縮，保留 PNG 透明度 (適合 Logo/Icon)";
+        }
+    }
+
+    // === 自動化 ===
+    async function autoLinkImages() {
+        if(!confirm("確定自動配對 gate01~gate64 圖片？")) return;
+        const imgMap = {};
+        images.forEach(img => { const key = img.title.toLowerCase().replace(/[^a-z0-9]/g, ''); imgMap[key] = img.image_url; });
+        const updates = [];
+        for(let i=1; i<=64; i++) {
+            const key = `gate${i.toString().padStart(2, '0')}`;
+            if (imgMap[key]) updates.push({ gate_id: i, image_url: imgMap[key] });
+        }
+        if (updates.length === 0) return alert("無配對資料");
+        const batchPayload = updates.map(u => {
+            const old = cards.find(c => c.gate_id === u.gate_id);
+            return { ...old, image_url: u.image_url };
+        });
+        const { error } = await myDB.from('card_pool').upsert(batchPayload);
+        if(error) alert(error.message); else { alert("成功配對"); loadCards(); }
+    }
+
+    async function syncStyleFrom64() {
+        const c64 = cards.find(c => c.gate_id === 64);
+        if (!c64 || !c64.style_config) return alert("請先設定並儲存 Gate 64 的樣式");
+        if(!confirm("將 Gate 64 樣式套用到全部？")) return;
+        const updates = cards.filter(c => c.gate_id !== 64).map(c => ({ ...c, style_config: c64.style_config }));
+        const { error } = await myDB.from('card_pool').upsert(updates);
+        if(error) alert(error.message); else { alert("同步完成"); loadCards(); }
+    }
+
+    // === 設計 ===
+    function initControls() {
+        SECTIONS.forEach(k => {
+            const container = document.getElementById(`ctrl-${k}`);
+            let html = `
+                <label>字體</label><select id="s-${k}-font" onchange="updatePreview()">${FONTS.map(f=>`<option value="${f.val}">${f.name}</option>`).join('')}</select>
+                <div style="display:flex;gap:5px;margin-top:5px;"><div style="flex:1"><label>字色</label><div class="color-group" id="cg-${k}-color">${COLORS.map(c=>`<div class="color-option ${c==='transparent'?'none':''}" style="background:${c}" onclick="setColor('${k}','color','${c}')"></div>`).join('')}</div><input type="hidden" id="s-${k}-color"></div>
+                <div style="flex:1"><label>邊色</label><div class="color-group" id="cg-${k}-stroke">${COLORS.map(c=>`<div class="color-option ${c==='transparent'?'none':''}" style="background:${c}" onclick="setColor('${k}','stroke','${c}')"></div>`).join('')}</div><input type="hidden" id="s-${k}-stroke"></div></div>
+                <div class="control-row"><label>大小</label><input type="range" id="s-${k}-size" min="8" max="80" oninput="updatePreview()"><span class="val-display" id="v-${k}-size"></span></div>
+                <div class="control-row"><label>X</label><input type="range" id="s-${k}-x" min="0" max="100" oninput="updatePreview()"><span class="val-display" id="v-${k}-x"></span></div>
+                <div class="control-row"><label>Y</label><input type="range" id="s-${k}-y" min="0" max="100" oninput="updatePreview()"><span class="val-display" id="v-${k}-y"></span></div>
+            `;
+            if(k==='quote' || k==='info') {
+                html += `<div class="control-row"><label>寬度</label><input type="range" id="s-${k}-w" min="100" max="400" oninput="updatePreview()"></div>`;
+            }
+            if(k==='quote') {
+                html += `<div class="control-row"><label>行距</label><input type="range" id="s-${k}-lh" min="1" max="3" step="0.1" oninput="updatePreview()"></div><div class="control-row"><label>字距</label><input type="range" id="s-${k}-ls" min="0" max="20" step="1" oninput="updatePreview()"></div>`;
+            }
+            container.innerHTML = html;
+        });
+    }
+
+    function setColor(s, t, c) {
+        document.getElementById(`s-${s}-${t}`).value = c;
+        Array.from(document.getElementById(`cg-${s}-${t}`).children).forEach(d => d.classList.toggle('active', d.style.background.includes(c) || (c==='transparent' && d.classList.contains('none'))));
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const d = id => document.getElementById(id).value;
+        const bgUrl = d('cfg-bg');
+        document.getElementById('p-bg').src = bgUrl ? (bgUrl.includes('?') ? bgUrl : bgUrl + `?t=${new Date().getTime()}`) : 'https://via.placeholder.com/320x550?text=No+Image';
+        
+        document.getElementById('p-gate').innerText = d('val-gate') ? `GATE ${d('val-gate')}` : 'GATE';
+        document.getElementById('p-info').innerText = (d('val-name')||d('val-kw')) ? `${d('val-name')} / ${d('val-kw')}` : '名稱 / 關鍵字';
+        document.getElementById('p-zodiac').innerText = d('val-zodiac') || '星座';
+        document.getElementById('p-zodiac').style.display = d('val-zodiac') ? 'block' : 'none';
+        document.getElementById('p-quote').innerText = d('val-quote') || '金句...';
+
+        SECTIONS.forEach(k => {
+            const el = document.getElementById(`p-${k}`);
+            const x=d(`s-${k}-x`), y=d(`s-${k}-y`), size=d(`s-${k}-size`);
+            el.style.left=x+'%'; el.style.top=y+'%'; el.style.fontSize=size+'px';
+            el.style.fontFamily=d(`s-${k}-font`); el.style.color=d(`s-${k}-color`);
+            const str = d(`s-${k}-stroke`);
+            el.style.textShadow = (str && str!=='transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none';
+            if(k==='quote' || k==='info') { el.style.width = d(`s-${k}-w`)+'px'; }
+            if(k==='quote') { el.style.lineHeight=d(`s-${k}-lh`); el.style.letterSpacing=d(`s-${k}-ls`)+'px'; }
+            if(document.getElementById(`v-${k}-x`)) document.getElementById(`v-${k}-x`).innerText = x;
+            if(document.getElementById(`v-${k}-y`)) document.getElementById(`v-${k}-y`).innerText = y;
+            if(document.getElementById(`v-${k}-size`)) document.getElementById(`v-${k}-size`).innerText = size;
+        });
+    }
+
+    async function loadCards() {
+        const { data } = await myDB.from('card_pool').select('*').order('gate_id');
+        cards = data || [];
+        document.getElementById('card-list-container').innerHTML = cards.map(c => `<div class="list-item" onclick="selectCard('${c.id}')" id="item-${c.id}"><img src="${c.image_url||''}"><div>Gate ${c.gate_id}<br>${c.gate_name}</div></div>`).join('');
+    }
+
+    function selectCard(id) {
+        currentCardId = id;
+        const c = cards.find(x=>x.id===id);
+        ['gate','name','kw','zodiac','quote'].forEach(k => document.getElementById(`val-${k}`).value = c[`gate_${k}`] || c[k] || '');
+        document.getElementById('val-gate').value = c.gate_id; document.getElementById('val-name').value = c.gate_name; document.getElementById('val-kw').value = c.gate_keyword;
+        document.getElementById('cfg-bg').value = c.image_url;
+        const config = c.style_config || JSON.parse(localStorage.getItem('peiyu_card_style_v2') || JSON.stringify(factoryDefault));
+        applyConfig(config);
+        updatePreview();
+        document.querySelectorAll('.list-item').forEach(e => e.classList.remove('active'));
+        const active = document.getElementById(`item-${id}`); if(active) active.classList.add('active');
+    }
+
+    function createNew() {
+        currentCardId = null;
+        ['gate','name','kw','zodiac','quote'].forEach(id => document.getElementById('val-'+id).value = '');
+        const config = JSON.parse(localStorage.getItem('peiyu_card_style_v2') || JSON.stringify(factoryDefault));
+        applyConfig(config);
+        updatePreview();
+    }
+
+    function applyConfig(cfg) {
+        SECTIONS.forEach(k => {
+            const s = cfg[k] || factoryDefault[k];
+            const d = factoryDefault[k];
+            document.getElementById(`s-${k}-x`).value = s.x??d.x; document.getElementById(`s-${k}-y`).value = s.y??d.y;
+            document.getElementById(`s-${k}-size`).value = s.size??d.size; document.getElementById(`s-${k}-font`).value = s.font??d.font;
+            setColor(k, 'color', s.color??d.color); setColor(k, 'stroke', s.stroke??d.stroke);
+            if(k==='quote' || k==='info') { document.getElementById(`s-${k}-w`).value = s.w??d.w; }
+            if(k==='quote') { document.getElementById(`s-${k}-lh`).value = s.lh??d.lh; document.getElementById(`s-${k}-ls`).value = s.ls??d.ls; }
+        });
+    }
+
+    function getConfig() {
+        const cfg = {};
+        SECTIONS.forEach(k => {
+            cfg[k] = { 
+                x: document.getElementById(`s-${k}-x`).value, y: document.getElementById(`s-${k}-y`).value, 
+                size: document.getElementById(`s-${k}-size`).value, font: document.getElementById(`s-${k}-font`).value,
+                color: document.getElementById(`s-${k}-color`).value, stroke: document.getElementById(`s-${k}-stroke`).value
+            };
+            if(k==='quote' || k==='info') { cfg[k].w=document.getElementById(`s-${k}-w`).value; }
+            if(k==='quote') { cfg[k].lh=document.getElementById(`s-${k}-lh`).value; cfg[k].ls=document.getElementById(`s-${k}-ls`).value; }
+        });
+        return cfg;
+    }
+
+    async function saveCard() {
+        const gateId = document.getElementById('val-gate').value;
+        if(!gateId) return alert("請輸入 Gate ID");
+        const style = getConfig();
+        localStorage.setItem('peiyu_card_style_v2', JSON.stringify(style));
+        
+        const payload = {
+            gate_id: gateId, gate_name: document.getElementById('val-name').value, gate_keyword: document.getElementById('val-kw').value,
+            quote: document.getElementById('val-quote').value, zodiac: document.getElementById('val-zodiac').value,
+            image_url: document.getElementById('cfg-bg').value, style_config: style
+        };
+        const { error } = currentCardId ? await myDB.from('card_pool').update(payload).eq('id', currentCardId) : await myDB.from('card_pool').insert([payload]);
+        if(error) alert("錯誤: "+error.message); else { alert("儲存成功"); loadCards(); }
+    }
+
+    function renderBatchTable() {
+        const tbody = document.getElementById('batch-tbody'); tbody.innerHTML = '';
+        const cardMap = {}; cards.forEach(c => { if(c.gate_id) cardMap[c.gate_id] = c; });
+        for (let i = 1; i <= 64; i++) {
+            const c = cardMap[i] || { gate_name:'', gate_keyword:'', zodiac:'', quote:'', image_url:'' };
+            const idAttr = c.id ? `data-id="${c.id}"` : '';
+            const bgStatus = c.image_url ? `<span style="color:green;">✅ 有圖</span>` : `<span style="color:#ccc;">無</span>`;
+            tbody.innerHTML += `<tr><td style="text-align:center;background:#f9f9f9;">${i}</td>
+                <td><input type="text" name="name_${i}" value="${c.gate_name||''}" ${idAttr}></td>
+                <td><input type="text" name="kw_${i}" value="${c.gate_keyword||''}"></td>
+                <td><input type="text" name="zodiac_${i}" value="${c.zodiac||''}"></td>
+                <td><textarea name="quote_${i}" rows="1" style="height:36px;">${c.quote||''}</textarea></td>
+                <td style="text-align:center;font-size:11px;">${bgStatus}</td></tr>`;
+        }
+    }
+
+    async function saveAllBatchData() {
+        const updates = [];
+        for (let i = 1; i <= 64; i++) {
+            const name = document.querySelector(`input[name="name_${i}"]`).value;
+            const kw = document.querySelector(`input[name="kw_${i}"]`).value;
+            const zodiac = document.querySelector(`input[name="zodiac_${i}"]`).value;
+            const quote = document.querySelector(`textarea[name="quote_${i}"]`).value;
+            const id = document.querySelector(`input[name="name_${i}"]`).dataset.id;
+            
+            if (name || kw || quote || id) {
+                const original = cards.find(c => c.id === id) || {};
+                updates.push({ 
+                    gate_id: i, gate_name: name, gate_keyword: kw, zodiac: zodiac, quote: quote, id: id || undefined,
+                    image_url: original.image_url, style_config: original.style_config
+                });
+            }
+        }
+        if (updates.length === 0) return alert("無資料");
+        const { error } = await myDB.from('card_pool').upsert(updates);
+        if(error) alert("失敗: "+error.message); else { alert(`成功更新 ${updates.length} 筆`); loadCards(); }
+    }
+
+    async function loadImages() {
+        const { data } = await myDB.from('site_content').select('*').order('created_at', {ascending: false});
+        images = data || [];
+        
+        // 更新底圖下拉選單
+        const sel = document.getElementById('cfg-bg');
+        sel.innerHTML = '<option value="">-- 選擇底圖 --</option>';
+        images.filter(img => img.category === 'asset').forEach(img => sel.innerHTML += `<option value="${img.image_url}">${img.title}</option>`);
+        
+        // 更新圖片庫列表
+        renderGallery();
+    }
+    
+    // 🌟 V43 新增：支援 KB 篩選
+    function renderGallery() {
+        const filter = document.getElementById('filter-view').value;
+        const grid = document.getElementById('gallery-grid');
+        
+        let filteredImages = images;
+        if (filter !== 'all') {
+            filteredImages = images.filter(img => img.category === filter || (filter === 'asset' && !img.category));
+        }
+
+        grid.innerHTML = filteredImages.map(img => `
+            <div class="img-card">
+                <img src="${img.image_url}?t=${new Date().getTime()}" onclick="window.open('${img.image_url}')">
+                <div>
+                    <b>${img.title}</b>
+                    <button class="del-btn" onclick="deleteImage('${img.id}')">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // 🌟 V43 大改版：上傳邏輯 (含自動壓縮)
+    async function uploadImage() {
+        const file = document.getElementById('upload-file').files[0];
+        const name = document.getElementById('upload-name').value.trim();
+        const targetBucket = document.getElementById('upload-target').value;
+        const btn = document.getElementById('btn-upload');
+        
+        if(!file || !name) return alert("請輸入 ID 並選擇檔案");
+        
+        btn.innerText = "⏳ 壓縮與上傳中..."; btn.disabled = true;
+        
+        // 定義分類對應
+        let dbCategory = 'asset'; 
+        if(targetBucket === 'kb-images') dbCategory = 'kb_asset';
+        if(targetBucket === 'site-assets') dbCategory = 'site_asset';
+
+        // 1. 不需要壓縮的類型 (網站素材) - 直接上傳
+        if (targetBucket === 'site-assets') {
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fName = `${name}.${fileExt}`;
+                const { error } = await myDB.storage.from(targetBucket).upload(fName, file, { upsert: true });
+                if(error) throw error;
+                const { data } = myDB.storage.from(targetBucket).getPublicUrl(fName);
+                await myDB.from('site_content').upsert([{ 
+                    title: name, category: dbCategory, image_url: data.publicUrl, body: 'asset' 
+                }], { onConflict: 'title' });
+                alert("✅ 上傳成功"); loadImages();
+            } catch (err) { alert("Upload Error: " + err.message); } 
+            finally { btn.innerText = "⬆️ 開始上傳"; btn.disabled = false; }
+        
+        } else {
+            // 2. 需要壓縮的類型 (Banners & KB) - 使用 Canvas 壓縮
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = function() {
+                    const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                    
+                    // 設定最大寬高 (1200px)
+                    const MAX=1200; let w=img.width, h=img.height; 
+                    if(w>MAX || h>MAX){ 
+                        if(w>h) { h*=MAX/w; w=MAX; } else { w*=MAX/h; h=MAX; }
+                    }
+                    
+                    cvs.width=w; cvs.height=h; 
+                    // 填滿白色背景 (避免 JPG 變黑底)
+                    ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0,0,w,h);
+                    ctx.drawImage(img,0,0,w,h);
+                    
+                    // 轉為 JPGBlob (80% 品質)
+                    cvs.toBlob(async function(blob){
+                        const fName = `${name}.jpg`;
+                        const { error } = await myDB.storage.from(targetBucket).upload(fName, blob, { upsert: true });
+                        if(error) alert("Upload Error: "+error.message);
+                        else {
+                            const { data } = myDB.storage.from(targetBucket).getPublicUrl(fName);
+                            await myDB.from('site_content').upsert([{ 
+                                title: name, category: dbCategory, image_url: data.publicUrl, body: 'asset' 
+                            }], { onConflict: 'title' });
+                            alert("✅ 壓縮並上傳成功"); loadImages();
+                        }
+                        btn.innerText = "⬆️ 開始上傳"; btn.disabled = false;
+                    }, 'image/jpeg', 0.8);
+                }
+            }
+        }
+    }
+
+    async function deleteImage(id) { if(confirm("刪除？")) { await myDB.from('site_content').delete().eq('id', id); loadImages(); }}
+    function resetStyle() { if(confirm("重置樣式？")) { applyConfig(factoryDefault); updatePreview(); } }
+    function toggleAcc(h) { h.nextElementSibling.classList.toggle('open'); }
+    function switchTab(t) {
+        document.querySelectorAll('.tab-view').forEach(e => e.classList.remove('active'));
+        document.getElementById('tab-' + t).classList.add('active');
+        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+</script>
+</body>
+</html>

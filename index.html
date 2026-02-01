@@ -20,11 +20,22 @@
        1. 全站基礎設定 (Variables & Reset)
        ====================================================== */
     :root { 
-        --forest: #1a2f23; --forest-light: #2a4032;
-        --cream: #f9f7f2; --white: #ffffff;
-        --accent: #c6a87c; --accent-hover: #b09060;
-        --text-main: #2c3e50; --text-light: #666;
-        --shopee: #ff5722; --error: #d32f2f; --success: #2e7d32;
+        /* 品牌色系 */
+        --forest: #1a2f23;       /* 主深綠 */
+        --forest-light: #2a4032; /* 淺深綠 */
+        --cream: #f9f7f2;        /* 米色背景 */
+        --white: #ffffff;
+        --accent: #c6a87c;       /* 金色點綴 */
+        --accent-hover: #b09060;
+        
+        /* 功能色系 */
+        --text-main: #2c3e50; 
+        --text-light: #666;
+        --shopee: #ff5722; 
+        --error: #d32f2f; 
+        --success: #2e7d32;
+        
+        /* 陰影設定 */
         --shadow-soft: 0 10px 30px rgba(26, 47, 35, 0.08);
         --shadow-hover: 0 15px 40px rgba(26, 47, 35, 0.15);
     }
@@ -38,22 +49,124 @@
     }
     
     h1, h2, h3, h4, .serif-font { font-family: 'Noto Serif TC', serif; }
-    #home { padding-bottom: 220px; }
-
-    /* 動畫容器 & Section */
+    
+    /* 頁面切換動畫 */
     .section { 
         display: none; padding: 40px 20px 100px 20px; 
         max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 80px); 
         animation: fadeSlideUp 0.6s ease-out; 
     }
     .section.active { display: block; }
+    
     @keyframes fadeSlideUp { 
         from { opacity: 0; transform: translateY(20px); } 
         to { opacity: 1; transform: translateY(0); } 
     }
 
+    #home { padding-bottom: 220px; }
+
     /* ======================================================
-       2. 導航 (Nav) & Footer
+       2. 🔥 按鈕終極統一配色 (Luxury Gold Style)
+       說明：綠底金字 -> 滑過變 -> 金底白字
+       ====================================================== */
+    
+    /* 第一層：基礎結構與尺寸鎖定 */
+    .btn-primary, 
+    .btn-secondary,
+    .btn-back-capsule, 
+    .kb-internal-back,
+    .btn-pill-search,
+    .btn-open-search,
+    .kb-action-btn,
+    .btn-add-group,
+    .btn-do-search,
+    .close-modal-btn,
+    .btn-view-report,
+    #kb-share-btn,      /* 分享鈕 */
+    .close-card-btn, 
+    #success-close-x,
+    #line-super-btn,
+    #term-btn,
+    #sub-btn {
+        height: 40px !important;            /* 🔥 統一高度 */
+        padding: 0 22px !important;         /* 統一胖瘦 */
+        font-size: 14px !important;         /* 統一字體 */
+        font-weight: bold !important;
+        border-radius: 50px !important;     /* 統一圓角 */
+        
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        
+        /* 🎨 預設顏色：綠底 + 金框 + 金字 */
+        background-color: var(--forest) !important;
+        border: 1px solid var(--accent) !important;
+        color: var(--accent) !important; 
+    }
+    
+    /* 確保按鈕內的圖示也跟著變金字 */
+    .btn-primary i, .btn-back-capsule i, #kb-share-btn i, .kb-action-btn i {
+        color: var(--accent) !important;
+        transition: all 0.3s ease;
+    }
+
+    /* 第二層：Hover 效果 (金底 + 金框 + 白字) */
+    .btn-primary:hover, 
+    .btn-secondary:hover,
+    .btn-back-capsule:hover, 
+    .kb-internal-back:hover,
+    .btn-pill-search:hover,
+    .btn-open-search:hover,
+    .kb-action-btn:hover,
+    .btn-add-group:hover,
+    .btn-do-search:hover,
+    .close-modal-btn:hover,
+    .btn-view-report:hover,
+    #kb-share-btn:hover,
+    .close-card-btn:hover, 
+    #success-close-x:hover,
+    #line-super-btn:hover,
+    #term-btn:not(:disabled):hover,
+    #sub-btn:not(:disabled):hover {
+        background-color: var(--accent) !important;
+        border-color: var(--accent) !important;
+        color: #ffffff !important;   /* 🔥 變白字 */
+        transform: translateY(-2px);
+    }
+    
+    /* Hover 時，圖示也要變白 */
+    .btn-primary:hover i, .btn-back-capsule:hover i, #kb-share-btn:hover i, .kb-action-btn:hover i {
+        color: #ffffff !important;
+    }
+
+    /* 第三層：特殊例外處理 */
+    
+    /* 分享按鈕 (正圓形) */
+    #kb-share-btn {
+        width: 40px !important; 
+        min-width: 40px !important;
+        padding: 0 !important; 
+        border-radius: 50% !important;
+    }
+
+    /* 圖示微調 */
+    .kb-internal-back i, .btn-back-capsule i, .btn-pill-search i { 
+        margin-right: 6px; font-size: 13px; transform: none; 
+    }
+
+    /* 禁用狀態 */
+    .btn-primary:disabled, #term-btn:disabled, #sub-btn:disabled { 
+        background: #ccc !important; border-color: #ccc !important; 
+        color: #fff !important; cursor: not-allowed; transform: none; box-shadow: none; 
+    }
+
+    /* ======================================================
+       3. 導航 (Nav) & Footer
        ====================================================== */
     nav { 
         background: var(--forest); padding: 0 40px; 
@@ -90,50 +203,61 @@
     .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
     /* ======================================================
-       3. 通用元件 (UI Components)
+       4. 文章內容渲染 (Article Content) - 與後台同步
        ====================================================== */
-    /* Buttons */
-    .btn-primary { 
-        padding: 16px 45px; background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); 
-        color: var(--white); border: none; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; 
-        box-shadow: 0 5px 15px rgba(26, 47, 35, 0.3); transition: all 0.3s ease; display: inline-block; letter-spacing: 1px;
+    .ql-editor { 
+        padding: 0; 
+        color: #2c3e50; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; 
+        overflow-wrap: break-word; 
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.4); }
-    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-    
-    .btn-secondary { padding: 10px 25px; background: transparent; color: var(--forest); border: 2px solid var(--forest); border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 10px; }
-    .btn-secondary:hover { background: var(--forest); color: var(--white); }
+    .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
+    .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
+    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .ql-editor .ql-indent-1 { padding-left: 3em !important; }
+    .ql-editor .ql-indent-2 { padding-left: 6em !important; }
+    .ql-editor .ql-indent-3 { padding-left: 9em !important; }
+    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
+    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; margin-top: 8px !important; line-height: 1.3 !important; list-style-position: outside !important; }
+    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
+    .ql-editor li::before { margin-right: 0em !important; width: 1em !important; text-align: center !important; display: inline-block !important; }
+    .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
+    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 0px !important; margin-bottom: 15px; line-height: 1.4; display: block; color: var(--forest); }
+    .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
+    .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
+    .ql-editor h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
+    .ql-editor h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex !important; align-items: center !important; justify-content: center; padding: 8px 35px !important; margin: 25px 0 5px 0 !important; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
+    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; color: inherit !important; }
+    strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
-    .btn-back-capsule, .kb-internal-back {
-        display: inline-flex; align-items: center; gap: 8px;
-        color: var(--forest); background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
-        padding: 0 15px; height: 36px; border-radius: 50px;
-        font-size: 13px; font-weight: bold; font-family: 'Noto Serif TC', serif;
-        cursor: pointer; margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-        text-decoration: none; transition: all 0.3s ease;
-        justify-content: center; width: auto;
-    }
-
-    .btn-back-capsule:hover, .kb-internal-back:hover { 
-        color: #ffffff; background: var(--forest); border-color: var(--forest); 
-        transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.15); 
-    }
-    .kb-internal-back i, .btn-back-capsule i { margin-right: 6px; font-size: 13px; transform: none; }
-
+    /* ======================================================
+       5. 通用 UI (Cards, Forms, Modals)
+       ====================================================== */
+    /* 懸浮返回按鈕 (FAB) - 手機版圓形按鈕 */
     .kb-fab-back {
-        display: none !important;
-        position: fixed; bottom: 40px; right: 25px;
-        width: 60px; height: 60px; border-radius: 50%;
-        background: var(--forest); color: var(--accent); border: 2px solid var(--accent);
-        display: flex; justify-content: center; align-items: center;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 9999; cursor: pointer; font-size: 1.4rem;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
-        animation: fabPopIn 0.5s forwards 0.3s;
+        display: none !important; position: fixed; bottom: 40px; right: 25px;
+        width: 60px; height: 60px; z-index: 9999; font-size: 1.4rem;
+        opacity: 0; animation: fabPopIn 0.5s forwards 0.3s;
+        
+        /* 繼承統一按鈕樣式 (綠底金字) */
+        background: var(--forest) !important; 
+        color: var(--accent) !important; 
+        border: 2px solid var(--accent) !important; 
+        
+        border-radius: 50% !important; display: flex; justify-content: center; align-items: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4); cursor: pointer; padding: 0 !important;
     }
-    .kb-fab-back:active { transform: scale(0.9); background: var(--accent); color: var(--forest); }
+    .kb-fab-back:active, .kb-fab-back:hover { 
+        background: var(--accent) !important; 
+        color: #ffffff !important; /* 滑過變白字 */
+    }
+    .kb-fab-back i { color: inherit !important; }
+    
     @keyframes fabPopIn { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
 
-    /* Cards & Forms */
+    /* 卡片與表單 */
     .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; margin-bottom: 30px; position: relative; }
     .form-group { margin-bottom: 25px; }
     label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
@@ -142,16 +266,14 @@
     input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
     input:disabled { background: #eee; cursor: not-allowed; color: #999; }
 
-    /* Overlays & Modals */
+    /* 彈窗 (Modals) */
     .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.4s; }
     .result-overlay.active { display: flex; opacity: 1; }
     .text-modal-card { position: relative; width: 90%; max-width: 650px; max-height: 85vh; background: #fff; border-radius: 4px; overflow-y: auto; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); opacity: 0; transition: all 0.4s ease; }
     .result-overlay.active .text-modal-card { transform: scale(1); opacity: 1; }
-    .text-modal-card h3 { text-align: center; color: var(--forest); margin-top: 10px; margin-bottom: 25px; font-size: 2rem; border: none; padding: 10px 0; background: linear-gradient(to right, transparent, rgba(198, 168, 124, 0.2), transparent); }
-    .close-modal-btn { display: block; width: 100%; max-width: 250px; margin: 40px auto 0 auto; padding: 14px 0; background: var(--text-main); color: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-    .close-modal-btn:hover { background: var(--error); }
+    .close-modal-btn { display: block !important; margin: 40px auto 0 auto !important; width: fit-content !important; min-width: 200px; }
 
-    /* Brand Headers */
+    /* 品牌標題元件 */
     .brand-section-header, .draw-section-header { text-align: center; margin-bottom: 45px; padding-top: 15px; }
     .brand-h3-zh, .draw-title-zh {
         display: inline-block !important; font-family: 'Noto Serif TC', serif !important;
@@ -172,12 +294,10 @@
         border-radius: 50px; border: 1px solid rgba(198, 168, 124, 0.4) !important;
         box-shadow: 0 4px 10px rgba(198, 168, 124, 0.1);
     }
-    .brand-capsule::before, .brand-capsule::after, .draw-desc-p::before, .draw-desc-p::after {
-        content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem;
-    }
+    .brand-capsule::before, .brand-capsule::after, .draw-desc-p::before, .draw-desc-p::after { content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem; }
 
     /* ======================================================
-       4. 首頁區塊 (Hero & Home)
+       6. 首頁區塊 (Hero & Home)
        ====================================================== */
     .hero-section {
         flex-direction: column; text-align: center; padding: 40px 20px 60px 20px;
@@ -212,15 +332,50 @@
         background: var(--forest); color: var(--accent); border: 2px solid white;
         z-index: 20; white-space: nowrap; display: block !important;
     }
-    #hero-btn-container, #must-read-container, #temp-container { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
-    #hero-btn-container .btn-primary, #must-read-container .btn-primary, #temp-container .btn-primary {
-        background: white; color: var(--forest); border: 2px solid var(--forest);
-        box-shadow: none; padding: 10px 25px; font-size: 1rem; transition: all 0.2s;
+    /* 公告按鈕容器 (維持原本設定) */
+    #hero-btn-container, #must-read-container, #temp-container { 
+        display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 5px; 
     }
-    #hero-btn-container .btn-primary:hover, #must-read-container .btn-primary:hover, #temp-container .btn-primary:hover {
-        background: var(--forest); color: white; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.2);
+    
+    /* 🔥 公告按鈕美化版 (字體縮小 + 質感優化) */
+    #hero-btn-container .btn-primary, 
+    #must-read-container .btn-primary, 
+    #temp-container .btn-primary {
+        background-color: #ffffff !important; 
+        color: var(--forest) !important;
+        border: 2px solid var(--forest) !important; 
+        
+        /* 字體設定：襯線體 + 粗體 */
+        font-family: 'Noto Serif TC', serif !important; 
+        font-weight: 900 !important;
+        
+        /* ✨ 關鍵修改 1：字距稍微拉開，增加空氣感 */
+        letter-spacing: 1.5px !important;
+        
+        /* ✨ 關鍵修改 2：字體縮小 (原本約 18px -> 現在約 15px) */
+        font-size: 0.95rem !important; 
+        
+        /* 外觀微調：內距稍微縮一點，配合小字 */
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.08) !important; 
+        padding: 8px 22px !important; 
     }
 
+    /* 最新快訊 (維持橘色系) */
+    #temp-container .btn-primary { 
+        color: #d35400 !important; 
+        border-color: #d35400 !important; 
+    }
+
+    /* Hover 效果 */
+    #hero-btn-container .btn-primary:hover, 
+    #must-read-container .btn-primary:hover { 
+        background-color: var(--forest) !important; 
+        color: #fff !important; 
+    }
+    #temp-container .btn-primary:hover { 
+        background-color: #d35400 !important; 
+        color: #fff !important; 
+    }
     /* 三大功能選單 */
     .hero-menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 800px; margin: 30px auto 0 auto; }
     .hero-menu-item {
@@ -239,7 +394,7 @@
     .hero-menu-desc { font-size: 0.9rem; color: #777; line-height: 1.5; margin-top: 5px; font-weight: normal; }
 
     /* ======================================================
-       5. 預約流程與表單 (Booking)
+       7. 預約流程與表單 (Booking)
        ====================================================== */
     .cat-card { 
         border: 1px solid rgba(0,0,0,0.05); padding: 22px 30px; border-radius: 16px; 
@@ -273,166 +428,209 @@
     /* 結算區 */
     .checkout-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #eee; margin-top: 30px; padding-top: 20px; }
     .checkout-footer .coupon-box { 
-        margin: 0 !important; 
-        flex: 0 0 320px; 
-        background: #fffdf9; 
-        padding: 15px 20px; 
-        border-radius: 12px; 
-        border: 1px solid rgba(198, 168, 124, 0.4); 
+        margin: 0 !important; flex: 0 0 320px; background: #fffdf9; 
+        padding: 15px 20px; border-radius: 12px; border: 1px solid rgba(198, 168, 124, 0.4); 
         display: flex; flex-direction: column; gap: 10px; align-items: stretch; 
     }
-    /* 請找到這一段並修改 */
     .checkout-footer .total-box { 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        border: none !important; 
-        text-align: right; 
-        font-size: 2rem; 
-        font-weight: 900; 
-        color: var(--forest); 
-        font-family: 'Cinzel', serif; 
-        letter-spacing: 1px;
-        
-        /* 🔥 加這一行！保證它永遠靠右邊！ */
-        margin-left: auto !important;
+        margin: 0 !important; padding: 0 !important; border: none !important; 
+        text-align: right; font-size: 2rem; font-weight: 900; 
+        color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px;
+        margin-left: auto !important; /* 強制靠右 */
     }
-    .ota-grid-row {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr; /* 電腦：左1 右1.5 */
-        gap: 15px;
-    }
+    .ota-grid-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px; }
     .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
 
-    /* 規則與條款 */
-    .story-text p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; }
-    .highlight-text { color: #a0522d; font-weight: bold; background: rgba(198, 168, 124, 0.15); padding: 10px 15px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 20px 0; }
-    .disclaimer-box { background-color: #fffcf5; border: 2px dashed var(--accent); border-radius: 8px; padding: 15px 20px; margin: 20px auto 30px auto; text-align: center; max-width: 90%; width: 600px; position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(198, 168, 124, 0.15); }
-    .disclaimer-box::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background-color: var(--accent); }
-    .disclaimer-box p { margin: 5px 0; color: var(--forest); font-weight: bold; font-size: 1rem; line-height: 1.6; }
-
-    /* 🔥 新增：標題與返回按鈕的排版優化 */
+    /* 步驟標題與返回 */
     .step-header-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center; /* 標題置中 */
-        margin-bottom: 30px;
-        min-height: 50px;
+        position: relative; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 30px; min-height: 50px;
     }
-    
-    /* 返回按鈕：電腦版絕對定位在左邊 */
-    .step-header-wrapper .btn-back-capsule {
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-    }
-
-    /* 標題本體：優雅的襯線字體 */
+    .step-header-wrapper .btn-back-capsule { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; }
     .step-title-fancy {
-        font-family: 'Noto Serif TC', serif;
-        font-size: 1.6rem;
-        font-weight: 900;
-        color: var(--forest);
-        letter-spacing: 2px;
-        border-bottom: 3px solid var(--accent); /* 底部裝飾線 */
-        padding-bottom: 5px;
-        margin: 0;
-        text-align: center;
+        font-family: 'Noto Serif TC', serif; font-size: 1.6rem; font-weight: 900;
+        color: var(--forest); letter-spacing: 2px; border-bottom: 3px solid var(--accent);
+        padding-bottom: 5px; margin: 0; text-align: center;
     }
+    /* --- 補回：服務預約內頁標題修正 (避免按鈕重疊) --- */
+        .step-header-wrapper { 
+            flex-direction: column !important; /* 強制變成直排 */
+            align-items: center !important;    /* 置中對齊 */
+            gap: 15px !important;              /* 拉開間距 */
+            margin-bottom: 20px !important;
+            height: auto !important;
+        }
+        .step-header-wrapper .btn-back-capsule { 
+            position: relative !important;     /* ❌ 取消絕對定位 (關鍵) */
+            transform: none !important;
+            left: auto !important;
+            top: auto !important;
+            align-self: flex-start !important; /* 按鈕靠左對齊，或者改成 center 置中也可以 */
+        }
+        .step-title-fancy {
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 1.4rem !important;
+            margin: 0 !important;
+        }
 
     /* ======================================================
-       6. 培癒寶典 (Knowledge Base)
+       8. 培癒寶典 (Knowledge Base)
        ====================================================== */
-
-    /* 2. 箱子內的按鈕列：強制靠右 */
-    .kb-inner-header-row {
-        display: flex !important;
-        justify-content: space-between !important; /* 👈 左右撐開：左返回、右功能 */
-        align-items: center !important;
-        width: 100% !important;
-        margin-bottom: 25px !important;
-        gap: 10px;
+    /* KB 列表容器 */
+    .kb-cat-view { 
+        background: #fdfaf5 !important; 
+        /* 🔥 上方 padding 從 40px 減為 20px */
+        padding: 20px 20px 25px 20px !important; 
+        border-radius: 24px; 
+        margin-top: 0 !important; 
+        position: relative !important; 
+        box-shadow: inset 0 0 20px rgba(26, 47, 35, 0.02);
     }
-    /* 統一按鈕與分享鍵的間距 */
-    .kb-action-group {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    /* 文章內容頁 (.kb-article-view) 建議保留白色底，這樣讀長文才舒服 */
+    /* KB 文章內容容器 */
     .kb-article-view { 
-        background: #ffffff; 
-        padding: 40px 50px; 
-        border-radius: 16px; 
-        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08); 
-        max-width: 900px; 
-        margin: 0 auto 60px auto; 
-    }.kb-cat-header { text-align: center; margin-bottom: 40px; }
-    .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
-    .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
+        background: #ffffff !important; padding: 50px 40px !important; 
+        border-radius: 24px; margin: 0 auto !important; max-width: 100% !important; 
+        position: relative !important; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important;
+        border: 1px solid #eee;
+    }
 
+    .kb-inner-header-row {
+        display: flex !important; 
+        justify-content: space-between !important; 
+        align-items: center !important; 
+        width: 100% !important; 
+        /* 🔥 下方 margin 從 25px 減為 5px */
+        margin-bottom: 5px !important; 
+        gap: 10px;
+    }
+    .kb-action-group { display: flex; gap: 10px; align-items: center; }
+    
+    /* KB 文章列表卡片 */
+    .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 5px 0; }
+    .kb-article-card { 
+        background: #ffffff !important; padding: 12px 20px !important; border-radius: 12px !important; 
+        border: 1px solid #f0f0f0; border-left: 6px solid var(--accent) !important; min-height: 65px; 
+        display: flex; align-items: center; transition: 0.3s; cursor: pointer; margin-bottom: 0;
+    }
+    .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.1); border-left-color: var(--forest); }
+    .kb-card-content { display: flex !important; align-items: center !important; width: 100% !important; min-width: 0 !important; }
+    .kb-card-num {
+        font-family: 'Cinzel', serif !important; font-size: 1.45rem !important; color: var(--accent) !important;
+        font-weight: 900 !important; flex: 0 0 85px !important; display: inline-flex !important;
+        justify-content: flex-end !important; align-items: center; margin-right: 20px !important; 
+        font-variant-numeric: tabular-nums !important; line-height: 1;
+    }
+    .kb-card-text { 
+        font-size: 1.05rem !important; font-weight: bold !important; color: var(--forest) !important;
+        white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; flex: 1 !important;
+    }
+    .kb-arrow { font-size: 1.5rem !important; color: var(--accent) !important; opacity: 0.6; }
+    .kb-article-card:hover .kb-arrow { color: var(--forest); transform: translateX(5px); }
 
-    /* --- 培癒寶典：便利貼修正版 (加粗 + 防模糊 + 會轉動) --- */
+    /* KB 大分類卡片 */
+    .kb-big-cat-card {
+        min-height: 140px !important; padding: 20px 35px !important; border-radius: 20px !important;
+        border-left: 8px solid var(--accent) !important;
+    }
+    .kb-big-cat-card .kb-avatar {
+        width: 100px !important; height: 100px !important; margin-right: 25px !important;
+        flex-shrink: 0; object-fit: contain; filter: drop-shadow(4px 4px 10px rgba(26, 47, 35, 0.12));
+    }
+    .kb-big-cat-card .kb-card-text {
+        font-family: 'Noto Serif TC', serif !important; /* 想要改字體改這裡 */
+        
+        font-size: 1.6rem !important;  /* 🔥 把這個數字改大！例如改成 2rem 或 2.2rem */
+        
+        font-weight: 900 !important;   /* 字體粗細 */
+        letter-spacing: 3px !important; /* 字距 */
+        color: var(--forest) !important;
+    }
+
+    /* KB 搜尋與結果樣式 */
+    .kb-search-container { max-width: 650px; margin: 0 auto 30px auto; }
+    /* 🔥 修改：搜尋群組改為垂直排列，並優化刪除按鈕位置 */
+    .kb-search-group { 
+        display: flex !important; 
+        flex-direction: column !important; /* 改成直排 */
+        gap: 8px !important; 
+        margin-bottom: 15px !important; 
+        background: #f9f9f9; 
+        padding: 15px 40px 15px 15px !important; /* 右邊 padding 加大，給按鈕用 */
+        border-radius: 10px; 
+        border: 1px solid #eee; 
+        position: relative !important; /* 讓按鈕可以絕對定位 */
+    }
+    
+    /* 輸入框寬度 100% */
+    .kb-search-title-input, 
+    .kb-search-key-input { 
+        width: 100% !important; 
+        flex: none !important; 
+    }
+
+    /* 刪除按鈕固定在右上角 */
+    .kb-group-remove-btn { 
+        position: absolute !important;
+        top: 12px !important;
+        right: 8px !important;
+        background: #ffebee; 
+        color: #d32f2f; 
+        border: none; 
+        width: 30px; 
+        height: 30px; 
+        border-radius: 50%; 
+        cursor: pointer; 
+        font-size: 14px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
+    .kb-result-section-title { display: flex; align-items: center; justify-content: center; margin: 40px 0 20px 0; color: #555; font-weight: bold; font-size: 1.1rem; }
+    .kb-result-section-title::before, .kb-result-section-title::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
+    .kb-result-section-badge { background: #fff; color: var(--forest); padding: 5px 20px; border: 2px solid var(--forest); border-radius: 50px; }
+    /* =========================================
+       🔥 修復搜尋結果的中分類標題 (通道、閘門...)
+       ========================================= */
+    .kb-search-mid-header {
+        display: inline-block;       /* 讓它變成膠囊狀 */
+        background: var(--forest);   /* 深綠色底 */
+        color: var(--accent);        /* 金色字 */
+        padding: 6px 25px;           /* 內距：讓它胖一點 */
+        border-radius: 50px;         /* 圓角 */
+        font-size: 1rem;             
+        font-weight: 900;            /* 粗體 */
+        font-family: 'Noto Serif TC', serif;
+        margin-bottom: 15px;         /* 跟下方卡片保持距離 */
+        margin-left: 5px;            /* 稍微靠右一點點，對齊卡片 */
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15); /* 加上陰影更有質感 */
+    }
+    .kb-mid-simple-badge {
+        display: inline-block; background: var(--forest); color: var(--accent);
+        padding: 6px 25px; border-radius: 50px; font-size: 1rem; font-weight: 900;
+        font-family: 'Noto Serif TC', serif; margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15);
+    }
+    .kb-search-mid-pill { /* 膠囊樣式整合 */
+        background: var(--forest); color: var(--accent); padding: 8px 30px; border-radius: 50px;
+        font-size: 1.1rem; font-weight: 900; font-family: 'Noto Serif TC', serif;
+        letter-spacing: 1.5px; box-shadow: 0 4px 15px rgba(26, 47, 35, 0.25);
+        border: 2px solid transparent; transition: all 0.3s; white-space: nowrap;
+    }
+
+    /* KB 便利貼 */
     .kb-tiny-note {
         position: absolute; top: 25px; right: 30px; z-index: 99;
         background: #ffffff; border: 2px dashed var(--accent); padding: 15px 25px;
         border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
-        
-        /* 🔥 你的神建議：加粗字體，解決細線失真問題 */
-        font-weight: bold !important; 
-        font-size: 13px; color: #555; text-align: left; line-height: 1.7; font-family: sans-serif;
-        max-width: 300px;
-        
-        /* 🔥 解決靜止模糊：使用 scale(1) 搭配平滑渲染濾鏡 */
-        transform: rotate(1.2deg);
-        -webkit-font-smoothing: antialiased; 
-        backface-visibility: hidden;
-        filter: drop-shadow(0 0 0 transparent); /* 強制重繪 */
-        
+        font-weight: bold !important; font-size: 13px; color: #555; text-align: left; line-height: 1.7; font-family: sans-serif;
+        max-width: 300px; transform: rotate(1.2deg); -webkit-font-smoothing: antialiased; 
+        backface-visibility: hidden; filter: drop-shadow(0 0 0 transparent);
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-
-    /* 🔥 確保滑鼠移入會「轉一下」而且變超清楚 */
-    .kb-tiny-note:hover { 
-        transform: rotate(0deg) scale(1.05) !important; 
-        box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3);
-        color: var(--forest);
-        z-index: 100;
-    }
-    /* 🔥 KB 列表與卡片 (統一瘦身版) */
-    .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 5px 0; }
+    .kb-tiny-note:hover { transform: rotate(0deg) scale(1.05) !important; box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3); color: var(--forest); z-index: 100; }
     
-    
-
-    .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.1); border-left-color: var(--forest); }
-    
-    .kb-card-content {
-        display: flex !important;
-        align-items: center !important;
-        width: 100% !important;
-        min-width: 0 !important; /* 觸發 ellipsis 關鍵 */
-    }
-
-    .kb-card-text {
-        font-size: 1.05rem !important;
-        font-weight: bold !important;
-        color: var(--forest) !important;
-        white-space: nowrap !important;   /* 🔥 強制一行 */
-        overflow: hidden !important;      /* 🔥 超出隱藏 */
-        text-overflow: ellipsis !important; /* 🔥 超出變 ... */
-        flex: 1 !important;
-    }
-    /* ➔ 箭頭也優化一下 */
-    .kb-arrow {
-        font-size: 1.5rem !important;
-        color: var(--accent) !important; /* 箭頭改用金色 */
-        opacity: 0.6;
-    }
-    .kb-article-card:hover .kb-arrow { color: var(--forest); transform: translateX(5px); }
-
-    /* 中分類分隔 (原本目錄頁的樣式) */
+    /* 中分類摺疊 */
     details.kb-section-group { margin-bottom: 40px; transition: 0.3s; }
     summary.kb-mid-separator { display: flex; align-items: center; justify-content: center; cursor: pointer; list-style: none; margin-bottom: 25px; outline: none; position: relative; }
     summary.kb-mid-separator::-webkit-details-marker { display: none; }
@@ -447,331 +645,21 @@
     .kb-mid-badge::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s; }
     details[open] summary .kb-mid-badge::after { transform: rotate(180deg); }
 
-    /* 🔥 搜尋結果的分組標題 (仿照原本中分類的線條樣式) */
-    .kb-search-group-separator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 40px 0 25px 0;
-    }
-    .kb-search-group-separator::before,
-    .kb-search-group-separator::after {
-        content: '';
-        height: 2px;
-        background: #e0e0e0;
-        flex: 1;
-        margin: 0 20px;
-    }
-    .kb-search-group-badge {
-        background: var(--forest);
-        color: var(--accent);
-        padding: 10px 35px;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        font-family: 'Noto Serif TC', serif;
-        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2);
-    }
-
+    /* KB 文章頭部資訊 */
+    .kb-cat-header { text-align: center; margin-bottom: 40px; }
+    .kb-cat-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; color: var(--forest); font-weight: 900; margin: 0; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(198, 168, 124, 0.2); }
+    .kb-article-title-h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 900; color: var(--forest); margin-bottom: 20px; line-height: 1.4; text-align: center; }
     .kb-meta-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
     .kb-tag { font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 1px; }
     .kb-tag-big { background: var(--forest); color: #fff; }
     .kb-tag-mid { background: #fffcf5; color: var(--accent); border: 1px solid var(--accent); }
     .kb-divider { color: #ccc; font-size: 0.8rem; }
-
-    /* KB 頂部按鈕區 */
     .kb-header-actions { display: flex !important; align-items: center !important; gap: 15px !important; margin-bottom: 25px !important; width: 100% !important; }
-    
-    
-    /* ======================================================
-       🔍 搜尋相關樣式 (整合版)
-       ====================================================== */
-    /* 搜尋框與彈窗 */
-    .btn-open-search {
-        display: flex; align-items: center; gap: 10px; margin: 0 auto 30px auto; padding: 12px 30px;
-        background: #fff; border: 2px solid var(--forest); border-radius: 50px;
-        color: var(--forest); font-weight: bold; font-size: 1rem; cursor: pointer; transition: all 0.3s;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    .btn-open-search:hover { background: var(--forest); color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.2); }
-
-    .kb-search-container { max-width: 650px; margin: 0 auto 30px auto; }
-    
-    .kb-search-group { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; }
-    .kb-search-title-input { flex: 1; min-width: 80px; padding: 10px; border: 1px solid var(--forest); border-radius: 8px; font-size: 0.9rem; font-weight: bold; color: var(--forest); }
-    .kb-search-key-input { flex: 2; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
-    
-    .kb-group-remove-btn { background: #ffebee; color: #d32f2f; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-    .kb-search-actions { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
-    .btn-add-group { background: #fff; color: var(--forest); border: 1px solid var(--forest); }
-    .btn-add-group:hover { background: #f1f8e9; }
-    .btn-do-search { background: var(--forest); color: var(--accent); }
-    .btn-do-search:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(26,47,35,0.3); }
-
-    .kb-result-section-title { text-align: center; margin: 40px 0 20px 0; position: relative; }
-    .kb-result-section-badge { background: var(--forest); color: #fff; padding: 8px 25px; border-radius: 50px; font-size: 1.1rem; font-weight: 900; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(26,47,35,0.2); display: inline-block; }
-    /* ======================================================
-       🔍 搜尋結果分組標題：頂級膠囊樣式
-       ====================================================== */
-    
-    /* 1. 外層容器：負責置中 + 左右畫線 */
-    .kb-search-mid-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 40px 0 20px 0; /* 與上下內容保持距離 */
-    }
-
-    /* 左右兩條灰線 */
-    .kb-search-mid-wrapper::before,
-    .kb-search-mid-wrapper::after {
-        content: '';
-        height: 1px;
-        background: #ccc; /* 線條顏色 */
-        flex: 1;          /* 自動撐滿兩邊 */
-        margin: 0 15px;   /* 線條與膠囊的距離 */
-    }
-
-    /* 2. 膠囊本體：深綠底金字 (品牌色) */
-    .kb-search-mid-pill {
-        background: var(--forest);
-        color: var(--accent);
-        padding: 8px 30px;        /* 膠囊大小 */
-        border-radius: 50px;      /* 圓弧造型 */
-        font-size: 1.1rem;
-        font-weight: 900;
-        font-family: 'Noto Serif TC', serif;
-        letter-spacing: 1.5px;
-        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.25); /* 讓它浮起來的陰影 */
-        border: 2px solid transparent; /* 預留邊框空間 */
-        transition: all 0.3s;
-        white-space: nowrap;
-    }
-
-    /* 滑鼠移過去的小特效 (選填) */
-    .kb-search-mid-pill:hover {
-        background: #fff;
-        color: var(--forest);
-        border-color: var(--forest);
-        transform: translateY(-2px);
-    }
-    /* ======================================================
-       🔍 搜尋結果樣式修正
-       ====================================================== */
-    
-    /* 1. 搜尋分組大標題 (天賦、挑戰...)：置中 + 左右線條 */
-    .kb-result-section-title {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 40px 0 20px 0;
-        color: #555;
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-    .kb-result-section-title::before,
-    .kb-result-section-title::after {
-        content: '';
-        height: 2px;
-        background: #e0e0e0;
-        flex: 1;
-        margin: 0 20px;
-    }
-    /* 標題文字膠囊 */
-    .kb-result-section-badge {
-        background: #fff; /* 白底，不做深色了，乾淨為主 */
-        color: var(--forest);
-        padding: 5px 20px;
-        border: 2px solid var(--forest);
-        border-radius: 50px;
-    }
-
-    /* 2. 中分類標題 (閘門、通道...)：靠左 + 深綠色膠囊 + 無線條 */
-    .kb-search-mid-group {
-        margin-bottom: 30px;
-    }
-    
-    .kb-mid-simple-badge {
-        display: inline-block;
-        background: var(--forest);
-        color: var(--accent);
-        padding: 6px 25px;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 900;
-        font-family: 'Noto Serif TC', serif;
-        margin-bottom: 15px; /* 跟下面文章的距離 */
-        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15);
-    }
-    /* 🔥 搜尋結果頁：上方編輯區 */
-    .kb-search-edit-box {
-        background: #f0f4f1; /* 淺綠灰底 */
-        border: 1px solid #dcebdc;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 30px;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    .kb-result-row {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-        align-items: center;
-    }
-    
-    .kb-result-input {
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 0.9rem;
-    }
-    /* 按鈕群組 */
-    .kb-edit-actions {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px dashed #ccc;
-    }
-    /* 🔥 膠囊與按鈕的並排容器 */
-    .kb-action-row {
-        display: flex;
-        justify-content: center; /* 置中 */
-        align-items: center;     /* 垂直對齊 */
-        gap: 15px;               /* 兩個東西中間的距離 */
-        margin-top: 15px;
-        flex-wrap: wrap;         /* 手機版如果不夠寬會自動換行 */
-    }
-
-    /* 🔥 深綠色藥丸按鈕 (統一風格) */
-    .btn-pill-dark {
-        background: var(--forest);
-        color: var(--accent);
-        border: 1px solid var(--forest);
-        padding: 6px 20px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        font-family: 'Noto Serif TC', serif;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s;
-        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-        text-decoration: none;
-        line-height: 1.5; /* 確保高度跟隔壁膠囊差不多 */
-    }
-    
-    .btn-pill-dark:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
-        background: #2a4032; /*稍微變亮一點點*/
-    }
-
-    /* 微調原本的 brand-capsule 讓它乖乖排隊 */
-    .brand-capsule.in-row {
-        margin: 0 !important; /* 拿掉原本的置中 margin */
-        display: inline-flex !important;
-    }
-    /* 🔥 1. 強制並排容器 */
-    .kb-action-row {
-        display: flex;
-        justify-content: center; /* 整組置中 */
-        align-items: center;     /* 垂直對齊 */
-        gap: 15px;               /* 按鈕跟文字的距離 */
-        margin-top: 15px;
-        flex-wrap: wrap;         /* 手機版空間不夠自動換行 */
-    }
-
-    /* 🔥 2. 膠囊樣式修正 (強制解除原本的置中與表格屬性) */
-    .brand-capsule.in-row {
-        display: inline-flex !important; /* 變成行內元素 */
-        margin: 0 !important;            /* 拿掉原本的 auto margin */
-        width: auto !important;          /* 寬度自動 */
-        line-height: 1.5;                /* 跟按鈕高度對齊 */
-        vertical-align: middle;
-    }
-
-    
-
-    /* 1. 修正標題網格：強制中間置中、右邊推到底 */
-.kb-header-grid {
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr !important; /* 左右等寬分掉空間，中間才會在正中間 */
-    width: 100% !important;
-    align-items: center !important;
-    margin: 25px 0 !important;
-}
-
-.kb-header-right {
-    display: flex !important;
-    justify-content: flex-end !important; /* 🔥 關鍵：把按鈕推到最右邊邊緣 */
-}
-
-    /* 恢復金色膠囊原本的樣子 */
-    .brand-capsule.center-fix {
-        margin: 0 !important; /* 因為 Grid 會幫它置中，所以 margin 歸零 */
-        white-space: nowrap;  /* 不准換行 */
-    }
-
-    /* 3. 🔥 完全還原您原本的「深綠底金字」按鈕樣式 */
-.btn-pill-search {
-    background: var(--forest) !important;
-    color: var(--accent) !important;
-    border: 1px solid var(--forest) !important;
-    padding: 6px 20px !important;
-    border-radius: 50px !important;
-    font-size: 0.85rem !important;
-    font-weight: bold !important;
-    font-family: 'Noto Serif TC', serif !important;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-    transition: all 0.2s;
-    text-decoration: none;
-    line-height: 1.5;
-}
-.btn-pill-search:hover {
-    transform: translateY(-2px);
-    background: #2a4032 !important;
-    box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3);
-}
-    /* =========================================
-       KB 內容編輯器樣式 (前台最終版)
-       ========================================= */
-    .ql-editor { padding: 0; color: #2c3e50; font-size: 16px; line-height: 1.8; font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; overflow-wrap: break-word; }
-    .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
-    .ql-font-monospace { font-family: 'Courier New', monospace !important; }
-    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .ql-editor .ql-indent-1 { padding-left: 3em !important; }
-    .ql-editor .ql-indent-2 { padding-left: 6em !important; }
-    .ql-editor .ql-indent-3 { padding-left: 9em !important; }
-    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
-    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; margin-top: 8px !important; line-height: 1.3 !important; list-style-position: outside !important; }
-    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
-    .ql-editor li::before { margin-right: 0em !important; width: 1em !important; text-align: center !important; display: inline-block !important; }
-    .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
-    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 0px !important; margin-bottom: 15px; line-height: 1.4; display: block; color: var(--forest); }
-    .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
-    .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
-    .ql-editor h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
-    .ql-editor h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex !important; align-items: center !important; justify-content: center; padding: 8px 35px !important; margin: 25px 0 5px 0 !important; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
-    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; color: inherit !important; }
-    .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
-    strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
 
     /* ======================================================
-       7. 抽卡系統 & 8. 手機版 RWD (整合)
+       9. 抽卡系統 (Draw)
        ====================================================== */
-    #draw-area { display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; perspective: 1000px; width: 100%; max-width: 900px; margin: 0 auto; justify-content: center; }
+    #draw-area { display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; perspective: 1000px; width: 100%; max-width: 900px; margin: 0 auto; justify-content: center; padding-top: 10px !important; }
     .card-back { width: 130%; justify-self: center; aspect-ratio: 3/5; height: auto; background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png'); background-repeat: no-repeat; background-position: center; background-size: cover; border-radius: 4px; cursor: pointer; position: relative; box-shadow: -2px 0 6px rgba(0,0,0,0.3); z-index: 1; will-change: transform; transition: transform 0.2s ease-out; }
     .card-back.is-selected { transform: translateY(-30px) !important; z-index: 200 !important; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); filter: brightness(1.1); }
     @keyframes cardShuffleIn { from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); } to { opacity: 1; transform: translateX(0) rotateY(0); } }
@@ -779,27 +667,49 @@
     .card-back.is-drawing { animation: cardDrawUp 0.6s ease-out forwards; z-index: 999 !important; pointer-events: none; }
     @media (min-width: 1025px) { .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); } }
 
-    .card-reveal { position: relative; width: 340px; height: 580px; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .card-reveal { position: relative; width: 340px; height: 580px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
-    .close-card-btn { position: fixed; top: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5); color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2002; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-    .close-card-btn:hover { background: var(--accent); color: var(--forest); transform: rotate(90deg); border-color: var(--forest); }
+    .close-card-btn {
+        /* 1. 定位設定：強制固定在螢幕右上角 */
+        position: fixed !important;
+        top: 30px !important;
+        right: 30px !important;  /* 🔥 這裡確保它在右邊 */
+        z-index: 2005 !important; /* 確保浮在最上面 */
+        
+        /* 2. 外觀設定：正圓形 */
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        
+        /* 3. 內容置中 */
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        min-width: 0 !important;
+        
+        /* 4. 顏色 (繼承原本的設定，或是您想自訂也可以) */
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
     
+    .close-card-btn:hover {
+        background: var(--accent) !important;
+        color: var(--forest) !important;
+        transform: rotate(90deg);
+        border-color: var(--forest) !important;
+    }
     .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; opacity: 1; background-color: var(--cream); }
     .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
+    #draw .brand-section-header { margin-bottom: 40px !important; }
 
-    /* 回到頂部按鈕 */
-    #back-to-top {
-        position: fixed; bottom: 90px; right: 20px; width: 40px; height: 40px;
-        background: rgba(26, 47, 35, 0.8); color: #fff; border: none; border-radius: 50%;
-        cursor: pointer; z-index: 998; opacity: 0; visibility: hidden;
-        transform: translateY(20px); transition: all 0.4s ease;
-        display: flex; align-items: center; justify-content: center; font-size: 18px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    #back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
-    #back-to-top:hover { background: var(--accent); transform: translateY(-3px); }
-
-    /* 9. 會員中心 - 歷史訂單卡片 */
+    /* ======================================================
+       10. 會員中心 (Dashboard)
+       ====================================================== */
     .history-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05); border: 1px solid rgba(0,0,0,0.02); transition: all 0.3s ease; overflow: hidden; }
     .history-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(26, 47, 35, 0.12); }
     .history-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
@@ -818,499 +728,392 @@
     .sb-pending { background: #fff3e0; color: #e67e22; }
     .sb-paid { background: #f3e5f5; color: #8e44ad; }
     .sb-completed { background: #e8f5e9; color: #2e7d32; }
-    .btn-view-report { background: linear-gradient(135deg, var(--forest) 0%, #2a4032 100%); color: white; border: none; padding: 8px 20px; border-radius: 30px; font-size: 0.9rem; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2); transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-    .btn-view-report:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 47, 35, 0.3); }
+
     /* ======================================================
-   🔥 按鈕樣式最終整理（僅針對按鈕、不影響便利貼與文章）
-   ====================================================== */
-
-/* 1. 統一所有功能按鈕：綠底、白字、細金框 */
-.btn-primary, 
-.btn-secondary,
-.btn-back-capsule, 
-.kb-internal-back,
-.btn-pill-search,
-.btn-open-search,
-.kb-action-btn,
-.btn-add-group,
-.btn-do-search,
-.close-modal-btn,
-.btn-view-report,
-#kb-share-btn,
-#back-to-top,
-.kb-fab-back,
-.close-card-btn, 
-#success-close-x,
-#line-super-btn,
-#term-btn,
-#sub-btn {
-    background-color: var(--forest) !important;
-    color: #ffffff !important;
-    border: 1px solid var(--accent) !important; /* 極細金框 */
-    border-radius: 50px !important;            /* 強制圓角，解決正方形問題 */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-}
-
-/* 2. 統一 Hover 效果：變金底、白字 */
-.btn-primary:hover, 
-.btn-secondary:hover,
-.btn-back-capsule:hover, 
-.kb-internal-back:hover,
-.btn-pill-search:hover,
-.btn-open-search:hover,
-.kb-action-btn:hover,
-.btn-add-group:hover,
-.btn-do-search:hover,
-.close-modal-btn:hover,
-.btn-view-report:hover,
-#kb-share-btn:hover,
-#back-to-top:hover,
-.kb-fab-back:hover,
-.close-card-btn:hover, 
-#success-close-x:hover,
-#line-super-btn:hover,
-#term-btn:not(:disabled):hover,
-#sub-btn:not(:disabled):hover {
-    background-color: var(--accent) !important;
-    border-color: var(--accent) !important;
-    color: #ffffff !important;
-    transform: translateY(-2px);
-}
-
-/* 3. 修正公告專區樣式（還原白底色框，不要變綠色） */
-#hero-btn-container .btn-primary, 
-#must-read-container .btn-primary, 
-#temp-container .btn-primary {
-    background-color: #ffffff !important;
-    color: var(--forest) !important;
-    border: 2px solid var(--forest) !important;
-    box-shadow: none !important;
-    padding: 8px 20px !important;
-}
-/* 橘色快訊公告 */
-#temp-container .btn-primary {
-    color: #d35400 !important;
-    border-color: #d35400 !important;
-}
-#hero-btn-container .btn-primary:hover, 
-#must-read-container .btn-primary:hover {
-    background-color: var(--forest) !important;
-    color: #fff !important;
-}
-#temp-container .btn-primary:hover {
-    background-color: #d35400 !important;
-    color: #fff !important;
-}
-
-/* 4. 修正彈窗底部關閉按鈕：強制置中 */
-.close-modal-btn {
-    display: block !important; /* 必須是 block 才能用 margin auto */
-    margin: 40px auto 0 auto !important; 
-    width: fit-content !important;
-    min-width: 200px;
-}
-
-/* 5. 針對禁用按鈕的顯示（例如未勾選同意時） */
-#term-btn:disabled, #sub-btn:disabled {
-    background-color: #ccc !important;
-    border-color: #ccc !important;
-    cursor: not-allowed !important;
-}
-
-    /* 2. 修正能量抽卡：對齊服務預約的視覺高度 */
-    #draw-area {
-        padding-top: 10 !important;     /* 拿掉抽卡區上方的 40px 留白 */
-    }
-
-    /* 3. 移除 HTML 標籤內多餘的硬排間距 */
-    #draw .brand-section-header {
-        margin-bottom: 40px !important; /* 強制將抽卡標題的底距縮小至滿意寬度 */
-    }
-    /* ======================================================
-       培癒寶典：卡片樣式分流
+       11. 回到頂部按鈕 (Back to Top) - 全域基礎設定 (電腦版)
+       🔥 先寫這個，確保它是基礎樣式
        ====================================================== */
+    #back-to-top {
+        /* 電腦版預設尺寸 */
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        
+        /* 顏色設定 (綠底 + 金框 + 金字) */
+        background-color: var(--forest) !important;
+        border: 2px solid var(--accent) !important; 
+        color: var(--accent) !important; 
+        
+        /* 定位與層級 */
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        bottom: 90px;
+        right: 30px;
+        z-index: 9999;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        
+        /* 動畫 */
+        transition: all 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+    }
 
-    /* --- 1. 大類別專屬 (Big Category) --- */
-    .kb-big-cat-card {
-        min-height: 140px !important;
-        padding: 20px 35px !important;
-        border-radius: 20px !important;
-        border-left: 8px solid var(--accent) !important;
+    #back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    /* 滑鼠移上去 (變金底 + 白字) */
+    #back-to-top:hover {
+        background-color: var(--accent) !important;
+        border-color: var(--accent) !important;
+        color: #ffffff !important; 
+        transform: translateY(-5px);
     }
-    .kb-big-cat-card .kb-avatar {
-        width: 100px !important;
-        height: 100px !important;
-        margin-right: 25px !important;
-        flex-shrink: 0;
-        object-fit: contain;
-        filter: drop-shadow(4px 4px 10px rgba(26, 47, 35, 0.12));
-    }
-    .kb-big-cat-card .kb-card-text {
-        font-family: 'Noto Serif TC', serif !important;
-        font-size: 1.6rem !important;
-        font-weight: 900 !important;
-        letter-spacing: 3px !important;
-        color: var(--forest) !important;
+    
+    #back-to-top i { font-size: 20px !important; margin: 0 !important; color: inherit !important; }
+    
+    /* ======================================================
+       15. 公告內容統一美化 (Announcement Styling)
+       依據：服務規範 (Snippet 3) 的風格
+       ====================================================== */
+    
+    /* --- 通用排版 --- */
+    #dyn-modal-content {
+        color: #444;
+        line-height: 1.8;
+        font-size: 1rem;
+        text-align: justify; /* 左右切齊 */
     }
 
-    /* --- 2. 文章列表專屬 (Article List) --- */
-    .kb-article-card {
-        background: #ffffff;
-        padding: 12px 25px;
+    /* --- 標題 H4 (深綠字 + 金色下底線) --- */
+    #dyn-modal-content h4 {
+        color: var(--forest);
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 10px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-weight: 900;
+        font-size: 1.2rem;
+        font-family: 'Noto Serif TC', serif;
+    }
+    /* 第一個標題不要上方間距 */
+    #dyn-modal-content h4:first-child { margin-top: 0; }
+
+    /* --- 內文 P --- */
+    #dyn-modal-content p { margin-bottom: 15px; }
+
+    /* --- 列表 UL / OL --- */
+    #dyn-modal-content ul, 
+    #dyn-modal-content ol {
+        padding-left: 20px;
+        margin-bottom: 20px;
+        color: #555;
+    }
+    #dyn-modal-content li { margin-bottom: 8px; }
+    #dyn-modal-content strong { color: #2c3e50; } /* 粗體字稍微深一點 */
+
+    /* --- 提示框 (淺黃底 + 金色左邊條) --- */
+    /* 用法：<div class="anno-box-tip">...</div> */
+    .anno-box-tip {
+        background: #fffcf5;
+        border-left: 4px solid var(--accent);
+        padding: 15px 20px;
+        margin: 25px 0;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+
+    /* --- 警告框 (淺紅底 + 紅色虛線框) --- */
+    /* 用法：<div class="anno-box-warn">...</div> */
+    .anno-box-warn {
+        background: #fff5f5;
+        border: 2px dashed #e74c3c;
+        padding: 20px;
+        margin: 30px 0;
         border-radius: 12px;
-        border: 1px solid #f0f0f0;
-        border-left: 6px solid var(--accent);
-        min-height: 60px; /* 恢復輕薄高度 */
-        margin-bottom: 0px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: 0.3s;
+        text-align: center;
+        color: #c0392b;
+    }
+
+    /* --- 圖片統一設定 --- */
+    #dyn-modal-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 1px solid #eee;
+        display: block;
+        margin: 15px auto;
     }
     /* ======================================================
-       培癒寶典：終極對齊、防模糊、純白內容版
+       13. RWD 行動版 (Mobile) - 最終整合區
+       說明：所有手機版樣式都寫在這裡，避免衝突
        ====================================================== */
-
-    /* 1. 列表箱子：米色底 (Knowledge Base List) */
-    .kb-cat-view { 
-        background: #fdfaf5 !important; 
-        padding: 40px 25px 25px 25px !important; 
-        border-radius: 24px; 
-        margin-top: 0 !important; 
-        position: relative !important; 
-        box-shadow: inset 0 0 20px rgba(26, 47, 35, 0.02);
-    }
-
-    /* 2. 🔥 文章內容箱子：絕對純白，內容置中優化 (Article Content) */
-    .kb-article-view { 
-        background: #ffffff !important; 
-        padding: 50px 40px !important; 
-        border-radius: 24px; 
-        margin: 0 auto !important; 
-        max-width: 100% !important; 
-        position: relative !important; 
-        box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important;
-        border: 1px solid #eee;
-    }
-
-    /* 3. 🔥 解決「1」對不齊：靠右對齊才是唯一解 */
-    .kb-card-num {
-        font-family: 'Cinzel', serif !important;
-        font-size: 1.45rem !important;
-        color: var(--accent) !important;
-        font-weight: 900 !important;
-        flex: 0 0 85px !important;       /* 停車格 85px */
-        display: inline-flex !important;
-        justify-content: flex-end !important; /* 👈 靠右排隊，數字尾巴對齊，文字起跑線才會統一 */
-        align-items: center;
-        margin-right: 20px !important; 
-        font-variant-numeric: tabular-nums !important;
-        line-height: 1;
-    }
-
-    /* 4. 🔥 解決便利貼模糊：加粗字體 + 移除 translate3d */
-    .kb-tiny-note {
-        position: absolute; top: 25px; right: 30px; z-index: 99;
-        background: #ffffff; border: 2px dashed var(--accent); padding: 15px 25px;
-        border-radius: 12px; box-shadow: 0 5px 20px rgba(198, 168, 124, 0.15);
-        font-family: sans-serif; font-size: 13px; color: #444; text-align: left; line-height: 1.7;
-        max-width: 300px;
-        transform: rotate(1.2deg);         /* 靜止角度 */
-        backface-visibility: hidden;
-        filter: blur(0);                   /* 強制瀏覽器精細渲染 */
-        outline: 1px solid transparent;    /* 輔助文字銳利化 */
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    /* 滑鼠移入：順暢轉正 */
-    .kb-tiny-note:hover { 
-        transform: rotate(0deg) scale(1.05) !important; 
-        box-shadow: 0 10px 30px rgba(198, 168, 124, 0.3);
-        z-index: 100;
-    }
-    #kb-share-btn {
-        width: 36px !important; 
-        height: 36px !important; 
-        padding: 0 !important; 
-        border-radius: 50% !important; 
-        min-width: 40px !important;
-        flex-shrink: 0;
-    }
-    /* 5. 其他 KB 元件樣式 */
-    .kb-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-    .kb-article-card { 
-        background: #ffffff !important; padding: 12px 20px !important; border-radius: 12px !important; 
-        border: 1px solid #f0f0f0; border-left: 6px solid var(--accent) !important; min-height: 65px; 
-        display: flex; align-items: center; transition: 0.3s; cursor: pointer;
-    }
-    .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26,47,35,0.1); }
-    
-    .kb-card-content { display: flex; align-items: center; width: 100%; min-width: 0; }
-    .kb-card-text { 
-        font-size: 1.05rem; font-weight: bold; color: var(--forest); flex: 1;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-    }
-    .kb-arrow { font-size: 1.2rem; color: var(--accent); opacity: 0.5; flex-shrink: 0; }
-    /* 將兩個名字寫在一起，用逗號隔開 */
-.kb-action-btn, .btn-pill-search {
-    height: 36px !important;           /* 鎖死高度 */
-    padding: 0 20px !important;        /* 統一內距 */
-    font-size: 13px !important;        /* 統一字體大小 */
-    font-weight: 900 !important;       /* 統一粗細 */
-    font-family: 'Noto Serif TC', serif !important;
-    
-    background-color: var(--forest) !important;
-    color: #ffffff !important;
-    border: 1px solid var(--accent) !important;
-    border-radius: 50px !important;
-    
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    white-space: nowrap;
-}
-    
-    /* RWD: Mobile (Max 768px) */
+    /* ======================================================
+       13. RWD 行動版 (Mobile) - 最終整合修正版
+       ====================================================== */
     @media (max-width: 768px) {
+        
+        /* --- 1. 基礎與間距修正 --- */
+        /* 修正首頁底部：減少留白，避免空太大一塊 */
+        #home { padding-bottom: 120px !important; }
+
+        .section { padding: 20px 15px 60px 15px !important; }
+        .card { padding: 20px 15px !important; border-radius: 12px !important; }
+        
+        /* --- 2. 服務預約標題修正 (避免按鈕蓋住文字) [補回] --- */
+        .step-header-wrapper { 
+            flex-direction: column !important; 
+            align-items: center !important;    
+            gap: 15px !important;
+            margin-bottom: 20px !important;
+            height: auto !important;
+        }
+        .step-header-wrapper .btn-back-capsule { 
+            position: relative !important;     
+            transform: none !important;
+            left: auto !important;
+            top: auto !important;
+            align-self: flex-start !important; 
+        }
+        .step-title-fancy {
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 1.4rem !important;
+            margin: 0 !important;
+        }
+
+        /* --- 3. 基礎元件縮小 --- */
+        .btn-primary, .btn-secondary,
+        .btn-back-capsule, .kb-internal-back,
+        .btn-pill-search, .btn-open-search,
+        .kb-action-btn, #sub-btn {
+            font-size: 13px !important; 
+            height: 36px !important; 
+            padding: 0 16px !important;
+        }
+        .btn-primary { padding: 0 20px !important; }
+
+        /* --- 4. 導航與 Hero --- */
         nav { padding: 0 20px; height: 80px; display: flex; justify-content: space-between; align-items: center; }
         .hamburger-btn { display: block !important; font-size: 32px !important; padding: 10px !important; color: var(--white); z-index: 1001; cursor: pointer; }
         .nav-links { display: none; position: absolute; top: 80px; left: 0; width: 100%; background: var(--forest); flex-direction: column; padding: 20px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
         .nav-links.active { display: flex; }
         .nav-links button { text-align: center; padding: 15px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        .section { padding: 20px 15px 60px 15px !important; }
-        .card { padding: 20px 15px !important; border-radius: 12px !important; }
-        .btn-primary { padding: 12px 30px !important; font-size: 1rem !important; }
-
-        .kb-fab-back { display: flex !important; position: fixed; bottom: 125px !important; right: 15px !important; width: 40px !important; height: 40px !important; border-radius: 50%; background: var(--forest); color: var(--accent); border: 2px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1002; font-size: 1.2rem; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.4s ease; }
-        #back-to-top.show, .kb-fab-back.show { opacity: 1; visibility: visible; transform: translateY(0); }
-
         .hero-section { flex-direction: column-reverse; gap: 30px; }
         .hero-img { margin: 0 auto !important; width: 180px; height: 180px; }
         .hero-text h1 { font-size: 1.8rem; line-height: 1.4; margin-bottom: 15px; }
         .hero-menu-grid { grid-template-columns: 1fr !important; gap: 15px !important; width: 100% !important; max-width: 340px !important; margin: 30px auto 0 auto !important; }
-        .hero-menu-item { width: 100% !important; padding: 25px 20px !important; display: flex !important; flex-direction: column !important; align-items: center !important; border-radius: 20px !important; box-shadow: 0 5px 15px rgba(26, 47, 35, 0.05) !important; }
-        .hero-menu-icon { width: 60px !important; height: 60px !important; font-size: 2rem !important; margin-bottom: 10px !important; }
 
-        #announcement-wrapper, #must-read-wrapper, #temp-wrapper { padding: 45px 15px 20px 15px !important; margin-top: 25px !important; }
+        /* --- 5. 公告區 (垂直排列) --- */
+        #must-read-container, 
+        #temp-container {
+            display: flex !important; flex-direction: column !important; align-items: center !important; gap: 12px !important;
+        }
+        #must-read-container .btn-primary, 
+        #temp-container .btn-primary {
+            width: 85% !important; max-width: 320px !important; display: flex !important; justify-content: center !important;
+            font-size: 1.1rem !important; padding: 12px 20px !important;
+        }
+        #announcement-wrapper { padding: 45px 15px 20px 15px !important; }
         .announce-badge { top: -12px !important; font-size: 0.8rem !important; padding: 5px 18px !important; }
-        #must-read-container, #temp-container { flex-direction: column !important; gap: 12px !important; align-items: center !important; }
-        #must-read-container button, #temp-container button { width: 100% !important; max-width: 280px; padding: 12px 20px !important; display: block !important; }
 
+        /* --- 6. 標題與排版 --- */
+        .brand-h3-zh, .draw-title-zh,
+        .brand-h2-en, .draw-title-h2 {
+            display: block !important; width: 100% !important; margin-left: 0 !important; margin-bottom: 5px !important; text-align: center !important;
+        }
+
+        /* --- 7. 圓形按鈕位置修正 (垂直分家) --- */
+        /* (A) 懸浮返回按鈕 (FAB) - 放在下層 */
+        .kb-fab-back { 
+            display: flex !important; position: fixed; 
+            bottom: 60px !important;  /* 下層：60px */
+            right: 15px !important; 
+            width: 32px !important; height: 32px !important; 
+            border-radius: 50% !important; padding: 0 !important;
+            background: var(--forest) !important; 
+            border: 2px solid var(--accent) !important; color: var(--accent) !important;
+            justify-content: center; align-items: center; 
+            z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s ease;
+        }
+        .kb-fab-back.show { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
+        .kb-fab-back i { font-size: 14px !important; color: inherit !important; }
+
+        /* (B) 回到頂部按鈕 - 放在上層 */
+        #back-to-top {
+            width: 32px !important; height: 32px !important; 
+            bottom: 110px !important; /* 上層：110px */
+            right: 15px !important;
+        }
+        #back-to-top i { font-size: 14px !important; }
+
+        /* --- 8. 其他細項 --- */
         .info-grid, .service-setting-grid, .checkout-footer, #birth-geo-group, #birth-time-group { display: block !important; }
         .service-setting-grid { padding: 15px; }
-        .info-grid .form-group { margin-bottom: 15px; }
-        #flow-data div[style*="grid-template-columns"], #flow-data div[style*="display: grid"], #flow-data div[style*="display: flex"] { display: block !important; grid-template-columns: 1fr !important; gap: 15px !important; }
-        #flow-data { padding: 15px 10px !important; }
-        #flow-data .form-group { width: 100% !important; margin-bottom: 15px !important; }
-        #flow-data input[type="date"], #flow-data input[type="time"], #flow-data input[type="text"], #flow-data select { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; font-size: 16px !important; appearance: none; -webkit-appearance: none; }
-        #flow-data label { font-size: 0.9rem !important; margin-bottom: 5px !important; }
-        
         .cat-card { padding: 15px !important; }
-        .service-card { padding: 10px !important; }
-        .service-info { font-size: 0.95rem !important; }
-        .service-desc { font-size: 0.85rem !important; margin-left: 30px; line-height: 1.4; }
-
-       .kb-article-view {
-        background: #ffffff !important;
-        box-shadow: 0 0px 0px rgba(26, 47, 35, 0.08) !important;
-    }
-        .kb-cat-view, .kb-article-view { padding: 30px 12px 20px 12px !important; border-radius: 16px !important; }
-        .kb-card-content { flex-direction: row !important; align-items: center !important; gap: 12px; }
-        .kb-list-container { gap: 10px !important; }
-        /* 調整卡片整體高度與圓角，撐起 100px 的圖 */
-        .kb-article-card { 
-            padding: 10px 15px !important; /* 👈 縮小上下內距（原為 15px） */
-            min-height: 60px !important;   /* 👈 將 80px 改成 60px 或更小 */
-        }
-        .kb-big-cat-card { min-height: 110px !important; }
-        .kb-card-text { font-size: 0.95rem !important; }
-        .kb-section-group { margin-bottom: 25px !important; }
-        .kb-mid-badge { padding: 4px 15px !important; font-size: 0.9rem !important; }
-        /* 手機版便利貼修正 */
-        .kb-card-num { flex: 0 0 70px !important; font-size: 1.1rem !important; margin-right: 12px !important; }
-        /* 手機版便利貼：固定位置、不轉動避免模糊 */
-       .kb-tiny-note {
-            position: absolute; top: -12px; right: -5px; width: fit-content; max-width: 55%; 
+        
+        /* 便利貼 */
+        .kb-tiny-note {
+            position: absolute !important; top: -12px !important; right: -5px !important; width: fit-content; max-width: 55% !important; 
             padding: 8px 10px; text-align: left; font-size: 10px; line-height: 1.4;
-            transform: rotate(2deg); z-index: 999; margin: 0; transition: none;
+            transform: rotate(2deg) !important; z-index: 999; margin: 0; transition: none !important;
         }
-        .kb-tiny-note:hover { transform: rotate(2deg); }
-        .kb-header-actions { gap: 10px !important; margin-bottom: 20px !important; }
-        .kb-internal-back, .btn-back-capsule { height: 36px !important; border-radius: 50px !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; margin-top: 0 !important; margin-bottom: 0 !important; }
-        .kb-internal-back, .btn-back-capsule {
-            background-color: var(--forest) !important; /* 👈 綠底 */
-            color: #ffffff !important;                   /* 👈 白字 */
-            border: 1px solid var(--accent) !important;  /* 👈 金框 */
-            display: inline-flex !important;
-            padding: 0 15px !important;
-            height: 36px !important;
-            border-radius: 50px !important;
-            font-size: 13px !important;
+        
+        /* KB 列表 */
+        .kb-article-view { padding: 30px 18px 20px 18px !important; }
+        .kb-list-container { gap: 10px !important; }
+        .kb-article-card { padding: 10px 15px !important; min-height: auto !important; }
+        .kb-card-num { flex: 0 0 60px !important; font-size: 1.1rem !important; text-align: right !important; margin-right: 10px !important; }
+        .kb-article-card .kb-card-text { font-size: 1rem !important; letter-spacing: 1px !important; }
+        .kb-header-grid { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 15px !important; width: 100% !important; margin: 15px 0 !important; }
+        .kb-header-right { display: flex !important; justify-content: center !important; width: 100% !important; min-width: 220px; padding: 10px 30px !important; }
+        .kb-avatar { width: 80px !important; height: 80px !important; margin-right: 15px !important; }
+
+        /* --- 9. 抽卡區 (最新對稱版) [更新] --- */
+       /* 9. 抽卡區 (還原舊版設定) */
+        #draw-area { 
+            display: grid !important;
+            grid-template-columns: repeat(8, 1fr) !important; /* 維持 8 張一行 */
+            
+            width: 92% !important; /* 🔥 改回原本的 92% */
+            margin: 0 auto !important; 
+            
+            padding: 15px 0 !important; /* 🔥 拿掉左右多餘的留白 */
+            padding-bottom: 60px !important;
+            
+            gap: 5px 0 !important; 
+            box-sizing: border-box !important;
+            overflow-x: visible !important; /* 允許輕微溢出效果 */
         }
-        /* 手機版按鈕群組微調 */
-        .kb-inner-header-row { 
-            display: flex !important; 
-            flex-direction: row !important; /* 👈 鎖死同列 */
-            justify-content: space-between !important; 
+        
+        .card-back { 
+            width: 115% !important; /* 🔥 改回原本的 115% */
+            justify-self: center;
+            box-shadow: -1px 0 3px rgba(0,0,0,0.2) !important;
+        }
+        .close-card-btn {
+            top: 20px !important;
+            right: 20px !important;
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 24px !important;
+        }
+
+        /* --- 10. Footer 頁尾 (瘦身版) --- */
+        .footer-banner { position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 1001 !important; padding: 5px 0 !important; }
+        .footer-content {
+            flex-direction: row !important;      
+            flex-wrap: wrap !important;         
+            justify-content: center !important; 
+            gap: 8px !important;                 
+            padding-bottom: 5px !important;      
+            padding-top: 5px !important;         
+            width: 100% !important;              
+            box-sizing: border-box !important;
+        }
+        .social-group { transform: scale(0.9); margin: 0 !important; }
+        .copyright { font-size: 10px !important; transform: scale(0.85); white-space: nowrap !important; opacity: 0.6; }
+
+        /* --- 11. 抽卡結果彈窗 (防蓋住) --- */
+        .result-overlay {
+            align-items: flex-start !important; 
+            padding-top: 90px !important;       
+            padding-bottom: 40px !important;    
+            overflow-y: auto !important;        
+        }
+        .card-reveal, .text-modal-card {
+            margin: 0 auto !important;          
+            margin-bottom: 20px !important;     
+        }
+
+        /* 🔥🔥🔥 修正：手機版「大分類」 - 結構穿透版 🔥🔥🔥 */
+        .kb-big-cat-card {
+            display: grid !important;
+            /* 左邊圖片固定 110px，右邊剩餘空間 */
+            grid-template-columns: 110px 1fr !important;
+            /* 兩列：平分高度 */
+            grid-template-rows: 1fr 1fr !important;
+            
+            gap: 0 15px !important; 
+            padding: 15px !important;
             align-items: center !important; 
-            width: 100% !important; 
-            gap: 8px !important;
+            min-height: 120px !important;
+            position: relative !important;
         }
-        .kb-action-group { display: flex !important; gap: 8px !important; align-items: center !important; }        .kb-internal-back, .btn-back-capsule, .btn-pill-search { font-size: 12px !important; padding: 0 12px !important; height: 34px !important; }
-        .kb-internal-back i, .btn-back-capsule i { margin-right: 6px !important; font-size: 13px !important; transform: none !important; }
-        .kb-header-actions { display: flex !important; align-items: center !important; gap: 8px !important; margin-bottom: 20px !important; width: 100% !important; }
-        #booking-step-2 h2 { margin-top: 20px !important; }
-        .ota-grid-row {
-            grid-template-columns: 1fr; /* 手機：變回一欄 (上下排) */
-            gap: 15px;
-        }
-        .ql-editor h2.title-boxed-h2, .ql-editor h3.title-boxed-h3 { display: block; width: 100%; box-sizing: border-box; }
-        .ql-editor h2.title-boxed-h2 { font-size: 1.2rem; padding: 10px 15px; }
-        .ql-editor h3.title-boxed-h3 { font-size: 1rem; }
-        #birth-time-group, #birth-geo-group { display: flex !important; flex-direction: column !important; gap: 10px !important; width: 100% !important; }
-        
-        #draw-area { grid-template-columns: repeat(8, 1fr) !important; gap: 6px 0 !important; width: 92% !important; margin: 0 auto !important; padding: 15px 0 !important; }
-        .card-back { width: 115% !important; }
-        .close-card-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 24px; }
 
-        .footer-banner { padding: 5px 0 8px 0 !important; background: #1a2f23 !important; position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 1001 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.15) !important; border-top: 2px solid #c6a87c !important; border-radius: 0 !important; }
-        .footer-content { padding: 0 10px !important; gap: 4px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; }
-        .social-btn { padding: 4px 10px !important; font-size: 12px !important; border-radius: 20px !important; border: 1px solid rgba(255,255,255,0.2) !important; }
-        .social-btn i { font-size: 12px !important; }
-        .copyright { margin-top: 4px !important; font-size: 10px !important; opacity: 0.5 !important; line-height: 1 !important; }
-        
-        /* 尋找這一行，把 0.9rem 改成 0.7rem */
-        .brand-h2-en, .draw-title-h2 { font-size: 0.7rem !important; } 
+        /* 關鍵修正：把原本包住圖片文字的容器「融化」掉，讓裡面的東西直接排版 */
+        .kb-big-cat-card .kb-card-content {
+            display: contents !important; 
+        }
 
-        /* 尋找這一行，把 1.3rem 改成 1.6rem */
-        .brand-h3-zh, .draw-title-zh { font-size: 1.6rem !important; }.brand-capsule, .draw-desc-p { font-size: 0.85rem !important; padding: 6px 12px !important; width: auto !important; max-width: 92% !important; display: inline-flex; align-items: center; justify-content: center; line-height: 1.3; }
-        
-        #back-to-top { position: fixed !important; bottom: 70px !important; right: 15px !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; background: var(--forest) !important; color: var(--accent) !important; border: 2px solid var(--accent) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important; z-index: 1002 !important; display: flex !important; justify-content: center; align-items: center; font-size: 1.2rem !important; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.4s ease; }
-    
-        .kb-search-group { flex-direction: column; align-items: stretch; position: relative; }
-        .kb-group-remove-btn { position: absolute; top: 5px; right: 5px; }
-        .kb-search-cat-text { font-size: 0.85rem; margin-right: 5px; }
-        .kb-search-cat-text::after { margin-left: 5px; }
-        .step-header-wrapper {
-            flex-direction: column; /* 垂直排列 */
-            align-items: flex-start; /* 靠左對齊 */
-            gap: 15px;
-            margin-bottom: 20px;
+        /* 1. 圖片 (現在可以直接控制位置了) */
+        .kb-big-cat-card img {
+            grid-column: 1 !important;
+            grid-row: 1 / 3 !important; /* 跨兩行 */
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            margin: 0 !important;
         }
-        .step-header-wrapper .btn-back-capsule {
-            position: relative; /* 取消絕對定位 */
-            transform: none;
-            left: auto;
-            top: auto;
+
+        /* 2. 文字 (現在可以直接控制位置了) */
+        .kb-big-cat-card .kb-card-text {
+            display: block !important;    
+            grid-column: 2 !important;    
+            grid-row: 1 !important;       /* 放在右上 */
+            align-self: end !important;   /* 靠下沉底 */
+            
+            font-size: 1.8rem !important; 
+            font-weight: 900 !important;
+            line-height: 1.2 !important;
+            letter-spacing: 2px !important;
+            color: var(--forest) !important;
+            margin: 0 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
-        .step-title-fancy {
-            width: 100%;
-            text-align: center;
-            font-size: 1.4rem;
-            border-bottom: none; /* 手機版拿掉線條比較乾淨 */
-            background: linear-gradient(transparent 70%, #fff3e0 70%); /* 改用螢光筆效果 */
+
+        /* 3. 箭頭 (靠右 + 變小) */
+        .kb-big-cat-card .kb-arrow {
+            grid-column: 2 !important;
+            grid-row: 2 !important;       /* 放在右下 */
+            align-self: start !important; /* 靠上浮起 */
+            
+            /* 🔥 修改這裡：靠右對齊 */
+            text-align: right !important; 
+            
+            /* 🔥 修改這裡：字體改小 (原本是 1.5rem) */
+            font-size: 1.2rem !important; 
+            
+            color: var(--accent) !important;
+            margin-top: 5px !important;
+            display: block !important;
+            width: 100% !important; /* 確保佔滿寬度，靠右才會生效 */
         }
-        .kb-result-row {
-            flex-direction: column;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            position: relative;
-        }
-        .kb-result-input { width: 100%; }
-        .kb-remove-row-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #ffebee;
-            color: #d32f2f;
-            border: none;
-            width: 25px; height: 25px;
-            border-radius: 50%;
-        }
-        /* 手機版標題網格：由橫向改為垂直排列 */
-    .kb-header-grid {
-        display: flex !important;
-        flex-direction: column !important; /* 🔥 強制換行 */
-        align-items: center !important;
-        gap: 15px !important;
-        width: 100% !important;
-        margin: 15px 0 !important;
-    }
-    /* 🔥 分享按鈕：絕對圓形統一版 (與回到最上頁按鈕一致) */
-    #kb-share-btn {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        padding: 0 !important;
-        border-radius: 50% !important; /* 👈 鎖死為正圓形 */
-        display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--forest) !important;
-        color: #ffffff !important;      /* 👈 統一為白字 */
-        border: 1px solid var(--accent) !important;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
-        transition: all 0.3s ease;
-        margin: 0 !important;
-    }
-    #kb-share-btn:hover { background-color: var(--accent) !important; transform: translateY(-2px); }
-    #kb-share-btn i { font-size: 16px !important; color: #ffffff !important; }
-    /* 手機版按鈕容器：取消靠右，改為置中並佔滿適度寬度 */
-    .kb-header-right {
-        display: flex !important;
-        justify-content: center !important; /* 換行後置中 */
-        width: 100% !important;
-    }
-    .kb-header-right  {
-        width: auto !important;
-        min-width: 220px;
-        padding: 10px 30px !important;
-    }
-    .kb-avatar {
-            width: 80px !important;
-            height: 80px !important;
-            margin-right: 15px !important;
-        }
-        .kb-article-card .kb-card-text {
-            font-size: 1.3rem !important;
+        /* 🔥 新增：在箭頭前面加上「點擊前往」提示字 */
+        .kb-big-cat-card .kb-arrow::before {
+            content: "前往";        /* 要加的文字 */
+            font-size: 13px !important; /* 字體小小 */
+            color: #999 !important;     /* 淺灰色，不要搶戲 */
+            font-weight: normal !important;
+            margin-right: 8px !important; /* 跟箭頭拉開一點距離 */
             letter-spacing: 1px !important;
+            vertical-align: middle !important;
         }
-    /* 4. 縮小按鈕體積以符合手機空間 */
-        .btn-pill-search { 
-            font-size: 12px !important; 
-            padding: 6px 12px !important; 
-            height: 36px !important; 
-            white-space: nowrap !important;
-            color: #ffffff !important; /* 👈 鎖死白字 */
-        }
-
-        .kb-card-num { flex: 0 0 65px !important; font-size: 1.1rem !important; margin-right: 12px !important; text-align: right !important; }
-        .kb-tiny-note { position: absolute !important; top: -12px !important; right: -5px !important; max-width: 55% !important; transform: rotate(2deg) !important; transition: none !important; }
-    
-}
+    }
     
     @media (max-width: 768px) and (orientation: landscape) {
         .kb-tiny-note { top: 10px !important; right: 15px !important; transform: rotate(0deg) !important; }
     }
-    .total-display-row {
-        display: flex;
-        align-items: baseline; /* 底部對齊 */
-        justify-content: flex-end; /* 靠右 */
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-</style>
+    .total-display-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    
+    </style>
 
 </head>
 <body>
@@ -1341,12 +1144,12 @@
             <h1>培癒試驗室</h1>
             <h2>我是空間創辦人培培</h2>
             
-            <div id="must-read-wrapper" style="width: 100%; max-width: 500px; margin: 15px auto 10px auto; border: 2px solid var(--forest); border-radius: 12px; padding: 15px; background: #fff; text-align: center; display: none;">
+            <div id="must-read-wrapper" style="width: 100%; max-width: 800px; margin: 15px auto 10px auto; border: 2px solid var(--forest); border-radius: 12px; padding: 15px; background: #fff; text-align: center; display: none;">
                 <div class="announce-badge" style="background: var(--forest); color: var(--accent);">✦ 必讀專區 ✦</div>
                 <div id="must-read-container" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top:10px;"></div>
             </div>
 
-            <div id="temp-wrapper" style="width: 100%; max-width: 500px; margin: 0 auto 20px auto; border: 2px dashed #e67e22; border-radius: 12px; padding: 15px; background: #fffcf0; text-align: center; display: none;">
+            <div id="temp-wrapper" style="width: 100%; max-width: 800px; margin: 0 auto 20px auto; border: 2px dashed #e67e22; border-radius: 12px; padding: 15px; background: #fffcf0; text-align: center; display: none;">
                 <div class="announce-badge" style="background: #e67e22; color: #fff;">🔥 最新快訊 🔥</div>
                 <div id="temp-container" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top:10px;"></div>
             </div>
@@ -1581,8 +1384,7 @@
 
             <div class="card" style="background:#fffcf5; border-top:none; padding:20px; margin-bottom:0; border:1px solid #fae1c3;">
                 <label>📜 服務規範</label>
-                <div id="terms-box" style="height:120px; overflow-y:auto; border:1px solid #e0e0e0; padding:10px; font-size:13px; background:#fff; border-radius:8px; margin:10px 0;"></div>
-                <label class="agree-wrapper" style="margin-top:15px; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;">
+                    <div id="terms-box" style="height:auto; min-height:100px; border:1px solid #e0e0e0; padding:15px; font-size:13px; background:#fff; border-radius:8px; margin:10px 0; line-height: 1.6;"></div>                <label class="agree-wrapper" style="margin-top:15px; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;">
                     <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)" style="width:18px; height:18px;">
                     <span>我已詳細閱讀並同意</span>
                 </label>
@@ -1689,75 +1491,112 @@
 </div>
 
 <div id="success-overlay" class="result-overlay">
-    <div class="text-modal-card" style="text-align:center; padding: 40px 30px; max-width: 450px; position: relative;">
+    <div class="text-modal-card" style="text-align:center; padding: 0 !important; border-radius: 16px; overflow: hidden; max-width: 450px; position: relative;">
         
-        <button id="success-close-x" onclick="closeSuccessModal()" style="
-            display: none; /* 預設看不到 */
-            position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            background: none; 
-            border: none; 
-            font-size: 1.5rem; 
-            color: #ccc; 
-            cursor: pointer; 
-            transition: 0.3s;
-            padding: 5px 10px;"
-            onmouseover="this.style.color='#666'" 
-            onmouseout="this.style.color='#ccc'"
-            title="關閉">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <h3 style="color:var(--forest); margin:0 0 10px 0;">🎉 預約成功！</h3>
-        <p style="color:#666; margin-bottom: 30px;">您的預約已送出，訂單編號如下：</p>
-        
-        <div id="success-order-id" style="background:#f1f8e9; color:var(--forest); padding:15px; border-radius:8px; font-weight:bold; font-size:1.2rem; margin-bottom:30px; border:1px dashed var(--forest);">
-            OD123456789
+        <div style="background: var(--forest); padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); position: relative; z-index: 100;">
+            <h3 style="margin: 0; color: #fff; font-size: 1.4rem; letter-spacing: 2px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                🎉 預約成功！
+            </h3>
+            
+            <button id="real-close-btn" onclick="closeSuccessModal()" style="
+                display: none; /* 預設隱藏 */
+                position: absolute; 
+                right: 15px; 
+                top: 50%; 
+                transform: translateY(-50%); 
+                background: none; 
+                border: none; 
+                color: rgba(255,255,255,0.6); 
+                font-size: 1.8rem; 
+                cursor: pointer; 
+                padding: 5px 15px;
+                z-index: 200;"
+                title="關閉">
+                ✕
+            </button>
         </div>
 
-        <p style="font-size:0.9rem; color:#d32f2f; font-weight:bold; margin-bottom:15px;">
-            ⚠️ 請務必點擊下方按鈕<br>傳送編號給我確認，才算完成喔！
-        </p>
+        <div style="padding: 40px 30px; background: #fff;">
+            
+            <p style="color:#666; margin-bottom: 20px; line-height: 1.6; font-size: 1rem;">
+                您的預約已送出<br>請記下您的訂單編號：
+            </p>
+            
+            <div id="success-order-id" style="
+                background: #fffcf5; 
+                color: var(--forest); 
+                padding: 15px; 
+                border-radius: 12px; 
+                font-weight: 900; 
+                font-size: 1.5rem; 
+                letter-spacing: 1px;
+                margin-bottom: 30px; 
+                border: 2px dashed var(--accent);
+                box-shadow: 0 4px 10px rgba(198, 168, 124, 0.15);
+                font-family: 'Cinzel', serif;
+                cursor: pointer;"
+                title="點擊複製">
+                OD123456789
+            </div>
 
-        <a id="line-super-btn" href="#" target="_blank" class="btn-primary" 
-           style="background:#06c755; box-shadow:0 5px 15px rgba(6,199,85,0.4); 
-                  display: inline-flex; justify-content: center; align-items: center; 
-                  text-decoration: none; line-height: 50px; border-radius: 30px; 
-                  padding: 0 35px; width: auto; min-width: 240px; max-width: 100%; box-sizing: border-box;">
-            <i class="fa-brands fa-line" style="margin-right:10px; font-size:1.5rem;"></i> 
-            <span style="font-size:1.1rem; font-weight: bold;">傳送訂單編號 (LINE)</span>
-        </a>
+            <div style="font-size:0.95rem; color:#c0392b; font-weight:bold; margin-bottom:25px; background: #fff5f5; padding: 12px; border-radius: 8px; line-height: 1.5;">
+                <i class="fa-solid fa-circle-exclamation" style="margin-right: 5px;"></i>
+                請務必點擊下方按鈕<br>傳送編號給我確認，才算完成喔！
+            </div>
 
-        <div style="margin-top:25px; background:#f5f5f5; color:#777; font-size:12px; padding:12px; border-radius:8px; line-height:1.6; border:1px solid #eee;">
-            🖥️ 電腦版用戶若沒安裝 LINE<br>
-            請直接搜尋 ID <b style="color:#333; user-select:all;">@927ctmwa</b> 並回傳訂單編號唷！
+            <a id="line-super-btn" href="#" target="_blank" class="btn-primary" 
+               style="background:#06c755 !important; border-color:#06c755 !important; color:#fff !important; 
+                      box-shadow: 0 8px 20px rgba(6,199,85,0.25); 
+                      display: inline-flex; justify-content: center; align-items: center; 
+                      text-decoration: none; height: 50px; border-radius: 50px; 
+                      padding: 0 20px; width: 100%; box-sizing: border-box; font-size: 1.1rem; transition: transform 0.2s;">
+                <i class="fa-brands fa-line" style="margin-right:10px; font-size:1.6rem;"></i> 
+                <span style="font-weight: bold;">傳送訂單編號 (LINE)</span>
+            </a>
+
+            <div style="margin-top:20px; color:#999; font-size:12px; line-height:1.5;">
+                電腦版用戶若沒安裝 LINE<br>
+                請搜尋 ID <b style="color:#555; user-select:all;">@927ctmwa</b> 並回傳編號
+            </div>
+
+            <button id="success-close-text" onclick="closeSuccessModal()" style="
+                display: none; 
+                width: 100%;
+                margin-top: 15px; 
+                background: none; 
+                border: none; 
+                color: #aaa; 
+                cursor: pointer; 
+                text-decoration: underline; 
+                font-size: 0.9rem; 
+                padding: 10px;">
+                稍後再傳，先回首頁
+            </button>
         </div>
-
-        <button id="success-close-text" onclick="closeSuccessModal()" style="
-            display: none; /* 預設看不到 */
-            width: 100%;
-            margin-top:25px; 
-            background:none; 
-            border:none; 
-            color:#999; 
-            cursor:pointer; 
-            text-decoration:underline; 
-            font-size:0.9rem; 
-            padding: 10px;">
-            稍後再傳，先回首頁
-        </button>
     </div>
 </div>
 
 
 <div id="dynamic-overlay" class="result-overlay">
-    <div class="text-modal-card">
-        <h3 id="dyn-modal-title">載入中...</h3>
+    <div class="text-modal-card" style="padding: 0 !important; border-radius: 16px; overflow: hidden; max-width: 550px;">
         
-        <div id="dyn-modal-content" class="story-text"></div>
+        <div style="background: var(--forest); padding: 25px 20px; text-align: center; border-bottom: 4px solid var(--accent); position: relative;">
+            <h3 id="dyn-modal-title" style="margin: 0; color: #fff; font-size: 1.4rem; letter-spacing: 2px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                載入中...
+            </h3>
+            <button onclick="closeModal('dynamic-overlay')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; padding: 5px;">✕</button>
+        </div>
         
-        <button class="close-modal-btn" onclick="closeModal('dynamic-overlay')">關閉</button>
+        <div style="padding: 30px 25px 40px 25px; max-height: 65vh; overflow-y: auto; background: #fff;">
+            
+            <div id="dyn-modal-content"></div>
+            
+            <button class="close-modal-btn" onclick="closeModal('dynamic-overlay')" 
+                    style="margin-top: 30px; width: 100%; padding: 12px; border-radius: 50px; background: #f4f4f4 !important; color: #666 !important; border: 1px solid #ddd !important;">
+                關閉視窗
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -1776,44 +1615,64 @@
 </div>
 
 <div id="search-overlay" class="result-overlay">
-    <div class="text-modal-card" style="max-width: 650px; padding: 30px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:1.5rem; border:none; text-align:left;">🔍 文章搜尋</h3>
-            <button onclick="closeModal('search-overlay')" style="background:none; border:none; font-size:1.5rem; color:#999; cursor:pointer;">✕</button>
+    <div class="text-modal-card" style="max-width: 650px; padding: 0 !important; border-radius: 16px; overflow: hidden; position: relative;"> 
+        
+        <div style="background: var(--forest); padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); position: relative; z-index: 100;">
+            <h3 style="margin: 0; color: #fff; font-size: 1.4rem; letter-spacing: 2px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                🔍 文章搜尋
+            </h3>
+            
+            <button onclick="closeModal('search-overlay')" style="
+                position: absolute; 
+                right: 15px; 
+                top: 50%; 
+                transform: translateY(-50%); 
+                background: none; 
+                border: none; 
+                color: rgba(255,255,255,0.6); 
+                font-size: 1.8rem; 
+                cursor: pointer; 
+                padding: 5px 15px;
+                z-index: 200;">✕</button>
         </div>
         
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee;">
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
-                <div>
-                    <label style="font-size: 0.85rem; color: #888;">自訂報告標題 (選填)</label>
-                    <input type="text" id="kb-search-report-title" placeholder="例如：我的天賦報告" style="padding: 10px; margin-top: 5px;">
-                </div>
-                <div>
-                    <label style="font-size: 0.85rem; color: #888;">篩選大分類</label>
-                    <select id="kb-search-big-cat" style="padding: 10px; margin-top: 5px;">
-                        <option value="">全域搜尋</option>
-                    </select>
+        <div style="padding: 30px; background: #fff;">
+            
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; position: relative; z-index: 1;">
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: #888;">自訂報告標題 (選填)</label>
+                        <input type="text" id="kb-search-report-title" placeholder="例如：我的天賦報告" style="padding: 10px; margin-top: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: #888;">篩選大分類</label>
+                        <select id="kb-search-big-cat" style="padding: 10px; margin-top: 5px;">
+                            <option value="">全域搜尋</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="modal-search-groups-area"></div>
+            <div id="modal-search-groups-area" style="position: relative; z-index: 1;"></div>
 
-        <div class="kb-search-actions" style="margin-top:25px;">
-            <button class="kb-action-btn btn-add-group" onclick="addSearchGroup()" style="background:#fff; color:var(--forest); border:1px solid var(--forest); padding:10px 25px; border-radius:50px; cursor:pointer;">
-                <i class="fa-solid fa-plus"></i> 新增欄位
-            </button>
-            <button class="btn-pill-search" onclick="doKbSearch()" style="padding:10px 35px;">
-                <i class="fa-solid fa-magnifying-glass"></i> 執行搜尋
-            </button>
-        </div>
-    </div>
+            <div class="kb-search-actions" style="margin-top:25px; position: relative; z-index: 1;">
+                <button class="kb-action-btn btn-add-group" onclick="addSearchGroup()" style="background:#fff; color:var(--forest); border:1px solid var(--forest); padding:10px 25px; border-radius:50px; cursor:pointer;">
+                    <i class="fa-solid fa-plus"></i> 新增欄位
+                </button>
+                <button class="btn-pill-search" onclick="doKbSearch()" style="padding:10px 35px;">
+                    <i class="fa-solid fa-magnifying-glass"></i> 執行搜尋
+                </button>
+            </div>
+            
+        </div> </div>
 </div>
 
 <script>
     const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
     const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
     const myDB = supabase.createClient(SB_URL, SB_KEY);
+    
+    if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
 
     let cats = [], items = [], activeCat = null, allCards = [], kbTree = {}, kbState = { level: 0 }, otas = [], servicesData = {};    let kbCatOrder = { big: [], mid: {}, hide_note: [] }; 
     let currentCoupon = null; 
@@ -1821,22 +1680,21 @@
     let isMemberBlocked = false; 
     const defaultStyle = { gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } };
 
-    // 🔥 showSection 修正版：支援「不渲染目錄」的純切換模式
+    // 🔥 showSection 修正版：配合 0.6s 動畫，全時段強制置頂
     function showSection(id, isDirectArticle = false) { 
-        // 1. 改回原標題
         document.title = "培癒試驗室";
 
-        // 2. 網址清理 (只有在「非直接看文章」的情況下才清空，避免把文章連結洗掉)
         if (!isDirectArticle) {
              const cleanUrl = window.location.pathname;
              window.history.pushState({ path: cleanUrl }, '', cleanUrl);
         }
 
-        // 3. 切換顯示區塊
+        // 1. 切換區塊顯示
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
-        document.getElementById(id).classList.add('active'); 
+        const targetSection = document.getElementById(id);
+        if (targetSection) targetSection.classList.add('active');
         
-        // 4. 處理導航按鈕狀態
+        // 2. 更新導航狀態
         document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         const baseId = id.split('-')[0]; 
         const navBtn = document.getElementById('nav-' + baseId);
@@ -1844,13 +1702,34 @@
         
         document.getElementById('nav-menu').classList.remove('active');
         
-        // 🔥 關鍵修改：
-        // 只有在「不是」直接看文章的情況下，才畫出目錄
-        // 這樣就不會發生「先看到目錄 -> 才變成文章」的怪異跳轉
+        // 3. 如果是 KB 首頁且非直接閱讀，渲染目錄
         if (id === 'knowledge' && !isDirectArticle) {
             renderKbHome(); 
         }
-        window.scrollTo(0,0); 
+
+        // 4. 🔥🔥🔥 核彈級強制置頂 (解決 CSS 動畫干擾) 🔥🔥🔥
+        
+        // (A) 瞬間歸零：防止畫面閃爍
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+
+        // (B) 短延遲：等待 DOM `display: block` 生效
+        setTimeout(() => { 
+            window.scrollTo(0, 0); 
+        }, 10);
+
+        // (C) 中延遲：對抗手機瀏覽器網址列伸縮
+        setTimeout(() => { 
+            window.scrollTo(0, 0); 
+        }, 100);
+
+        // (D) 🔥 關鍵修正：長延遲 (700ms)
+        // 因為你的 CSS 動畫是 0.6s (600ms)，我們必須在動畫「完全結束後」
+        // 再執行一次強制置頂，確保卷軸不會因為動畫結束而被彈回舊位置！
+        setTimeout(() => { 
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 700);
     }
 
    document.addEventListener("DOMContentLoaded", async () => {
@@ -2280,6 +2159,7 @@
 async function doSubmit() {
     if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「個案專區」登入！");
     
+    // ... (這段檢查勾選邏輯不變) ...
     const selectedSvcs = document.querySelectorAll('input[name="svc"]:checked');
     for (let svc of selectedSvcs) {
         const subBoxes = document.querySelectorAll(`.sub-opt-item[data-parent-id="${svc.value}"]`);
@@ -2293,6 +2173,7 @@ async function doSubmit() {
         }
     }
 
+    // ... (這段基本資料檢查邏輯不變) ...
     const name = document.getElementById('c-name').value.trim();
     const phone = document.getElementById('c-phone').value.trim();
     const email = document.getElementById('c-email').value.trim();
@@ -2320,6 +2201,7 @@ async function doSubmit() {
     btn.innerText = "資料處理中...";
 
     try {
+        // ... (圖片上傳與資料準備邏輯不變) ...
         if (flow === 'upload') {
             const fileInput = document.getElementById('c-file');
             if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
@@ -2384,7 +2266,6 @@ async function doSubmit() {
         if(!error) { 
             try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });} catch (e) {}
 
-            // 🔥🔥🔥 重點修改在這裡：加上 '#' 字號！
             const shortId = '#' + myBookingId.slice(-6);
             
             const idBox = document.getElementById('success-order-id');
@@ -2395,7 +2276,6 @@ async function doSubmit() {
                 fallbackCopyText(shortId, () => alert("訂單編號已複製！"));
             };
 
-            // 2. 準備文字 (這裡的 shortId 現在已經帶有 # 了)
             let lineMsgText = "";
             if (payStatus === 'ota') {
                 const otaSelect = document.getElementById('ota-source-select');
@@ -2406,13 +2286,12 @@ async function doSubmit() {
                 lineMsgText = `你好，我已預約（尚未付款）。\n培癒試驗室訂單編號：${shortId}`;
             }
 
-            // 3. 設定 LINE 按鈕行為 (隱藏出口邏輯)
             const lineUrl = `https://line.me/R/oaMessage/@927ctmwa/?${encodeURIComponent(lineMsgText)}`;
             const lineBtn = document.getElementById('line-super-btn');
             lineBtn.href = lineUrl; 
             
-            // 先隱藏出口
-            document.getElementById('success-close-x').style.display = 'none';
+            // 🔥🔥🔥 修正重點：使用新 ID (real-close-btn) 來控制隱藏 🔥🔥🔥
+            document.getElementById('real-close-btn').style.display = 'none';
             document.getElementById('success-close-text').style.display = 'none';
 
             lineBtn.onclick = function(e) {
@@ -2421,8 +2300,8 @@ async function doSubmit() {
                 fallbackCopyText(lineMsgText, () => {
                     lineBtn.innerHTML = `<i class="fa-solid fa-check"></i> <b>已複製！正在開啟...</b>`;
                     
-                    // 解鎖出口
-                    document.getElementById('success-close-x').style.display = 'block';
+                    // 🔥🔥🔥 解鎖出口：顯示新 ID 的按鈕 🔥🔥🔥
+                    document.getElementById('real-close-btn').style.display = 'block';
                     document.getElementById('success-close-text').style.display = 'block';
                     
                     setTimeout(() => { window.open(lineUrl, '_blank'); }, 500); 
@@ -2442,6 +2321,8 @@ async function doSubmit() {
         btn.innerText = "送出預約"; 
     }
 }
+
+
 // 🔥 新增：萬用複製函式 (就算瀏覽器擋也能複製)
 function fallbackCopyText(text, callback) {
     // 嘗試 A 計畫：現代 API
@@ -2554,20 +2435,26 @@ function tryOldSchoolCopy(text, callback) {
                     </div>`;
         }).join('');
 
+        // 🔥🔥🔥 修正區：加上 style="margin-bottom: 15px" 縮短間距 🔥🔥🔥
         document.getElementById('kb-container').innerHTML = `
-            <div class="brand-section-header">
+            <div class="brand-section-header" style="margin-bottom: 15px !important;">
                  <div class="brand-h3-zh">培癒寶典</div>                    
                  <div class="brand-h2-en">PY JOURNEY</div>
-                 <div class="brand-capsule center-fix" style="margin: 15px auto !important;">探索自我的導引手冊</div>
+                 <div class="brand-capsule">
+                    探索自我的導引手冊
+                 </div>
             </div>
+            
             <div class="kb-cat-view">
                 <div class="kb-inner-header-row">
-                    <div></div> <button class="btn-pill-search" onclick="openSearchPanel()">
+                    <div></div> 
+                    <button class="btn-pill-search" onclick="openSearchPanel()">
                         <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
                     </button>
                 </div>
                 <div class="kb-list-container">${listHtml}</div>
             </div>`;
+            
         document.getElementById('knowledge').classList.add('kb-reading-mode');
         window.scrollTo(0,0);
     }
@@ -2591,193 +2478,207 @@ function tryOldSchoolCopy(text, callback) {
         openModal('search-overlay');
     }
 
-    // 🔥 新功能：動態新增欄位 (目標改為彈窗內的區域)
-    // ⚠️ 修正重點：只留這一個版本，對應 id="modal-search-groups-area"
+    // 🔥 addSearchGroup 修正版：兩行式佈局 (標題一行、關鍵字一行)
     function addSearchGroup(title = '', keywords = '') {
         const area = document.getElementById('modal-search-groups-area');
         if (!area) return;
 
         const div = document.createElement('div');
         div.className = 'kb-search-group';
+        
+        // 這裡的 HTML 結構配合上面的 CSS，會自動變成兩行
+        // 標題在第一行，關鍵字在第二行，X 按鈕浮在右上角
         div.innerHTML = `
-            <input type="text" class="kb-search-title-input" placeholder="標題 (如:天賦)" value="${title}">
-            <input type="text" class="kb-search-key-input" placeholder="關鍵字 (如:12,38)" value="${keywords}">
+            <input type="text" class="kb-search-title-input" 
+                   placeholder="小標題 (選填，無則顯示關鍵字)" 
+                   value="${title}">
+            
+            <input type="text" class="kb-search-key-input" 
+                   placeholder="搜尋關鍵字 (如: 12, 38)" 
+                   value="${keywords}">
+            
             <button class="kb-group-remove-btn" onclick="this.parentElement.remove()" title="刪除此組">✕</button>
         `;
         area.appendChild(div);
     }
 
-    // 3. 修正搜尋執行：抓取標題與分類
-    function doKbSearch(forceData = null) {
+    // 🔥 doKbSearch 修正版：強制收鍵盤 + 預先置頂
+    function doKbSearch(forceData = null, isBack = false) { 
+        // 1. 強制收起手機鍵盤 (避免高度亂跳)
+        if (document.activeElement) { document.activeElement.blur(); }
+
         if (!kbArticlesFlat || kbArticlesFlat.length === 0) return;
+        
         let searchData = { reportTitle: '', filterCat: '', groups: [] };
-        if (forceData) { searchData = forceData; } else {
-            searchData.reportTitle = document.getElementById('kb-search-report-title').value.trim();
-            searchData.filterCat = document.getElementById('kb-search-big-cat').value;
+        if (forceData) { 
+            searchData = forceData; 
+        } else {
+            const titleInput = document.getElementById('kb-search-report-title');
+            const catInput = document.getElementById('kb-search-big-cat');
+            if(titleInput) searchData.reportTitle = titleInput.value.trim();
+            if(catInput) searchData.filterCat = catInput.value;
+            
             document.querySelectorAll('#modal-search-groups-area .kb-search-group').forEach(g => {
                 const t = g.querySelector('.kb-search-title-input').value.trim();
                 const k = g.querySelector('.kb-search-key-input').value.trim();
                 if (k) searchData.groups.push({ title: t, keys: k });
             });
         }
+        
         if (searchData.groups.length === 0) return;
+        
+        // 2. 關閉彈窗前，先滾第一次
+        window.scrollTo(0, 0);
         closeModal('search-overlay');
-        kbState.level = 3; kbState.searchQuery = searchData;
-        const base64Str = safeB64Encode(JSON.stringify(searchData));
-        window.history.pushState({ path: window.location.pathname + `?view=knowledge&q=${base64Str}` }, '', window.location.pathname + `?view=knowledge&q=${base64Str}`);
-        renderSearchResults(searchData);
-    }
 
-    function renderSearchResults(searchData) {
+        // 3. 顯示 Loading
+        const loadingHtml = `
+            <div style="height: 80vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                <img src="logoloading.png" 
+                     style="width: 100px; height: 100px; object-fit: contain; 
+                            animation: spin 2s infinite linear; 
+                            filter: drop-shadow(0 0 15px rgba(198, 168, 124, 0.5));">
+                <div style="margin-top: 20px; color: var(--forest); font-weight: 900; letter-spacing: 2px; font-family: 'Noto Serif TC', serif;">
+                    資料調閱中...
+                </div>
+            </div>
+            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+        `;
+        
         document.getElementById('knowledge').classList.add('kb-reading-mode');
-        let finalHtml = ""; let totalCount = 0;
+        document.getElementById('kb-container').innerHTML = loadingHtml;
+        
+        // 再次確認置頂
+        window.scrollTo(0, 0);
+
+        // 4. 延遲 800ms 讓鍵盤完全收好，再顯示結果
+        setTimeout(() => {
+            kbState.level = 3; 
+            kbState.searchQuery = searchData;
+            
+            if (!isBack) { 
+                const base64Str = safeB64Encode(JSON.stringify(searchData));
+                window.history.pushState({ path: window.location.pathname + `?view=knowledge&q=${base64Str}` }, '', window.location.pathname + `?view=knowledge&q=${base64Str}`);
+            }
+            
+            renderSearchResults(searchData, isBack); 
+        }, 800); 
+    }
+    
+    // 🔥 renderSearchResults 修正版：使用隱形錨點 + 偏移定位 (解決切頭)
+    function renderSearchResults(searchData, isBack = false) { 
+        // 1. 強制收鍵盤
+        if (document.activeElement) { document.activeElement.blur(); }
+
+        document.getElementById('knowledge').classList.add('kb-reading-mode');
+        let finalHtml = "";
+        let totalCount = 0;
         const displayTitle = searchData.reportTitle || "文章搜尋結果";
 
-        // 在 renderSearchResults 函式內
-    searchData.groups.forEach((group) => {
-        const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-        let pool = kbArticlesFlat;
-        
-        // 如果有選大分類，先過濾大分類
-        if (searchData.filterCat) {
-            pool = pool.filter(a => a.big_category === searchData.filterCat);
-        }
+        // --- 篩選邏輯 (不變) ---
+        searchData.groups.forEach((group) => {
+            const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
+            let pool = kbArticlesFlat;
+            if (searchData.filterCat) { pool = pool.filter(a => a.big_category === searchData.filterCat); }
 
-        // 🔥 修正後的邏輯：移除嚴格數字匹配，改回通用包含判斷
-        const results = pool.filter(art => keywords.some(k => {
-            return art.title.toLowerCase().includes(k.toLowerCase());
-        }));
-        
-        totalCount += results.length;
+            const results = pool.filter(art => {
+                return keywords.some(k => {
+                    if (/^\d+$/.test(k)) {
+                        const cleanNum = parseInt(k, 10).toString();
+                        const regex = new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`);
+                        return regex.test(art.title);
+                    } else { return art.title.includes(k); }
+                });
+            });
+            
+            totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
-            let contentHtml = results.length === 0 ? `<div style="text-align:center; color:#ccc; padding:20px;">(無相關文章)</div>` : "";
-            if (results.length > 0) {
+            let contentHtml = "";
+
+            if (results.length === 0) {
+                contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
+            } else {
                 const grouped = {};
-                results.forEach(art => { const mid = art.mid_category || '其他'; if (!grouped[mid]) grouped[mid] = []; grouped[mid].push(art); });
+                results.forEach(art => {
+                    const mid = art.mid_category || '其他';
+                    if (!grouped[mid]) grouped[mid] = [];
+                    grouped[mid].push(art);
+                });
+
                 Object.keys(grouped).forEach(midCat => {
-                    const cards = grouped[midCat].map(a => {
-                        const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                        let disp = m ? `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>` : `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
-                        return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${disp}</div><div class="kb-arrow">➔</div></div>`;
+                    const articles = grouped[midCat];
+                    const cards = articles.map(a => {
+                        let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
+                        const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+                        if (match) { displayHtml = `<div class="kb-card-num" style="margin-right:15px;">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`; }
+                        
+                        // 🔥 確保這裡有 data-id
+                        return `<div class="kb-article-card" data-id="${a.id}" onclick="readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
-                    contentHtml += `<div class="kb-search-mid-group"><div style="text-align:left;"><span class="kb-mid-simple-badge">${midCat}</span></div><div class="kb-list-container">${cards}</div></div>`;
+                    contentHtml += `<div class="kb-search-mid-group"><div class="kb-search-mid-header">${midCat}</div><div class="kb-list-container">${cards}</div></div>`;
                 });
             }
             finalHtml += `<div class="kb-result-section"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
         });
 
-        // 尋找 renderSearchResults 函式最後的 innerHTML 位置
-    document.getElementById('kb-container').innerHTML = `
-        <div class="kb-search-results-wrapper">
-            <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-            <div class="brand-section-header">
-                <div class="brand-h3-zh">${displayTitle}</div>                    
-                <div class="brand-h2-en">SEARCH RESULTS</div>
-                <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
-            </div>
-            <div class="kb-cat-view">
-                <div class="kb-inner-header-row">
-    <div class="kb-action-group">
-        <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回</button>
-        <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告">
-            <i class="fa-solid fa-share-nodes"></i>
-        </button>
-    </div>
-    <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 搜尋文章</button>
-</div>
-                ${finalHtml}
-            </div>
-        </div>`;
-        window.scrollTo(0, 0);
-    }
-function renderSearchResults(searchData) {
-    document.getElementById('knowledge').classList.add('kb-reading-mode');
-    let finalHtml = "";
-    let totalCount = 0;
-    const displayTitle = searchData.reportTitle || "文章搜尋結果";
+        // --- 2. 渲染 HTML (加入隱形錨點) ---
+        const container = document.getElementById('kb-container');
+        container.innerHTML = `
+            <div class="kb-search-results-wrapper">
+                <div id="search-anchor-top" style="height:1px; width:100%;"></div>
 
-    // searchData 現在是一個物件 { reportTitle, filterCat, groups }
-    searchData.groups.forEach((group) => {
-        const keywords = group.keys.split(/[,.，\s]+/).filter(k => k.trim() !== "");
-        
-        // 1. 先篩選出所有符合的文章
-        let pool = kbArticlesFlat;
-        
-        // 🔥 大分類篩選邏輯
-        if (searchData.filterCat) {
-            pool = pool.filter(a => a.big_category === searchData.filterCat);
-        }
-
-        const results = pool.filter(art => {
-            return keywords.some(k => {
-                if (/^\d+$/.test(k)) {
-                    // 🔥 精確數字正則：確保「1」只會對到「1」或「01」，不會對到「10」或「21」
-                    const cleanNum = parseInt(k, 10).toString();
-                    const regex = new RegExp(`(^|[^0-9])0?${cleanNum}([^0-9]|$)`);
-                    return regex.test(art.title);
-                } else {
-                    return art.title.includes(k);
-                }
-            });
-        });
-        
-        totalCount += results.length;
-        const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
-        let contentHtml = "";
-
-        if (results.length === 0) {
-            contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
-        } else {
-            // 2. 依照「中分類 (mid_category)」進行分組
-            const grouped = {};
-            results.forEach(art => {
-                const mid = art.mid_category || '其他';
-                if (!grouped[mid]) grouped[mid] = [];
-                grouped[mid].push(art);
-            });
-
-            Object.keys(grouped).forEach(midCat => {
-                const articles = grouped[midCat];
-                const cards = articles.map(a => {
-                    let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
-                    const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                    if (match) {
-                        displayHtml = `<div class="kb-card-num" style="margin-right:15px;">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
-                    }
-                    return `<div class="kb-article-card" onclick="readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
-                }).join('');
-
-                contentHtml += `<div class="kb-search-mid-group"><div class="kb-search-mid-header">${midCat}</div><div class="kb-list-container">${cards}</div></div>`;
-            });
-        }
-
-        finalHtml += `<div class="kb-result-section"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
-    });
-
-    // 3. 渲染最終畫面 (左二右一佈局)
-    document.getElementById('kb-container').innerHTML = `
-        <div class="kb-search-results-wrapper">
-            <div class="brand-section-header">
-                <div class="brand-h3-zh">${displayTitle}</div>                    
-                <div class="brand-h2-en">SEARCH RESULTS</div>
-                <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
-            </div>
-            <div class="kb-cat-view">
-                <div class="kb-inner-header-row">
-                    <div class="kb-action-group">
-                        <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回</button>
-                        <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告"><i class="fa-solid fa-share-nodes"></i></button>
-                    </div>
-                    <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 搜尋文章</button>
+                <div class="brand-section-header" style="margin-top: 10px;">
+                    <div class="brand-h3-zh">${displayTitle}</div>                    
+                    <div class="brand-h2-en">SEARCH RESULTS</div>
+                    <div class="brand-capsule center-fix" style="margin: 15px auto !important;">共搜尋到 ${totalCount} 篇文章</div>
                 </div>
-                ${finalHtml}
-            </div>
-        </div>`;
-    window.scrollTo(0, 0);
-}
 
-    // 🔥 enterKb 修正版：移除自動定位，改為強制回到最頂端
-    function enterKb(big) {
+                <div class="kb-cat-view">
+                    <div class="kb-inner-header-row">
+                        <div class="kb-action-group">
+                            <button onclick="kbGoBack()" class="btn-pill-search"><i class="fa-solid fa-arrow-left"></i> 返回</button>
+                            <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告"><i class="fa-solid fa-share-nodes"></i></button>
+                        </div>
+                        <button class="btn-pill-search" onclick="openSearchPanel(kbState.searchQuery)"><i class="fa-solid fa-magnifying-glass"></i> 搜尋文章</button>
+                    </div>
+                    ${finalHtml}
+                </div>
+            </div>`;
+        
+        // --- 3. 捲動控制 ---
+        if (isBack && kbState.lastClickedId) {
+            // A. 返回模式：找回上次的卡片
+            setTimeout(() => {
+                const target = document.querySelector(`.kb-article-card[data-id="${kbState.lastClickedId}"]`);
+                if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
+            }, 100);
+        } else {
+            // B. 新搜尋模式：使用錨點 + 偏移量計算
+            // 這種算法會算出「絕對位置」，不會被捲軸目前的狀態騙去
+            const anchor = document.getElementById('search-anchor-top');
+            if (anchor) {
+                // 算出錨點距離頁面最頂端的距離
+                const topPos = anchor.getBoundingClientRect().top + window.scrollY;
+                
+                // 🔥 減去 100px (保留給導航列 Header 的空間)
+                // 這樣就不會切頭了！
+                window.scrollTo({
+                    top: topPos - 120, // 多扣一點比較保險
+                    behavior: 'auto'
+                });
+
+                // 為了防止手機瀏覽器在下一幀又亂跳，加個鎖定
+                setTimeout(() => {
+                   window.scrollTo({ top: topPos - 120, behavior: 'auto' });
+                }, 50);
+            } else {
+                // 如果真的抓不到錨點，回歸原始歸零
+                window.scrollTo(0, 0);
+            }
+        }
+    }
+
+    function enterKb(big, isBack = false) { 
         kbState.level = 1;
         kbState.big = big;
         
@@ -2805,57 +2706,50 @@ function renderSearchResults(searchData) {
             const articlesHtml = arts.map(a => {
                 let displayHtml = "";
                 const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                
                 if (match) {
-                    // 有數字：靠右顯示在停車格裡
                     displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
                 } else {
-                    // 沒有數字：補一個同樣 75px 寬的 ✦ 佔位，起跑線才會絕對對齊
                     displayHtml = `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
                 }
-                
-                return `
-                <div class="kb-article-card" onclick="event.stopPropagation(); readArt('${a.id}')">
-                    <div class="kb-card-content">${displayHtml}</div>
-                    <div class="kb-arrow">➔</div>
-                </div>`;
+                // 🔥 記得這裡要有 data-id
+                return `<div class="kb-article-card" data-id="${a.id}" onclick="event.stopPropagation(); readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
             }).join('');
 
             const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
-
-            return `
-            <details id="${safeMidId}" class="kb-section-group" open>
-                <summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary>
-                <div class="kb-list-container">${articlesHtml}</div>
-            </details>`;
+            return `<details id="${safeMidId}" class="kb-section-group" open><summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary><div class="kb-list-container">${articlesHtml}</div></details>`;
         }).join('');
         
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-cat-view">
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
-
                 <div class="kb-header-actions">
                     <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
                         <i class="fa-solid fa-arrow-left"></i> 返回首頁
                     </div>
                 </div>
-
-                <div class="kb-cat-header">
-                    <h1 class="kb-cat-title-h1">${big}</h1>
-                    ${noteHtml}
-                </div>
+                <div class="kb-cat-header"><h1 class="kb-cat-title-h1">${big}</h1>${noteHtml}</div>
                 ${contentHtml}
-            </div>
-        `;
+            </div>`;
         
-        // 🔥 這裡改掉了！
-        // 不管有沒有 activeMid，全部強制滾到最上面 (0, 0)
-        window.scrollTo(0, 0);
+        // 🔥🔥🔥 這裡就是你要的邏輯 🔥🔥🔥
+        if (isBack && kbState.lastClickedId) {
+            // A. 如果是按返回：滾回原本的位置
+            setTimeout(() => {
+                const target = document.querySelector(`.kb-article-card[data-id="${kbState.lastClickedId}"]`);
+                if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
+            }, 50);
+        } else {
+            // B. 如果是新點進來：強制置頂
+            window.scrollTo(0, 0);
+            setTimeout(() => window.scrollTo(0, 0), 10);
+        }
     }
 
-
-    // 🔥 readArt 最終版：動態修改網頁標題 + 手機版優化
+    // 🔥 readArt 修正版：點擊時記住捲動位置
     async function readArt(idOrSlug) {
+        // 1. 💾 記住這張卡片的 ID (為了等一下返回時用)
+        kbState.lastClickedId = idOrSlug;
+
         const isUUID = idOrSlug.length > 20; 
         let query = myDB.from('kb_articles').select('*');
         if (isUUID) { query = query.eq('id', idOrSlug); } else { query = query.eq('slug', idOrSlug); }
@@ -2863,10 +2757,8 @@ function renderSearchResults(searchData) {
         const { data, error } = await query.single();
         if (error || !data) { console.error(error); alert("找不到文章！"); return; }
 
-        // ✅ 這裡修改標題！
         document.title = `培癒試驗室 ${data.title}`;
 
-        // 狀態與網址處理
         kbState.activeBig = data.big_category; 
         kbState.activeMid = data.mid_category;
         kbState.level = 2;
@@ -2891,13 +2783,13 @@ function renderSearchResults(searchData) {
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
 
             <div class="kb-header-actions">
-    <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
-        <i class="fa-solid fa-arrow-left"></i> 返回
-    </div>
-    <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結">
-        <i class="fa-solid fa-share-nodes"></i>
-    </button>
-</div>
+                <div onclick="kbGoBack()" class="kb-internal-back" style="cursor:pointer;">
+                    <i class="fa-solid fa-arrow-left"></i> 返回
+                </div>
+                <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
                 ${noteHtml}
 
                 <h1 class="kb-article-title-h1" style="margin-top: 10px;">${data.title}</h1>
@@ -2911,7 +2803,9 @@ function renderSearchResults(searchData) {
                 <div class="ql-editor">${data.body}</div>
             </div>`;
             
-        window.scrollTo(0, 0);
+        // 🔥 進入文章時，絕對置頂！
+        window.scrollTo(0, 0); 
+        setTimeout(() => window.scrollTo(0, 0), 10);
     }
 
     // 🔥 最終修復：手機版操作結束後直接離開，絕不執行電腦版邏輯
@@ -2951,37 +2845,29 @@ function renderSearchResults(searchData) {
 
 
     // 🔥 kbGoBack 最終修正版：支援從文章返回「多組搜尋結果」
+    // 🔥 kbGoBack 修正版：傳送 true 參數
     function kbGoBack() {
-        // 1. 改回原標題
         document.title = "培癒試驗室";
-        
-        // 2. 退出閱讀模式樣式 (讓標題跑出來，如果是回首頁的話)
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
         
-        // 3. 判斷當前狀態
         if (kbState.level === 2) { 
-            // === 目前在看文章 (Level 2) ===
-            
-            // A. 如果之前是透過「搜尋」進來的 (不管是單組還是多組)
+            // 情況 A: 從文章返回
             if (kbState.searchQuery) {
-                // 直接把存起來的搜尋設定 (searchQuery) 丟回去重新執行
-                // 這樣畫面就會變回剛剛那張漂亮的「客製化報告表」
-                doKbSearch(kbState.searchQuery);
+                // 返回搜尋結果，並傳入 true (代表要恢復捲動)
+                doKbSearch(kbState.searchQuery, true); 
             }
-            // B. 正常分類瀏覽 -> 回到該大分類目錄
             else if (kbState.activeBig) {
                 const cleanUrl = window.location.pathname + "?view=knowledge";
                 window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-                enterKb(kbState.activeBig);
+                // 返回大分類，並傳入 true (代表要恢復捲動)
+                enterKb(kbState.activeBig, true); 
             } 
-            // C. 例外狀況 -> 回首頁
             else {
                 renderKbHome();
             }
         } 
         else {
-            // === 其他情況 (Level 3 搜尋結果頁 或 Level 1 目錄頁) ===
-            // 按返回 -> 全部回寶典首頁
+            // 情況 B: 從其他地方返回首頁
             const cleanUrl = window.location.pathname + "?view=knowledge";
             window.history.pushState({ path: cleanUrl }, '', cleanUrl);
             renderKbHome();
@@ -3294,30 +3180,32 @@ function renderSearchResults(searchData) {
     // === 回到頂部按鈕邏輯 ===
     
     // 監聽捲動事件
-    // === 雙按鈕滑動監聽邏輯 ===
+    // 監聽捲動事件
     window.onscroll = function() {
         const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-        const isScrolled = scrollTop > 300; // 滑動超過 300px
+        const isScrolled = scrollTop > 300; 
 
-        // 1. 控制「回到最上」按鈕 (全站通用)
+        // 1. 控制「回到最上」按鈕
         const topBtn = document.getElementById('back-to-top');
+        // 🔥 新增判斷：檢查現在是不是在「抽卡 (draw)」頁面
+        const isDrawPage = document.getElementById('draw').classList.contains('active');
+
         if (topBtn) {
-            if (isScrolled) topBtn.classList.add('show');
-            else topBtn.classList.remove('show');
+            // 邏輯：有捲動 + 「不是」抽卡頁面，才顯示按鈕
+            if (isScrolled && !isDrawPage) {
+                topBtn.classList.add('show');
+            } else {
+                topBtn.classList.remove('show');
+            }
         }
 
         // 2. 控制「回上一頁」按鈕 (只在培癒寶典出現)
-        // 因為這按鈕是動態生成的，所以用 querySelector 抓
         const backBtn = document.querySelector('.kb-fab-back');
         const knowledgeSection = document.getElementById('knowledge');
         
-        // 檢查：(1)按鈕存在 (2)目前在培癒寶典分頁 (3)有滑動
         if (backBtn && knowledgeSection.classList.contains('active')) {
-            if (isScrolled) {
-                backBtn.classList.add('show');
-            } else {
-                backBtn.classList.remove('show');
-            }
+            if (isScrolled) backBtn.classList.add('show');
+            else backBtn.classList.remove('show');
         }
     };
     

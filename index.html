@@ -444,7 +444,16 @@
     }
     .ota-grid-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px; }
     .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
-
+    /* 時間選擇下拉選單樣式 */
+    .time-select {
+        flex: 1; /* 兩個平分寬度 */
+        padding: 14px; 
+        border: 1px solid #ddd; 
+        border-radius: 10px; 
+        font-size: 16px; 
+        outline: none; 
+        background: #fafafa;
+    }
     /* 步驟標題與返回 */
     .step-header-wrapper {
         position: relative; display: flex; align-items: center; justify-content: center;
@@ -1362,9 +1371,19 @@
                         <input type="date" id="b-date">
                     </div>
                     <div class="form-group">
-                        <label>出生精確時間</label>
-                        <input type="time" id="b-time" value="12:00">
-                        <small style="color:#d32f2f; display:block; margin-top:5px; font-size:12px;">✅ 請確認是上午或下午</small>
+                        <label class="required">出生時間 (24小時制)</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <select id="b-hour" class="time-select">
+                                <option value="" disabled selected>時</option>
+                                </select>
+                            <span style="font-weight:bold; color:#888;">:</span>
+                            <select id="b-minute" class="time-select">
+                                <option value="" disabled selected>分</option>
+                                </select>
+                        </div>
+                        <small style="color:#d32f2f; display:block; margin-top:8px; font-size:12px; font-weight:bold; background:#fff5f5; padding:5px; border-radius:4px;">
+                            ✅ 例如：下午 2 點請選 【14】時，半夜 12 點請選 【00】時
+                        </small>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;" id="birth-geo-group">
@@ -1809,6 +1828,7 @@
         loadSiteAssets();
         checkSession(); 
         loadHeroAnnouncements();
+        initTimeSelects();
 
         await Promise.all([p1, p3]); 
 
@@ -2094,6 +2114,38 @@
         showSection('booking-step-2');
     }
 
+
+    // 🔥 自動產生 24小時制的時間選單
+    function initTimeSelects() {
+        const hourSelect = document.getElementById('b-hour');
+        const minSelect = document.getElementById('b-minute');
+        
+        if(!hourSelect || !minSelect) return;
+
+        // 產生 00 - 23 小時
+        for(let i=0; i<24; i++) {
+            const val = i.toString().padStart(2, '0');
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.text = val;
+            hourSelect.add(opt);
+        }
+        
+        // 產生 00 - 59 分鐘
+        for(let i=0; i<60; i++) {
+            const val = i.toString().padStart(2, '0');
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.text = val;
+            minSelect.add(opt);
+        }
+        
+        // 預設選中 12:00
+        hourSelect.value = "12";
+        minSelect.value = "00";
+    }
+    
+
     function handleServiceCheck(el) {
         const isMain = (el.dataset.isMain === 'true');
 
@@ -2242,7 +2294,10 @@ async function doSubmit() {
             finalDataInfo = `截圖: ${data.publicUrl}`;
         } else {
             const bDate = document.getElementById('b-date').value;
-            const bTime = document.getElementById('b-time').value;
+            const h = document.getElementById('b-hour').value;
+        const m = document.getElementById('b-minute').value;
+        if (!h || !m) return alert("❌ 請完整選擇出生時間 (幾點 : 幾分)");
+        const bTime = `${h}:${m}`;
             const bPlace = document.getElementById('b-place').value.trim();
             if (!bDate || !bTime || !bPlace) throw new Error("❌ 請完整填寫出生資料");
             finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;

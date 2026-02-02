@@ -607,6 +607,7 @@
         align-items: center; 
         justify-content: center; 
     }
+    
     .kb-result-section-title { display: flex; align-items: center; justify-content: center; margin: 40px 0 20px 0; color: #555; font-weight: bold; font-size: 1.1rem; }
     .kb-result-section-title::before, .kb-result-section-title::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
     .kb-result-section-badge { background: #fff; color: var(--forest); padding: 5px 20px; border: 2px solid var(--forest); border-radius: 50px; }
@@ -657,8 +658,8 @@
     summary.kb-mid-separator::-webkit-details-marker { display: none; }
     summary.kb-mid-separator::before, summary.kb-mid-separator::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
     .kb-mid-badge { 
-        background: var(--forest); color: var(--accent); padding: 10px 35px; border-radius: 50px; 
-        font-size: 1.2rem; font-weight: bold; font-family: 'Noto Serif TC', serif; 
+        background: var(--forest); color: var(--accent); padding: 6px 25px; border-radius: 50px; 
+        font-size: 1rem; font-weight: bold; font-family: 'Noto Serif TC', serif; 
         box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); display: flex; align-items: center; gap: 10px; 
         transition: 0.3s; border: 2px solid transparent; 
     }
@@ -2750,7 +2751,8 @@ function tryOldSchoolCopy(text, callback) {
             sortedMids = Object.keys(kbTree[big]);
         }
 
-        const contentHtml = sortedMids.map(mid => {
+        // 🔥 這裡加入 index 參數
+        const contentHtml = sortedMids.map((mid, index) => {
             const arts = kbTree[big][mid]; 
             const articlesHtml = arts.map(a => {
                 let displayHtml = "";
@@ -2758,14 +2760,26 @@ function tryOldSchoolCopy(text, callback) {
                 if (match) {
                     displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
                 } else {
-                    displayHtml = `<div class="kb-card-num" style="font-size:1rem; opacity:0.3;">✦</div><div class="kb-card-text">${a.title}</div>`;
+                    displayHtml = `<div class="kb-card-num star-only">✦</div><div class="kb-card-text">${a.title}</div>`;
                 }
-                // 🔥 記得這裡要有 data-id
                 return `<div class="kb-article-card" data-id="${a.id}" onclick="event.stopPropagation(); readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
             }).join('');
 
             const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
-            return `<details id="${safeMidId}" class="kb-section-group" open><summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary><div class="kb-list-container">${articlesHtml}</div></details>`;
+            
+            // 🔥 關鍵修正：只有第 1 個 (index===0) 預設開啟，其他不管
+            // ❌ 已移除 onclick="closeOthers(this)"，不會再自動關閉別人了
+            const openAttr = index === 0 ? 'open' : '';
+
+            return `
+                <details id="${safeMidId}" class="kb-section-group" ${openAttr}>
+                    <summary class="kb-mid-separator">
+                        <span class="kb-mid-badge">${mid}</span>
+                    </summary>
+                    <div class="kb-list-container">
+                        ${articlesHtml}
+                    </div>
+                </details>`;
         }).join('');
         
         document.getElementById('kb-container').innerHTML = `
@@ -2780,20 +2794,16 @@ function tryOldSchoolCopy(text, callback) {
                 ${contentHtml}
             </div>`;
         
-        // 🔥🔥🔥 這裡就是你要的邏輯 🔥🔥🔥
         if (isBack && kbState.lastClickedId) {
-            // A. 如果是按返回：滾回原本的位置
             setTimeout(() => {
                 const target = document.querySelector(`.kb-article-card[data-id="${kbState.lastClickedId}"]`);
                 if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
             }, 50);
         } else {
-            // B. 如果是新點進來：強制置頂
             window.scrollTo(0, 0);
             setTimeout(() => window.scrollTo(0, 0), 10);
         }
     }
-
     // 🔥 readArt 修正版：點擊時記住捲動位置
     async function readArt(idOrSlug) {
         // 1. 💾 記住這張卡片的 ID (為了等一下返回時用)

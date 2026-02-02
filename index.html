@@ -2271,18 +2271,11 @@ async function doSubmit() {
             try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });} catch (e) {}
 
             const shortId = '#' + myBookingId.slice(-6);
-            
-            const idBox = document.getElementById('success-order-id');
-            idBox.innerText = shortId;
-            idBox.style.cursor = "pointer";
-            idBox.title = "點擊複製編號";
-            idBox.onclick = function() {
-                fallbackCopyText(shortId, () => alert("訂單編號已複製！"));
-            };
 
+            // 1. 🔥 先把 LINE 要傳的完整訊息組好
             let lineMsgText = "";
             if (payStatus === 'ota') {
-                const otaSelect = document.getElementById('ota-source-select');
+                const otaSelect = document.getElementById('ota-source-select'); // 注意：這邊確認一下你的 ID 是 source 還是 platform
                 const otaName = otaSelect.options[otaSelect.selectedIndex].text;
                 const otaCode = document.getElementById('ota-order-id').value.trim();
                 lineMsgText = `你好，我已預約〔已於 ${otaName} 付款，單號：${otaCode}〕。\n培癒試驗室訂單編號：${shortId}`;
@@ -2290,9 +2283,20 @@ async function doSubmit() {
                 lineMsgText = `你好，我已預約（尚未付款）。\n培癒試驗室訂單編號：${shortId}`;
             }
 
+            // 2. 🔥 設定訂單編號那格的行為
+            const idBox = document.getElementById('success-order-id');
+            idBox.innerText = shortId;
+            idBox.style.cursor = "pointer";
+            idBox.title = "點擊複製完整預約訊息"; // 提示文字改一下
+            idBox.onclick = function() {
+                // 這裡改成複製 lineMsgText (完整訊息)
+                fallbackCopyText(lineMsgText, () => alert("預約訊息已複製！"));
+            };
+
+            // 3. 設定 LINE 按鈕 (這段維持原樣或是接在後面)
             const lineUrl = `https://line.me/R/oaMessage/@927ctmwa/?${encodeURIComponent(lineMsgText)}`;
             const lineBtn = document.getElementById('line-super-btn');
-            lineBtn.href = lineUrl; 
+            lineBtn.href = lineUrl;
             
             // 🔥🔥🔥 修正重點：使用新 ID (real-close-btn) 來控制隱藏 🔥🔥🔥
             document.getElementById('real-close-btn').style.display = 'none';

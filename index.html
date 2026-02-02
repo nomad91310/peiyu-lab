@@ -520,10 +520,27 @@
     .kb-article-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.1); border-left-color: var(--forest); }
     .kb-card-content { display: flex !important; align-items: center !important; width: 100% !important; min-width: 0 !important; }
     .kb-card-num {
-        font-family: 'Cinzel', serif !important; font-size: 1.45rem !important; color: var(--accent) !important;
-        font-weight: 900 !important; flex: 0 0 85px !important; display: inline-flex !important;
-        justify-content: flex-end !important; align-items: center; margin-right: 20px !important; 
-        font-variant-numeric: tabular-nums !important; line-height: 1;
+        flex: 0 0 40px !important;      /* 👈 數字的固定寬度 */
+        width: 65px !important;
+        
+        display: inline-flex !important;
+        justify-content: flex-start !important; /* 靠左 */
+        text-align: left !important;
+        white-space: nowrap !important;
+        
+        font-family: 'Cinzel', serif !important;
+        font-size: 1.2rem !important;
+        color: var(--accent) !important;
+        font-weight: 900 !important;
+        margin-right: 10px !important;
+        font-variant-numeric: tabular-nums !important;
+        line-height: 1 !important;
+    }
+    .kb-card-num.star-only {
+        flex: 0 0 35px !important;      /* 👈 星星只佔 35px */
+        width: 35px !important;
+        font-size: 1.2rem !important;   /* 星星稍微小一點點比較精緻 */
+        opacity: 0.6 !important;        /* 稍微淡一點更有質感 */
     }
     .kb-card-text { 
         font-size: 1.05rem !important; font-weight: bold !important; color: var(--forest) !important;
@@ -972,8 +989,14 @@
         /* KB 列表 */
         .kb-article-view { padding: 30px 18px 20px 18px !important; }
         .kb-list-container { gap: 10px !important; }
-        .kb-article-card { padding: 10px 15px !important; min-height: auto !important; }
-        .kb-card-num { flex: 0 0 60px !important; font-size: 1.1rem !important; text-align: right !important; margin-right: 10px !important; }
+        /* 手機版卡片極限壓縮高度 */
+        .kb-article-card { 
+            padding: 5px 10px !important;   /* 👈 上下只留 5px，左右 10px */
+            min-height: 45px !important;    /* 👈 設定最小高度 (配合你的字體大小) */
+            margin-bottom: 3px !important;  /* 👈 卡片之間的距離也縮小一點 */
+        }
+        .kb-card-num { flex: 0 0 70px !important; width: 70px !important; }
+        .kb-card-num.star-only { flex: 0 0 25px !important; width: 25px !important; }
         .kb-article-card .kb-card-text { font-size: 1rem !important; letter-spacing: 1px !important; }
         .kb-header-grid { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 15px !important; width: 100% !important; margin: 15px 0 !important; }
         .kb-header-right { display: flex !important; justify-content: center !important; width: 100% !important; min-width: 220px; padding: 10px 30px !important; }
@@ -2615,13 +2638,31 @@ function tryOldSchoolCopy(text, callback) {
 
                 Object.keys(grouped).forEach(midCat => {
                     const articles = grouped[midCat];
+                    // 產生該分類下的卡片
                     const cards = articles.map(a => {
-                        let displayHtml = `<div class="kb-card-text">${a.title}</div>`;
-                        const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                        if (match) { displayHtml = `<div class="kb-card-num" style="margin-right:15px;">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`; }
+                        const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
                         
-                        // 🔥 確保這裡有 data-id
-                        return `<div class="kb-article-card" data-id="${a.id}" onclick="readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
+                        let displayHtml = "";
+                        
+                        if (m) {
+                            // 🟢 情況一：有數字 (如 01 標題) -> 使用預設樣式 (65px)
+                            displayHtml = `
+                                <div class="kb-card-num">${m[1]}</div>
+                                <div class="kb-card-text">${m[2]}</div>
+                            `;
+                        } else {
+                            // 🟡 情況二：沒數字 (顯示星星) -> 加入 star-only 縮小寬度
+                            displayHtml = `
+                                <div class="kb-card-num star-only">✦</div>
+                                <div class="kb-card-text">${a.title}</div>
+                            `;
+                        }
+
+                        return `
+                        <div class="kb-article-card" onclick="readArt('${a.id}')">
+                            <div class="kb-card-content">${displayHtml}</div>
+                            <div class="kb-arrow">➔</div>
+                        </div>`;
                     }).join('');
                     contentHtml += `<div class="kb-search-mid-group"><div class="kb-search-mid-header">${midCat}</div><div class="kb-list-container">${cards}</div></div>`;
                 });

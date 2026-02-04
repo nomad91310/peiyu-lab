@@ -1662,7 +1662,14 @@
 </div>
 
 <div id="search-overlay" class="result-overlay">
-    <div class="text-modal-card" style="max-width: 650px; padding: 0 !important; border-radius: 16px; overflow: hidden; position: relative;"> 
+    <div class="text-modal-card" style="
+    max-width: 650px; 
+    padding: 0 !important; 
+    border-radius: 16px; 
+    overflow-y: auto;       /* 👈 改成 auto，以防萬一內容真的太長 */
+    max-height: 90vh;       /* 👈 確保不超過螢幕高度 */
+    position: relative;
+"> 
         
         <div style="background: var(--forest); padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); position: relative; z-index: 100;">
             <h3 style="margin: 0; color: #fff; font-size: 1.4rem; letter-spacing: 2px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -1700,8 +1707,13 @@
                 </div>
             </div>
 
-            <div id="modal-search-groups-area" style="position: relative; z-index: 1;"></div>
-
+            <div id="modal-search-groups-area" style="position: relative; 
+                z-index: 1; 
+                max-height: 40vh;       /* 👈 限制最大高度 (約螢幕 40%) */
+                overflow-y: auto;       /* 👈 超過就出現捲軸 */
+                padding-right: 5px;     /* 👈 避免捲軸擋住內容 */
+                margin-bottom: 10px;    /* 👈 與下方按鈕保持距離 */
+            "></div>
             <div class="kb-search-actions" style="margin-top:25px; position: relative; z-index: 1;">
                 <button class="kb-action-btn btn-add-group" onclick="addSearchGroup()" style="background:#fff; color:var(--forest); border:1px solid var(--forest); padding:10px 25px; border-radius:50px; cursor:pointer;">
                     <i class="fa-solid fa-plus"></i> 新增欄位

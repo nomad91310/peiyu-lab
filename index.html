@@ -580,6 +580,10 @@
     /* KB 搜尋與結果樣式 */
     .kb-search-container { max-width: 650px; margin: 0 auto 30px auto; }
     /* 🔥 修改：搜尋群組改為垂直排列，並優化刪除按鈕位置 */
+    @keyframes slideInNew {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
     .kb-search-group { 
         display: flex !important; 
         flex-direction: column !important; /* 改成直排 */
@@ -590,6 +594,7 @@
         border-radius: 10px; 
         border: 1px solid #eee; 
         position: relative !important; /* 讓按鈕可以絕對定位 */
+        animation: slideInNew 0.3s ease-out forwards;
     }
     
     /* 輸入框寬度 100% */
@@ -1706,7 +1711,7 @@
                     </div>
                 </div>
             </div>
-
+            <hr style="border: 0; border-top: 2px dashed #eee; margin: 0 0 15px 0;">
             <div id="modal-search-groups-area" style="position: relative; 
                 z-index: 1; 
                 max-height: 40vh;       /* 👈 限制最大高度 (約螢幕 40%) */
@@ -2577,7 +2582,7 @@ function tryOldSchoolCopy(text, callback) {
         openModal('search-overlay');
     }
 
-    // 🔥 addSearchGroup 修正版：兩行式佈局 (標題一行、關鍵字一行)
+    // 🔥 addSearchGroup 優化版：自動捲動 + 對焦
     function addSearchGroup(title = '', keywords = '') {
         const area = document.getElementById('modal-search-groups-area');
         if (!area) return;
@@ -2585,8 +2590,6 @@ function tryOldSchoolCopy(text, callback) {
         const div = document.createElement('div');
         div.className = 'kb-search-group';
         
-        // 這裡的 HTML 結構配合上面的 CSS，會自動變成兩行
-        // 標題在第一行，關鍵字在第二行，X 按鈕浮在右上角
         div.innerHTML = `
             <input type="text" class="kb-search-title-input" 
                    placeholder="小標題 (選填，無則顯示關鍵字)" 
@@ -2599,6 +2602,21 @@ function tryOldSchoolCopy(text, callback) {
             <button class="kb-group-remove-btn" onclick="this.parentElement.remove()" title="刪除此組">✕</button>
         `;
         area.appendChild(div);
+
+        // 🔥 關鍵修正 1：自動捲動到最底部
+        // 使用 setTimeout 確保畫面渲染完後才捲動
+        setTimeout(() => {
+            area.scrollTo({
+                top: area.scrollHeight,
+                behavior: 'smooth' // 平滑捲動，更有感
+            });
+            
+            // 🔥 關鍵修正 2 (選填)：自動讓新欄位的「關鍵字」輸入框獲得焦點
+            // 這樣客人不用再點一次就能直接打字，體驗更好
+            const keyInput = div.querySelector('.kb-search-key-input');
+            if(keyInput) keyInput.focus();
+            
+        }, 50);
     }
 
     // 🔥 doKbSearch 修正版：強制收鍵盤 + 預先置頂

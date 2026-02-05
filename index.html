@@ -3330,19 +3330,21 @@ function tryOldSchoolCopy(text, callback) {
     }
 
     function openDynamicAnnouncement(title, contentHtml) {
+        // 1. 設定標題與內容
         document.getElementById('dyn-modal-title').innerText = title; 
-        
-        // 先抓到內容框
         const contentBox = document.getElementById('dyn-modal-content');
         contentBox.innerHTML = contentHtml || "無內容";
         
-        // 🔥🔥🔥 關鍵修改：強制把「上一層容器」的捲軸歸零 🔥🔥🔥
-        // 因為你的 HTML 結構裡，捲軸是長在 contentBox 的爸爸身上 (那個有 max-height: 65vh 的 div)
-        if (contentBox.parentElement) {
-            contentBox.parentElement.scrollTop = 0;
-        }
-
+        // 2. 先打開視窗 (這時候畫面可能還沒完全跳出來)
         openModal('dynamic-overlay');
+
+        // 3. 🔥🔥🔥 終極修正：延遲 10 毫秒再捲動 🔥🔥🔥
+        // 這樣可以確保視窗已經完全顯示了，瀏覽器才會乖乖執行捲動
+        if (contentBox.parentElement) {
+            setTimeout(() => {
+                contentBox.parentElement.scrollTop = 0;
+            }, 10);
+        }
     }
     // === 回到頂部按鈕邏輯 ===
     

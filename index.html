@@ -2836,7 +2836,6 @@ function tryOldSchoolCopy(text, callback) {
             sortedMids = Object.keys(kbTree[big]);
         }
 
-        // 🔥 這裡加入 index 參數
         const contentHtml = sortedMids.map((mid, index) => {
             const arts = kbTree[big][mid]; 
             const articlesHtml = arts.map(a => {
@@ -2852,9 +2851,16 @@ function tryOldSchoolCopy(text, callback) {
 
             const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
             
-            // 🔥 關鍵修正：只有第 1 個 (index===0) 預設開啟，其他不管
-            // ❌ 已移除 onclick="closeOthers(this)"，不會再自動關閉別人了
-            const openAttr = index === 0 ? 'open' : '';
+            // 🔥🔥🔥 關鍵修改：智慧判斷誰該打開 🔥🔥🔥
+            let openAttr = '';
+
+            if (isBack && kbState.activeMid) {
+                // 🅰️ 如果是「返回」且有「記憶的中分類」👉 打開記憶的那一組
+                if (mid === kbState.activeMid) openAttr = 'open';
+            } else {
+                // 🅱️ 如果是「第一次進來」👉 只開第 1 組 (index === 0)
+                if (index === 0) openAttr = 'open';
+            }
 
             return `
                 <details id="${safeMidId}" class="kb-section-group" ${openAttr}>
@@ -2879,16 +2885,23 @@ function tryOldSchoolCopy(text, callback) {
                 ${contentHtml}
             </div>`;
         
+        // 捲動邏輯 (維持不變)
         if (isBack && kbState.lastClickedId) {
             setTimeout(() => {
                 const target = document.querySelector(`.kb-article-card[data-id="${kbState.lastClickedId}"]`);
-                if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
+                if (target) {
+                    target.scrollIntoView({ behavior: 'auto', block: 'center' });
+                    // 🔥 加碼：如果該文章所在的 details 沒開 (防呆)，強制把它打開
+                    const parentDetails = target.closest('details');
+                    if (parentDetails && !parentDetails.open) parentDetails.open = true;
+                }
             }, 50);
         } else {
             window.scrollTo(0, 0);
             setTimeout(() => window.scrollTo(0, 0), 10);
         }
-    }
+    }    
+    
     // 🔥 readArt 修正版：點擊時記住捲動位置
     async function readArt(idOrSlug) {
         // 1. 💾 記住這張卡片的 ID (為了等一下返回時用)

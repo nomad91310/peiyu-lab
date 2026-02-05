@@ -3331,7 +3331,17 @@ function tryOldSchoolCopy(text, callback) {
 
     function openDynamicAnnouncement(title, contentHtml) {
         document.getElementById('dyn-modal-title').innerText = title; 
-        document.getElementById('dyn-modal-content').innerHTML = contentHtml || "無內容";
+        
+        // 先抓到內容框
+        const contentBox = document.getElementById('dyn-modal-content');
+        contentBox.innerHTML = contentHtml || "無內容";
+        
+        // 🔥🔥🔥 關鍵修改：強制把「上一層容器」的捲軸歸零 🔥🔥🔥
+        // 因為你的 HTML 結構裡，捲軸是長在 contentBox 的爸爸身上 (那個有 max-height: 65vh 的 div)
+        if (contentBox.parentElement) {
+            contentBox.parentElement.scrollTop = 0;
+        }
+
         openModal('dynamic-overlay');
     }
     // === 回到頂部按鈕邏輯 ===

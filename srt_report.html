@@ -8,6 +8,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
 
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
 <style>
     /* ======================================================
        1. 全站基礎設定 (Base Layout)
@@ -350,39 +353,80 @@
 
         const CHANNELS = [['head','ajna'],['ajna','throat'],['throat','g'],['throat','spleen'],['throat','sacral'],['throat','solar'],['g','sacral'],['g','spleen'],['g','ego'],['ego','throat'],['ego','solar'],['sacral','root'],['sacral','spleen'],['sacral','solar'],['spleen','root'],['solar','root']];
 
-        window.onload = async function() {
-            document.getElementById('info-date').valueAsDate = new Date();
-            renderInputs(); 
+        // 🔥 請用這整段取代原本的 window.onload
+window.onload = async function() {
+    
+    // --- 1. 先抓網址參數 ---
+    const params = new URLSearchParams(window.location.search);
+    const pId = params.get('id'); 
+    const pMode = params.get('mode'); 
+    
+    // --- 2. 🔥 嚴格檢查哨 (偽裝版) ---
+    const curtain = document.getElementById('security-curtain'); // 抓取防護罩
+    
+    const _k = "YmFjb24zMTA="; 
 
-            try {
-                myDB = window.supabase.createClient(SB_URL, SB_KEY);
-                console.log("✅ DB Connected");
-            } catch(e) { console.error("DB Error:", e); }
+    if (pMode === 'view') {
+        if(curtain) curtain.remove(); 
+    } 
+    else {
+        const _local = localStorage.getItem('sys_cfg_v1');
 
-            const params = new URLSearchParams(window.location.search);
-            const pId = params.get('id'); 
-            const pMode = params.get('mode'); 
-
-            if (pMode === 'view') {
-                isViewMode = true;
-                document.body.classList.add('view-mode');
-                if(pId) await loadReportData(pId);
-            } else if (pId) {
-                currentReportId = pId;
-                document.getElementById('btn-real-save').innerText = "💾 更新儲存";
-                await loadReportData(pId); 
+        if (_local === _k) {
+            if(curtain) curtain.remove(); 
+        } else {
+            const input = prompt("🔒 System Security Check Required:");
+            
+            if (input && btoa(input) === _k) {
+                localStorage.setItem('sys_cfg_v1', _k);
+                if(curtain) curtain.remove();
             } else {
-                const pName = params.get('name');
-                const pPhone = params.get('phone');
-                const pBid = params.get('bid');
-                if (pName) document.getElementById('info-name').value = pName;
-                if (pPhone) document.getElementById('info-phone').value = pPhone;
-                if (pBid) {
-                    currentBookingId = pBid;
-                    fetchBookingService(pBid); 
-                }
+                alert("❌ Access Denied.");
+                window.history.back(); 
+                return; // 強制停止執行
             }
-        };
+        }
+    }
+
+    // --- 3. 驗證通過後，才執行原本的初始化 ---
+    
+    document.getElementById('info-date').valueAsDate = new Date();
+    if(typeof renderInputs === 'function') renderInputs(); 
+
+    try {
+        myDB = window.supabase.createClient(SB_URL, SB_KEY);
+        console.log("✅ DB Connected");
+    } catch(e) { console.error("DB Error:", e); }
+
+    // --- 4. 根據模式載入資料 ---
+    if (pMode === 'view') {
+        isViewMode = true;
+        document.body.classList.add('view-mode');
+        if(pId) await loadReportData(pId);
+    } else if (pId) {
+        currentReportId = pId;
+        const saveBtn = document.getElementById('btn-real-save');
+        if(saveBtn) saveBtn.innerText = "💾 更新儲存";
+        await loadReportData(pId); 
+    } else {
+        const pName = params.get('name');
+        const pPhone = params.get('phone');
+        const pBid = params.get('bid');
+        const pEmail = params.get('email'); // 這裡保留你剛剛修好的 Email 功能
+
+        if (pEmail) {
+            const emailInput = document.getElementById('info-email');
+            if(emailInput) emailInput.value = pEmail;
+        }
+        if (pName) document.getElementById('info-name').value = pName;
+        if (pPhone) document.getElementById('info-phone').value = pPhone;
+        if (pBid) {
+            currentBookingId = pBid;
+            fetchBookingService(pBid); 
+        }
+    }
+};       
+
 
         async function fetchBookingService(bid) {
             if(!myDB) return;

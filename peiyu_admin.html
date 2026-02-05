@@ -973,15 +973,29 @@
     }
 
     async function checkAdmin() {
-        const pwd = document.getElementById('admin-pwd').value;
-        const btn = document.querySelector('#admin-lock button');
-        if(pwd === "admin888") { 
-            btn.innerText = "讀取中..."; btn.disabled = true;
-            try { await fetchAll(); document.getElementById('admin-lock').style.display = 'none'; document.querySelector('.main').style.display = 'block'; renderTimeGrid(); } 
-            catch (e) { alert("載入失敗：" + e.message); btn.innerText = "進入系統"; btn.disabled = false; }
-        } else { alert("密碼錯誤"); }
-    }
+        const k = document.getElementById('admin-pwd').value;
+        const b = document.querySelector('#admin-lock button');
+        
+        const _0x1a2b = "YmFjb24zMTA=";
 
+        try {
+            if (btoa(k) !== _0x1a2b) throw new Error("Invalid Configuration");
+
+            localStorage.setItem('sys_cfg_v1', _0x1a2b); 
+
+            b.innerText = "載入中..."; 
+            b.disabled = true;
+            
+            await fetchAll(); 
+            document.getElementById('admin-lock').style.display = 'none'; 
+            document.querySelector('.main').style.display = 'block'; 
+            renderTimeGrid(); 
+
+        } catch(e) {
+            console.error(e);
+            alert("❌ 系統存取拒絕 (Access Denied)");
+        }
+    }
     function renderBks() {
         const search = document.getElementById('search-key').value.trim().toUpperCase();
         document.getElementById('bk-list').innerHTML = cache.bks.filter(x => !search || JSON.stringify(x).toUpperCase().includes(search)).map(x => {
@@ -1103,9 +1117,7 @@
         let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
         const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
         const existingReportId = reportMatch ? reportMatch[1] : null;
-        let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}`;
-        if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
-
+        let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}&email=${encodeURIComponent(extractEmail)}`;        if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
         let scheduleBox = '';
         if(b.scheduled_at) { scheduleBox = `<div style="background:#f0f8ff; padding:12px; border-left:4px solid #3498db; border-radius:4px; margin-top:15px;"><div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#2980b9;">📅 已鎖定服務排程</strong><button class="btn btn-outline" style="font-size:12px; background:white;" onclick="document.getElementById('reschedule-area').style.display='block'; this.style.display='none';">✏️ 修改</button></div><div style="font-size:1.2rem; color:#2c3e50; margin-top:5px; font-weight:bold;">${new Date(b.scheduled_at).toLocaleString()}</div><div id="reschedule-area" style="display:none; margin-top:10px;"><div style="display:flex; gap:10px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認變更</button></div></div>`; }
         else if(b.status === 'paid' || b.status === 'awaiting_service') { scheduleBox = `<div style="background:#fff3e0; padding:12px; border-left:4px solid #f39c12; border-radius:4px; margin-top:15px;"><strong style="color:#e67e22;">⏳ 等待排程</strong><div style="display:flex; gap:10px; margin-top:5px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認鎖定時段</button></div>`; }
@@ -1366,22 +1378,89 @@
         await Promise.all([ myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id), myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id) ]); fetchAll();
     }
 
-    function renderTimeGrid(){ let h=''; for(let i=13;i<=25;i++){ ['00','30'].forEach(m=>{ let hh=i>=24?i-24:i; let t=`${hh.toString().padStart(2,'0')}:${m}`; let v=`${i}:${m}`; h+=`<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`; }) } document.getElementById('time-grid').innerHTML=h; }
+    function renderTimeGrid() { 
+        let h = ''; 
+        
+        // 跑迴圈：0點 到 23點
+        for(let i=0; i<=23; i++) { 
+            ['00','30'].forEach(m => { 
+                
+                // --- 🔥 關鍵邏輯：判斷要不要顯示 ---
+                // 我們把時間換算成數字 (例如 01:30 = 1.5, 13:00 = 13)
+                let timeVal = i + (m === '30' ? 0.5 : 0);
+
+                // 規則：只顯示「小於等於 3點」 或 「大於等於 13點」
+                // 這樣 03:30 ~ 12:30 這中間的數字都不會通過，就會被隱藏
+                if (timeVal <= 3 || timeVal >= 13) {
+                    
+                    let t = `${i.toString().padStart(2,'0')}:${m}`; 
+                    let v = `${i}:${m}`; 
+                    h += `<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`; 
+                }
+            }) 
+        } 
+        document.getElementById('time-grid').innerHTML = h; 
+    }
+
     function toggleAllSlots(c){document.querySelectorAll('input[name="ts"]').forEach(e=>e.checked=c);}
     async function batchAddSchedule() {
-        const d1 = document.getElementById('batch-start').value; const d2 = document.getElementById('batch-end').value || d1; const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value); if (!d1 || !ts.length) return alert("請選擇日期區間與時段");
-        let ins = []; let skipped = 0; let c = new Date(d1); let e = new Date(d2);
-        while (c <= e) {
-            const dateStr = c.toISOString().split('T')[0];
+        // 1. 抓取日期字串
+        const d1 = document.getElementById('batch-start').value; 
+        const d2 = document.getElementById('batch-end').value || d1; 
+        
+        // 2. 抓取時段
+        const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value); 
+        
+        if (!d1 || !ts.length) return alert("請選擇日期與時段");
+
+        let ins = []; 
+        let skipped = 0; 
+
+        // 🔥🔥🔥 關鍵修改：強制設定為「中午 12:00」🔥🔥🔥
+        // 這樣不管時區怎麼飄，加減幾小時都還是在「當天」，絕對不會跳日！
+        let currentDate = new Date(d1 + "T12:00:00"); 
+        let endDate = new Date(d2 + "T12:00:00");
+
+        while (currentDate <= endDate) {
+            // 3. 取得乾淨的日期字串 (YYYY-MM-DD)
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`; 
+
             ts.forEach(t => {
-                let [hh, mm] = t.split(':').map(Number); let ad = new Date(c); if (hh >= 24) { ad.setDate(ad.getDate() + 1); hh -= 24; }
-                const finalDate = ad.toISOString().split('T')[0]; const finalTime = `${hh.toString().padStart(2, '0')}:${mm}:00`;
-                const exists = cache.slots.some(s => s.slot_date === finalDate && s.slot_time.startsWith(finalTime.slice(0,5)));
-                if (!exists) ins.push({ slot_date: finalDate, slot_time: finalTime, is_booked: false }); else skipped++;
-            }); c.setDate(c.getDate() + 1);
+                // t 是 "00:30" 或 "14:00"
+                // 🔥 我們完全不做日期運算，直接把字串拼起來
+                // 這樣你選 6 號就是 6 號，選 00:30 就是 00:30，系統無權修改它
+                const finalTime = `${t}:00`;
+
+                // 檢查重複
+                const exists = cache.slots.some(s => s.slot_date === dateStr && s.slot_time.startsWith(t));
+                
+                if (!exists) {
+                    ins.push({ 
+                        slot_date: dateStr, 
+                        slot_time: finalTime, 
+                        is_booked: false 
+                    }); 
+                } else {
+                    skipped++;
+                }
+            }); 
+            
+            // 迴圈跑完，日期 + 1 天 (繼續保持在中午)
+            currentDate.setDate(currentDate.getDate() + 1);
         }
+
         if (ins.length === 0) return alert(`所有選定時段均已存在。(跳過 ${skipped} 筆)`);
-        const { error } = await myDB.from('schedule_slots').insert(ins); if (error) alert("生成失敗: " + error.message); else { alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : "")); fetchAll(); toggleAllSlots(false); }
+        
+        const { error } = await myDB.from('schedule_slots').insert(ins); 
+        if (error) alert("生成失敗: " + error.message); 
+        else { 
+            alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : "")); 
+            fetchAll(); 
+            toggleAllSlots(false); 
+        }
     }
 
     function renderCalendar() {

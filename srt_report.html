@@ -213,6 +213,25 @@
     body.view-mode #addon-section-wrapper, body.view-mode #inputs-container, 
     body.view-mode .summary-section, body.view-mode .action-bar,
     body.view-mode .save-hint { display: none !important; }
+    /* --- 專屬：唯讀模式下的回饋區塊樣式 --- */
+    body.view-mode #feedback-section {
+        display: block !important; 
+        max-width: 800px; /* 不要像圖片那麼寬 */
+        margin: 30px auto; /* 置中對齊 */
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    body.view-mode textarea#client-feedback {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: "Microsoft JhengHei", sans-serif;
+    }
 
     body.view-mode .container { background: transparent !important; box-shadow: none !important; padding: 0; max-width: 100%; }
     body.view-mode #result-wrapper { display: block !important; margin-top: 0; }
@@ -306,6 +325,30 @@
             <div class="save-hint">✅ 圖片已生成，請右鍵另存圖片</div><br>
             <button id="guest-dl-btn" onclick="downloadReportImage()">📥 下載我的能量報告</button>
             <br>
+            
+            <div class="card" id="feedback-section" style="margin-top: 30px; margin-bottom: 30px; text-align: left;">
+                <h3 style="color: #9b59b6; margin-top: 0;">💬 個案回饋與感受</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 15px;">感謝您的信任！請在此填寫您做完療癒後的感受，您的回饋是我們前進的最大動力：</p>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 14px; color: #444; font-weight: bold; display: block; margin-bottom: 5px;">對外顯示暱稱 (選填)：</label>
+                    <input type="text" id="client-nickname" placeholder="例如：愛貓的A小姐 (若留空則顯示為匿名訪客)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
+                </div>
+
+                <textarea id="client-feedback" rows="4" placeholder="在此輸入您的感受或想對療癒師說的話..." style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-family: inherit; margin-bottom: 10px;"></textarea>
+                
+                <div style="display: flex; align-items: flex-start; gap: 10px; background: #fdfaf1; padding: 12px; border-radius: 8px; border: 1px dashed #c6a87c;">
+                    <input type="checkbox" id="client-consent" checked style="width: 18px; height: 18px; cursor: pointer; margin-top: 2px;">
+                    <label for="client-consent" style="font-size: 13px; color: #555; cursor: pointer; margin: 0; line-height: 1.5;">
+                        <strong style="color: #1a2f23;">我同意將此回饋分享於網站</strong><br>
+                        (我們將僅使用您上方填寫的暱稱，絕不公開您的真實姓名與聯絡方式)
+                    </label>
+                </div>
+
+                <div style="text-align: right; margin-top: 15px;">
+                    <button id="btn-submit-feedback" class="btn" style="background: #9b59b6; color: white; display: none; width: auto; padding: 10px 25px; font-size: 16px;" onclick="submitFeedback()">📤 送出回饋</button>
+                </div>
+            </div>
             <img id="final-image" alt="Generated Report" />
         </div>
     </div>
@@ -402,7 +445,12 @@ window.onload = async function() {
     if (pMode === 'view') {
         isViewMode = true;
         document.body.classList.add('view-mode');
-        if(pId) await loadReportData(pId);
+       document.getElementById('btn-submit-feedback').style.display = 'inline-block';
+        
+        if(pId) {
+            currentReportId = pId; // 🔥🔥🔥 補上這一行：讓客人模式也把報表 ID 記起來！
+            await loadReportData(pId);
+        }
     } else if (pId) {
         currentReportId = pId;
         const saveBtn = document.getElementById('btn-real-save');
@@ -572,8 +620,19 @@ window.onload = async function() {
                     addonsData.push({ name: item.name, val: mainVal, subs: subsData, isCore: false });
                 });
             }
+            // 🔥 抓取回饋相關內容
+            const feedbackText = document.getElementById('client-feedback') ? document.getElementById('client-feedback').value : "";
+            const nicknameText = document.getElementById('client-nickname') ? document.getElementById('client-nickname').value : "";
+            const consentBool = document.getElementById('client-consent') ? document.getElementById('client-consent').checked : false;
 
-            return { centers: centersData, specialItems: [...coreData, ...addonsData], reportTitle: currentMainService };
+            return { 
+                centers: centersData, 
+                specialItems: [...coreData, ...addonsData], 
+                reportTitle: currentMainService,
+                client_feedback: feedbackText,
+                client_nickname: nicknameText,
+                client_consent: consentBool
+            };
         }
 
         function generatePreview() {
@@ -604,7 +663,46 @@ window.onload = async function() {
                 alert("生成失敗: " + e.message);
             }
         }
+        // === 處理客人送出回饋 ===
+        // === 處理客人送出回饋 ===
+        async function submitFeedback() {
+            if (!currentReportId) return alert("錯誤：找不到報表 ID");
+            
+            const fb = document.getElementById('client-feedback').value.trim();
+            const nickname = document.getElementById('client-nickname').value.trim() || "匿名訪客"; 
+            const consent = document.getElementById('client-consent').checked;
 
+            if(!fb) return alert("請先填寫回饋內容喔！");
+            
+            const btn = document.getElementById('btn-submit-feedback');
+            btn.innerText = "送出中..."; 
+            btn.disabled = true;
+            
+            try {
+                // 1. 先抓出資料庫裡原本的報表資料
+                const { data, error } = await myDB.from('reports').select('raw_data').eq('id', currentReportId).single();
+                if(error) throw error;
+                
+                let currentRawData = data.raw_data || {};
+                
+                // 2. 把客人的回饋、暱稱、同意選項塞進去
+                currentRawData.client_feedback = fb; 
+                currentRawData.client_nickname = nickname;
+                currentRawData.client_consent = consent;
+                
+                // 3. 存回資料庫
+                const { error: updErr } = await myDB.from('reports').update({ raw_data: currentRawData }).eq('id', currentReportId);
+                if(updErr) throw updErr;
+                
+                alert("✅ 感謝您的回饋！我們已經收到囉。");
+            } catch(e) {
+                console.error(e);
+                alert("❌ 送出失敗，請稍後再試或聯繫客服：" + e.message);
+            } finally {
+                btn.innerText = "📤 送出回饋"; 
+                btn.disabled = false;
+            }
+        }
         async function saveToDatabase() {
             const msg = document.getElementById('status-msg');
             const ph = document.getElementById('info-phone').value.trim();
@@ -694,7 +792,27 @@ window.onload = async function() {
             document.getElementById('info-date').value = data.service_date;
             document.getElementById('info-healer').value = data.healer_name;
             document.getElementById('overall-summary').value = data.summary || "";
-            
+            // 🔥 讀取客人之前寫過的回饋、暱稱與同意狀態
+            if (data.raw_data && data.raw_data.client_feedback) {
+                document.getElementById('client-feedback').value = data.raw_data.client_feedback;
+                
+                if (data.raw_data.client_nickname) {
+                    document.getElementById('client-nickname').value = data.raw_data.client_nickname;
+                }
+                
+                if (data.raw_data.client_consent !== undefined) {
+                    document.getElementById('client-consent').checked = data.raw_data.client_consent;
+                }
+
+                // 如果是管理員，把框框鎖起來不讓他改客人寫的話 (可選)
+                if (!isViewMode) {
+                    document.getElementById('client-feedback').readOnly = true;
+                    document.getElementById('client-feedback').style.backgroundColor = "#f5f5f5";
+                    document.getElementById('client-nickname').readOnly = true;
+                    document.getElementById('client-nickname').style.backgroundColor = "#f5f5f5";
+                    document.getElementById('client-consent').disabled = true;
+                }
+            }
             if (data.service_item) { currentMainService = data.service_item; } 
             else if (data.raw_data && data.raw_data.reportTitle) { currentMainService = data.raw_data.reportTitle; }
             document.getElementById('page-title').innerText = currentMainService ? `🔮 ${currentMainService}` : "🔮";

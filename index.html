@@ -207,34 +207,58 @@
     .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
     /* ======================================================
-       4. 文章內容渲染 (Article Content) - 與後台同步
+       4. 文章內容渲染 (Article Content) - 完全解放交給後台設定
        ====================================================== */
-    .ql-editor { 
+    /* 建立乾淨的渲染容器，不干擾編輯器自帶的 peiyu-article 設定 */
+    .article-render-area { 
         padding: 0; 
         color: #2c3e50; 
         font-size: 16px; 
-        line-height: 1.8; 
         font-family: -apple-system, "Microsoft JhengHei", "Helvetica Neue", sans-serif; 
         overflow-wrap: break-word; 
     }
-    .ql-font-serif { font-family: 'Noto Serif TC', serif !important; }
-    .ql-font-monospace { font-family: inherit !important; letter-spacing: 0.05em; color: #444; }
-    .ql-editor img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .ql-editor .ql-indent-1 { padding-left: 3em !important; }
-    .ql-editor .ql-indent-2 { padding-left: 6em !important; }
-    .ql-editor .ql-indent-3 { padding-left: 9em !important; }
-    .ql-editor ul, .ql-editor ol { padding-left: 5px !important; margin-bottom: 5px !important; margin-top: 0 !important; }
-    .ql-editor li { padding-left: 1.2em !important; margin-bottom: 0px !important; margin-top: 8px !important; line-height: 1.3 !important; list-style-position: outside !important; }
-    .ql-editor li > p { margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1.3 !important; }
-    .ql-editor li::before { margin-right: 0em !important; width: 1em !important; text-align: center !important; display: inline-block !important; }
-    .ql-editor .ql-size-small { font-size: 0.85rem; color: #666; line-height: 1.6; }
-    .ql-editor .ql-size-large { font-size: 1.5rem; font-weight: 900; margin-top: 0px !important; margin-bottom: 15px; line-height: 1.4; display: block; color: var(--forest); }
-    .ql-editor .ql-size-huge { font-size: 2.2rem; font-weight: 900; margin-top: 40px; margin-bottom: 25px; line-height: 1.2; display: block; color: var(--forest); text-align: center; }
-    .ql-editor blockquote { border-left: 5px solid var(--shopee, #d35400); background-color: #fffaf0; padding: 15px 20px; margin: 20px 0; color: #8a5a00; font-style: italic; font-weight: bold; }
-    .ql-editor h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
-    .ql-editor h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex !important; align-items: center !important; justify-content: center; padding: 8px 35px !important; margin: 25px 0 5px 0 !important; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
-    .ql-editor h3.title-boxed-h3 .ql-size-large { margin: 0 !important; padding: 0 !important; line-height: 1.2 !important; display: inline !important; border: none !important; color: inherit !important; }
-    strong[style*="background-color"] { padding: 0 4px; border-radius: 2px; }
+    
+    /* 移除強迫置中的設定，讓圖片回歸自然排版 */
+    .article-render-area img { 
+        max-width: 100%; 
+        height: auto; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }
+    
+    /* 針對編輯器產生的外殼進行保護，確保靠左/靠右的排版不會亂掉 */
+    .article-render-area .resizable-wrapper {
+        margin-top: 15px;
+        margin-bottom: 15px;
+        clear: both; /* 確保浮動圖片不會卡到下一段文字 */
+    }
+    
+    .article-render-area .resizable-wrapper img {
+        width: 100%; 
+        display: block; 
+    }
+    
+    .article-render-area li > p,
+    .article-render-area li > div:not([class]) { 
+        display: inline; 
+        margin: 0; 
+        padding: 0; 
+    }   
+
+    /* 引言與舊版魔法積木的相容性保留 (預防舊文章跑版，新文章會吃後台設定) */
+    /* 破解瀏覽器偷懶把縮排變成 blockquote 的問題，讓它回歸單純的向右推移 */
+    .article-render-area blockquote { 
+        margin: 0 0 0 2.5em; /* 產生真實的向右縮排距離 */
+        padding: 0; 
+        border: none; 
+        background: transparent; 
+        color: inherit; 
+        font-style: normal; 
+        font-weight: normal; 
+    }
+    .article-render-area h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
+    .article-render-area h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex; align-items: center; justify-content: center; padding: 8px 35px; margin: 25px 0 5px 0; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
+
 
     /* ======================================================
        5. 通用 UI (Cards, Forms, Modals)
@@ -2957,7 +2981,7 @@ function tryOldSchoolCopy(text, callback) {
                     <span class="kb-tag kb-tag-mid">${data.mid_category}</span>
                 </div>
                 
-                <div class="ql-editor">${data.body}</div>
+                <div class="article-render-area">${data.body}</div>
             </div>`;
             
         // 🔥 進入文章時，絕對置頂！

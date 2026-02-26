@@ -12,7 +12,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
     <link rel="preload" as="image" href="logo.png">
     <link rel="preload" as="image" href="logohuman.png">
@@ -207,7 +206,7 @@
     .copyright { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
     /* ======================================================
-       4. 文章內容渲染 (Article Content) - 完全解放交給後台設定
+       4. 文章內容渲染 (Article Content) - 培癒原生編輯器專用
        ====================================================== */
     /* 建立乾淨的渲染容器，不干擾編輯器自帶的 peiyu-article 設定 */
     .article-render-area { 
@@ -218,26 +217,35 @@
         overflow-wrap: break-word; 
     }
     
-    /* 移除強迫置中的設定，讓圖片回歸自然排版 */
+    /* 🌟 新版圖片前台防禦 */
     .article-render-area img { 
         max-width: 100%; 
         height: auto; 
         border-radius: 8px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
     }
-    
-    /* 針對編輯器產生的外殼進行保護，確保靠左/靠右的排版不會亂掉 */
     .article-render-area .resizable-wrapper {
-        margin-top: 15px;
-        margin-bottom: 15px;
-        clear: both; /* 確保浮動圖片不會卡到下一段文字 */
+        max-width: 100%; 
+        /* 註：靠左/靠右/置中的 margin 會由後台自動寫入 inline-style，這裡不寫死 */
     }
-    
     .article-render-area .resizable-wrapper img {
         width: 100%; 
         display: block; 
     }
+
+    /* 🌟 新版表格前台防禦 (這段是你昨天漏掉的，必須補上！) */
+    .article-render-area table.peiyu-table {
+        border-collapse: collapse;
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+    .article-render-area table.peiyu-table th,
+    .article-render-area table.peiyu-table td {
+        padding: 8px 12px;
+        border: 1px solid #ddd; /* 確保前台有框線 */
+    }
     
+    /* 確保清單內的 div 或 p 不會破壞排版 */
     .article-render-area li > p,
     .article-render-area li > div:not([class]) { 
         display: inline; 
@@ -245,7 +253,6 @@
         padding: 0; 
     }   
 
-    /* 引言與舊版魔法積木的相容性保留 (預防舊文章跑版，新文章會吃後台設定) */
     /* 破解瀏覽器偷懶把縮排變成 blockquote 的問題，讓它回歸單純的向右推移 */
     .article-render-area blockquote { 
         margin: 0 0 0 2.5em; /* 產生真實的向右縮排距離 */
@@ -256,9 +263,10 @@
         font-style: normal; 
         font-weight: normal; 
     }
+
+    /* 引言與舊版魔法積木的相容性保留 (預防舊文章跑版) */
     .article-render-area h2.title-boxed-h2 { border-left: 8px solid var(--accent); background: var(--forest); color: #fff; padding: 10px 20px; margin: 30px 0 15px 0; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.4; display: table; box-shadow: 4px 4px 0px rgba(198, 168, 124, 0.4); }
     .article-render-area h3.title-boxed-h3 { border: 2px solid var(--accent); background: #fffcf5; color: var(--forest); display: inline-flex; align-items: center; justify-content: center; padding: 8px 35px; margin: 25px 0 5px 0; border-radius: 50px; font-family: 'Noto Serif TC', serif; width: auto; max-width: 100%; min-height: 50px; }
-
 
     /* ======================================================
        5. 通用 UI (Cards, Forms, Modals)

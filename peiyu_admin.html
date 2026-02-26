@@ -204,48 +204,30 @@
 /* ======================================================
        5. 培癒原生編輯器樣式
        ====================================================== */
-    /* 1. 恢復電腦版封印：把 overflow: hidden 加回來，解決灰底破圖 Bug！ */
-    .editor-wrapper { flex: 1; background: white; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; min-height: 500px; }
+    /* 5. 培癒原生編輯器樣式 - 究極修正版 */
+    /* 確保側邊選單永遠在最上層，不被工具列覆蓋 */
+    .sidebar { z-index: 5000 !important; }
+
+    .editor-wrapper { flex: 1; background: white; border: 1px solid #ccc; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; position: relative; min-height: 500px; }
     
-    /* 2. 電腦版預設不吸頂 (因為本來就不會跑掉) */
-    .editor-sticky-header {
-        background: #f8f9fa;
-        z-index: 1500;
-    }
-    
-    /* 3. 📱 專屬手機/平板的吸頂魔法 */
+    /* 📱 專屬手機/平板的「內部捲軸」佈局 */
     @media (max-width: 1024px) {
-        /* 解除父層卡片封印，否則 sticky 會失效 */
-        #tab-kb .kb-layout > .card { overflow: visible !important; height: auto !important; }
-        .editor-wrapper { overflow: visible !important; }
-        
-        .editor-sticky-header {
-            position: sticky;
-            top: 0px !important; /* 🌟 強制貼齊螢幕頂部，解決被吃掉的問題！ */
-            border-radius: 8px 8px 0 0;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-            margin: -1px; 
-            z-index: 2000;
+        #tab-kb .kb-layout > .card { 
+            height: calc(100vh - 120px) !important; 
+            display: flex; flex-direction: column; overflow: hidden !important; padding: 15px !important;
         }
+        .editor-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden !important; }
+        .editor-sticky-header { position: relative !important; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #editor { flex: 1; overflow-y: auto !important; padding: 20px !important; -webkit-overflow-scrolling: touch; }
     }
     
     @media (max-width: 768px) {
-        /* 🌟 手機版工具列極限瘦身：強制不換行 + 橫向滑動 */
-        .editor-sticky-header .toolbar {
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            padding: 6px 10px !important;
-            -webkit-overflow-scrolling: touch; /* 讓 iPhone 滑動超順暢 */
-        }
-        .editor-sticky-header .toolbar::-webkit-scrollbar { display: none; } /* 隱藏醜醜的捲軸 */
-        
-        /* 極致壓縮按鈕與間距，釋放下方編輯區空間 */
+        .editor-sticky-header .toolbar { flex-wrap: nowrap !important; overflow-x: auto !important; padding: 6px 10px !important; }
+        .editor-sticky-header .toolbar::-webkit-scrollbar { display: none; }
         .tb-group { margin-right: 5px !important; padding-right: 5px !important; }
-        .editor-btn { padding: 4px 8px !important; font-size: 13px !important; }
-        select.tb-select { height: 26px !important; padding: 0 4px !important; font-size: 12px !important; }
-        .color-picker-wrapper { width: 26px !important; height: 26px !important; }
-        .color-picker-wrapper i { top: 5px !important; left: 6px !important; font-size: 12px !important; }
+        .editor-btn { padding: 4px 10px !important; font-size: 14px !important; }
     }
+        
         
         
     .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
@@ -697,23 +679,23 @@
             <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%;">
                 <span id="mode-title" style="display:none;">新增文章</span>
                 
-                <div style="display:flex; gap:15px; margin-bottom:8px; margin-top:5px; align-items:center; flex-wrap:nowrap;">
-                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div style="display:flex; gap:15px; margin-bottom:8px; margin-top:5px; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">大分類</label>
                         <input list="kb-big-list" id="kb-big" placeholder="例: 人類圖" style="width:140px; margin:0; padding:6px 10px;">
                         <datalist id="kb-big-list"></datalist>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">中分類</label>
                         <input list="kb-mid-list" id="kb-mid" placeholder="例: 通道" style="width:140px; margin:0; padding:6px 10px;">
                         <datalist id="kb-mid-list"></datalist>
                     </div>
                 </div>
                 
-                <div style="display:flex; gap:15px; margin-bottom:12px; align-items:center; flex-wrap:nowrap;">
+                <div style="display:flex; gap:15px; margin-bottom:12px; align-items:center;">
                     <div style="display:flex; align-items:center; gap:8px; flex:1;">
                         <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">文章標題</label>
-                        <input type="text" id="kb-title" placeholder="請輸入標題..." style="margin:0; padding:6px 10px;">
+                        <input type="text" id="kb-title" placeholder="輸入標題..." style="margin:0; padding:6px 10px;">
                     </div>
                     
                     <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
@@ -1249,43 +1231,21 @@
         try { 
             const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single(); 
             if(error || !data) return alert("讀取失敗"); 
-            document.getElementById('kb-id').value = data.id; 
-            document.getElementById('kb-title').value = data.title; 
-            document.getElementById('kb-big').value = data.big_category; 
-            document.getElementById('kb-mid').value = data.mid_category; 
-            document.getElementById('kb-pub').checked = data.is_published; 
-            document.getElementById('btn-kb-del').style.display = 'inline-block'; 
-            document.getElementById('mode-title').innerText = "編輯文章"; 
-            
-            // 解析新版排版資料
-            const rawHTML = data.body || ''; 
-            const parser = new DOMParser(); 
-            const doc = parser.parseFromString(rawHTML, 'text/html');
-            const styleTag = doc.querySelector('.peiyu-dynamic-config');
-            if (styleTag && styleTag.getAttribute('data-cfg')) spacingCfg = JSON.parse(styleTag.getAttribute('data-cfg'));
-            else spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; // 預設值
-            applySpacingToEditor();
-            
-            const wrapper = doc.querySelector('.peiyu-article');
-            document.getElementById('editor').innerHTML = wrapper ? wrapper.innerHTML : rawHTML;
-            
-            // 重置歷史紀錄
-            history = [document.getElementById('editor').innerHTML]; historyIndex = 0;
-        } catch (e) { alert("開啟文章失敗: " + e.message); }
+            document.getElementById('kb-id').value = data.id; document.getElementById('kb-title').value = data.title;
+            document.getElementById('kb-big').value = data.big_category; document.getElementById('kb-mid').value = data.mid_category;
+            const wrapper = (new DOMParser()).parseFromString(data.body || '', 'text/html').querySelector('.peiyu-article');
+            document.getElementById('editor').innerHTML = wrapper ? wrapper.innerHTML : (data.body || '');
+            history = [document.getElementById('editor').innerHTML]; historyIndex = 0; // 🌟 錄入新進度
+        } catch (e) { alert("開啟失敗"); }
     }
 
+    // 🌟 初始化函數同步 (防止噴掉 history)
     function resetKbForm() {
-        document.getElementById('kb-id').value=''; 
-        document.getElementById('kb-title').value=''; 
-        document.getElementById('kb-big').value=''; 
-        document.getElementById('kb-mid').value=''; 
-        document.getElementById('btn-kb-del').style.display='none'; 
-        document.getElementById('mode-title').innerText="新增文章"; 
-        
+        document.getElementById('kb-id').value=''; document.getElementById('kb-title').value=''; 
+        document.getElementById('kb-big').value=''; document.getElementById('kb-mid').value=''; 
         document.getElementById('editor').innerHTML = '<p>請在此開始撰寫...</p>';
         history = [document.getElementById('editor').innerHTML]; historyIndex = 0;
-        spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; 
-        applySpacingToEditor();
+        spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; applySpacingToEditor();
     }
 
     async function saveArticle() {
@@ -1408,57 +1368,80 @@
         if(styleTag) styleTag.innerHTML = css; 
     }        
 
-    // 初始化準備歷史紀錄變數
+    // 1. 初始化
     let history = ['<p>請在此開始撰寫...</p>'];
     let historyIndex = 0; 
     let typingTimeout;
 
-    // 如果 DOM 準備好，綁定事件
-    document.addEventListener("DOMContentLoaded", () => {
-        const editor = document.getElementById('editor');
-        if (editor) {
-            editor.addEventListener('input', () => { 
-                clearTimeout(typingTimeout); 
-                typingTimeout = setTimeout(saveHistory, 800); 
-            });
-            editor.addEventListener('keyup', saveSelection);
-            editor.addEventListener('mouseup', saveSelection);
-            editor.addEventListener('input', saveSelection);
-        }
-    });
-
+    // 2. 核心紀錄功能 (埋標記 + 比對)
     function saveHistory() {
         const editor = document.getElementById('editor');
         if (!editor) return;
-        const content = editor.innerHTML;
-        if (content !== history[historyIndex]) {
-            history = history.slice(0, historyIndex + 1); 
-            history.push(content);
-            if (history.length > 50) history.shift(); 
-            else historyIndex = history.length - 1; 
+        const sel = window.getSelection();
+        let markedHTML = editor.innerHTML;
+
+        if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            try {
+                const range = sel.getRangeAt(0);
+                const marker = document.createElement("span");
+                marker.id = "cursor-marker";
+                marker.style.display = "none";
+                range.insertNode(marker);
+                markedHTML = editor.innerHTML;
+                marker.remove();
+            } catch(e) {}
+        }
+
+        const currentPure = markedHTML.replace(/<span id="cursor-marker".*?><\/span>/g, "");
+        const lastPure = history[historyIndex].replace(/<span id="cursor-marker".*?><\/span>/g, "");
+
+        if (currentPure !== lastPure) {
+            if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
+            history.push(markedHTML);
+            if (history.length > 50) history.shift();
+            else historyIndex = history.length - 1;
         }
     }
     
+    // 3. 修正後的 Undo (上一步)
     function customUndo() {
-        const editor = document.getElementById('editor');
-        clearTimeout(typingTimeout); 
-        if (editor.innerHTML !== history[historyIndex]) saveHistory();
-        if (historyIndex > 0) { historyIndex--; editor.innerHTML = history[historyIndex]; }
+        clearTimeout(typingTimeout);
+        saveHistory(); // 🌟 關鍵：先存下「現在打錯的」，這樣退回才是「原本對的」
+        if (historyIndex > 0) { historyIndex--; applyHistoryState(); }
     }
 
     function customRedo() {
-        const editor = document.getElementById('editor');
-        clearTimeout(typingTimeout); 
-        if (historyIndex < history.length - 1) { historyIndex++; editor.innerHTML = history[historyIndex]; }
+        clearTimeout(typingTimeout);
+        if (historyIndex < history.length - 1) { historyIndex++; applyHistoryState(); }
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.metaKey) {
-            const key = e.key.toLowerCase(); 
-            if (key === 'z' && !e.shiftKey) { e.preventDefault(); customUndo(); }
-            if (key === 'y' || (key === 'z' && e.shiftKey)) { e.preventDefault(); customRedo(); }
+    function applyHistoryState() {
+        const editor = document.getElementById('editor');
+        editor.innerHTML = history[historyIndex];
+        const marker = document.getElementById('cursor-marker');
+        if (marker) {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStartAfter(marker);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            marker.remove();
+        }
+        editor.focus({ preventScroll: true });
+    }
+
+    // 5. 監聽輸入：縮短延遲時間，讓紀錄更頻繁
+    document.addEventListener("DOMContentLoaded", () => {
+        const editor = document.getElementById('editor');
+        if (editor) {
+            editor.addEventListener('input', () => {
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(saveHistory, 500); // 縮短為 0.5 秒存一次
+            });
         }
     });
+
 
     let savedRange = null;
     function saveSelection() {

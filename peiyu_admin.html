@@ -215,12 +215,13 @@
     
     /* 3. 📱 專屬手機/平板的吸頂魔法 */
     @media (max-width: 1024px) {
+        /* 解除父層卡片封印，否則 sticky 會失效 */
         #tab-kb .kb-layout > .card { overflow: visible !important; height: auto !important; }
         .editor-wrapper { overflow: visible !important; }
         
         .editor-sticky-header {
             position: sticky;
-            top: 0px !important; /* 🌟 修正1：強制設為 0，絕對不准跑到螢幕外面！ */
+            top: 0px !important; /* 🌟 強制貼齊螢幕頂部，解決被吃掉的問題！ */
             border-radius: 8px 8px 0 0;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
             margin: -1px; 
@@ -229,24 +230,24 @@
     }
     
     @media (max-width: 768px) {
-        /* 🌟 修正2：手機版工具列極限瘦身，改成「橫向滑動」 */
+        /* 🌟 手機版工具列極限瘦身：強制不換行 + 橫向滑動 */
         .editor-sticky-header .toolbar {
-            flex-wrap: nowrap !important; /* 絕對不准換行 */
-            overflow-x: auto !important;  /* 超出的按鈕可以用手左右滑 */
-            padding: 6px 10px !important; /* 縮小上下留白 */
-            -webkit-overflow-scrolling: touch; /* 讓蘋果手機滑起來超順 */
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            padding: 6px 10px !important;
+            -webkit-overflow-scrolling: touch; /* 讓 iPhone 滑動超順暢 */
         }
+        .editor-sticky-header .toolbar::-webkit-scrollbar { display: none; } /* 隱藏醜醜的捲軸 */
         
-        /* 隱藏醜醜的橫向捲軸，保持畫面乾淨 */
-        .editor-sticky-header .toolbar::-webkit-scrollbar { display: none; }
-        
-        /* 縮小按鈕與間距，極限壓縮高度 */
+        /* 極致壓縮按鈕與間距，釋放下方編輯區空間 */
         .tb-group { margin-right: 5px !important; padding-right: 5px !important; }
         .editor-btn { padding: 4px 8px !important; font-size: 13px !important; }
         select.tb-select { height: 26px !important; padding: 0 4px !important; font-size: 12px !important; }
         .color-picker-wrapper { width: 26px !important; height: 26px !important; }
         .color-picker-wrapper i { top: 5px !important; left: 6px !important; font-size: 12px !important; }
-    }    
+    }
+        
+        
     .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
     .tb-group { display: flex; gap: 2px; padding-right: 8px; margin-right: 8px; border-right: 1px solid #ddd; align-items: center; }
     .tb-group:last-child { border-right: none; }
@@ -483,20 +484,24 @@
 <div class="editor-modal-overlay" id="gallery-modal">
     <div class="editor-modal-box editor-gallery-box">
         <div class="editor-gallery-header">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <h3 style="margin:0;">🖼️ 資料庫圖庫</h3>
-                <select id="bucket-select" onchange="switchBucket()" style="padding:5px; border-radius:4px;">
-                    <option value="kb-images">文章配圖 (kb-images)</option>
-                    <option value="site-assets">網站素材 (site-assets)</option>
-                    <option value="banners">橫幅 (banners)</option>
-                </select>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="uploadToDB(this)">
-                <button class="editor-btn" style="background:var(--forest); color:white;" onclick="document.getElementById('upload-input').click()">⬆️ 上傳圖片</button>
-                <button class="editor-btn" style="background:#fee2e2; color:#e74c3c; border-color:#fca5a5;" onclick="document.getElementById('gallery-modal').style.display='none'">關閉</button>
-            </div>
-        </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <h3 style="margin:0;">圖庫</h3>
+        <select id="bucket-select" onchange="switchBucket()" style="padding:5px; border-radius:4px;">
+            <option value="kb-images">文章配圖 (kb-images)</option>
+            <option value="site-assets">網站素材 (site-assets)</option>
+            <option value="banners">橫幅 (banners)</option>
+        </select>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <input type="text" id="custom-img-name" placeholder="自訂檔名 (選填，例如：gate01)" style="width:200px; padding:5px; border:1px solid #ddd; border-radius:4px;">
+        
+        <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="uploadToDB(this)">
+        <button class="editor-btn" style="background:var(--forest); color:white;" onclick="document.getElementById('upload-input').click()">
+            <i class="fas fa-plus-circle"></i> 插入新圖片
+        </button>
+        <button class="editor-btn" style="background:#fee2e2; color:#e74c3c; border-color:#fca5a5;" onclick="document.getElementById('gallery-modal').style.display='none'">關閉</button>
+    </div>
+</div>
         <div id="gallery-content" class="editor-gallery-grid">載入中...</div>
     </div>
 </div>
@@ -690,23 +695,34 @@
                 <div id="kb-tree" class="kb-tree-content"></div>
             </div>
             <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h2 id="mode-title" style="margin:0; color:var(--dark);">新增文章</h2>
-                    <button class="btn btn-purple" onclick="openGallery()">🖼️ 開啟圖庫</button>
+                <span id="mode-title" style="display:none;">新增文章</span>
+                
+                <div style="display:flex; gap:15px; margin-bottom:8px; margin-top:5px; align-items:center; flex-wrap:nowrap;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">大分類</label>
+                        <input list="kb-big-list" id="kb-big" placeholder="例: 人類圖" style="width:140px; margin:0; padding:6px 10px;">
+                        <datalist id="kb-big-list"></datalist>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">中分類</label>
+                        <input list="kb-mid-list" id="kb-mid" placeholder="例: 通道" style="width:140px; margin:0; padding:6px 10px;">
+                        <datalist id="kb-mid-list"></datalist>
+                    </div>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 2fr; gap:15px; margin-bottom:15px;">
-                    <div><label style="font-weight:bold;">大分類</label><input list="kb-big-list" id="kb-big" placeholder="例: 人類圖"><datalist id="kb-big-list"></datalist></div>
-                    <div><label style="font-weight:bold;">中分類</label><input list="kb-mid-list" id="kb-mid" placeholder="例: 通道"><datalist id="kb-mid-list"></datalist></div>
-                    <div><label style="font-weight:bold;">文章標題</label><input type="text" id="kb-title" placeholder="輸入標題..."></div>
-                </div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px; padding:10px; border-radius:8px;">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer;">
-                            <input type="checkbox" id="kb-pub" checked style="width:auto; cursor:pointer;"> 前台顯示
+                
+                <div style="display:flex; gap:15px; margin-bottom:12px; align-items:center; flex-wrap:nowrap;">
+                    <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                        <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">文章標題</label>
+                        <input type="text" id="kb-title" placeholder="請輸入標題..." style="margin:0; padding:6px 10px;">
+                    </div>
+                    
+                    <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+                        <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer; font-size:14px; white-space:nowrap;">
+                            <input type="checkbox" id="kb-pub" checked style="width:18px; height:18px; cursor:pointer;"> 前台顯示
                         </label>
                         <input type="hidden" id="kb-id">
-                        <button class="btn btn-danger" onclick="delArticle()" style="display:none;" id="btn-kb-del">刪除</button>
-                        <button class="btn btn-forest" onclick="saveArticle()">💾 儲存文章</button>
+                        <button class="btn btn-danger" onclick="delArticle()" style="display:none; padding: 6px 10px;" id="btn-kb-del">刪除</button>
+                        <button class="btn btn-forest" onclick="saveArticle()" style="padding: 6px 15px; font-weight:bold;">💾 儲存文章</button>
                     </div>
                 </div>
 
@@ -714,41 +730,74 @@
                 <div class="editor-wrapper">
                     <div class="editor-sticky-header">
                         <div class="toolbar">
-                            <div class="tb-group"><button class="editor-btn" onclick="customUndo()" title="復原"><i class="fas fa-undo"></i></button><button class="editor-btn" onclick="customRedo()" title="重做"><i class="fas fa-redo"></i></button></div>
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="customUndo()" title="復原"><i class="fas fa-undo"></i></button>
+                                <button class="editor-btn" onclick="customRedo()" title="重做"><i class="fas fa-redo"></i></button>
+                            </div>
                             <div class="tb-group">
                                 <select class="tb-select" onchange="exec('fontName', this.value); this.value='';">
-                                    <option value="">字體</option><option value="sans-serif">標準黑體</option><option value="'Noto Serif TC', serif">優雅明體</option><option value="monospace">等寬字體</option>
+                                    <option value="">字體</option>
+                                    <option value="sans-serif">標準黑體</option>
+                                    <option value="'Noto Serif TC', serif">優雅明體</option>
+                                    <option value="monospace">等寬字體</option>
                                 </select>
                                 <select class="tb-select" onchange="applyFontSize(this.value); this.value='';">
-                                    <option value="">大小</option><option value="10">10pt</option><option value="14">14pt</option><option value="18">18pt</option><option value="24">24pt</option>
+                                    <option value="">大小</option>
+                                    <option value="10">10pt (偏小)</option>
+                                    <option value="12">12pt (標準)</option>
+                                    <option value="14">14pt (稍大)</option>
+                                    <option value="18">18pt (副標)</option>
+                                    <option value="24">24pt (主標)</option>
+                                    <option value="36">36pt (巨大)</option>
                                 </select>
                             </div>
-                            <div class="tb-group"><button class="editor-btn" onclick="exec('bold')"><i class="fas fa-bold"></i></button><button class="editor-btn" onclick="exec('italic')"><i class="fas fa-italic"></i></button><button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button></div>
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="exec('bold')"><i class="fas fa-bold"></i></button>
+                                <button class="editor-btn" onclick="exec('italic')"><i class="fas fa-italic"></i></button>
+                                <button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button>
+                            </div>
                             <div class="tb-group">
                                 <div class="color-picker-wrapper" title="文字顏色"><input type="color" onchange="exec('foreColor', this.value)" value="#2c3e50"><i class="fas fa-font" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
                                 <div class="color-picker-wrapper" title="螢光筆" style="margin-left:5px;" onmousedown="saveSelection()"> <input type="color" onchange="applyHighlighter(this.value)" value="#ffffff"><i class="fas fa-highlighter" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
                             </div>
-                            <div class="tb-group"><button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button><button class="editor-btn" onclick="exec('justifyCenter')"><i class="fas fa-align-center"></i></button><button class="editor-btn" onclick="exec('justifyRight')"><i class="fas fa-align-right"></i></button></div>
-                            <div class="tb-group"><button class="editor-btn" onclick="exec('indent')"><i class="fas fa-indent"></i></button><button class="editor-btn" onclick="exec('outdent')"><i class="fas fa-outdent"></i></button><button class="editor-btn" onclick="applyFirstLineIndent()" style="font-weight:bold;">⇥ 2</button></div>
-                            <div class="tb-group"><button class="editor-btn" onclick="exec('insertOrderedList')"><i class="fas fa-list-ol"></i></button><button class="editor-btn" onclick="exec('insertUnorderedList')"><i class="fas fa-list-ul"></i></button></div>
-                            <div class="tb-group"><button class="editor-btn" onclick="insertLink()"><i class="fas fa-link"></i></button><button class="editor-btn" onclick="exec('removeFormat')"><i class="fas fa-eraser"></i></button></div>
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button>
+                                <button class="editor-btn" onclick="exec('justifyCenter')"><i class="fas fa-align-center"></i></button>
+                                <button class="editor-btn" onclick="exec('justifyRight')"><i class="fas fa-align-right"></i></button>
+                            </div>
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="exec('indent')"><i class="fas fa-indent"></i></button>
+                                <button class="editor-btn" onclick="exec('outdent')"><i class="fas fa-outdent"></i></button>
+                                <button class="editor-btn" onclick="applyFirstLineIndent()" style="font-weight:bold;">⇥ 2</button>
+                            </div>
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="exec('insertOrderedList')"><i class="fas fa-list-ol"></i></button>
+                                <button class="editor-btn" onclick="exec('insertUnorderedList')"><i class="fas fa-list-ul"></i></button>
+                            </div>
+                            
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
+                                <button class="editor-btn" onclick="openGallery()" style="color:var(--info);" title="開啟圖庫"><i class="fas fa-image"></i></button>
+                                <button class="editor-btn" onclick="openModal('table')" title="插入表格"><i class="fas fa-table"></i></button>
+                                <button class="editor-btn" onclick="exec('insertHorizontalRule')" title="水平線"><i class="fas fa-minus"></i></button>
+                                <button class="editor-btn" onclick="exec('removeFormat')" title="清除樣式"><i class="fas fa-eraser"></i></button>
+                                <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
+
+                            </div>
                         </div>
 
                         <div class="toolbar" style="background:#fff; border-bottom:1px solid #eee;">
-                            <div class="tb-group">
-                                <button class="editor-btn" onclick="openModal('table')"><i class="fas fa-table"></i> 表格</button>
-                                <button class="editor-btn" onclick="exec('insertHorizontalRule')"><i class="fas fa-minus"></i></button>
-                            </div>
                             <div class="tb-group" style="background: #e8f5e9; border-radius: 6px; padding: 2px 8px; border: 1px solid #c8e6c9;">
-                                <button class="editor-btn" style="color:#1a2f23; font-weight:bold;" onclick="openModal('spacing')"><i class="fas fa-sliders-h" style="margin-right:5px;"></i> 排版</button>
+                                <button class="editor-btn" style="color:#1a2f23; font-weight:bold;" onclick="openModal('spacing')"><i class="fas fa-sliders-h" style="margin-right:5px;"></i> 排版設定</button>
                             </div>
                             <div class="tb-group" style="margin-left: auto;">
                                 <b style="font-size:12px; color:#999; margin-right:5px;">✨ 魔法積木：</b>
                                 <button class="editor-btn btn-magic" onclick="cleanCurrentArticle()" style="background:#fff5f5; border-color:#fadbd8; color:#c0392b; margin-right: 5px;">🧹 除髒</button>
+                                <button class="editor-btn btn-magic" onclick="openModal('h2')">🟡 主標</button>
                                 <button class="editor-btn btn-magic" onclick="openModal('h3')">🟢 副標</button>
                                 <button class="editor-btn btn-magic" onclick="openModal('card')">💡 資訊卡</button>
+                                <button class="editor-btn btn-magic" onclick="openModal('warn')">🚨 警告框</button>
                             </div>
-                            <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
                         </div>
                     </div>
                     <div id="editor" contenteditable="true"><p>請在此開始撰寫...</p></div>
@@ -917,7 +966,7 @@
     <div class="editor-modal-box editor-gallery-box">
         <div class="editor-gallery-header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <h3 style="margin:0;">🖼️ 資料庫圖庫</h3>
+                <h3 style="margin:0;">圖庫</h3>
                 <select id="bucket-select" onchange="switchBucket()" style="padding:5px; border-radius:4px;">
                     <option value="kb-images">文章配圖</option>
                 </select>
@@ -1422,15 +1471,19 @@
     }
 
     function restoreSelection() {
-        const editor = document.getElementById('editor');
+    // 🌟 關鍵修正：加上 preventScroll: true，強迫瀏覽器閉嘴，不准亂捲動畫面
         editor.focus({ preventScroll: true });
         if (savedRange) {
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(savedRange);
         } else {
-            const range = document.createRange(); range.selectNodeContents(editor); range.collapse(false);
-            const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+            const range = document.createRange(); 
+            range.selectNodeContents(editor); 
+            range.collapse(false);
+            const sel = window.getSelection(); 
+            sel.removeAllRanges(); 
+            sel.addRange(range);
         }
     }
 
@@ -1443,9 +1496,13 @@
     function applyFontSize(pt) {
         restoreSelection(); 
         const sel = window.getSelection();
-        if (!sel.toString()) return;
+        if (!sel.toString()) return; 
+
+        // 1. 魔法：先強迫瀏覽器把文字標上 <font size="7"> 當作「追蹤記號」
         document.execCommand('styleWithCSS', false, false);
         document.execCommand('fontSize', false, '7');
+        
+        // 2. 抓出剛才被做記號的文字，把它換成乾淨的 <span> 並強制注入精準的 pt 大小
         const fonts = document.getElementById('editor').querySelectorAll('font[size="7"]');
         fonts.forEach(f => {
             const span = document.createElement('span');
@@ -1453,10 +1510,15 @@
             span.innerHTML = f.innerHTML;
             f.replaceWith(span);
         });
+
+        // 3. 雙重防呆：處理某些瀏覽器生出的特定大尺寸 span
         const spans = document.getElementById('editor').querySelectorAll('span');
         spans.forEach(s => {
-            if (s.style.fontSize === '-webkit-xxx-large' || s.style.fontSize === 'xxx-large' || s.style.fontSize === '48px') s.style.fontSize = pt + 'pt';
+            if (s.style.fontSize === '-webkit-xxx-large' || s.style.fontSize === 'xxx-large' || s.style.fontSize === '48px') {
+                s.style.fontSize = pt + 'pt';
+            }
         });
+
         document.getElementById('editor').focus({ preventScroll: true });
         saveHistory();
     }
@@ -1473,17 +1535,29 @@
         restoreSelection(); 
         const sel = window.getSelection();
         if (!sel.toString()) return; 
+
         document.execCommand('styleWithCSS', false, true); 
         document.execCommand('hiliteColor', false, color);
         document.execCommand('backColor', false, color); 
+
+        // 🌟 終極殺陣：抓出所有被反白涵蓋的「區塊元素」，暴力拔除它們的背景色，防止顏色殘留或重疊
         const blocks = document.getElementById('editor').querySelectorAll('p, div, li, ul, ol, td, th, tr, table, h2, h3');
-        blocks.forEach(block => { if (sel.containsNode(block, true)) block.style.backgroundColor = ''; });
+        blocks.forEach(block => {
+            if (sel.containsNode(block, true)) {
+                block.style.backgroundColor = '';
+            }
+        });
+
+        // 雙重保險：往上找父節點清查，確保乾淨
         let node = sel.focusNode;
         if (node && node.nodeType === 3) node = node.parentNode;
         while (node && node.id !== 'editor') {
-            if (['P', 'DIV', 'LI', 'UL', 'OL', 'TD', 'TH'].includes(node.tagName)) node.style.backgroundColor = ''; 
+            if (['P', 'DIV', 'LI', 'UL', 'OL', 'TD', 'TH'].includes(node.tagName)) {
+                node.style.backgroundColor = ''; 
+            }
             node = node.parentNode;
         }
+        
         document.getElementById('editor').focus({ preventScroll: true });
         saveHistory();
     }
@@ -1658,13 +1732,82 @@
         insertHtml(html); closeGallery();
     }
     async function uploadToDB(input){ 
-        const f = input.files[0]; if(!f) return; 
-        document.querySelector('.editor-gallery-header button').innerText = "上傳中..."; 
-        await myDB.storage.from(currentBucket).upload(`${Date.now()}_${f.name}`,f); 
-        document.querySelector('.editor-gallery-header button').innerText = "⬆️ 上傳圖片"; 
-        loadGalleryImages(); input.value = ''; 
-    }
+    const file = input.files[0]; if(!file) return; 
+    
+    const btn = document.querySelector('.editor-gallery-header button[onclick*="upload-input"]');
+    const nameInput = document.getElementById('custom-img-name');
+    const originalText = btn.innerHTML;
+    
+    // 1. 取得名稱：如果有填寫就用填寫的，沒填就用原檔名（去除副檔名）
+    let rawName = nameInput.value.trim() || file.name.split('.').slice(0, -1).join('.');
+    
+    // 2. 淨化檔名：將空格與特殊符號轉為底線，避免 Invalid key 報錯
+    const cleanName = rawName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const finalID = `art_${Date.now()}_${cleanName}`; // 加上時間戳防止重複覆蓋
+    const targetBucket = 'kb-images'; 
+    const dbCategory = 'kb_asset';
+    const fName = `${finalID}.jpg`;
 
+    btn.innerHTML = "⏳ 處理中..."; 
+    btn.disabled = true;
+
+    const reader = new FileReader(); 
+    reader.readAsDataURL(file);
+    reader.onload = function(e) {
+        const img = new Image(); 
+        img.src = e.target.result;
+        img.onload = function() {
+            const cvs = document.createElement('canvas'); 
+            const ctx = cvs.getContext('2d');
+            
+            // 🌟 智慧尺寸邏輯：最大寬度 1200px。
+            // 如果原圖寬度 < 1200，就用原圖大小 (不會被拉大)
+            // 如果原圖寬度 > 1200，才按比例縮小
+            const MAX = 1200; 
+            let w = img.width, h = img.height; 
+            if(w > MAX || h > MAX){ 
+                if(w > h) { h *= MAX/w; w = MAX; } else { w *= MAX/h; h = MAX; }
+            }
+            
+            cvs.width = w; cvs.height = h; 
+            ctx.fillStyle = "#FFFFFF"; 
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            cvs.toBlob(async function(blob){
+                try {
+                    const { error: storageErr } = await myDB.storage.from(targetBucket).upload(fName, blob, { upsert: true });
+                    if(storageErr) throw storageErr;
+
+                    const { data: urlData } = myDB.storage.from(targetBucket).getPublicUrl(fName);
+                    const publicUrl = urlData.publicUrl;
+
+                    // 同步寫入資料庫
+                    await myDB.from('site_content').insert([{ 
+                        title: rawName, // 這裡存入你輸入的好看標題
+                        category: dbCategory, 
+                        image_url: publicUrl, 
+                        body: 'asset' 
+                    }]);
+
+                    insertGalleryImage(publicUrl); 
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    nameInput.value = ''; // 清空名稱欄位
+                    input.value = ''; 
+                    closeGallery();
+                    if(typeof fetchAll === 'function') fetchAll(); 
+                    
+                } catch (err) {
+                    alert("插入失敗：" + err.message);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }, 'image/jpeg', 0.85); // 稍微提高品質至 85%
+        }
+    }
+}
     
     // 🖱️ 圖片與表格浮動選單 (動態綁定事件)
     document.addEventListener("DOMContentLoaded", () => {

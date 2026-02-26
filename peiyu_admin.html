@@ -215,15 +215,29 @@
     
     /* 3. 📱 專屬手機/平板的吸頂魔法 */
     @media (max-width: 1024px) {
-        .editor-wrapper {
-            overflow: visible; /* 只有手機版才解除封印，允許工具列浮出來 */
+        /* 🌟 終極解藥：解除父層卡片的封印！只要有 hidden，sticky 就絕對會失效 */
+        #tab-kb .kb-layout > .card {
+            overflow: visible !important;
+            height: auto !important;
         }
+
+        .editor-wrapper {
+            overflow: visible !important; /* 確保編輯器外殼不擋路 */
+        }
+        
         .editor-sticky-header {
             position: sticky;
-            top: 80px; /* 🔥 完美避開你最上面那個 80px 高的導航列，無縫接軌！ */
+            top: -30px; /* 後台沒有導航列，直接抵銷平板 30px 的 padding 貼齊頂部 */
             border-radius: 8px 8px 0 0;
             box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
-            margin: -1px; /* 密合邊框，防白線 */
+            margin: -1px; 
+            z-index: 2000;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .editor-sticky-header { 
+            top: -15px; /* 手機版外圍 padding 比較小，所以用 -15px 抵銷 */
         }
     }    
     .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }

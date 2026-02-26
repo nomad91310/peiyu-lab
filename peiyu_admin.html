@@ -215,30 +215,37 @@
     
     /* 3. 📱 專屬手機/平板的吸頂魔法 */
     @media (max-width: 1024px) {
-        /* 🌟 終極解藥：解除父層卡片的封印！只要有 hidden，sticky 就絕對會失效 */
-        #tab-kb .kb-layout > .card {
-            overflow: visible !important;
-            height: auto !important;
-        }
-
-        .editor-wrapper {
-            overflow: visible !important; /* 確保編輯器外殼不擋路 */
-        }
+        #tab-kb .kb-layout > .card { overflow: visible !important; height: auto !important; }
+        .editor-wrapper { overflow: visible !important; }
         
         .editor-sticky-header {
             position: sticky;
-            top: -30px; /* 後台沒有導航列，直接抵銷平板 30px 的 padding 貼齊頂部 */
+            top: 0px !important; /* 🌟 修正1：強制設為 0，絕對不准跑到螢幕外面！ */
             border-radius: 8px 8px 0 0;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
             margin: -1px; 
             z-index: 2000;
         }
     }
     
     @media (max-width: 768px) {
-        .editor-sticky-header { 
-            top: -15px; /* 手機版外圍 padding 比較小，所以用 -15px 抵銷 */
+        /* 🌟 修正2：手機版工具列極限瘦身，改成「橫向滑動」 */
+        .editor-sticky-header .toolbar {
+            flex-wrap: nowrap !important; /* 絕對不准換行 */
+            overflow-x: auto !important;  /* 超出的按鈕可以用手左右滑 */
+            padding: 6px 10px !important; /* 縮小上下留白 */
+            -webkit-overflow-scrolling: touch; /* 讓蘋果手機滑起來超順 */
         }
+        
+        /* 隱藏醜醜的橫向捲軸，保持畫面乾淨 */
+        .editor-sticky-header .toolbar::-webkit-scrollbar { display: none; }
+        
+        /* 縮小按鈕與間距，極限壓縮高度 */
+        .tb-group { margin-right: 5px !important; padding-right: 5px !important; }
+        .editor-btn { padding: 4px 8px !important; font-size: 13px !important; }
+        select.tb-select { height: 26px !important; padding: 0 4px !important; font-size: 12px !important; }
+        .color-picker-wrapper { width: 26px !important; height: 26px !important; }
+        .color-picker-wrapper i { top: 5px !important; left: 6px !important; font-size: 12px !important; }
     }    
     .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
     .tb-group { display: flex; gap: 2px; padding-right: 8px; margin-right: 8px; border-right: 1px solid #ddd; align-items: center; }

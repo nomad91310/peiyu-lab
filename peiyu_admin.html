@@ -210,15 +210,47 @@
 
     .editor-wrapper { flex: 1; background: white; border: 1px solid #ccc; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; position: relative; min-height: 500px; }
     
-    /* 📱 專屬手機/平板的「內部捲軸」佈局 */
+    /* 📱 專屬手機/平板的「捲軸流暢」佈局修正 */
     @media (max-width: 1024px) {
+        /* 1. 讓卡片高度彈性，不准鎖死在 100vh，否則橫向模式下編輯區會消失 */
         #tab-kb .kb-layout > .card { 
-            height: calc(100vh - 120px) !important; 
-            display: flex; flex-direction: column; overflow: hidden !important; padding: 15px !important;
+            height: auto !important; 
+            min-height: calc(100vh - 100px);
+            display: flex; 
+            flex-direction: column; 
+            overflow: visible !important; /* 🌟 讓出垂直捲動權限給最外層 .main */
+            padding: 15px !important;
         }
-        .editor-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden !important; }
-        .editor-sticky-header { position: relative !important; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #editor { flex: 1; overflow-y: auto !important; padding: 20px !important; -webkit-overflow-scrolling: touch; }
+
+        /* 2. 編輯器包裝層不再鎖死高度 */
+        .editor-wrapper { 
+            flex: none !important;
+            display: flex; 
+            flex-direction: column; 
+            overflow: visible !important; 
+            height: auto !important;
+            min-height: 500px;
+            border-bottom: 2px solid #ccc;
+        }
+
+        /* 3. 工具列改為「黏性定位」，捲動時會吸在頂部 */
+        .editor-sticky-header { 
+            position: sticky !important; 
+            top: -31px; /* 這裡配合 .main 的 padding 調整，確保吸頂 */
+            z-index: 100; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+
+        /* 4. 🌟 核心修正：解決橫向捲軸與垂直捲動的衝突 */
+        #editor { 
+            flex: none !important;
+            overflow-y: visible !important; /* 🌟 禁止內部垂直捲動，改由外層 .main 統一管理 */
+            overflow-x: auto !important;    /* 🌟 僅保留橫向捲動 (給寬表格或圖片使用) */
+            height: auto !important;        /* 隨內容撐開 */
+            padding: 20px !important; 
+            -webkit-overflow-scrolling: touch; 
+            background: #fff;
+        }
     }
     
     @media (max-width: 768px) {

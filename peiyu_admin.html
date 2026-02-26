@@ -204,8 +204,28 @@
 /* ======================================================
        5. 培癒原生編輯器樣式
        ====================================================== */
+    /* 1. 恢復電腦版封印：把 overflow: hidden 加回來，解決灰底破圖 Bug！ */
     .editor-wrapper { flex: 1; background: white; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; min-height: 500px; }
     
+    /* 2. 電腦版預設不吸頂 (因為本來就不會跑掉) */
+    .editor-sticky-header {
+        background: #f8f9fa;
+        z-index: 1500;
+    }
+    
+    /* 3. 📱 專屬手機/平板的吸頂魔法 */
+    @media (max-width: 1024px) {
+        .editor-wrapper {
+            overflow: visible; /* 只有手機版才解除封印，允許工具列浮出來 */
+        }
+        .editor-sticky-header {
+            position: sticky;
+            top: 80px; /* 🔥 完美避開你最上面那個 80px 高的導航列，無縫接軌！ */
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+            margin: -1px; /* 密合邊框，防白線 */
+        }
+    }    
     .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
     .tb-group { display: flex; gap: 2px; padding-right: 8px; margin-right: 8px; border-right: 1px solid #ddd; align-items: center; }
     .tb-group:last-child { border-right: none; }
@@ -671,44 +691,45 @@
 
                 <style id="dynamic-spacing"></style>
                 <div class="editor-wrapper">
-                    <div class="toolbar">
-                        <div class="tb-group"><button class="editor-btn" onclick="customUndo()" title="復原"><i class="fas fa-undo"></i></button><button class="editor-btn" onclick="customRedo()" title="重做"><i class="fas fa-redo"></i></button></div>
-                        <div class="tb-group">
-                            <select class="tb-select" onchange="exec('fontName', this.value); this.value='';">
-                                <option value="">字體</option><option value="sans-serif">標準黑體</option><option value="'Noto Serif TC', serif">優雅明體</option><option value="monospace">等寬字體</option>
-                            </select>
-                            <select class="tb-select" onchange="applyFontSize(this.value); this.value='';">
-                                <option value="">大小</option><option value="10">10pt</option><option value="14">14pt</option><option value="18">18pt</option><option value="24">24pt</option>
-                            </select>
+                    <div class="editor-sticky-header">
+                        <div class="toolbar">
+                            <div class="tb-group"><button class="editor-btn" onclick="customUndo()" title="復原"><i class="fas fa-undo"></i></button><button class="editor-btn" onclick="customRedo()" title="重做"><i class="fas fa-redo"></i></button></div>
+                            <div class="tb-group">
+                                <select class="tb-select" onchange="exec('fontName', this.value); this.value='';">
+                                    <option value="">字體</option><option value="sans-serif">標準黑體</option><option value="'Noto Serif TC', serif">優雅明體</option><option value="monospace">等寬字體</option>
+                                </select>
+                                <select class="tb-select" onchange="applyFontSize(this.value); this.value='';">
+                                    <option value="">大小</option><option value="10">10pt</option><option value="14">14pt</option><option value="18">18pt</option><option value="24">24pt</option>
+                                </select>
+                            </div>
+                            <div class="tb-group"><button class="editor-btn" onclick="exec('bold')"><i class="fas fa-bold"></i></button><button class="editor-btn" onclick="exec('italic')"><i class="fas fa-italic"></i></button><button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button></div>
+                            <div class="tb-group">
+                                <div class="color-picker-wrapper" title="文字顏色"><input type="color" onchange="exec('foreColor', this.value)" value="#2c3e50"><i class="fas fa-font" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
+                                <div class="color-picker-wrapper" title="螢光筆" style="margin-left:5px;" onmousedown="saveSelection()"> <input type="color" onchange="applyHighlighter(this.value)" value="#ffffff"><i class="fas fa-highlighter" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
+                            </div>
+                            <div class="tb-group"><button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button><button class="editor-btn" onclick="exec('justifyCenter')"><i class="fas fa-align-center"></i></button><button class="editor-btn" onclick="exec('justifyRight')"><i class="fas fa-align-right"></i></button></div>
+                            <div class="tb-group"><button class="editor-btn" onclick="exec('indent')"><i class="fas fa-indent"></i></button><button class="editor-btn" onclick="exec('outdent')"><i class="fas fa-outdent"></i></button><button class="editor-btn" onclick="applyFirstLineIndent()" style="font-weight:bold;">⇥ 2</button></div>
+                            <div class="tb-group"><button class="editor-btn" onclick="exec('insertOrderedList')"><i class="fas fa-list-ol"></i></button><button class="editor-btn" onclick="exec('insertUnorderedList')"><i class="fas fa-list-ul"></i></button></div>
+                            <div class="tb-group"><button class="editor-btn" onclick="insertLink()"><i class="fas fa-link"></i></button><button class="editor-btn" onclick="exec('removeFormat')"><i class="fas fa-eraser"></i></button></div>
                         </div>
-                        <div class="tb-group"><button class="editor-btn" onclick="exec('bold')"><i class="fas fa-bold"></i></button><button class="editor-btn" onclick="exec('italic')"><i class="fas fa-italic"></i></button><button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button></div>
-                        <div class="tb-group">
-                            <div class="color-picker-wrapper" title="文字顏色"><input type="color" onchange="exec('foreColor', this.value)" value="#2c3e50"><i class="fas fa-font" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
-                            <div class="color-picker-wrapper" title="螢光筆" style="margin-left:5px;" onmousedown="saveSelection()"> <input type="color" onchange="applyHighlighter(this.value)" value="#ffffff"><i class="fas fa-highlighter" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
-                        </div>
-                        <div class="tb-group"><button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button><button class="editor-btn" onclick="exec('justifyCenter')"><i class="fas fa-align-center"></i></button><button class="editor-btn" onclick="exec('justifyRight')"><i class="fas fa-align-right"></i></button></div>
-                        <div class="tb-group"><button class="editor-btn" onclick="exec('indent')"><i class="fas fa-indent"></i></button><button class="editor-btn" onclick="exec('outdent')"><i class="fas fa-outdent"></i></button><button class="editor-btn" onclick="applyFirstLineIndent()" style="font-weight:bold;">⇥ 2</button></div>
-                        <div class="tb-group"><button class="editor-btn" onclick="exec('insertOrderedList')"><i class="fas fa-list-ol"></i></button><button class="editor-btn" onclick="exec('insertUnorderedList')"><i class="fas fa-list-ul"></i></button></div>
-                        <div class="tb-group"><button class="editor-btn" onclick="insertLink()"><i class="fas fa-link"></i></button><button class="editor-btn" onclick="exec('removeFormat')"><i class="fas fa-eraser"></i></button></div>
-                    </div>
 
-                    <div class="toolbar" style="background:#fff; border-bottom:1px solid #eee;">
-                        <div class="tb-group">
-                            <button class="editor-btn" onclick="openModal('table')"><i class="fas fa-table"></i> 表格</button>
-                            <button class="editor-btn" onclick="exec('insertHorizontalRule')"><i class="fas fa-minus"></i></button>
+                        <div class="toolbar" style="background:#fff; border-bottom:1px solid #eee;">
+                            <div class="tb-group">
+                                <button class="editor-btn" onclick="openModal('table')"><i class="fas fa-table"></i> 表格</button>
+                                <button class="editor-btn" onclick="exec('insertHorizontalRule')"><i class="fas fa-minus"></i></button>
+                            </div>
+                            <div class="tb-group" style="background: #e8f5e9; border-radius: 6px; padding: 2px 8px; border: 1px solid #c8e6c9;">
+                                <button class="editor-btn" style="color:#1a2f23; font-weight:bold;" onclick="openModal('spacing')"><i class="fas fa-sliders-h" style="margin-right:5px;"></i> 排版</button>
+                            </div>
+                            <div class="tb-group" style="margin-left: auto;">
+                                <b style="font-size:12px; color:#999; margin-right:5px;">✨ 魔法積木：</b>
+                                <button class="editor-btn btn-magic" onclick="cleanCurrentArticle()" style="background:#fff5f5; border-color:#fadbd8; color:#c0392b; margin-right: 5px;">🧹 除髒</button>
+                                <button class="editor-btn btn-magic" onclick="openModal('h3')">🟢 副標</button>
+                                <button class="editor-btn btn-magic" onclick="openModal('card')">💡 資訊卡</button>
+                            </div>
+                            <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
                         </div>
-                        <div class="tb-group" style="background: #e8f5e9; border-radius: 6px; padding: 2px 8px; border: 1px solid #c8e6c9;">
-                            <button class="editor-btn" style="color:#1a2f23; font-weight:bold;" onclick="openModal('spacing')"><i class="fas fa-sliders-h" style="margin-right:5px;"></i> 排版</button>
-                        </div>
-                        <div class="tb-group" style="margin-left: auto;">
-                            <b style="font-size:12px; color:#999; margin-right:5px;">✨ 魔法積木：</b>
-                            <button class="editor-btn btn-magic" onclick="cleanCurrentArticle()" style="background:#fff5f5; border-color:#fadbd8; color:#c0392b; margin-right: 5px;">🧹 除髒</button>
-                            <button class="editor-btn btn-magic" onclick="openModal('h3')">🟢 副標</button>
-                            <button class="editor-btn btn-magic" onclick="openModal('card')">💡 資訊卡</button>
-                        </div>
-                        <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
                     </div>
-
                     <div id="editor" contenteditable="true"><p>請在此開始撰寫...</p></div>
                     <div id="float-menu"></div>
                     <textarea id="source-area" class="source-view"></textarea>

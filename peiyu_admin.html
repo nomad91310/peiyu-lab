@@ -1623,6 +1623,7 @@
         loadGalleryImages(); input.value = ''; 
     }
 
+    
     // 🖱️ 圖片與表格浮動選單 (動態綁定事件)
     document.addEventListener("DOMContentLoaded", () => {
         const editor = document.getElementById('editor');
@@ -1637,20 +1638,25 @@
                 currentTarget = null; 
                 currentTargetCell = null;
 
-                // 🌟 修正1：先抓圖片，再抓表格！
                 let targetImg = e.target.closest('img'); 
                 let targetTable = e.target.closest('table'); 
                 let targetCell = e.target.closest('td, th');
 
                 if (targetImg) { 
-                    // 優先處理圖片 (即使它在表格內)
                     let wrapper = targetImg.closest('.resizable-wrapper');
                     if (!wrapper) {
+                        let oldW = targetImg.getAttribute('width') || targetImg.style.width || '100%';
+                        if (oldW && !oldW.includes('%') && !oldW.includes('px') && !oldW.includes('auto')) { oldW += 'px'; }
+
                         wrapper = document.createElement('div');
                         wrapper.className = 'resizable-wrapper peiyu-obj';
-                        wrapper.style.cssText = 'display:block; width:100%; margin:15px auto; clear:both;';
+                        wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
+                        
                         targetImg.style.width = '100%'; 
+                        targetImg.style.height = 'auto'; 
                         targetImg.style.display = 'block';
+                        targetImg.removeAttribute('width'); 
+                        
                         targetImg.parentNode.insertBefore(wrapper, targetImg);
                         wrapper.appendChild(targetImg);
                     }
@@ -1658,7 +1664,6 @@
                     currentTarget.classList.add('obj-selected'); 
                     showFloatMenu(e.clientX, e.clientY, 'image'); 
                 } else if (targetTable) { 
-                    // 如果沒點到圖片，才處理表格
                     targetTable.classList.add('peiyu-table', 'peiyu-obj');
                     if(targetTable.style.display === 'block') targetTable.style.display = 'table';
                     
@@ -1684,7 +1689,6 @@
                     currColW = parseInt(currentTargetCell.style.width);
                 }
 
-                // 🌟 修正2：加入「剪下」按鈕
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;">
                     <div style="display:flex; justify-content:space-between;">
                         ${alignBtns}
@@ -1714,27 +1718,72 @@
                     </div>
                 </div>`; 
             } else if (type === 'image') { 
-                let currW = 100; if(currentTarget.style.width && currentTarget.style.width.includes('%')) currW = parseInt(currentTarget.style.width); 
-                floatMenu.innerHTML = `<div style="display:flex; gap:10px; align-items:center;">
-                    ${alignBtns}
-                    <div style="display:flex; gap:3px; margin-left:auto;">
-                        <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下</button>
-                        <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
+                let currW = 100; 
+                let currUnit = '%';
+                if (currentTarget.style.width) {
+                    if (currentTarget.style.width.includes('px')) { currW = parseInt(currentTarget.style.width); currUnit = 'px'; } 
+                    else if (currentTarget.style.width.includes('%')) { currW = parseInt(currentTarget.style.width); currUnit = '%'; }
+                }
+                
+                // 🌟 圖片專屬面板：加入文繞圖與斷行控制
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:2px; background:#f0f4f8; padding:3px; border-radius:6px; border:1px solid #dcebf7;">
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-left')" title="置左 (獨立一行不繞圖)"><i class="fas fa-align-left"></i></button>
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-center')" title="置中 (獨立一行不繞圖)"><i class="fas fa-align-center"></i></button>
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-right')" title="置右 (獨立一行不繞圖)"><i class="fas fa-align-right"></i></button>
+                            <div style="width:1px; background:#bdc3c7; margin:0 4px;"></div>
+                            <button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-left')" title="靠左 (文字在右側環繞)"><i class="fas fa-indent" style="margin-right:2px;"></i>左繞</button>
+                            <button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-right')" title="靠右 (文字在左側環繞)"><i class="fas fa-outdent" style="margin-right:2px;"></i>右繞</button>
+                        </div>
                     </div>
-                </div>
-                <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; margin-top:5px;"><span>大小:</span><input type="range" min="10" max="100" value="${currW}" oninput="updateImgWidth(this.value)" onchange="saveHistory()" style="width:100px;"><span id="img-w-val" style="font-weight:bold; margin-left:5px;">${currW}%</span></div>`; 
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; padding:5px; border-radius:4px;">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span style="white-space:nowrap; font-weight:bold; font-size:12px; color:#555;">大小:</span>
+                            <input type="number" id="img-custom-w" value="${currW}" onchange="setImgCustomWidth()" onkeyup="if(event.key==='Enter')setImgCustomWidth()" style="width:50px; padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; text-align:center;">
+                            <select id="img-custom-unit" onchange="setImgCustomWidth()" style="padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; cursor:pointer;">
+                                <option value="%" ${currUnit === '%' ? 'selected' : ''}>%</option>
+                                <option value="px" ${currUnit === 'px' ? 'selected' : ''}>px</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
+                        </div>
+                    </div>
+                </div>`; 
             } 
         }
         
+        // 🌟 新增：圖片專屬的環繞與排版控制
+        window.setImgAlign = function(mode) {
+            if(!currentTarget) return;
+            currentTarget.style.display = 'block';
+            currentTarget.style.clear = 'both'; // 清除上一層的干擾
+
+            if (mode === 'block-left') {
+                currentTarget.style.float = 'none';
+                currentTarget.style.margin = '15px auto 15px 0';
+            } else if (mode === 'block-center') {
+                currentTarget.style.float = 'none';
+                currentTarget.style.margin = '15px auto';
+            } else if (mode === 'block-right') {
+                currentTarget.style.float = 'none';
+                currentTarget.style.margin = '15px 0 15px auto';
+            } else if (mode === 'float-left') {
+                currentTarget.style.float = 'left';
+                currentTarget.style.margin = '15px 20px 15px 0'; // 給右側文字留呼吸空間
+            } else if (mode === 'float-right') {
+                currentTarget.style.float = 'right';
+                currentTarget.style.margin = '15px 0 15px 20px'; // 給左側文字留呼吸空間
+            }
+            saveHistory();
+        }
+
+        // 表格專用的對齊邏輯 (維持不變)
         window.setAlign = function(align) { 
             if(!currentTarget) return; 
-            if (currentTarget.classList.contains('resizable-wrapper')) { 
-                currentTarget.style.display = 'block'; 
-                currentTarget.style.clear = 'both'; 
-                if (align === 'center') { currentTarget.style.float = 'none'; currentTarget.style.margin = '15px auto'; } 
-                else if (align === 'left') { currentTarget.style.float = 'left'; currentTarget.style.margin = '15px 20px 15px 0'; } 
-                else if (align === 'right') { currentTarget.style.float = 'right'; currentTarget.style.margin = '15px 0 15px 20px'; } 
-            } else if (currentTarget.tagName === 'TABLE') { 
+            if (currentTarget.tagName === 'TABLE') { 
                 currentTarget.style.display = 'table'; 
                 currentTarget.style.clear = 'both'; 
                 if (align === 'center') { currentTarget.style.margin = '15px auto'; } 
@@ -1744,13 +1793,20 @@
             saveHistory(); 
         }
         
-        window.updateImgWidth = function(val) { 
+        window.setImgCustomWidth = function() { 
             if(!currentTarget) return; 
-            currentTarget.style.width = val + "%"; 
+            const wVal = document.getElementById('img-custom-w').value;
+            const unit = document.getElementById('img-custom-unit').value;
+            
+            currentTarget.style.width = wVal + unit; 
+            currentTarget.style.maxWidth = '100%'; 
+            
             const img = currentTarget.querySelector('img');
-            if(img) img.style.width = "100%"; 
-            const label = document.getElementById('img-w-val');
-            if (label) label.innerText = val + "%"; 
+            if(img) {
+                img.style.width = "100%"; 
+                img.style.height = "auto";
+            }
+            saveHistory(); 
         }
         
         window.updateTableWidth = function(val) { 
@@ -1777,7 +1833,6 @@
         
         window.modImg = function(a) { if(a === 'delete') { currentTarget.remove(); floatMenu.style.display = 'none'; saveHistory(); } }
         
-        // 🌟 新增：萬用剪下功能
         window.modCut = async function() {
             if(!currentTarget) return;
             try {
@@ -1792,7 +1847,6 @@
                 floatMenu.style.display = 'none';
                 saveHistory();
                 
-                // 用一個不明顯的小提示告訴使用者剪下成功
                 alert("✂️ 已剪下！\n請將游標點擊到想放的地方，按下鍵盤 Ctrl+V (或 Cmd+V) 貼上。");
             } catch (err) {
                 console.error(err);

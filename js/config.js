@@ -1,18 +1,12 @@
-// ==========================================
-// 核心設定檔 (js/config.js) - 修正版
-// ==========================================
 
-// 1. 資料庫連線設定 (這是修正後的正確編碼)
-const _z1 = "aHR0cHM6Ly9nZXlycG93aGFxZmhueGdocG9rci5zdXBhYmFzZS5jbw=="; // 正確的 URL (含 f)
+
+const _z1 = "aHR0cHM6Ly9nZXlycG93aGFxZmhueGdocG9rci5zdXBhYmFzZS5jbw=="; 
 const _z2 = "c2JfcHVibGlzaGFibGVfYVh1Y2RxOFV0dk1iQ0ticmlxcEpDd19ndHBZQnctcg=="; // Key
 
-// 確保連線 client 抓到的是正確的變數
 const myDB = supabase.createClient(atob(_z1), atob(_z2));
 
-// 2. 密碼驗證憑證
 const VALID_TOKEN = "YmFjb24zMTA="; 
 
-// 3. 安全防護函數 (供子頁面使用)
 function requireLogin() {
     const currentToken = localStorage.getItem('sys_cfg_v1');
     if (currentToken !== VALID_TOKEN) {

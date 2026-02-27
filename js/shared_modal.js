@@ -121,14 +121,33 @@ function openBooking(id) {
     if (b.main_service) serviceHtml += `<div style="color:#d35400; font-weight:bold; font-size:1.2rem; margin-top:5px; padding-left:5px;">🔥 ${b.main_service}</div>`;
     if (b.service_detail) serviceHtml += `<div style="color:#666; font-size:0.95rem; margin-top:8px; padding-left:15px; border-left:3px solid #eee;">${b.service_detail.split('|').map(s => `<div style="margin-top:3px;">➕ ${s.trim()}</div>`).join('')}</div>`;
     
+    // 🔥 動態判定報表模板邏輯開始
     const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
+    
     let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
-    let reportTemplate = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
+    
+    // 如果資料庫(services資料表)裡面有設定 report_template (例如：tarot_report.html)，就用那個
+    // 如果沒有，就預設使用 srt_report.html
+    let templateName = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
+    
+    // 確保路徑指向 report/ 資料夾
+    let reportTemplatePath = `report/${templateName}`;
+
+    // 檢查訂單中是否已經有生成過報告的紀錄
     const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
     const existingReportId = reportMatch ? reportMatch[1] : null;
-    let reportUrl = existingReportId ? `${reportTemplate}?id=${existingReportId}` : `${reportTemplate}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}&email=${encodeURIComponent(extractEmail)}`;        
-    if(existingReportId) { btnLabel = "📄 查看/修改報告"; btnClass = "btn-purple"; }
     
+    // 組合最終的開啟網址
+    let reportUrl = existingReportId 
+        ? `${reportTemplatePath}?id=${existingReportId}` 
+        : `${reportTemplatePath}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}&email=${encodeURIComponent(extractEmail)}`;        
+    
+    if(existingReportId) { 
+        btnLabel = "📄 查看/修改報告"; 
+        btnClass = "btn-purple"; 
+    }
+    // 🔥 動態判定報表模板邏輯結束
+
     let scheduleBox = '';
     if(b.scheduled_at) { 
         scheduleBox = `<div style="background:#f0f8ff; padding:12px; border-left:4px solid #3498db; border-radius:4px; margin-top:15px;"><div style="display:flex; justify-content:space-between; align-items:center;"><strong style="color:#2980b9;">📅 已鎖定服務排程</strong><button class="btn btn-outline" style="font-size:12px; background:white;" onclick="document.getElementById('reschedule-area').style.display='block'; this.style.display='none';">✏️ 修改</button></div><div style="font-size:1.2rem; color:#2c3e50; margin-top:5px; font-weight:bold;">${new Date(b.scheduled_at).toLocaleString()}</div><div id="reschedule-area" style="display:none; margin-top:10px;"><div style="display:flex; gap:10px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認變更</button></div></div>`; 

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>會員專區</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+<style>
+    /* ======================================================
+       1. 基礎設定與變數 (與外殼完全同步)
+       ====================================================== */
+    :root { 
+        --forest: #1a2f23; --forest-light: #2a4032; 
+        --cream: #f9f7f2; --white: #ffffff; 
+        --accent: #c6a87c; --text-main: #2c3e50; 
+    }
+    * { box-sizing: border-box; }
+    body { 
+        margin: 0; 
+        font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+        background-color: transparent; /* 讓外殼的背景透過去 */
+        color: var(--text-main); 
+        line-height: 1.7; 
+        overflow-x: hidden; 
+    }
+    h1, h2, h3, h4 { font-family: 'Noto Serif TC', serif; }
+    
+    .section { padding: 40px 20px 80px 20px; max-width: 900px; margin: 0 auto; animation: fadeSlideUp 0.5s ease-out; }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ======================================================
+       2. 按鈕與表單
+       ====================================================== */
+    .btn-primary, .btn-secondary, .btn-view-report {
+        height: 40px !important; padding: 0 22px !important; font-size: 14px !important; font-weight: bold !important; border-radius: 50px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; 
+        cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        background-color: var(--forest) !important; border: 1px solid var(--accent) !important; color: var(--accent) !important; 
+    }
+    .btn-primary i, .btn-secondary i, .btn-view-report i { color: var(--accent) !important; transition: all 0.3s ease; margin-right: 6px; }
+    .btn-primary:hover, .btn-secondary:hover, .btn-view-report:hover { background-color: var(--accent) !important; border-color: var(--accent) !important; color: #ffffff !important; transform: translateY(-2px); }
+    .btn-primary:hover i, .btn-secondary:hover i, .btn-view-report:hover i { color: #ffffff !important; }
+
+    .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(26, 47, 35, 0.08); border: 1px solid #eee; margin-bottom: 30px; position: relative; }
+    label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
+    input { width: 100%; height: 50px; padding: 0 18px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; background: #fafafa; box-sizing: border-box; }
+    input:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
+    input:disabled { background: #eee; cursor: not-allowed; color: #999; }
+
+    /* ======================================================
+       3. 歷史訂單卡片 (History Cards)
+       ====================================================== */
+    .history-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05); border: 1px solid rgba(0,0,0,0.02); transition: all 0.3s ease; overflow: hidden; }
+    .history-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(26, 47, 35, 0.12); }
+    .history-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
+    
+    .history-card.status-pending::before { background-color: #f39c12; }
+    .history-card.status-paid::before { background-color: #9b59b6; }
+    .history-card.status-awaiting_service::before { background-color: #3498db; }
+    .history-card.status-completed::before { background-color: #27ae60; }
+    
+    .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 12px; }
+    .history-date { font-size: 0.85rem; color: #999; letter-spacing: 1px; }
+    .history-id { font-family: monospace; color: #ccc; font-size: 0.8rem; }
+    .history-title { font-family: 'Noto Serif TC', serif; font-size: 1.2rem; color: var(--forest); font-weight: 900; margin-bottom: 5px; }
+    .history-sub { font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.5; }
+    .history-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f5f5f5; }
+    .history-price { font-family: 'Cinzel', serif; font-weight: bold; color: var(--forest); font-size: 1.1rem; }
+    
+    .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; display: inline-block; vertical-align: middle; }
+    .sb-pending { background: #fff3e0; color: #e67e22; }
+    .sb-paid { background: #f3e5f5; color: #8e44ad; }
+    .sb-completed { background: #e8f5e9; color: #2e7d32; }
+
+    /* ======================================================
+       4. 彈窗與 RWD
+       ====================================================== */
+    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); }
+    .result-overlay.active { display: flex; }
+    .text-modal-card { position: relative; width: 90%; max-width: 450px; background: #fff; border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+
+    @media (max-width: 768px) {
+        .section { padding: 20px 15px 60px 15px; }
+        .card { padding: 30px 20px; }
+        .history-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .history-footer .btn-view-report { width: 100%; margin-top: 10px; }
+        #dash-welcome { font-size: 1.2rem; }
+        .mobile-header-btns { display: flex; gap: 10px; margin-top: 15px; width: 100%; }
+        .mobile-header-btns button { flex: 1; }
+        .desktop-header-btns { display: none; }
+    }
+    @media (min-width: 769px) {
+        .mobile-header-btns { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="section">
+    <div id="login-box" class="card" style="max-width:500px; margin:20px auto;">
+        <h3 style="margin-top:0; text-align:center; font-size: 1.5rem; color: var(--forest); letter-spacing: 2px;">👤 會員登入</h3>
+        <div style="margin-top:30px;">
+            <input type="tel" id="l-phone" placeholder="手機 (您的帳號)" style="margin-bottom:15px;">
+            <input type="password" id="l-pass" placeholder="密碼" style="margin-bottom:25px;" onkeypress="if(event.key === 'Enter') doLogin()">
+            <button class="btn-primary" onclick="doLogin()" style="width:100%; height:50px !important; font-size:1.1rem !important;">登入系統</button>
+            
+            <div style="text-align:center; margin-top:20px;">
+                <a href="https://line.me/R/ti/p/@927ctmwa" target="_blank" style="color:#999; font-size:14px; text-decoration:underline; letter-spacing:1px;">
+                    忘記密碼？請至官方 LINE 詢問
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="dash" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:30px; border-bottom: 2px solid var(--accent); padding-bottom: 15px;">
+            <h3 id="dash-welcome" style="margin:0; color: var(--forest);"></h3>
+            
+            <div class="desktop-header-btns">
+                <button class="btn-secondary" style="background:#fff !important; color:var(--forest) !important;" onclick="openEditProfile()"><i class="fa-solid fa-pen"></i> 修改資料</button>
+                <button class="btn-secondary" style="background:#fff !important; border-color:#999 !important; color:#999 !important;" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> 登出</button>
+            </div>
+
+            <div class="mobile-header-btns">
+                <button class="btn-secondary" style="background:#fff !important; color:var(--forest) !important;" onclick="openEditProfile()"><i class="fa-solid fa-pen"></i> 修改資料</button>
+                <button class="btn-secondary" style="background:#fff !important; border-color:#999 !important; color:#999 !important;" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> 登出</button>
+            </div>
+        </div>
+
+        <div class="card" style="background:#f1f8e9; border:1px solid #c8e6c9;">
+            <h4 style="margin-top:0; color:#2e7d32; font-size: 1.2rem;">📋 您的服務報告</h4>
+            <div id="dash-history" style="max-height:65vh; overflow-y:auto; margin-top:15px; padding-right: 5px;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="edit-profile-overlay" class="result-overlay">
+    <div class="text-modal-card">
+        <h3 style="margin-top:0; color: var(--forest); border-bottom: 2px solid var(--accent); padding-bottom: 10px;">✏️ 修改會員資料</h3>
+        <label>手機 (帳號不可修改)</label>
+        <input type="text" id="ep-phone" disabled>
+        
+        <label style="margin-top:15px;">姓名</label>
+        <input type="text" id="ep-name">
+        
+        <label style="margin-top:15px;">Email</label>
+        <input type="email" id="ep-email">
+        
+        <label style="margin-top:15px;">新密碼 (不改請留空)</label>
+        <input type="password" id="ep-pass" placeholder="輸入新密碼">
+        
+        <div style="margin-top:30px; display:flex; gap:15px;">
+            <button class="btn-secondary" onclick="closeModal('edit-profile-overlay')" style="flex:1; background:#fff !important; color:#666 !important; border-color:#ddd !important;">取消</button>
+            <button class="btn-primary" onclick="saveProfile()" style="flex:1;">儲存變更</button>
+        </div>
+    </div>
+</div>
+<script src="../js/config.js"></script>
+<script>
+
+    let currentUser = null; 
+    let cats = [];
+    let items = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // 🔥 預先載入服務資料，為了正確比對並產生報告按鈕的跳轉連結
+        await loadDataForReports();
+        checkSession();
+    });
+
+    async function loadDataForReports() {
+        const [{data: c}, {data: i}] = await Promise.all([
+            myDB.from('service_categories').select('*'),
+            myDB.from('services').select('*')
+        ]);
+        cats = c || [];
+        items = i || [];
+    }
+
+    async function checkSession() {
+        const saved = sessionStorage.getItem('peiyu_session'); 
+        if (saved) {
+            try {
+                const { phone, pass } = JSON.parse(saved);
+                document.getElementById('l-phone').value = phone;
+                document.getElementById('l-pass').value = pass;
+                await doLogin(true); // true 代表是自動登入，不跳 alert
+            } catch (e) {
+                sessionStorage.removeItem('peiyu_session');
+            }
+        }
+    }
+
+    async function doLogin(isAuto = false) { 
+        const phone = document.getElementById('l-phone').value.trim(); 
+        const pass = document.getElementById('l-pass').value.trim(); 
+        if(!phone || !pass) {
+            if(!isAuto) alert("請輸入帳號密碼"); 
+            return;
+        }
+        
+        try { 
+            const { data: user, error: userErr } = await myDB.from('profiles').select('*').eq('phone', phone).eq('password', pass).single(); 
+            if (userErr || !user) throw new Error("帳號或密碼錯誤"); 
+            
+            const { data: bookings } = await myDB.from('bookings').select('*').eq('user_id', user.id); 
+            const { data: reports } = await myDB.from('reports').select('*').eq('user_id', user.id); 
+            
+            user.bookings = bookings || []; 
+            user.reports = reports || []; 
+            currentUser = user; 
+
+            sessionStorage.setItem('peiyu_session', JSON.stringify({ phone: phone, pass: pass }));
+            
+            document.getElementById('login-box').style.display = 'none'; 
+            document.getElementById('dash').style.display = 'block'; 
+            
+            renderDashboard(currentUser); 
+        } catch (err) { 
+            console.error(err); 
+            if(!isAuto) alert("登入失敗：" + err.message); 
+        } 
+    }
+
+    function renderDashboard(user) {
+        document.getElementById('dash-welcome').innerText = `🌿 歡迎回來，${user.full_name}`;
+        
+        // 按時間倒序排列
+        const allBookings = user.bookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        let historyHtml = "<div style='color:#999; text-align:center; padding:40px;'>🍃 目前尚無預約紀錄，期待您的光臨</div>";
+
+        if (allBookings.length > 0) {
+            historyHtml = allBookings.map(b => {
+                const dateStr = new Date(b.created_at).toLocaleDateString();
+                const title = b.service_item || '服務預約';
+                
+                // 狀態對應樣式與文字
+                let statusClass = `status-${b.status}`;
+                let statusText = "處理中";
+                let statusBadgeClass = "sb-pending";
+
+                if (b.status === 'pending') { statusText = "等待付款"; statusBadgeClass = "sb-pending"; }
+                else if (b.status === 'paid' || b.status === 'awaiting_service') { statusText = "已預約 / 服務中"; statusBadgeClass = "sb-paid"; }
+                else if (b.status === 'completed') { statusText = "✨ 旅程完成"; statusBadgeClass = "sb-completed"; }
+
+                // 處理服務細節顯示
+                const rawDetail = b.service_detail || "";
+                const details = rawDetail.split('|').map(s => s.replace(/\(\$\d+\)/g, '').trim()).join(' ✦ ');
+
+                // 檢查是否有報告
+                const reportMatch = (b.wish_detail || "").match(/\[報告已生成 ID:(.*?)\]/);
+                const currentReportId = reportMatch ? reportMatch[1] : null;
+
+                // 底部按鈕區邏輯
+                let actionBtn = "";
+                if (currentReportId) {
+                    // 自動判斷對應的報告範本
+                    const matchedCat = cats.find(c => b.service_item === c.name);
+                    const specificSvc = items.find(s => s.category_id === matchedCat?.id && b.service_detail.includes(s.title) && s.is_main);
+                    const templateFile = (specificSvc && specificSvc.report_template) ? specificSvc.report_template : "srt_report.html";
+                    
+                    // 網址相對於 peiyu_index 目錄
+                    let targetUrl = `../report/${templateFile}?id=${currentReportId}&mode=view`;
+                    
+                    actionBtn = `
+                        <button class="btn-view-report" onclick="window.open('${targetUrl}')">
+                            <i class="fa-solid fa-scroll"></i> 查看能量報告
+                        </button>`;
+                } else if (b.status === 'pending') {
+                    actionBtn = `<span style="font-size:0.85rem; color:#e67e22; font-weight:bold;">請聯繫官方 LINE 確認付款</span>`;
+                } else if (b.scheduled_at) {
+                    const t = new Date(b.scheduled_at);
+                    const timeStr = `${t.getMonth() + 1}/${t.getDate()} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`;
+                    actionBtn = `<span style="font-size:0.85rem; color:#8e44ad; font-weight:bold;"><i class="fa-regular fa-clock"></i> 預約時間：${timeStr}</span>`;
+                }
+
+                // 價格顯示
+                let priceDisplay = `$${b.price}`;
+                if (b.coupon_info) {
+                    priceDisplay += ` <small style="color:#e91e63; font-size:0.7rem;">(含優惠)</small>`;
+                }
+
+                return `
+                <div class="history-card ${statusClass}">
+                    <div class="history-header">
+                        <span class="history-date">${dateStr}</span>
+                        <span class="history-id">#${b.booking_id.slice(-6)}</span>
+                    </div>
+                    
+                    <div class="history-title">${title}</div>
+                    <div class="history-sub">${details}</div>
+                    
+                    <div style="margin-bottom:10px;">
+                        <span class="status-badge ${statusBadgeClass}">${statusText}</span>
+                    </div>
+
+                    <div class="history-footer">
+                        <div class="history-price">${priceDisplay}</div>
+                        <div>${actionBtn}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        document.getElementById('dash-history').innerHTML = historyHtml;
+    }
+
+    function doLogout() { 
+        currentUser = null; 
+        sessionStorage.removeItem('peiyu_session'); 
+        document.getElementById('l-pass').value = ""; // 清空密碼，保留帳號
+        document.getElementById('login-box').style.display = 'block'; 
+        document.getElementById('dash').style.display = 'none'; 
+        alert("已成功登出 👋"); 
+    }
+
+    function openEditProfile() { 
+        if(!currentUser) return; 
+        document.getElementById('ep-phone').value = currentUser.phone; 
+        document.getElementById('ep-name').value = currentUser.full_name; 
+        document.getElementById('ep-email').value = currentUser.email || ""; 
+        document.getElementById('ep-pass').value = ""; 
+        document.getElementById('edit-profile-overlay').classList.add('active'); 
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    async function saveProfile() { 
+        if(!currentUser) return; 
+        const newName = document.getElementById('ep-name').value.trim(); 
+        const newEmail = document.getElementById('ep-email').value.trim(); 
+        const newPass = document.getElementById('ep-pass').value.trim(); 
+        
+        if(!newName) return alert("姓名不能為空");
+
+        const updateData = { full_name: newName, email: newEmail }; 
+        if(newPass) updateData.password = newPass; 
+        
+        const { error } = await myDB.from('profiles').update(updateData).eq('id', currentUser.id); 
+        
+        if(error) { 
+            alert("更新失敗: " + error.message); 
+        } else { 
+            alert("✅ 資料已成功更新！"); 
+            currentUser.full_name = newName; 
+            currentUser.email = newEmail; 
+            document.getElementById('dash-welcome').innerText = `🌿 歡迎回來，${newName}`; 
+            
+            // 如果有改密碼，同步更新 Session
+            if(newPass) {
+                sessionStorage.setItem('peiyu_session', JSON.stringify({ phone: currentUser.phone, pass: newPass }));
+            }
+
+            closeModal('edit-profile-overlay'); 
+        } 
+    }
+</script>
+</body>
+</html>

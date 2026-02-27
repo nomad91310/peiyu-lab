@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+<style>
+    :root { --forest: #1a2f23; --accent: #c6a87c; --cream: #f9f7f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background-color: var(--cream); color: #2c3e50; overflow-x: hidden; }
+    
+    .section { padding: 40px 20px 60px 20px; max-width: 1100px; margin: 0 auto; animation: fadeSlideUp 0.6s ease-out; }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn-primary { height: 40px; padding: 0 22px; font-size: 14px; font-weight: bold; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; background-color: var(--forest); border: 1px solid var(--accent); color: var(--accent); }
+    .btn-primary:hover { background-color: var(--accent); color: #fff; transform: translateY(-2px); }
+
+    .hero-section { flex-direction: column; text-align: center; padding: 20px 20px 60px 20px; gap: 20px; border-radius: 0 0 40px 40px; }
+    .hero-img { margin: 0 auto; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; border: 6px solid white; box-shadow: 0 15px 35px rgba(198, 168, 124, 0.25); display: flex; justify-content: center; align-items: center; background-color: white; }
+    .hero-img img { width: 110%; height: 110%; object-fit: contain; border-radius: 60%; }
+    
+    .hero-text h1 { font-size: 2.2rem; margin-bottom: 5px; color: var(--forest); font-family: 'Noto Serif TC', serif; }
+    .hero-text h2 { font-size: 1.1rem; color: #888; font-weight: normal; margin-bottom: 25px; position: relative; display: inline-block; }
+    .hero-text h2::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background: var(--accent); border-radius: 2px; }
+
+    #must-read-wrapper, #temp-wrapper { background: white; border-radius: 20px; padding: 40px 20px 30px 20px; box-shadow: 0 15px 40px rgba(26, 47, 35, 0.06); width: 100%; max-width: 500px; margin: 35px auto 0 auto; position: relative; text-align: center; }
+    .announce-badge { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); padding: 8px 25px; border-radius: 50px; font-size: 0.95rem; font-weight: 900; background: var(--forest); color: var(--accent); border: 2px solid white; }
+    #must-read-container, #temp-container { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
+
+    .hero-menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 800px; margin: 30px auto 0 auto; }
+    .hero-menu-item { background: white; border-radius: 20px; padding: 20px 10px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 20px rgba(26, 47, 35, 0.05); display: flex; flex-direction: column; align-items: center; }
+    .hero-menu-item:hover { transform: translateY(-8px); border: 2px solid var(--accent); }
+    .hero-menu-icon { font-size: 2.2rem; color: var(--forest); background: #f4f7f6; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+    .hero-menu-text { font-size: 1.1rem; font-weight: 900; color: var(--forest); }
+    .hero-menu-desc { font-size: 0.9rem; color: #777; margin-top: 5px; }
+
+    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .result-overlay.active { display: flex; }
+    .text-modal-card { width: 90%; max-width: 650px; max-height: 85vh; background: #fff; border-radius: 16px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    /* 🔥 新增：確保公告標題列固定在頂部 */
+    .modal-header {
+        background: var(--forest); 
+        padding: 25px 20px; 
+        text-align: center; 
+        border-bottom: 4px solid var(--accent); 
+        position: sticky; /* 固定在頂部 */
+        top: 0; 
+        z-index: 100;
+    }
+
+    /* 🔥 新增：按鈕固定在右上方 */
+    .modal-close-btn {
+        position: absolute; 
+        right: 15px; 
+        top: 15px; /* 固定距離上方 15px */
+        background: none; 
+        border: none; 
+        color: #fff; 
+        font-size: 1.5rem; 
+        cursor: pointer;
+        transition: 0.3s;
+        line-height: 1;
+    }
+    .modal-close-btn:hover { color: var(--accent); }
+    #dyn-modal-content img { max-width: 100% !important; height: auto !important; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; display: block; margin: 15px auto; }
+    #dyn-modal-content { line-height: 1.8; color: #444; }
+
+    @media (max-width: 768px) {
+        .hero-menu-grid { grid-template-columns: 1fr; max-width: 340px; }
+        .hero-img { width: 180px; height: 180px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="section">
+    <div class="hero-section">
+        <div class="hero-img"><img src="../assets/images/logohuman.png" id="site-hero"></div>
+        <div class="hero-text">
+            <h1>培癒試驗室</h1>
+            <h2>我是空間創辦人培培</h2>
+            
+            <div id="must-read-wrapper" style="display: none; border: 2px solid var(--forest);">
+                <div class="announce-badge">✦ 必讀專區 ✦</div>
+                <div id="must-read-container"></div>
+            </div>
+
+            <div class="hero-menu-grid">
+                <div class="hero-menu-item" onclick="window.parent.switchChannel('peiyu_index/booking.html', 'nav-booking')">
+                    <div class="hero-menu-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="hero-menu-text">服務預約</div>
+                    <div class="hero-menu-desc">靈擺能量調整<br>找回原廠設定</div>
+                </div>
+                <div class="hero-menu-item" onclick="window.parent.switchChannel('peiyu_index/kb.html', 'nav-knowledge')">
+                    <div class="hero-menu-icon"><i class="fa-solid fa-book-open"></i></div>
+                    <div class="hero-menu-text">培癒寶典</div>
+                    <div class="hero-menu-desc">非專業知識庫<br>內耗自救筆記</div>
+                </div>
+                <div class="hero-menu-item" onclick="window.parent.switchChannel('peiyu_index/draw.html', 'nav-draw')">
+                    <div class="hero-menu-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <div class="hero-menu-text">能量抽卡</div>
+                    <div class="hero-menu-desc">64 閘門指引<br>直覺抽取訊息</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dynamic-overlay" class="result-overlay">
+    <div class="text-modal-card">
+        <div class="modal-header">
+            <h3 id="dyn-modal-title" style="margin: 0; color: #fff; padding-right: 30px;">載入中...</h3>
+            <button class="modal-close-btn" onclick="document.getElementById('dynamic-overlay').classList.remove('active')">✕</button>
+        </div>
+        
+        <div style="padding: 30px 25px;" id="dyn-modal-content"></div>
+    </div>
+</div>
+<script src="../js/config.js"></script>
+<script>
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        loadSiteAssets(); 
+
+        const { data } = await myDB.from('announcements').select('*').eq('is_active', true);
+        if (data && data.length > 0) {
+            document.getElementById('must-read-wrapper').style.display = 'block';
+            const box = document.getElementById('must-read-container');
+            data.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-primary';
+                btn.innerHTML = item.title;
+                btn.onclick = () => {
+                    document.getElementById('dyn-modal-title').innerText = item.title;
+                    document.getElementById('dyn-modal-content').innerHTML = item.content;
+                    document.getElementById('dynamic-overlay').classList.add('active');
+                };
+                box.appendChild(btn);
+            });
+        }
+    });
+
+    async function loadSiteAssets() { 
+        const { data } = await myDB.from('site_content').select('*').eq('category', 'site_asset'); 
+        if (data) { 
+            data.forEach(item => { 
+                if (item.title === 'logohuman') {
+                    const el = document.getElementById('site-hero');
+                    if(el) el.src = item.image_url;
+                }
+            }); 
+        } 
+    }
+</script>
+</body>
+</html>

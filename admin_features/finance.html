@@ -124,12 +124,10 @@
         </table>
     </div>
 </div>
+<script src="../js/config.js"></script>
 
 <script>
-    // 1. 初始化資料庫連線
-    const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
-    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
-    const myDB = supabase.createClient(SB_URL, SB_KEY);
+
     
     // 專屬於這個頁面的快取，只存 OTA 和 優惠券
     let cache = { otas: [], coupons: [] };

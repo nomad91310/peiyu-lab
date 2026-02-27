@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Serif+TC:wght@500;700;900&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+<style>
+    :root { 
+        --forest: #1a2f23; --accent: #c6a87c; --cream: #f9f7f2; --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background-color: transparent; overflow-x: hidden; }
+    
+    .section { padding: 40px 20px 80px 20px; max-width: 1100px; margin: 0 auto; animation: fadeSlideUp 0.5s ease-out; }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 品牌標題元件 */
+    .brand-section-header { text-align: center; margin-bottom: 40px; padding-top: 15px; }
+    .brand-h3-zh { display: inline-block; font-family: 'Noto Serif TC', serif; font-size: 2.2rem; color: var(--forest); margin: 0; font-weight: 900; letter-spacing: 5px; }
+    .brand-h2-en { display: inline-block; font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--forest); margin-left: 15px; font-weight: 700; letter-spacing: 1.5px; opacity: 0.4; }
+    .brand-capsule { display: table; margin: 10px auto 0 auto; font-family: 'Noto Serif TC', serif; font-size: 0.85rem; color: #777; background: #fffdf9; padding: 4px 22px; border-radius: 50px; border: 1px solid rgba(198, 168, 124, 0.4); }
+    .brand-capsule::before, .brand-capsule::after { content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem; }
+
+    /* 抽卡系統網格 (電腦版: 16列) */
+    #draw-area { 
+        display: grid; grid-template-columns: repeat(16, 1fr); gap: 25px 0; padding: 40px 0; 
+        perspective: 1000px; width: 100%; max-width: 900px; margin: 0 auto; 
+        justify-content: center; padding-top: 10px !important; 
+    }
+    .card-back { 
+        width: 130%; justify-self: center; aspect-ratio: 3/5; height: auto; 
+        background-image: url('https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/cardback.png'); 
+        background-repeat: no-repeat; background-position: center; background-size: cover; 
+        border-radius: 4px; cursor: pointer; position: relative; 
+        box-shadow: -2px 0 6px rgba(0,0,0,0.3); z-index: 1; 
+        will-change: transform; transition: transform 0.2s ease-out; 
+    }
+    .card-back.is-selected { transform: translateY(-30px) !important; z-index: 200 !important; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); filter: brightness(1.1); }
+    @keyframes cardShuffleIn { from { opacity: 0; transform: translateX(-30px) rotateY(-10deg); } to { opacity: 1; transform: translateX(0) rotateY(0); } }
+    @keyframes cardDrawUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-160px); opacity: 1; box-shadow: 0 0 30px var(--accent); } }
+    .card-back.is-drawing { animation: cardDrawUp 0.6s ease-out forwards; z-index: 999 !important; pointer-events: none; }
+    
+    @media (min-width: 1025px) { 
+        .card-back:not(.is-drawing):not(.is-selected):hover { transform: translateY(-40px) !important; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); } 
+    }
+
+    /* 抽卡結果彈窗 */
+    .result-overlay { 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; 
+        z-index: 2000; backdrop-filter: blur(8px); 
+    }
+    .result-overlay.active { display: flex; }
+    .card-reveal { 
+        position: relative; width: 340px; height: 580px; background: #fff; border-radius: 8px; overflow: hidden; 
+        box-shadow: 0 0 60px rgba(198, 168, 124, 0.5); transform: scale(0.8) rotateY(90deg); opacity: 0; 
+        transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+    .result-overlay.active .card-reveal { transform: scale(1) rotateY(0); opacity: 1; }
+    
+    .close-card-btn {
+        position: fixed !important; top: 30px !important; right: 30px !important; z-index: 2005 !important;
+        width: 40px !important; height: 40px !important; border-radius: 50% !important;
+        display: flex !important; justify-content: center !important; align-items: center !important; min-width: 0 !important;
+        background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.5); color: white;
+        
+        /* 🔥 修正強迫症：把字體鎖死，行高設為 0，並強制往上推 4px */
+        font-size: 28px !important; 
+        line-height: 0 !important; 
+        padding: 0 0 4px 0 !important; 
+        
+        cursor: pointer; transition: all 0.3s ease; box-sizing: border-box;
+    }
+    .close-card-btn:hover { background: var(--accent) !important; color: var(--forest) !important; transform: rotate(90deg); border-color: var(--forest) !important; }
+
+    /* 牌卡上的文字層 */
+    .layer-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 0; opacity: 1; background-color: var(--cream); }
+    .layer-text { position: absolute; z-index: 10; white-space: pre-wrap; text-align: center; transform: translate(-50%, -50%); pointer-events: none; width: max-content; }
+
+    /* 手機版 RWD (8列重疊設計) */
+    @media (max-width: 768px) {
+        .brand-h3-zh, .brand-h2-en { display: block; width: 100%; margin-left: 0; text-align: center; }
+        .section { padding: 20px 15px 60px 15px; }
+        
+        #draw-area { 
+            display: grid !important; grid-template-columns: repeat(8, 1fr) !important; 
+            width: 92% !important; margin: 0 auto !important; padding: 15px 0 !important; padding-bottom: 60px !important;
+            gap: 5px 0 !important; box-sizing: border-box !important; overflow-x: visible !important; 
+        }
+        .card-back { width: 115% !important; justify-self: center; box-shadow: -1px 0 3px rgba(0,0,0,0.2) !important; }
+        .close-card-btn { top: 20px !important; right: 20px !important; width: 40px !important; height: 40px !important; font-size: 24px !important; }
+        
+        /* 防蓋住修正 */
+        .result-overlay { align-items: flex-start !important; padding-top: 90px !important; padding-bottom: 40px !important; overflow-y: auto !important; }
+        .card-reveal { margin: 0 auto !important; margin-bottom: 20px !important; }
+    }
+</style>
+</head>
+<body>
+
+<div class="section">
+    <div class="brand-section-header"> 
+        <div class="brand-h3-zh">64 閘門能量指引</div>
+        <div class="brand-h2-en">ORACLE GUIDANCE</div>
+        <div class="brand-capsule">憑直覺選一張牌，領取當下的指引</div>
+    </div>
+
+    <div id="draw-area">
+        <div style="color:#666; text-align:center; grid-column: 1 / -1;">牌卡準備中...</div>
+    </div>
+</div>
+
+<div id="overlay" class="result-overlay">
+    <div style="position:relative;">
+        <button class="close-card-btn" onclick="closeResult()">×</button>
+        <div id="final-card" class="card-reveal">
+            <img id="p-bg" class="layer-bg" src="">
+            <div id="p-gate" class="layer-text"></div>
+            <div id="p-info" class="layer-text"></div>
+            <div id="p-zodiac" class="layer-text"></div>
+            <div id="p-quote" class="layer-text"></div>
+        </div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+
+    let allCards = [];
+    const defaultStyle = { 
+        gate: { x: 50, y: 65, size: 34, font: "'Cinzel', serif", color: "#1a1a1a", stroke: "#ffffff" }, 
+        info: { x: 50, y: 72, size: 18, font: "'Noto Serif TC', serif", color: "#1a1a1a", stroke: "transparent", w: 300 }, 
+        zodiac: { x: 85, y: 65, size: 12, font: "sans-serif", color: "#6a1b9a", stroke: "transparent" }, 
+        quote: { x: 50, y: 88, size: 15, font: "'Shippori Mincho', serif", color: "#ffffff", stroke: "#000000", w: 280, lh: 1.6, ls: 0 } 
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initDrawData();
+    });
+
+    async function initDrawData() { 
+        const { data } = await myDB.from('card_pool').select('*'); 
+        allCards = data || []; 
+        renderDrawTable(); 
+    }
+    
+    function renderDrawTable() { 
+        const table = document.getElementById('draw-area'); 
+        if (!table) return; 
+        table.innerHTML = ''; 
+        
+        // 生成 64 張卡，打亂順序
+        const deck = allCards.length > 0 ? [...allCards] : Array.from({length: 64}, (_, i) => ({ gate_id: i + 1 })); 
+        const shuffled = deck.sort(() => Math.random() - 0.5); 
+        const isDesktop = window.matchMedia('(hover: hover)').matches;
+
+        // 洗牌時鎖定點擊 0.8 秒防呆
+        let isInputLocked = true;
+        setTimeout(() => { isInputLocked = false; }, 800);
+
+        shuffled.forEach((card, index) => { 
+            const el = document.createElement('div'); 
+            el.className = 'card-back'; 
+            el.style.animation = `cardShuffleIn 0.5s ease-out ${index * 0.015}s forwards`; 
+            
+            el.onclick = function() { 
+                if (isInputLocked) return;
+
+                if (isDesktop || el.classList.contains('is-selected')) {
+                    el.classList.remove('is-selected');
+                    el.classList.add('is-drawing'); 
+                    isInputLocked = true; 
+                    // 延遲顯示結果，讓牌飛上去的動畫跑完
+                    setTimeout(() => { drawCard(card); }, 600); 
+                } else {
+                    // 手機版：第一次點擊先浮起來
+                    const allActive = document.querySelectorAll('.card-back.is-selected');
+                    allActive.forEach(c => c.classList.remove('is-selected'));
+                    el.classList.add('is-selected');
+                }
+            }; 
+            table.appendChild(el); 
+        }); 
+    }
+
+    async function drawCard(card) { 
+        document.getElementById('p-gate').innerText = `GATE ${card.gate_id}`; 
+        document.getElementById('p-info').innerText = `${card.gate_name || ''} / ${card.gate_keyword || ''}`; 
+        document.getElementById('p-zodiac').innerText = card.zodiac || ''; 
+        document.getElementById('p-quote').innerText = card.quote || ''; 
+        
+        if (card.image_url) { 
+            document.getElementById('p-bg').src = card.image_url + `?t=${new Date().getTime()}`; 
+        } 
+        
+        const style = card.style_config || defaultStyle; 
+        applyStyle('gate', style.gate || defaultStyle.gate); 
+        applyStyle('info', style.info || defaultStyle.info); 
+        applyStyle('zodiac', style.zodiac || defaultStyle.zodiac); 
+        applyStyle('quote', style.quote || defaultStyle.quote); 
+        
+        document.getElementById('overlay').classList.add('active'); 
+    }
+
+    function applyStyle(id, s) { 
+        const el = document.getElementById(`p-${id}`); 
+        const def = defaultStyle[id]; 
+        const val = (prop) => (s && s[prop] !== undefined) ? s[prop] : def[prop]; 
+        
+        el.style.left = val('x') + '%'; 
+        el.style.top = val('y') + '%'; 
+        el.style.fontSize = val('size') + 'px'; 
+        el.style.fontFamily = val('font'); 
+        el.style.color = val('color'); 
+        
+        const str = val('stroke'); 
+        el.style.textShadow = (str && str !== 'transparent') ? `1px 1px 0 ${str}, -1px -1px 0 ${str}, 1px -1px 0 ${str}, -1px 1px 0 ${str}` : 'none'; 
+        
+        if(id === 'quote' || id === 'info') el.style.width = val('w') + 'px'; 
+        if(id === 'quote') { el.style.lineHeight = val('lh'); el.style.letterSpacing = val('ls') + 'px'; } 
+        if(id === 'zodiac') el.style.display = document.getElementById('p-zodiac').innerText ? 'block' : 'none'; 
+    }
+
+    function closeResult() { 
+        document.getElementById('overlay').classList.remove('active'); 
+        // 關閉後重新洗牌
+        setTimeout(() => { 
+            renderDrawTable(); 
+            document.getElementById('p-bg').src = ""; 
+        }, 500); 
+    }
+</script>
+</body>
+</html>

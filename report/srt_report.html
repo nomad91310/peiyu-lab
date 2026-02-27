@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服務報表 | 培癒試驗室</title>
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
+<style>
+    /* ======================================================
+       1. 全站基礎設定 (Base Layout)
+       ====================================================== */
+    * { box-sizing: border-box; font-family: "Microsoft JhengHei", -apple-system, "Heiti TC", sans-serif; }
+            body { 
+            background: #e0e5ec; 
+            padding: 30px; 
+            margin: 0; 
+            color: #333; 
+            line-height: 1.5; 
+            min-height: 100vh;
+            /* 🔥 新增這兩行：防止手機版回彈抖動 */
+            overscroll-behavior-y: none; 
+        }
+    
+    /* 主容器 */
+    .container { 
+        background: white; padding: 30px; border-radius: 16px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        max-width: 1280px; margin: 0 auto; width: 100%; position: relative;
+    }
+
+    h2 { margin: 0 0 20px 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; font-size: 28px; font-weight: 900; }
+    h3 { color:#e65100; margin-bottom:10px; font-size:16px; font-weight: bold; }
+
+    /* ======================================================
+       2. 頂部資料輸入區 (Header Inputs)
+       ====================================================== */
+    .header-inputs { 
+        display: grid; 
+        /* 🔥 修改：原本是 repeat(4, 1fr)，改成這樣比較彈性 */
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 15px;
+        background: #f0f4f8; padding: 20px; border-radius: 12px; 
+        margin-bottom: 25px; border: 1px solid #dcebf7; 
+    }
+    .header-group label { display: block; font-size: 14px; color: #1565c0; font-weight: bold; margin-bottom: 6px; }
+    .header-group input { width: 100%; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 15px; background: #fff; }
+
+    /* ======================================================
+       3. 核心能量區 (Core Metrics)
+       ====================================================== */
+    .core-metrics-container { 
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; 
+        background: linear-gradient(135deg, #fff3e0 0%, #fffbf5 100%); 
+        padding: 20px; border-radius: 15px; border: 1px solid #ffe0b2; 
+        box-shadow: inset 0 2px 4px rgba(230, 81, 0, 0.05);
+    }
+    .metric-card { 
+        background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #ffe0b2; 
+        display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;
+    }
+    .metric-card:hover { border-color: #ffb300; transform: translateY(-1px); }
+    .metric-title { font-weight: bold; color: #e65100; font-size: 14px; white-space: nowrap; }
+    .metric-inputs { display: flex; gap: 8px; align-items: center; }
+    .metric-inputs select { width: 90px; height: 34px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; padding: 0 5px; background: #fff; color: #333; }
+    .metric-inputs input { width: 55px; height: 32px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 14px; }
+    .adj-fixed { color: #2e7d32; font-weight: bold; font-size: 14px; padding-left: 8px; white-space: nowrap; }
+
+    /* ======================================================
+       4. 加購項目區 (Addons)
+       ====================================================== */
+    #addon-section-wrapper { margin-bottom: 25px; display: none; } /* 預設隱藏，有資料才顯示 */
+    #addon-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .addon-card { 
+        border: 1px solid #b3e5fc; background: #f1f8e9; padding: 12px; border-radius: 8px; 
+        position: relative; overflow: hidden; border-left: 6px solid #0288d1;
+    }
+    .addon-title { font-weight:bold; color:#0277bd; margin-bottom:10px; font-size: 14px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+
+    /* ======================================================
+       5. 九大中心卡片 (Centers Grid)
+       ====================================================== */
+    #inputs-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+
+    .center-card { 
+        background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; 
+        padding: 0 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+        position: relative; overflow: hidden; transition: transform 0.2s;
+    }
+    .center-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+    /* 左側色條指示 */
+    .center-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; z-index: 2; }
+    .center-card[data-color="head"]::before { background: #e8e6a5; }
+    .center-card[data-color="ajna"]::before { background: #a7d28b; }
+    .center-card[data-color="throat"]::before { background: #c6a87c; }
+    .center-card[data-color="g"]::before { background: #f4eb68; }
+    .center-card[data-color="ego"]::before { background: #e85d5d; }
+    .center-card[data-color="solar"]::before { background: #c69c6d; }
+    .center-card[data-color="spleen"]::before { background: #c69c6d; }
+    .center-card[data-color="sacral"]::before { background: #e85d5d; }
+    .center-card[data-color="root"]::before { background: #c69c6d; }
+
+    /* Header 填色與佈局 */
+    .center-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px 12px 20px; }
+    .center-card[data-color="head"] .center-header { background: #fdfdec; }
+    .center-card[data-color="ajna"] .center-header { background: #f4f9f0; }
+    .center-card[data-color="throat"] .center-header { background: #f9f5f0; }
+    /* (其餘中心預設白底或淡色) */
+
+    .center-title { font-size: 15px; font-weight: bold; color: #333; }
+    .status-group { transform: scale(0.9); display: flex; gap: 4px; transform-origin: right center; }
+    .status-btn { padding: 4px 8px; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+    .status-btn.active { background: #34495e; color: white; border-color: #34495e; }
+
+    /* 卡片內部元件 */
+    .diagnosis-area, .input-row, .custom-note-area { margin: 0 15px 12px 15px !important; }
+    .diagnosis-area { background: #fafafa; padding: 12px; border-radius: 8px; border: 1px dashed #ddd; }
+    .checkbox-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; margin-bottom: 6px; cursor: pointer; color: #555; }
+    .checkbox-item:hover { color: #000; }
+    .checkbox-item input { margin-top: 3px; accent-color: #e65100; }
+
+    .input-row { display: flex; gap: 10px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-size: 11px; color: #777; margin-bottom: 4px; }
+    .input-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-weight: bold; color: #333; }
+
+    .custom-note-area textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; height: 55px; resize: vertical; background: #fffdf9; }
+
+    /* ======================================================
+       6. 總結與操作區 (Summary & Actions)
+       ====================================================== */
+    .summary-section { 
+        background: #fffdf7; border: 1px solid #f1e4bc; border-radius: 16px; 
+        padding: 25px; margin-top: 30px; box-shadow: 0 4px 15px rgba(245, 127, 23, 0.08); 
+        position: relative; overflow: hidden;
+    }
+    .summary-section::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(to bottom, #f57f17, #ffb300); }
+    .summary-section label { font-size: 18px; color: #f57f17; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+    .summary-section textarea { 
+        width: 100%; height: 180px; padding: 15px; border: 1px solid #eee; border-radius: 10px; 
+        font-size: 16px; line-height: 1.8; color: #444; resize: vertical; 
+        font-family: "Microsoft JhengHei", sans-serif !important; 
+    }
+
+    .action-bar { display: flex; gap: 15px; margin-top: 30px; }
+    .btn { width: 100%; padding: 18px; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .btn-preview { background: #546e7a; }
+    .btn-save { background: #2e7d32; }
+    .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+    .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    #status-msg { margin-top: 15px; text-align: center; color: #666; font-weight: bold; }
+
+    /* ======================================================
+       7. 結果預覽與下載 (Results)
+       ====================================================== */
+    #result-wrapper { display: none; margin-top: 40px; text-align: center; }
+    #final-image { max-width: 100%; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 1px solid #eee; }
+    .save-hint { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; display: inline-block; }
+    .canvas-container { display: none; } /* 隱藏實際繪圖用的 Canvas */
+
+    /* ======================================================
+       8. 客人瀏覽模式 (View Mode) 按鈕大統一
+       ====================================================== */
+    
+    /* 1. 基礎樣式：強制深綠底、白字、細金框 */
+    .back-btn, #guest-dl-btn {
+        background-color: #1a2f23 !important; /* PY 深綠 */
+        color: #ffffff !important;           /* 純白字 */
+        border: 1px solid #c6a87c !important; /* PY 金邊 */
+        
+        border-radius: 50px !important;       /* 藥丸圓角 */
+        padding: 12px 35px !important;
+        font-weight: bold !important;
+        font-size: 16px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.4) !important;
+        display: none; /* 維持邏輯預設隱藏 */
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
+    }
+
+    /* 2. 滑鼠移入效果：變金底、白字 */
+    .back-btn:hover, #guest-dl-btn:hover {
+        background-color: #c6a87c !important; /* 變 PY 金底 */
+        border-color: #c6a87c !important;     /* 邊框維持金色 */
+        color: #ffffff !important;           /* 維持白字 */
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(198, 168, 124, 0.5) !important;
+    }
+
+    /* 3. 確保位置正確 */
+    .back-btn {
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 9999 !important;
+    }
+
+    #guest-dl-btn {
+        margin: 20px auto !important;
+        width: fit-content !important;
+        min-width: 250px !important;
+    }
+    /* 4. 根據 body class 顯示按鈕 (維持原邏輯) */
+    body.view-mode .back-btn,
+    body.view-mode #guest-dl-btn {
+        display: inline-flex !important;
+    }
+    
+    /* 隱藏其餘編輯介面 */
+    body.view-mode h2, body.view-mode h3, 
+    body.view-mode .header-inputs, body.view-mode .core-metrics-container, 
+    body.view-mode #addon-section-wrapper, body.view-mode #inputs-container, 
+    body.view-mode .summary-section, body.view-mode .action-bar,
+    body.view-mode .save-hint { display: none !important; }
+    /* --- 專屬：唯讀模式下的回饋區塊樣式 --- */
+    body.view-mode #feedback-section {
+        display: block !important; 
+        max-width: 800px; /* 不要像圖片那麼寬 */
+        margin: 30px auto; /* 置中對齊 */
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    body.view-mode textarea#client-feedback {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: "Microsoft JhengHei", sans-serif;
+    }
+
+    body.view-mode .container { background: transparent !important; box-shadow: none !important; padding: 0; max-width: 100%; }
+    body.view-mode #result-wrapper { display: block !important; margin-top: 0; }
+    body.view-mode #final-image { display: block; margin: 0 auto; width: 100%; max-width: 2600px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+    /* 🔥 彈窗背景 */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(26, 47, 35, 0.85);
+        display: none; justify-content: center; align-items: center;
+        z-index: 10000; backdrop-filter: blur(5px);
+    }
+    .modal-overlay.active { display: flex; }
+    
+    /* 🔥 彈窗小卡片 */
+    .modal-card {
+        background: white; width: 90%; max-width: 500px;
+        padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        position: relative; animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 🔥 彈窗內的輸入框 */
+    .modal-card label { display: block; font-weight: bold; margin-bottom: 8px; color: #1a2f23; }
+    .modal-card input, .modal-card textarea { 
+        width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; font-size: 16px; 
+    }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; }
+
+    /* ======================================================
+       9. 響應式調整 (Mobile)
+       ====================================================== */
+    @media (max-width: 768px) { 
+        .header-inputs { grid-template-columns: 1fr 1fr; } 
+        .core-metrics-container { grid-template-columns: 1fr; }
+        #inputs-container { grid-template-columns: 1fr; } 
+        .input-row { flex-direction: row; } 
+        h2 { font-size: 22px; }
+        .back-btn {
+            padding: 8px 18px !important; /* 縮減內距 (原本是 12px 35px) */
+            font-size: 13px !important;    /* 縮小字體 (原本是 16px) */
+            top: 10px !important;         /* 離頂部近一點 */
+            left: 10px !important;        /* 離左邊近一點 */
+        }
+    }
+</style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.close()">← 關閉視窗</button>
+
+    <div class="container">
+        <h2 id="page-title">🔮 服務報表</h2>
+        
+       <div class="header-inputs">
+            <div class="header-group"><label>調整日期</label><input type="date" id="info-date"></div>
+            <div class="header-group phone-group"><label>個案手機</label><input type="tel" id="info-phone" placeholder="系統自動帶入"></div>
+            <div class="header-group"><label>個案姓名</label><input type="text" id="info-name" placeholder="系統自動帶入"></div>
+            
+            <div class="header-group"><label>Email (選填)</label><input type="email" id="info-email" placeholder="會員登入用"></div>
+            
+            <div class="header-group"><label>療癒師</label><input type="text" id="info-healer" value="培癒試驗室"></div>
+        </div>
+
+        <h3>⚡ 核心能量 & 加購 (必填區)</h3>
+        <div class="core-metrics-container">
+            <div class="metric-card">
+                <div class="metric-title">🔥 生命力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-0">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-0" value="高">
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🚀 執行力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-1">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-1" value="高">
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🎨 創造力</div>
+                <div class="metric-inputs">
+                    <select id="core-val-2">
+                        <option value="低">檢測：低</option>
+                        <option value="中" selected>檢測：中</option>
+                        <option value="高">檢測：高</option>
+                    </select>
+                    <span class="adj-fixed">➔ 調整：高</span>
+                    <input type="hidden" id="core-adj-2" value="高">
+                </div>
+            </div>
+        </div>
+
+        <div id="addon-section-wrapper"><div id="addon-container"></div></div>
+        
+        <div id="inputs-container" style="margin-top:20px;"></div>
+
+        <div class="summary-section">
+            <label>📝 療癒師總結</label>
+            <textarea id="overall-summary" placeholder="請輸入總結...支援 Enter 換行"></textarea>
+        </div>
+        
+        <div id="status-msg"></div>
+
+        <div class="action-bar">
+            <button class="btn btn-preview" onclick="generatePreview()">📸 生成圖片預覽</button>
+            <button class="btn btn-save" id="btn-real-save" onclick="saveToDatabase()">💾 確認存檔並結案</button>
+        </div>
+
+        <div id="result-wrapper">
+            <div class="save-hint">✅ 圖片已生成，請點擊下方按鈕下載</div><br>
+            
+            <img id="final-image" alt="" style="display: block; opacity: 0; margin: 0 auto; width: 100%; max-width: 2600px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid #eee;" />
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 25px; margin-bottom: 80px;">
+                <button id="guest-dl-btn" onclick="downloadReportImage()" style="display: none;">📥 下載我的能量報告圖片</button>
+                
+                <button id="btn-open-feedback" class="btn" style="background: #9b59b6; color: white; width: auto; padding: 12px 30px; font-size: 16px; border-radius: 50px; display: none;" onclick="openFeedbackModal()">💬 填寫回饋感受</button>
+            </div>
+        </div>
+
+        <div id="feedback-modal" class="modal-overlay">
+            <div class="modal-card">
+                <span class="close-modal" onclick="closeFeedbackModal()">×</span>
+                <h3 style="color: #9b59b6; margin-top: 0;">💬 填寫感受與回饋</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">您的回饋是我們前進的最大動力：</p>
+                
+                <label>對外顯示暱稱 (選填)</label>
+                <input type="text" id="client-nickname" placeholder="例如：愛貓的A小姐">
+
+                <label>療癒感受</label>
+                <textarea id="client-feedback" rows="5" placeholder="在此輸入您的感受..."></textarea>
+                
+                <div style="display: flex; align-items: flex-start; gap: 10px; background: #fdfaf1; padding: 12px; border-radius: 8px; border: 1px dashed #c6a87c; margin-bottom: 20px;">
+                    <input type="checkbox" id="client-consent" checked style="width: 18px; height: 18px; cursor: pointer; margin-top: 2px;">
+                    <label for="client-consent" style="font-size: 13px; color: #555; cursor: pointer; margin: 0; line-height: 1.4;">我同意將此回饋分享於網站</label>
+                </div>
+
+                <button id="btn-submit-feedback" class="btn" style="background: #9b59b6; color: white; width: 100%; padding: 15px; font-size: 16px;" onclick="submitFeedback()">📤 送出回饋</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="canvas-container"><canvas id="mainCanvas"></canvas></div>
+    
+    <script src="../js/config.js"></script>
+
+    <script>
+
+        let myDB = null; 
+        let currentBookingId = null;
+        let currentReportId = null;
+        let detectedAddons = []; 
+        let isViewMode = false;
+        let currentMainService = "";
+
+        const MANDATORY_CHECKS = ["生命力", "執行力", "創造力"];
+        const HD_COLORS = { head: '#e8e6a5', ajna: '#a7d28b', throat: '#c6a87c', g: '#f4eb68', ego: '#ff9b9b', solar: '#c69c6d', spleen: '#c69c6d', sacral: '#ff9b9b', root: '#c69c6d' };
+        const ENERGY_COLORS = { red: '#ff5252', yellow: '#ffd740', green: '#69f0ae' };
+        const CENTER_THEMES = { head: '靈感・壓力・疑問', ajna: '概念・信念・分析', throat: '顯化・溝通・行動', g: '愛・方向・認同', ego: '價值感・承諾・動力', solar: '情緒・感受・神經系統', spleen: '生存・直覺・健康', sacral: '生產力・性・生命力', root: '壓力・衝勁・腎上腺' };
+
+        const CENTER_CONTENT = {
+            head: { label: "頭腦", organ: "松果體", static: { defined: "天生有固定的思考模式。健康時能享受思考壓力，啟發他人；不健康時困在自己的問題裡憂鬱，或對他人漠不關心。", undefined: "靈感來自四面八方。健康時能區分什麼問題重要；不健康時會把別人的問題攬在身上，急於解決腦中困惑。", open: "對靈感完全開放。健康時享受未知；不健康時會迷失在資訊海中，不知道什麼對自己重要。" }, dynamic: [ { label: "困在腦中/憂鬱 (內縮)", defDiag: "思考內捲陷入封閉迴圈，腦壓過高導致低潮。", defAdj: "釋放累積內在壓力，助思緒重新流動連結外界。", undefDiag: "吸收環境混亂思緒無法過濾，大腦當機深層疲憊。", undefAdj: "清理外來雜訊，助大腦關機釋放不屬於你的煩惱。", isHealthy: false }, { label: "雞婆/焦慮行動 (外顯)", defDiag: "急於找答案而衝動行事，消除疑惑壓力未看清全貌。", defAdj: "安撫急躁腦波，協助學會等待靈感自然浮現。", undefDiag: "把他人問題當責任，急於幫忙解決以紓解壓力。", undefAdj: "切斷非己責任能量，協助劃清界線放下他人問題。", isHealthy: false }, { label: "失眠/停不下來 (失調)", defDiag: "身體累大腦仍慣性運轉，執著想通某事致失眠。", defAdj: "注入深層放鬆頻率，強制松果體進入休眠模式。", undefDiag: "睡前受高壓環境影響，不知非己壓力而持續空轉。", undefAdj: "建立頂輪防護罩，過濾夜間集體潛意識干擾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。松果體運作清晰。", undefDiag: "頭腦清明，不為他人問題煩惱。", adjust: "", isHealthy: true } ] },
+            ajna: { label: "邏輯", organ: "腦下垂體", static: { defined: "享受研究，有穩固觀點。健康時思緒清晰；不健康時固執己見，聽不進別人的話，或焦慮於「沒做到」。", undefined: "思考有彈性。健康時能接納各種觀點；不健康時擔心自己不聰明，或為了假裝確定而變得比已定義更固執。", open: "心智像白紙。健康時客觀中立；不健康時因為缺乏定見而極度不安，無法做決定。" }, dynamic: [ { label: "焦慮/自責 (內縮)", defDiag: "心智焦慮想通即做到，因現實落差陷入自責批判。", defAdj: "整合思考與行動落差，釋放不夠努力的自責感。", undefDiag: "因無固定想法而不安，怕顯無知而自我懷疑。", undefAdj: "轉化對未知恐懼，協助接納不確定也是一種智慧。", isHealthy: false }, { label: "固執/假裝確定 (外顯)", defDiag: "思維僵化太信邏輯，聽不進建議鎖在象牙塔。", defAdj: "軟化僵固信念結構，增心智彈性聽見不同聲音。", undefDiag: "掩飾不確定感而假裝堅定，死守借來的觀點不放。", undefAdj: "釋放防衛機制，卸下必須全知全能的偽裝面具。", isHealthy: false }, { label: "專注力渙散 (失調)", defDiag: "腦下垂體壓力過大，邏輯線斷裂致思緒混亂。", defAdj: "修復眉心輪能量，協助重新聚焦找回組織力。", undefDiag: "心智被資訊淹沒，試圖處理過量訊息而當機。", undefAdj: "清理心智緩存區，刪除無用資訊垃圾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。邏輯清晰。", undefDiag: "思維靈活，能客觀看待不同資訊。", adjust: "", isHealthy: true } ] },
+            throat: { label: "喉嚨", organ: "甲狀腺", static: { defined: "有固定表達模式。健康時說話有力量；不健康時喋喋不休、插嘴，或光說不練。", undefined: "聲音多變。健康時沉默自在，一字千金；不健康時為了博關注而亂說話，或過度說話填補空白。", open: "無固定聲音。健康時能模仿各種口音；不健康時不知道怎麼表達自己，說出來的話常被誤解。" }, dynamic: [ { label: "有口難言/壓抑 (內縮)", defDiag: "因受挫或制約選擇吞忍，真實想法鎖死在喉輪。", defAdj: "疏通顯化管道，協助找回為自己發聲的勇氣。", undefDiag: "不知如何表達，怕說錯話導致能量淤積。", undefAdj: "清理表達通道焦慮，協助信任自己的聲音。", isHealthy: false }, { label: "喋喋不休 (外顯)", defDiag: "急於表達忽略時機，插嘴導致語言失去重量。", defAdj: "平衡喉輪躁動能量，協助學會等待與聆聽。", undefDiag: "怕空氣安靜而強迫說話，刷存在感耗損氣場。", undefAdj: "安住於內在，協助享受沉默也是一種力量。", isHealthy: false }, { label: "光說不練/空談 (失調)", defDiag: "能量停在嘴巴，計畫多卻無落地執行力。", defAdj: "連結喉輪與動力中心，將語言轉化為具體執行。", undefDiag: "迎合氣氛說錯話，承諾做不到的事導致失衡。", undefAdj: "校準語言能量，協助言行一致。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。表達真實有力。", undefDiag: "隨順因緣發聲，沉默也自在。", adjust: "", isHealthy: true } ] },
+            g: { label: "G", organ: "肝臟", static: { defined: "愛與方向是固定的。健康時自信堅定；不健康時強勢控制，要求別人照你的方式走。", undefined: "場所的變色龍。健康時隨遇而安；不健康時為了討愛而委屈自己，或瘋狂尋找「我是誰」。", open: "無身分標籤。健康時是客觀觀察者；不健康時因為缺乏邊界感而徹底迷失。" }, dynamic: [ { label: "缺乏自愛/討好 (內縮)", defDiag: "為維持關係背叛原則，壓抑真實自我感到委屈。", defAdj: "修補能量場破洞，注入愛自己頻率重塑邊界。", undefDiag: "討愛而過度配合，誤以為愛需交換而迎合。", undefAdj: "注入無條件的愛，協助明白你本身就值得被愛。", isHealthy: false }, { label: "強勢/控制狂 (外顯)", defDiag: "過於堅持原則，強迫他人照你方式走致壓力。", defAdj: "柔化心輪能量，協助尊重每個生命獨特軌跡。", undefDiag: "依附他人抓取方向，死抓伴侶不放讓人窒息。", undefAdj: "切斷依附能量索，找回自己就是導航的力量。", isHealthy: false }, { label: "迷失方向/空虛 (失調)", defDiag: "太久沒回內在，GPS訊號微弱看不到下一步。", defAdj: "校準內在導航，重新對焦靈魂渴望的航道。", undefDiag: "迷失在環境裡，誤認他人方向為己獨處時空虛。", undefAdj: "清理外在干擾，協助茫茫大海中找到座標。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。清楚自己方向。", undefDiag: "享受當下環境，不執著定位。", adjust: "", isHealthy: true } ] },
+            ego: { label: "意志", organ: "心臟/胃", static: { defined: "意志力固定。健康時信守承諾，有自信；不健康時傲慢，施壓於人，或過度承諾導致過勞。", undefined: "價值無需證明。健康時不輕易承諾；不健康時自卑，為了證明自己而逞強。", open: "無競爭意識。健康時知足常樂；不健康時完全不知道自己價值在哪，不敢爭取。" }, dynamic: [ { label: "自卑/價值感低 (內縮)", defDiag: "因失敗懷疑能力，致心臟與胃部能量萎縮。", defAdj: "釋放挫敗感，喚醒內在戰士精神找回自信。", undefDiag: "陷比較陷阱覺不如人，靠外在成就填補空洞。", undefAdj: "釋放自我懷疑毒素，肯定原本的自己就夠好了。", isHealthy: false }, { label: "傲慢/施壓 (外顯)", defDiag: "自我膨脹批判他人做不到，造成人際壓力。", defAdj: "轉化過強自我意識，運用意志力支持而非壓迫。", undefDiag: "虛張聲勢掩飾自信不足，裝出過度自大武裝。", undefAdj: "卸下偽裝盔甲，協助用真實樣貌與人連結。", isHealthy: false }, { label: "過度承諾/過勞 (失調)", defDiag: "高估電量接下超載任務，透支心臟能量。", defAdj: "切斷超載承諾，讓意志力中心獲得必要休息。", undefDiag: "為證明自己而亂答應，不想做卻不敢拒絕。", undefAdj: "強化能量邊界，協助勇敢拒絕不適合承諾。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。自我價值健康。", undefDiag: "不需證明什麼，自在展現。", adjust: "", isHealthy: true } ] },
+            solar: { label: "情緒", organ: "腎/神經", static: { defined: "自帶情緒波。健康時等待清晰，接納低潮；不健康時情緒勒索，衝動決定，或壓抑感受。", undefined: "共感者。健康時不避諱衝突；不健康時當爛好人，壓抑真實感受，莫名崩潰。", open: "情緒冷靜。健康時敏感度高；不健康時對情緒麻木，或無法處理高張力情緒而當機。" }, dynamic: [ { label: "壓抑/好人症候群 (內縮)", defDiag: "受制約認情緒不好，強吞能量造成內傷。", defAdj: "疏通情緒管道，允許情緒安全流動與釋放。", undefDiag: "怕衝突而吞忍當好人，變他人情緒垃圾桶。", undefAdj: "清理堆積情緒垃圾，建立保護層不再照單全收。", isHealthy: false }, { label: "情緒勒索/倒垃圾 (外顯)", defDiag: "拒為情緒負責，任風暴肆虐遷怒他人。", defAdj: "淨化能量場，建立健康宣洩管道不傷及他人。", undefDiag: "反射環境憤怒，不會處理而用激烈方式彈回去。", undefAdj: "協助抽離當下情緒，看清這不是我的情緒。", isHealthy: false }, { label: "衝動/焦慮 (失調)", defDiag: "浪尖上做決定，因一時情緒高低做出後悔事。", defAdj: "安撫神經系統，協助學會等待情緒浪潮退去。", undefDiag: "神經系統過載，過多情緒刺激致高度焦慮。", undefAdj: "注入寧靜頻率，讓緊繃的神經深層放鬆。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。擁有情緒智慧。", undefDiag: "不沾染他人情緒，保持清明。", adjust: "", isHealthy: true } ] },
+            spleen: { label: "直覺", organ: "脾/淋巴", static: { defined: "直覺可靠。健康時相信身體訊號；不健康時鐵齒忽視直覺，或因太清楚風險而過度保守。", undefined: "直覺不穩。健康時對未知自在；不健康時緊抓不放（依賴），放大恐懼。", open: "恐懼無濾網。健康時無畏體驗；不健康時不知死活，或被恐懼徹底癱瘓。" }, dynamic: [ { label: "過度保守/不敢變 (內縮)", defDiag: "太清楚風險而封閉，拒絕改變錯失機會。", defAdj: "釋放僵化防禦，給予踏出舒適圈的信任與勇氣。", undefDiag: "被恐懼癱瘓，面對未知巨大不安而縮角落。", undefAdj: "清理深層恐懼印記，協助回到當下安全感。", isHealthy: false }, { label: "鐵齒/忽視警訊 (外顯)", defDiag: "大腦蓋過身體訊號，太依賴邏輯致險境。", defAdj: "重新校準身體雷達，再次聽見直覺聲音。", undefDiag: "為掩飾恐懼而逞強，表現魯莽無視極限。", undefAdj: "連結生存本能，協助辨識真正的危險。", isHealthy: false }, { label: "依賴/緊抓不放 (失調)", defDiag: "只信舊習慣，即便有害健康仍不願放手。", defAdj: "切斷舊有慣性連結，協助擁抱新健康模式。", undefDiag: "怕孤單而緊抓有毒關係，為對方找藉口。", undefAdj: "切斷依附能量索，提醒隨時有轉身離開權利。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。直覺敏銳。", undefDiag: "面對恐懼不依附，獨立自主。", adjust: "", isHealthy: true } ] },
+            sacral: { label: "薦骨", organ: "生殖系統", static: { defined: "強大發電機。健康時做喜歡的事；不健康時亂發起行動（挫敗），或勉強做不愛的事。", undefined: "能量引導者。健康時適度休息；不健康時不知何時停，變工作狂。", open: "性能量模糊。健康時享受生活；不健康時生活失去邊界，徹底過勞。" }, dynamic: [ { label: "勉強/能量阻塞 (內縮)", defDiag: "腦逼身體做沒回應的事，致生命力嚴重漏油。", defAdj: "修復能量漏洞，喚醒對真心喜愛事物的回應。", undefDiag: "吸收他人興奮誤認有體力，被榨乾不敢停。", undefAdj: "協助與空白和解，找回適合你的休息節奏。", isHealthy: false }, { label: "亂發起/挫敗 (外顯)", defDiag: "忘記等待主動發起，處處碰壁感到憤怒挫敗。", defAdj: "協助能量歸位，從主動出擊調回磁性吸引。", undefDiag: "拼命工作證明有用，忙碌填補內心空虛。", undefAdj: "釋放我不夠好驅動力，協助慢下來享受生活。", isHealthy: false }, { label: "性/創造力受阻 (失調)", defDiag: "創造之火熄滅，生活機械化影響親密流動。", defAdj: "激活臍輪能量，找回生活樂趣與性動力。", undefDiag: "能量透支，長期高壓致身體強制關機。", undefAdj: "注入修復能量，協助生殖系統深層充電。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。源源不絕創造力。", undefDiag: "工作有度，懂得適時休息。", adjust: "", isHealthy: true } ] },
+            root: { label: "根部", organ: "腎上腺", static: { defined: "抗壓性強。健康時從容面對；不健康時沒耐心，逼迫別人快一點。", undefined: "壓力放大器。健康時借力使力；不健康時急著做完，忙中出錯。", open: "對壓力無感。健康時逍遙自在；不健康時累積壓力而不自知，突然崩潰。" }, dynamic: [ { label: "壓抑壓力/便秘 (內縮)", defDiag: "壓力吞肚內，腎上腺備戰致身體僵硬。", defAdj: "釋放累積底層壓力，協助身體肌肉深層放鬆。", undefDiag: "被他人壓力綁架，周遭著急變自己焦慮。", undefAdj: "清理外來壓力能量，協助找回內在從容。", isHealthy: false }, { label: "逼迫他人/暴躁 (外顯)", defDiag: "受不了慢步調逼迫他人，製造高壓氣氛。", defAdj: "平衡根部能量，將壓力轉化為穩定支持力。", undefDiag: "急於解脫未完成壓力，拼命趕工欲速不達。", undefAdj: "協助安住當下，明白事情做不完但可慢慢做。", isHealthy: false }, { label: "生存焦慮/無法扎根 (失調)", defDiag: "對現實不安擔心匱乏，無法安穩活當下。", defAdj: "強化海底輪與大地連結，注入豐盛信任頻率。", undefDiag: "壓力大到想逃避，飄忽不定無法落地執行。", undefAdj: "協助能量扎根，提升執行力與穩定度。", isHealthy: false }, { label: "健康 (綠燈)", defDiag: "能量運作良好。步履踏實。", undefDiag: "不被他人壓力驅動，從容自在。", adjust: "", isHealthy: true } ] }
+        };
+
+        const CENTERS = [
+            { id: 'head', shape: 'tri-up', cx: 400, cy: 120, w: 180, h: 150, textDy: 10 }, 
+            { id: 'ajna', shape: 'tri-down', cx: 400, cy: 290, w: 180, h: 150, textDy: -10 },
+            { id: 'throat', shape: 'square', cx: 400, cy: 450, w: 140, h: 140, textDy: 0 },
+            { id: 'g', shape: 'diamond', cx: 400, cy: 650, w: 170, h: 170, textDy: 0 },
+            { id: 'ego', shape: 'tri-small', cx: 620, cy: 680, w: 130, h: 120, textDy: 0 }, 
+            { id: 'sacral', shape: 'square', cx: 400, cy: 840, w: 140, h: 140, textDy: 0 },
+            { id: 'spleen', shape: 'tri-left', cx: 165, cy: 830, w: 180, h: 160, textDy: 0 }, 
+            { id: 'solar', shape: 'tri-right', cx: 635, cy: 830, w: 180, h: 160, textDy: 0 }, 
+            { id: 'root', shape: 'square', cx: 400, cy: 1030, w: 140, h: 140, textDy: 0 }
+        ];
+
+        const CHANNELS = [['head','ajna'],['ajna','throat'],['throat','g'],['throat','spleen'],['throat','sacral'],['throat','solar'],['g','sacral'],['g','spleen'],['g','ego'],['ego','throat'],['ego','solar'],['sacral','root'],['sacral','spleen'],['sacral','solar'],['spleen','root'],['solar','root']];
+        if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+        }
+        // 🔥 請用這整段取代原本的 window.onload
+window.onload = async function() {
+    
+    // --- 1. 先抓網址參數 ---
+    const params = new URLSearchParams(window.location.search);
+    const pId = params.get('id'); 
+    const pMode = params.get('mode'); 
+    
+    // --- 2. 🔥 嚴格檢查哨 (偽裝版) ---
+    const curtain = document.getElementById('security-curtain'); // 抓取防護罩
+    
+    const _k = "YmFjb24zMTA="; 
+
+    if (pMode === 'view') {
+        if(curtain) curtain.remove(); 
+    } 
+    else {
+        const _local = localStorage.getItem('sys_cfg_v1');
+
+        if (_local === _k) {
+            if(curtain) curtain.remove(); 
+        } else {
+            const input = prompt("🔒 System Security Check Required:");
+            
+            if (input && btoa(input) === _k) {
+                localStorage.setItem('sys_cfg_v1', _k);
+                if(curtain) curtain.remove();
+            } else {
+                alert("❌ Access Denied.");
+                window.history.back(); 
+                return; // 強制停止執行
+            }
+        }
+    }
+
+    // --- 3. 驗證通過後，才執行原本的初始化 ---
+    
+    document.getElementById('info-date').valueAsDate = new Date();
+    if(typeof renderInputs === 'function') renderInputs(); 
+
+    try {
+        myDB = window.supabase.createClient(SB_URL, SB_KEY);
+        console.log("✅ DB Connected");
+    } catch(e) { console.error("DB Error:", e); }
+
+    // --- 4. 根據模式載入資料 ---
+    if (pMode === 'view') {
+        isViewMode = true;
+        document.body.classList.add('view-mode');
+       document.getElementById('btn-submit-feedback').style.display = 'inline-block';
+        
+        if(pId) {
+            currentReportId = pId; // 🔥🔥🔥 補上這一行：讓客人模式也把報表 ID 記起來！
+            await loadReportData(pId);
+        }
+    } else if (pId) {
+        currentReportId = pId;
+        const saveBtn = document.getElementById('btn-real-save');
+        if(saveBtn) saveBtn.innerText = "💾 更新儲存";
+        await loadReportData(pId); 
+    } else {
+        const pName = params.get('name');
+        const pPhone = params.get('phone');
+        const pBid = params.get('bid');
+        const pEmail = params.get('email'); // 這裡保留你剛剛修好的 Email 功能
+
+        if (pEmail) {
+            const emailInput = document.getElementById('info-email');
+            if(emailInput) emailInput.value = pEmail;
+        }
+        if (pName) document.getElementById('info-name').value = pName;
+        if (pPhone) document.getElementById('info-phone').value = pPhone;
+        if (pBid) {
+            currentBookingId = pBid;
+            fetchBookingService(pBid); 
+        }
+    }
+};       
+
+
+        async function fetchBookingService(bid) {
+            if(!myDB) return;
+            try {
+                const { data: booking, error } = await myDB.from('bookings').select('service_item, service_detail').eq('id', bid).single();
+                if (error) throw error;
+
+                if (booking) {
+                    currentMainService = booking.service_item;
+                    document.getElementById('page-title').innerText = `🔮 ${currentMainService}`;
+
+                    if (booking.service_detail) {
+                        let detailStr = booking.service_detail
+                            .replace(/\(\s*\$\s*\d+\s*\)/g, '') 
+                            .replace(/\$\s*\d+/g, '')          
+                            .replace(/\d+\s*元/g, '')         
+                            .trim();
+
+                        const parts = detailStr.split('|').map(p => p.trim());
+                        detectedAddons = []; 
+
+                        parts.forEach(p => {
+                            const match = p.match(/(.+?)[\[\(](.+?)[\]\)]/);
+                            if (match) {
+                                const category = match[1].trim(); 
+                                const subItems = match[2].split(/[、，,]+/).map(s => s.trim()).filter(s => s !== "");
+                                detectedAddons.push({ name: category, subs: subItems });
+                            } else if (p && p !== currentMainService) {
+                                detectedAddons.push({ name: p, subs: [] });
+                            }
+                        });
+                        
+                        const container = document.getElementById('addon-container');
+                        const wrapper = document.getElementById('addon-section-wrapper');
+                        if (container && detectedAddons.length > 0) {
+                            wrapper.style.display = 'block';
+                            container.innerHTML = ''; 
+                            detectedAddons.forEach((item, idx) => {
+                                const card = document.createElement('div');
+                                card.className = 'addon-card';
+                                let html = `<div class="addon-title">${item.name}</div>`;
+                                html += `<div style="margin-bottom:10px;"><label style="font-size:12px; color:#c62828;">項目檢測：</label><select id="addon-main-val-${idx}"><option value="低">低</option><option value="中" selected>中</option><option value="高">高</option></select></div>`;
+                                item.subs.forEach((sub, sIdx) => {
+                                    html += `<div style="margin-bottom:8px; padding-left:10px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px;">• ${sub}</span><select id="addon-sub-adj-${idx}-${sIdx}"><option value="低">調整：低</option><option value="中">調整：中</option><option value="高" selected>調整：高</option></select></div>`;
+                                });
+                                card.innerHTML = html;
+                                container.appendChild(card);
+                            });
+                        }
+                    }
+                }
+            } catch(e) { console.error("Fetch Booking Error:", e); }
+        }
+
+        function renderInputs() {
+            const container = document.getElementById('inputs-container');
+            CENTERS.forEach(c => {
+                const data = CENTER_CONTENT[c.id];
+                const card = document.createElement('div');
+                card.className = 'center-card';
+                card.setAttribute('data-color', c.id);
+                let checkHTML = data.dynamic.map((d, i) => `<label class="checkbox-item"><input type="checkbox" name="diag-${c.id}" value="${i}" onclick="handleCheck('${c.id}', ${i})"><span>${d.label}</span></label>`).join('');
+                card.innerHTML = `
+                    <div class="center-header">
+                        <div class="center-title">${data.label} <span style="font-size:12px;color:#777;">(${data.organ})</span></div>
+                        <div class="status-group" id="group-${c.id}">
+                            <button class="status-btn active" onclick="setStatus('${c.id}', 'defined')">已定義</button>
+                            <button class="status-btn" onclick="setStatus('${c.id}', 'undefined')">未定義</button>
+                            <button class="status-btn" onclick="setStatus('${c.id}', 'open')">全空白</button>
+                            <input type="hidden" id="status-${c.id}" value="defined">
+                        </div>
+                    </div>
+                    <div class="diagnosis-area"><div style="font-weight:bold;color:#e65100;margin-bottom:5px;">📋 靈擺診斷</div><div class="checkbox-group">${checkHTML}</div></div>
+                    <div class="input-row"><div class="input-group"><label>檢測(%)</label><input type="number" id="val-${c.id}"></div><div class="input-group"><label>調整(%)</label><input type="number" id="adj-${c.id}"></div></div>
+                    <div class="custom-note-area"><textarea id="note-${c.id}" placeholder="手寫補充..."></textarea></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setStatus(id, s) {
+            const btns = document.getElementById(`group-${id}`).getElementsByTagName('button');
+            btns[0].className = s==='defined'?'status-btn active':'status-btn';
+            btns[1].className = s==='undefined'?'status-btn active':'status-btn';
+            btns[2].className = s==='open'?'status-btn active':'status-btn';
+            document.getElementById(`status-${id}`).value = s;
+        }
+
+        function handleCheck(id, idx) {
+            const cbs = document.getElementsByName(`diag-${id}`);
+            if (CENTER_CONTENT[id].dynamic[idx].isHealthy && cbs[idx].checked) {
+                cbs.forEach((cb, i) => { if(i!==idx) cb.checked = false; });
+                document.getElementById(`val-${id}`).value = 100;
+            } else if (cbs[idx].checked) {
+                cbs.forEach((cb, i) => { if(CENTER_CONTENT[id].dynamic[i].isHealthy) cb.checked = false; });
+            }
+        }
+
+        function collectDataFromUI() {
+            const centersData = CENTERS.map(c => {
+                const centerKey = c.id;
+                const db = CENTER_CONTENT[centerKey];
+                const status = document.getElementById(`status-${centerKey}`) ? document.getElementById(`status-${centerKey}`).value : 'defined'; 
+                let statusLabel = (status === 'defined') ? "已定義" : (status === 'undefined') ? "未定義" : "全空白";
+                let valInput = document.getElementById(`val-${centerKey}`).value;
+                let val = valInput === "" ? "--" : valInput;
+                let adjInput = document.getElementById(`adj-${centerKey}`).value;
+                const checkboxes = document.getElementsByName(`diag-${centerKey}`);
+                let hasUnhealthyIssue = false;
+                let dynamicPairs = [];
+                
+                checkboxes.forEach((cb, i) => {
+                    if (cb.checked) {
+                        const item = db.dynamic[i];
+                        if (!item.isHealthy) hasUnhealthyIssue = true;
+                        let dTxt = (status === 'defined' ? item.defDiag : item.undefDiag);
+                        let aTxt = (status === 'defined' ? item.defAdj : item.undefAdj);
+                        if (item.isHealthy) { dynamicPairs.push({ type: 'healthy_diag', diag: `🟢 ${dTxt}` }); } 
+                        else { dynamicPairs.push({ type: 'diag', text: `⚠️ ${dTxt}` }); dynamicPairs.push({ type: 'adjust', text: `🛠️ ${aTxt}` }); }
+                    }
+                });
+                let finalAdj = adjInput !== "" ? adjInput : (valInput !== "" && parseInt(valInput) !== 100 ? "100" : (hasUnhealthyIssue ? "100" : "無須調整"));
+                
+                return { 
+                    ...c, label: db.label, status: status, statusLabel: statusLabel, sLabel: statusLabel, val: val, adj: finalAdj, finalAdj: finalAdj, 
+                    content: [{ type: 'static', text: db.static[status] }].concat(dynamicPairs.map(p => ({ type: p.type, text: p.text || p.diag }))).concat(document.getElementById(`note-${centerKey}`).value.trim() ? [{type:'note', text: '💡 補充：' + document.getElementById(`note-${centerKey}`).value.trim()}] : []),
+                    raw_diags: dynamicPairs 
+                }; 
+            });
+
+            const coreData = MANDATORY_CHECKS.map((name, i) => ({
+                name: name, val: document.getElementById(`core-val-${i}`).value, adj: "高", isCore: true, subs: []
+            }));
+
+            const addonsData = [];
+            if (detectedAddons && detectedAddons.length > 0) {
+                detectedAddons.forEach((item, idx) => {
+                    const mainVal = document.getElementById(`addon-main-val-${idx}`).value;
+                    const subsData = item.subs.map((subName, sIdx) => ({
+                        name: subName,
+                        adj: document.getElementById(`addon-sub-adj-${idx}-${sIdx}`).value
+                    }));
+                    addonsData.push({ name: item.name, val: mainVal, subs: subsData, isCore: false });
+                });
+            }
+            // 🔥 抓取回饋相關內容
+            const feedbackText = document.getElementById('client-feedback') ? document.getElementById('client-feedback').value : "";
+            const nicknameText = document.getElementById('client-nickname') ? document.getElementById('client-nickname').value : "";
+            const consentBool = document.getElementById('client-consent') ? document.getElementById('client-consent').checked : false;
+
+            return { 
+                centers: centersData, 
+                specialItems: [...coreData, ...addonsData], 
+                reportTitle: currentMainService,
+                client_feedback: feedbackText,
+                client_nickname: nicknameText,
+                client_consent: consentBool
+            };
+        }
+
+        function generatePreview() {
+            try {
+                const msg = document.getElementById('status-msg');
+                msg.innerText = "🎨 正在生成預覽圖...";
+                const fullData = collectDataFromUI();
+
+                const meta = {
+                    title: currentMainService, 
+                    date: document.getElementById('info-date').value,
+                    name: document.getElementById('info-name').value,
+                    phone: document.getElementById('info-phone').value,
+                    healer: document.getElementById('info-healer').value,
+                    summary: document.getElementById('overall-summary').value
+                };
+
+                drawClassicReport(fullData, meta); 
+
+                msg.innerText = "";
+                document.getElementById('btn-real-save').style.display = 'inline-block';
+                document.getElementById('result-wrapper').style.display = 'block';
+                // 🔥 根據模式顯示按鈕
+                document.getElementById('guest-dl-btn').style.display = 'inline-flex';
+                if (isViewMode) {
+                    document.getElementById('btn-open-feedback').style.display = 'inline-flex';
+                }
+                
+            } catch (e) {
+                console.error(e);
+                alert("生成失敗: " + e.message);
+            }
+        }
+        // === 處理客人送出回饋 ===
+        async function submitFeedback() {
+    if (!currentReportId) return alert("錯誤：找不到報表 ID");
+    
+    const fb = document.getElementById('client-feedback').value.trim();
+    const nickname = document.getElementById('client-nickname').value.trim() || "匿名訪客"; 
+    const consent = document.getElementById('client-consent').checked;
+
+    if(!fb) return alert("請先填寫回饋內容喔！");
+    
+    const btn = document.getElementById('btn-submit-feedback');
+    btn.innerText = "送出中..."; 
+    btn.disabled = true;
+    
+    try {
+        const { data, error } = await myDB.from('reports').select('raw_data').eq('id', currentReportId).single();
+        if(error) throw error;
+        
+        let currentRawData = data.raw_data || {};
+        currentRawData.client_feedback = fb; 
+        currentRawData.client_nickname = nickname;
+        currentRawData.client_consent = consent;
+        
+        const { error: updErr } = await myDB.from('reports').update({ raw_data: currentRawData }).eq('id', currentReportId);
+        if(updErr) throw updErr;
+        
+        alert("✅ 感謝您的回饋！我們已經收到囉。");
+        closeFeedbackModal(); // 🔥 只加了這一行，送完就關窗
+    } catch(e) {
+        console.error(e);
+        alert("❌ 送出失敗，請稍後再試或聯繫客服：" + e.message);
+    } finally {
+        btn.innerText = "📤 送出回饋"; 
+        btn.disabled = false;
+    }
+}        
+        
+        async function saveToDatabase() {
+            const msg = document.getElementById('status-msg');
+            const ph = document.getElementById('info-phone').value.trim();
+            const nm = document.getElementById('info-name').value.trim();
+            const em = document.getElementById('info-email').value.trim(); // 👈 抓取 Email
+
+            if(!myDB) { alert("連線錯誤"); return; }
+            if(!ph) { alert("請填寫個案手機"); return; }
+
+            msg.innerText = "⏳ 正在存檔並執行結案程序...";
+            document.getElementById('btn-real-save').disabled = true;
+            const fullData = collectDataFromUI();
+
+            try {
+                let uid = null;
+                // 1. 查詢是否已是會員
+                const { data: prof } = await myDB.from('profiles').select('id').eq('phone', ph).single();
+                
+                if(prof) {
+                    uid = prof.id; 
+                } else {
+                    // 🔥 關鍵修正：生成預設密碼 (guest + 手機末4碼)
+                    const defaultPwd = ph.length >= 4 ? 'guest' + ph.slice(-4) : 'guest1234';
+                    
+                    // 🔥 關鍵修正：註冊時同時寫入 email、password 與 role
+                    const { data: np, error: createErr } = await myDB.from('profiles').insert([{
+                        phone: ph, 
+                        full_name: nm,
+                        email: em,           
+                        password: defaultPwd, 
+                        role: 'member'
+                    }]).select().single();
+                    
+                    if(createErr) throw createErr;
+                    uid = np.id;
+                }
+
+                // 2. 準備報告與訂單連動邏輯
+                const sum = document.getElementById('overall-summary').value;
+                const dt = document.getElementById('info-date').value;
+                const healer = document.getElementById('info-healer').value;
+
+                const payload = { 
+                    user_id: uid, 
+                    service_date: dt, 
+                    healer_name: healer, 
+                    summary: sum, 
+                    raw_data: fullData,
+                    service_item: currentMainService 
+                };
+
+                let reportId = currentReportId;
+                if (currentReportId) {
+                    await myDB.from('reports').update(payload).eq('id', currentReportId);
+                } else {
+                    const { data: newR, error: ie } = await myDB.from('reports').insert([payload]).select().single();
+                    if(ie) throw ie;
+                    reportId = newR.id;
+                    currentReportId = newR.id;
+                }
+
+                if (currentBookingId) {
+                    const linkText = `[報告已生成 ID:${reportId}]`;
+                    const { data: oldB } = await myDB.from('bookings').select('wish_detail').eq('id', currentBookingId).single();
+                    let newDetail = oldB ? (oldB.wish_detail || "") : "";
+                    if (!newDetail.includes("報告已生成")) { newDetail += (newDetail ? " | " : "") + linkText; }
+                    await myDB.from('bookings').update({ status: 'completed', wish_detail: newDetail }).eq('id', currentBookingId);
+                }
+
+                alert("✅ 存檔成功！視窗將自動關閉。");
+                window.close();
+
+            } catch(err) {
+                console.error(err);
+                msg.innerText = "⚠️ 存檔失敗: " + err.message;
+                document.getElementById('btn-real-save').disabled = false;
+            }
+        }
+        
+        async function loadReportData(reportId) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "⏳ 正在讀取資料...";
+            
+            const { data, error } = await myDB.from('reports').select('*').eq('id', reportId).single();
+            if (error) { alert("讀取失敗：" + error.message); return; }
+
+            document.getElementById('info-date').value = data.service_date;
+            document.getElementById('info-healer').value = data.healer_name;
+            document.getElementById('overall-summary').value = data.summary || "";
+            // 🔥 讀取客人之前寫過的回饋、暱稱與同意狀態
+            if (data.raw_data && data.raw_data.client_feedback) {
+                document.getElementById('client-feedback').value = data.raw_data.client_feedback;
+                
+                if (data.raw_data.client_nickname) {
+                    document.getElementById('client-nickname').value = data.raw_data.client_nickname;
+                }
+                
+                if (data.raw_data.client_consent !== undefined) {
+                    document.getElementById('client-consent').checked = data.raw_data.client_consent;
+                }
+
+                // 如果是管理員，把框框鎖起來不讓他改客人寫的話 (可選)
+                if (!isViewMode) {
+                    document.getElementById('client-feedback').readOnly = true;
+                    document.getElementById('client-feedback').style.backgroundColor = "#f5f5f5";
+                    document.getElementById('client-nickname').readOnly = true;
+                    document.getElementById('client-nickname').style.backgroundColor = "#f5f5f5";
+                    document.getElementById('client-consent').disabled = true;
+                }
+            }
+            if (data.service_item) { currentMainService = data.service_item; } 
+            else if (data.raw_data && data.raw_data.reportTitle) { currentMainService = data.raw_data.reportTitle; }
+            document.getElementById('page-title').innerText = currentMainService ? `🔮 ${currentMainService}` : "🔮";
+
+            if (data.user_id) {
+                const { data: prof } = await myDB.from('profiles').select('*').eq('id', data.user_id).single();
+                if (prof) {
+                    document.getElementById('info-name').value = prof.full_name;
+                    document.getElementById('info-phone').value = prof.phone;
+                }
+            }
+
+            if (data.raw_data) {
+                const rd = data.raw_data;
+                (rd.centers || []).forEach(item => {
+                    const cid = item.id;
+                    setStatus(cid, item.status);
+                    if(item.val && item.val!=="--") document.getElementById(`val-${cid}`).value = item.val;
+                    if(item.finalAdj && item.finalAdj!=="無須調整" && item.finalAdj!=="100") document.getElementById(`adj-${cid}`).value = item.finalAdj;
+                    if (item.raw_diags) {
+                        const dbDynamic = CENTER_CONTENT[cid].dynamic;
+                        const cbs = document.getElementsByName(`diag-${cid}`);
+                        item.raw_diags.forEach(d => {
+                            let r = d.text || d.diag; if(!r) return;
+                            const clean = r.substring(2).trim();
+                            dbDynamic.forEach((def, idx) => {
+                                if(def.defDiag===clean || def.undefDiag===clean || def.defAdj===clean || def.undefAdj===clean) {
+                                    if(cbs[idx]) cbs[idx].checked = true;
+                                }
+                            });
+                        });
+                    }
+                    if (item.content) {
+                        const nb = item.content.find(x => x.type === 'note');
+                        if (nb) document.getElementById(`note-${cid}`).value = nb.text.replace("💡 補充：", "");
+                    }
+                });
+
+                const special = rd.specialItems || [];
+                special.filter(x => x.isCore).forEach((c, i) => {
+                    const el = document.getElementById(`core-val-${i}`);
+                    if (el) el.value = c.val;
+                });
+
+                const addons = special.filter(x => !x.isCore);
+                const container = document.getElementById('addon-container');
+                const wrapper = document.getElementById('addon-section-wrapper');
+                if (container && addons.length > 0) {
+                    wrapper.style.display = 'block';
+                    container.innerHTML = '';
+                    detectedAddons = addons.map(a => ({ name: a.name, subs: a.subs ? a.subs.map(s => s.name) : [] }));
+                    addons.forEach((item, idx) => {
+                        const card = document.createElement('div');
+                        card.className = 'addon-card';
+                        let h = `<div class="addon-title">${item.name}</div>`;
+                        h += `<div style="margin-bottom:10px;"><label style="font-size:12px; color:#c62828;">項目檢測：</label><select id="addon-main-val-${idx}"><option value="${item.val}">${item.val}</option></select></div>`;
+                        if (item.subs) item.subs.forEach((s, si) => h += `<div style="margin-bottom:8px; padding-left:10px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px;">• ${s.name}</span><select id="addon-sub-adj-${idx}-${si}"><option value="${s.adj}">${s.adj}</option></select></div>`);
+                        card.innerHTML = h;
+                        container.appendChild(card);
+                    });
+                }
+            }
+            msg.innerText = "";
+            setTimeout(() => { generatePreview(); }, 200);
+        }
+
+        async function drawClassicReport(fullData, meta) { 
+            try {
+                const canvas = document.getElementById('mainCanvas');
+                const ctx = canvas.getContext('2d');
+                const canvasWidth = 2600; const headerHeight = 250;
+
+                const logoImg = await new Promise((res) => {
+                    const img = new Image(); img.src = 'logo.png';
+                    img.onload = () => res(img); img.onerror = () => res(null);
+                });
+
+                const reportData = fullData.centers; 
+                const specialItems = fullData.specialItems || [];
+                const coreItems = specialItems.filter(x => x.isCore);
+                const addonItems = specialItems.filter(x => !x.isCore);
+                const healthyCenters = reportData.filter(x => x.finalAdj === "無須調整");
+                const adjustCenters = reportData.filter(x => x.finalAdj !== "無須調整");
+
+                const dividerX = 750; const rightPanelX = 780; const rightPanelW = 1770;
+                const mainColWidth = (rightPanelW - 50) / 3;
+                const mainColX = [rightPanelX, rightPanelX + mainColWidth + 25, rightPanelX + (mainColWidth + 25) * 2];
+                const HEALTHY_CARD_H = 160; const ADJUST_CARD_H = 460;
+
+                const drawEnergyBarRow = (bx, by, level, label, isDet, barW = 100) => {
+                    ctx.fillStyle = "#888"; ctx.font = "15px Microsoft JhengHei"; ctx.textAlign = "left";
+                    ctx.fillText(label, bx, by + 14);
+                    const labelW = ctx.measureText(label).width + 8;
+                    const barH = 16; const segW = (barW - 6) / 3;
+                    ctx.fillStyle = "#f0f0f0"; roundRect(ctx, bx + labelW, by, barW, barH, 4); ctx.fill();
+                    let count = (level === "低" ? 1 : level === "中" ? 2 : 3);
+                    let color = isDet ? "#ff5252" : (count === 1 ? "#ff5252" : count === 2 ? "#ffd740" : "#69f0ae");
+                    for (let k = 0; k < count; k++) { ctx.fillStyle = color; roundRect(ctx, bx + labelW + 3 + (k * (segW + 2)), by + 3, segW, barH - 6, 2); ctx.fill(); }
+                };
+
+                let rowY = headerHeight + 130;
+                let addonAreaH = addonItems.length * 160;
+                let healthyTopY = headerHeight + 100 + addonAreaH + 20;
+                let healthyTotalH = Math.ceil(healthyCenters.length / 3) * (HEALTHY_CARD_H + 30) + 40;
+                let adjustTopY = healthyTopY + healthyTotalH;
+                let adjustTotalH = Math.ceil(adjustCenters.length / 3) * (ADJUST_CARD_H + 100) + 40;
+                const sumLines = processParagraphs(ctx, meta.summary || "", canvasWidth - 280);
+                const summaryBoxH = (sumLines.length * 52) + 160;
+
+                canvas.width = canvasWidth; canvas.height = adjustTopY + adjustTotalH + summaryBoxH + 200;
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawHeader(ctx, canvasWidth, headerHeight, meta, logoImg);
+
+                ctx.save(); ctx.translate(0, headerHeight);
+                ctx.strokeStyle = "#eee"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(dividerX, 0); ctx.lineTo(dividerX, adjustTopY + adjustTotalH - headerHeight - 50); ctx.stroke();
+                CHANNELS.forEach(p => { const c1 = CENTERS.find(c => c.id === p[0]), c2 = CENTERS.find(c => c.id === p[1]); if(c1 && c2) { ctx.lineWidth=3; ctx.strokeStyle="#e0e0e0"; ctx.beginPath(); ctx.moveTo(c1.cx, c1.cy); ctx.lineTo(c2.cx, c2.cy); ctx.stroke(); } });
+                reportData.forEach(item => { 
+                    const {cx:x, cy:y, w, h} = item; ctx.beginPath();
+                    if (item.shape === 'square') ctx.rect(x-w/2, y-h/2, w, h);
+                    else if (item.shape === 'diamond') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y); ctx.lineTo(x, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-up') { ctx.moveTo(x, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y+h/2); ctx.closePath(); }
+                    else if (item.shape === 'tri-down') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x, y+h/2); ctx.closePath(); }
+                    else if (item.shape === 'tri-left') { ctx.moveTo(x-w/2, y-h/2); ctx.lineTo(x-w/2, y+h/2); ctx.lineTo(x+w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-right') { ctx.moveTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.lineTo(x-w/2, y); ctx.closePath(); }
+                    else if (item.shape === 'tri-small') { ctx.moveTo(x-w/2, y); ctx.lineTo(x+w/2, y-h/2); ctx.lineTo(x+w/2, y+h/2); ctx.closePath(); }
+                    ctx.fillStyle = (item.status === 'defined' ? HD_COLORS[item.id] : "#ffffff"); ctx.fill();
+                    ctx.lineWidth = 4; ctx.strokeStyle = "#444"; ctx.stroke();
+                    let tx = x, ty = y, tAlign = "center";
+                    if (item.id === 'head') { ty = y + (h/2) - 32; tx = x - 15; } else if (item.id === 'ajna') { ty = y - (h/2) + 32; tx = x - 15; } 
+                    else if (item.id === 'spleen') { tAlign = "left"; tx = x - (w/2) + 18; } else if (item.id === 'solar') { tAlign = "right"; tx = x + (w/2) - 18; } else { tx = x - 15; }
+                    ctx.fillStyle = "#2c3e50"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.textAlign = tAlign; ctx.textBaseline = "middle"; ctx.fillText(item.label, tx, ty); 
+                    let val = (item.finalAdj === "無須調整" && item.val === "--") ? "100" : item.val;
+                    let bC = (parseInt(val)<=40)? ENERGY_COLORS.red : (parseInt(val)<=70)? ENERGY_COLORS.yellow : ENERGY_COLORS.green;
+                    let bx = (tAlign === "left") ? tx + ctx.measureText(item.label).width + 30 : (tAlign === "right") ? tx - ctx.measureText(item.label).width - 30 : tx + 45;
+                    ctx.beginPath(); ctx.arc(bx, ty, 22, 0, Math.PI*2); ctx.fillStyle = bC; ctx.fill();
+                    ctx.fillStyle = (bC === ENERGY_COLORS.red) ? "#ffffff" : "#000000"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center"; ctx.fillText(val, bx, ty);
+                });
+                ctx.restore();
+
+                const titleY = headerHeight + 65;
+                ctx.fillStyle = "#1a2f23"; ctx.font = "bold 34px 'Noto Serif TC', serif"; ctx.textAlign="left";
+                ctx.fillText("⚡ 基本能量檢測與加購項目調整", rightPanelX, titleY);
+
+                coreItems.forEach((cItem, i) => {
+                    const bx = rightPanelX + 550 + (i * 420);
+                    ctx.save(); ctx.strokeStyle = "#c6a87c"; ctx.lineWidth = 1;
+                    roundRect(ctx, bx, titleY - 45, 400, 90, 15); ctx.stroke(); ctx.restore();
+                    ctx.fillStyle = "#1a1a1a"; ctx.font = "bold 20px Microsoft JhengHei";
+                    ctx.fillText(cItem.name, bx + 20, titleY);
+                    drawEnergyBarRow(bx + 110, titleY - 30, cItem.val, "檢測", true, 90);
+                    drawEnergyBarRow(bx + 110, titleY + 5, "高", "調整", false, 90);
+                });
+
+                addonItems.forEach((aItem, idx) => {
+                    ctx.save(); ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#eee"; roundRect(ctx, rightPanelX, rowY, rightPanelW - 50, 120, 15); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#0288d1"; roundRect(ctx, rightPanelX, rowY, 10, 120, {tl:15, bl:15}); ctx.fill();
+                    ctx.fillStyle = "#0277bd"; ctx.font = "bold 24px Microsoft JhengHei"; ctx.fillText(aItem.name, rightPanelX + 35, rowY + 50);
+                    drawEnergyBarRow(rightPanelX + 35, rowY + 75, aItem.val, "檢測值", true, 130);
+                    if (aItem.subs) { aItem.subs.forEach((sub, sIdx) => { if (sIdx < 4) { const sx = rightPanelX + 380 + (sIdx * 340); ctx.fillStyle = "#333"; ctx.font = "bold 20px Microsoft JhengHei"; ctx.fillText(sub.name, sx, rowY + 50); drawEnergyBarRow(sx, rowY + 75, sub.adj, "調整後", false, 130); } }); }
+                    rowY += 120;
+                });
+
+                const drawCenterCard = (centerObj, dx, dy, h, isH) => {
+                    ctx.save(); ctx.fillStyle = "#ffffff"; ctx.shadowColor = "rgba(0,0,0,0.05)"; ctx.shadowBlur = 10; roundRect(ctx, dx, dy, mainColWidth, h, 15); ctx.fill(); ctx.restore();
+                    ctx.fillStyle = HD_COLORS[centerObj.id]; roundRect(ctx, dx, dy, 10, h, {tl:15, bl:15}); ctx.fill();
+                    
+                    const themeDesc = CENTER_THEMES[centerObj.id] ? ` - ${CENTER_THEMES[centerObj.id]}` : "";
+                    const title = `${centerObj.label}中心 (${centerObj.sLabel})${themeDesc}`;
+                    
+                    ctx.font = "bold 20px Microsoft JhengHei"; const pillW = ctx.measureText(title).width + 35;
+                    ctx.strokeStyle = HD_COLORS[centerObj.id]; ctx.lineWidth = 3; roundRect(ctx, dx + 30, dy + 25, pillW, 45, 22.5); ctx.stroke();
+                    
+                    ctx.save(); ctx.fillStyle = "#333"; ctx.textAlign="center"; ctx.textBaseline="middle"; 
+                    ctx.fillText(title, dx + 30 + pillW/2, dy + 25 + 22.5); ctx.restore();
+
+                    if (isH) {
+                        ctx.save(); ctx.fillStyle = "#e8f5e9"; roundRect(ctx, dx + mainColWidth - 85, dy + 32, 65, 32, 6); ctx.fill();
+                        ctx.fillStyle = "#2e7d32"; ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                        ctx.fillText("健康", dx + mainColWidth - 52.5, dy + 48); ctx.restore();
+                    }
+
+                    ctx.textAlign="left"; ctx.textBaseline="top"; ctx.fillStyle="#555"; ctx.font="17px Microsoft JhengHei";
+                    const centerStatus = centerObj.status || 'defined';
+                    const staticText = CENTER_CONTENT[centerObj.id].static[centerStatus] || "";
+                    
+                    if(isH) { 
+                        processParagraphs(ctx, staticText, mainColWidth - 60).forEach((line, lineIdx) => ctx.fillText(line, dx + 35, dy + 95 + lineIdx * 26)); 
+                    } else {
+                        let cy = dy + 85; ctx.fillStyle = "#7f8c8d"; ctx.font = "17px Microsoft JhengHei";
+                        const introText = processParagraphs(ctx, staticText, mainColWidth - 60);
+                        introText.slice(0, 2).forEach(line => { ctx.fillText(line, dx + 35, cy); cy += 25; });
+                        
+                        cy += 10; ctx.fillStyle = "#2c3e50"; ctx.font = "bold 19px Microsoft JhengHei"; ctx.fillText("能量檢測/調整項目", dx + 35, cy);
+
+                        ctx.save();
+                        ctx.fillStyle = "#f8f9fa"; 
+                        roundRect(ctx, dx + mainColWidth - 225, cy - 8, 210, 35, 6); ctx.fill();
+                        ctx.strokeStyle = "#eee"; ctx.lineWidth = 1; ctx.stroke();
+                        
+                        ctx.font = "bold 16px Microsoft JhengHei"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+                        let detTxt = `檢測 ${centerObj.val}% ➔ `;
+                        ctx.fillStyle = "#e53935"; 
+                        ctx.fillText(detTxt, dx + mainColWidth - 215, cy + 10);
+                        let detW = ctx.measureText(detTxt).width;
+                        
+                        ctx.fillStyle = "#0277bd"; 
+                        ctx.fillText(`調整後 ${centerObj.adj}%`, dx + mainColWidth - 215 + detW, cy + 10);
+                        ctx.restore();
+
+                        cy+=35; 
+                        let dPairs = []; if (centerObj.content) { for(let j=0; j < centerObj.content.length; j++){ if(centerObj.content[j].type === 'diag'){ dPairs.push({d: centerObj.content[j].text, a: centerObj.content[j+1] ? centerObj.content[j+1].text : ""}); j++; } } }
+                        dPairs.forEach(p => {
+                            const dL = processParagraphs(ctx, p.d, mainColWidth-80); const aL = processParagraphs(ctx, p.a, mainColWidth-80);
+                            const bh = (dL.length + aL.length) * 28 + 20; ctx.fillStyle="#fffcf5"; ctx.strokeStyle="#fae1c3"; roundRect(ctx, dx+35, cy, mainColWidth-70, bh, 10); ctx.fill(); ctx.stroke();
+                            ctx.font="bold 16px Microsoft JhengHei"; ctx.fillStyle="#8e242a"; dL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+i*28));
+                            ctx.font="15px Microsoft JhengHei"; ctx.fillStyle="#1a4a6e"; aL.forEach((l,i) => ctx.fillText(l, dx+50, cy+15+dL.length*28+i*28));
+                            cy+=bh+10;
+                        });
+                    }
+                };
+
+                if(healthyCenters.length > 0) { ctx.fillStyle="#2e7d32"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("✅ 穩定運作能量中心", rightPanelX, healthyTopY + 30); let hY = [healthyTopY+60, healthyTopY+60, healthyTopY+60]; healthyCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], hY[col], HEALTHY_CARD_H, true); hY[col] += HEALTHY_CARD_H + 35; }); }
+                if(adjustCenters.length > 0) { ctx.fillStyle="#c62828"; ctx.font="bold 36px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("🛠️ 重點調整能量中心", rightPanelX, adjustTopY + 30); let aY = [adjustTopY+80, adjustTopY+80, adjustTopY+80]; adjustCenters.forEach((it, i) => { const col = i%3; drawCenterCard(it, mainColX[col], aY[col], ADJUST_CARD_H, false); aY[col] += ADJUST_CARD_H + 35; }); }
+
+                const finalSy = Math.max(adjustTopY + adjustTotalH - 30, healthyTopY + healthyTotalH)+50; 
+                ctx.fillStyle="#f9f7f2"; ctx.strokeStyle="#c6a87c"; roundRect(ctx, 100, finalSy, canvasWidth-200, summaryBoxH, 30); ctx.fill(); ctx.stroke();
+                ctx.fillStyle="#1a2f23"; ctx.font="bold 42px 'Noto Serif TC', serif"; ctx.textAlign="left"; ctx.fillText("培癒師總結：", 140, finalSy+40); 
+                ctx.fillStyle="#333"; ctx.font="26px Microsoft JhengHei"; sumLines.forEach((line, i) => ctx.fillText(line, 140, finalSy + 110 + i * 52));
+
+                const finalImg = document.getElementById('final-image');
+        // 先把透明度設為 0，確保它在背景載入
+        finalImg.style.opacity = '0';
+        finalImg.src = canvas.toDataURL("image/jpeg", 0.9);
+        
+        // 圖片載入完成後，才漸層顯現，這樣高度是預先撐好的，捲軸就不會迷路
+        finalImg.onload = function() { 
+            finalImg.style.opacity = '1'; 
+            finalImg.style.transition = 'opacity 0.5s ease'; // 加個淡入，質感更好
+        };
+
+            } catch (e) { console.error("❌ 繪圖失敗：", e); }
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            if (typeof radius === 'number') { radius = {tl: radius, tr: radius, br: radius, bl: radius}; }
+            ctx.beginPath(); ctx.moveTo(x + radius.tl, y); ctx.lineTo(x + width - radius.tr, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr); ctx.lineTo(x + width, y + height - radius.br);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height); ctx.lineTo(x + radius.bl, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl); ctx.lineTo(x, y + radius.tl);
+            ctx.quadraticCurveTo(x, y, x + radius.tl, y); ctx.closePath();
+        }
+
+        function processParagraphs(ctx, text, maxWidth) {
+            if (!text) return [""];
+            const paragraphs = text.split('\n');
+            let allLines = [];
+            paragraphs.forEach(para => {
+                if (para.trim() === "") { allLines.push(""); return; }
+                const words = para.split(''); 
+                let currentLine = words[0];
+                for (let i = 1; i < words.length; i++) {
+                    const width = ctx.measureText(currentLine + words[i]).width;
+                    if (width < maxWidth) { currentLine += words[i]; } 
+                    else { allLines.push(currentLine); currentLine = words[i]; }
+                }
+                allLines.push(currentLine);
+            });
+            return allLines;
+        }
+
+        function drawHeader(ctx, width, height, meta, logoImg) {
+            const mainBarH = height - 100;
+            ctx.fillStyle = "#1a2f23"; ctx.fillRect(0, 0, width, mainBarH);
+            if (logoImg) {
+                const logoH = 90; const logoW = (logoImg.width / logoImg.height) * logoH;
+                ctx.drawImage(logoImg, 50, (mainBarH / 2) - (logoH / 2), logoW, logoH);
+            }
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 72px 'Noto Serif TC', serif"; ctx.textAlign = "center";
+            ctx.fillText(meta.title, width / 2, (mainBarH / 2) + 20); 
+            ctx.fillStyle = "#c6a87c"; ctx.fillRect(0, mainBarH - 4, width, 4);
+            ctx.fillStyle = "#f9f7f2"; ctx.fillRect(0, mainBarH, width, 100);
+            ctx.fillStyle = "#1a2f23"; ctx.font = "bold 26px 'Noto Serif TC', serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+            const colW = (width - 300) / 4;
+            ctx.fillText(`📅 調整日期：${meta.date}`, 150, mainBarH + 50);
+            ctx.fillText(`👤 姓名：${meta.name}`, 150 + colW, mainBarH + 50);
+            ctx.fillText(`📞 手機：${meta.phone}`, 150 + colW * 2, mainBarH + 50);
+            ctx.fillText(`🩺 療癒師：${meta.healer}`, 150 + colW * 3, mainBarH + 50);
+        }
+
+        function downloadReportImage() {
+            const canvas = document.getElementById('mainCanvas');
+            const name = document.getElementById('info-name').value || 'EnergyReport';
+            const date = document.getElementById('info-date').value || '';
+            const fileName = `服務報告_${name}_${date}.jpg`;
+
+            // 🔥 修正下載：使用 toBlob 處理大型 Canvas 圖片，避免瀏覽器限制
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 下載完畢後釋放記憶體網址
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }, 'image/jpeg', 0.95); // 0.95 代表圖片品質
+        }
+        function openFeedbackModal() {
+            document.getElementById('feedback-modal').classList.add('active');
+            // 防止背景捲動
+            document.body.style.overflow = 'hidden';
+        }
+        function closeFeedbackModal() {
+            document.getElementById('feedback-modal').classList.remove('active');
+            // 恢復背景捲動
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>

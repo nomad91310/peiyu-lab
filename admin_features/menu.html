@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服務配置</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- 基礎樣式 --- */
+        :root { --forest: #1a2f23; --accent: #c6a87c; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --purple: #9b59b6; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 20px; color: #333; }
+        
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
+        
+        /* 表單與按鈕 */
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; font-family: inherit; }
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* 表格與列表 */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
+        tr:hover { background: #fdfaf1; }
+        
+        .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
+        .admin-row:hover { background: #f0f7ff; }
+
+        /* 提示框 */
+        .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
+        .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
+        .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
+
+        /* RWD */
+        .card-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        @media (max-width: 1024px) { .card-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="card-layout">
+    <div class="card" id="card-cat">
+        <h3 style="margin-top:0; color:var(--forest);">📂 大類管理</h3>
+        <input type="hidden" id="cat-id-edit">
+        <input type="text" id="cat-name" placeholder="大類名稱 (例: 人類圖解讀)" style="margin-bottom:10px;">
+        
+        <select id="cat-type" style="margin-bottom:10px;">
+            <option value="sleep">詢問睡眠 (調頻類)</option>
+            <option value="consult">詢問日期 (諮詢類)</option>
+        </select>
+
+        <div style="background:#e3f2fd; padding:12px; border-radius:6px; margin-bottom:10px; border:1px solid #bbdefb;">
+            <label style="font-size:12px; color:#1565c0; font-weight:bold; display:block; margin-bottom:8px;">客人可提供資料方式 (可複選)：</label>
+            <div style="display:flex; gap:15px;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
+                    <input type="checkbox" id="req-birth" value="birth" style="width:18px; height:18px;" checked> 📅 出生年月日
+                </label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
+                    <input type="checkbox" id="req-image" value="image" style="width:18px; height:18px;"> 📸 上傳截圖
+                </label>
+            </div>
+        </div>
+
+        <textarea id="cat-terms" placeholder="服務規範條款" style="height:80px; margin-bottom:10px;"></textarea>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增</button>
+            <button class="btn btn-outline" id="btn-cat-cancel" onclick="cancelEdit('cat')" style="display:none;">取消</button>
+        </div>
+        <table id="cat-list" style="margin-top:15px;"></table>
+    </div>
+    
+    <div class="card" id="card-svc">
+        <h3 style="margin-top:0; color:var(--forest);">⚙️ 細項管理</h3>
+        <div class="sql-hint-box">
+            <strong>💡 SQL 補丁：</strong>
+            <button class="btn btn-outline btn-copy-sql" onclick="copySqlCode()">📋 複製代碼</button>
+            <div class="sql-code-area" id="sql-code-block">ALTER TABLE services ADD COLUMN IF NOT EXISTS report_template TEXT;</div>
+        </div>
+
+        <input type="hidden" id="svc-id-edit">
+        <select id="svc-cat-filter" style="margin-bottom:10px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()">
+            <option value="">載入中...</option>
+        </select>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="i-name" placeholder="項目名" style="flex:2;">
+            <input type="number" id="i-price" placeholder="價格" style="flex:1;">
+        </div>
+        <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin:10px 0;">
+            <label style="display:flex; align-items:center; gap:5px; margin-bottom:10px; color:var(--danger); font-weight:bold; cursor:pointer;">
+                <input type="checkbox" id="i-is-main" style="width:18px; height:18px;" onchange="toggleSubOptionInput()"> 設為主項目 (單選互斥，無子選項)
+            </label>
+            <div id="main-opt-wrapper" style="display:none;">
+                <input type="text" id="i-report-tpl" placeholder="對應報告檔案 (例: srt_report.html)">
+                <small style="color:var(--purple);">💡 若為主項目，請填寫此欄以連結報表。</small>
+            </div>
+            <div id="sub-opt-wrapper">
+                <input type="text" id="i-sub-opts" placeholder="子選項 (逗號隔開)">
+                <small style="color:#666;">💡 加購項目才需要</small>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content: flex-end;">
+            <button class="btn btn-outline" id="btn-svc-cancel" onclick="cancelEdit('svc')" style="display:none;">取消</button>
+            <button class="btn btn-forest" id="btn-svc-save" onclick="saveItem()">＋ 新增項目</button>
+        </div>
+        <div style="max-height:400px; overflow-y:auto; margin-top:15px; border-top:1px solid #eee;" id="svc-list-container">
+            <p style="padding:10px; color:#999;">請先選擇上方的大類...</p>
+        </div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+    let cache = { cats: [], svcs: [] };
+
+    // --- 1. 讀取資料 ---
+    async function fetchMenuData() {
+        try {
+            const [c, s] = await Promise.all([
+                myDB.from('service_categories').select('*').order('created_at'),
+                myDB.from('services').select('*').order('sort_order')
+            ]);
+            cache.cats = c.data || [];
+            cache.svcs = s.data || [];
+            
+            renderConfigTables();
+            if (document.getElementById('svc-cat-filter').value) {
+                filterServiceList();
+            }
+        } catch(e) { console.error("讀取失敗:", e); }
+    }
+
+    // --- 2. 大類管理邏輯 ---
+    function renderConfigTables() {
+        // 更新細項的下拉選單
+        const s = document.getElementById('svc-cat-filter'); 
+        const activeCats = cache.cats.filter(c => c.is_active !== false); 
+        
+        // 記住原本選的值，避免重整後跳掉
+        const currentSelected = s.value;
+        s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        if (currentSelected && activeCats.find(c => c.id === currentSelected)) {
+            s.value = currentSelected;
+        }
+
+        // 渲染大類列表
+        document.getElementById('cat-list').innerHTML = cache.cats.map(c => {
+            const isActive = c.is_active !== false; 
+            const rowStyle = isActive ? '' : 'background:#eee; color:#999;'; 
+            const statusLabel = isActive ? '' : '<span style="font-size:12px; color:red; font-weight:bold;">(已暫停)</span>'; 
+            const toggleBtnText = isActive ? '🚫 暫停' : '👁️ 啟用'; 
+            const toggleBtnClass = isActive ? 'btn-warning' : 'btn-success';
+            
+            return `
+            <tr style="${rowStyle}">
+                <td>
+                    <b>${c.name}</b> ${statusLabel}
+                    <div style="font-size:12px; color:#aaa;">${c.terms ? '(含規範)' : ''}</div>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯">✏️</button>
+                    <button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="font-size:12px;">${toggleBtnText}</button>
+                    <button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除">🗑️</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function saveCategory() {
+        const id = document.getElementById('cat-id-edit').value; 
+        const name = document.getElementById('cat-name').value.trim(); 
+        const type = document.getElementById('cat-type').value; 
+        const terms = document.getElementById('cat-terms').value; 
+        if (!name) return alert("❌ 大類名稱為必填！");
+        
+        let reqs = []; 
+        if (document.getElementById('req-birth').checked) reqs.push('birth'); 
+        if (document.getElementById('req-image').checked) reqs.push('image'); 
+        const dataReqStr = reqs.length > 0 ? reqs.join(',') : 'birth';
+        
+        const payload = { name: name, question_type: type, data_requirement: dataReqStr, terms: terms };
+        let error = null; 
+        if (id) { const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; } 
+        else { const res = await myDB.from('service_categories').insert([payload]); error = res.error; }
+        
+        if (error) alert("儲存失敗: " + error.message); 
+        else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('cat'); fetchMenuData(); }
+    }
+
+    function editCat(id) {
+        const c = cache.cats.find(x => x.id === id); if (!c) return;
+        document.getElementById('cat-id-edit').value = c.id; 
+        document.getElementById('cat-name').value = c.name; 
+        document.getElementById('cat-type').value = c.question_type || 'sleep'; 
+        document.getElementById('cat-terms').value = c.terms || '';
+        
+        const reqStr = c.data_requirement || 'birth'; 
+        document.getElementById('req-birth').checked = reqStr.includes('birth'); 
+        document.getElementById('req-image').checked = reqStr.includes('image');
+        
+        document.getElementById('btn-cat-save').innerText = "💾 儲存修改"; 
+        document.getElementById('btn-cat-save').className = "btn btn-warning"; 
+        document.getElementById('btn-cat-cancel').style.display = "inline-block"; 
+        document.getElementById('card-cat').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function toggleCatStatus(id, newStatus) { 
+        const { error } = await myDB.from('service_categories').update({ is_active: newStatus }).eq('id', id); 
+        if (error) alert("更新失敗: " + error.message); else fetchMenuData(); 
+    }
+    
+    async function deleteCat(id) { 
+        if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？")) return; 
+        const { error } = await myDB.from('service_categories').delete().eq('id', id); 
+        if (error) alert("刪除失敗 (可能有關聯資料): " + error.message); else { alert("✅ 已刪除"); fetchMenuData(); } 
+    }
+
+    // --- 3. 細項管理邏輯 ---
+    function filterServiceList() { 
+        const c = document.getElementById('svc-cat-filter').value; 
+        if (!c) {
+            document.getElementById('svc-list-container').innerHTML = '<p style="padding:10px; color:#999;">請先選擇上方的大類...</p>';
+            return;
+        }
+        document.getElementById('svc-list-container').innerHTML = cache.svcs.filter(s => s.category_id === c).map((s) => `
+            <div class="admin-row">
+                <div style="display:flex; flex-direction:column; margin-right:10px;">
+                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',-1)">▲</button>
+                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',1)">▼</button>
+                </div>
+                <div style="flex:1">
+                    <b>${s.title}</b> <span style="color:#d35400; font-weight:bold;">$${s.price}</span> 
+                    ${s.is_main ? '<span class="tag tag-main" style="background:#e74c3c;">主項目</span>' : ''}
+                    ${s.sub_options ? `<div style="font-size:12px; color:#666; margin-top:4px;">└ ${s.sub_options}</div>` : ''}
+                </div>
+                <button class="btn btn-info" onclick="editSvc('${s.id}')">修</button>
+                <button class="btn btn-danger" onclick="deleteService('${s.id}')">刪</button>
+            </div>`).join(''); 
+    }
+
+    async function moveSvc(id, dir) {
+        const c = document.getElementById('svc-cat-filter').value; 
+        const list = cache.svcs.filter(s => s.category_id === c); 
+        const idx = list.findIndex(s => s.id === id); 
+        if (idx === -1 || idx + dir < 0 || idx + dir >= list.length) return;
+        
+        const target = list[idx + dir]; 
+        const temp = list[idx].sort_order; 
+        list[idx].sort_order = target.sort_order; 
+        target.sort_order = temp;
+        
+        await Promise.all([ 
+            myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id), 
+            myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id) 
+        ]); 
+        fetchMenuData();
+    }
+
+    async function saveItem() {
+        const id = document.getElementById('svc-id-edit').value; 
+        const catId = document.getElementById('svc-cat-filter').value; 
+        const title = document.getElementById('i-name').value.trim(); 
+        const price = document.getElementById('i-price').value; 
+        const isMain = document.getElementById('i-is-main').checked; 
+        const reportTpl = document.getElementById('i-report-tpl').value.trim(); 
+        const subOpts = document.getElementById('i-sub-opts').value.trim();
+        
+        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！"); 
+        if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
+        
+        const payload = { category_id: catId, title: title, price: parseInt(price), is_main: isMain, report_template: reportTpl, sub_options: subOpts };
+        let error = null; 
+        if (id) { 
+            const res = await myDB.from('services').update(payload).eq('id', id); error = res.error; 
+        } else { 
+            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }); 
+            payload.sort_order = count ? count + 1 : 1; 
+            const res = await myDB.from('services').insert([payload]); error = res.error; 
+        }
+        
+        if (error) alert("儲存失敗: " + error.message); 
+        else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('svc'); fetchMenuData(); }
+    }
+
+    function editSvc(id) {
+        const s = cache.svcs.find(x => x.id === id); if (!s) return;
+        document.getElementById('svc-cat-filter').value = s.category_id; filterServiceList();
+        
+        document.getElementById('svc-id-edit').value = s.id; 
+        document.getElementById('i-name').value = s.title; 
+        document.getElementById('i-price').value = s.price; 
+        document.getElementById('i-is-main').checked = s.is_main; 
+        document.getElementById('i-report-tpl').value = s.report_template || ''; 
+        document.getElementById('i-sub-opts').value = s.sub_options || '';
+        
+        toggleSubOptionInput(); 
+        document.getElementById('btn-svc-save').innerText = "💾 儲存修改"; 
+        document.getElementById('btn-svc-save').className = "btn btn-warning"; 
+        document.getElementById('btn-svc-cancel').style.display = 'inline-block'; 
+        document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    async function deleteService(id) {
+        if(confirm("確定刪除此服務項目？")) {
+            await myDB.from('services').delete().eq('id', id);
+            fetchMenuData();
+        }
+    }
+
+    function toggleSubOptionInput() { 
+        const isMain = document.getElementById('i-is-main').checked; 
+        document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none'; 
+        document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block'; 
+    }
+    
+    function cancelEdit(type) {
+        if (type === 'cat') { 
+            document.getElementById('cat-id-edit').value = ''; 
+            document.getElementById('cat-name').value = ''; 
+            document.getElementById('cat-terms').value = ''; 
+            document.getElementById('cat-type').value = 'sleep'; 
+            document.getElementById('req-birth').checked = true; 
+            document.getElementById('req-image').checked = false; 
+            document.getElementById('btn-cat-save').innerText = "＋ 新增"; 
+            document.getElementById('btn-cat-save').className = "btn btn-forest"; 
+            document.getElementById('btn-cat-cancel').style.display = "none"; 
+        } 
+        else if (type === 'svc') { 
+            document.getElementById('svc-id-edit').value = ''; 
+            document.getElementById('i-name').value = ''; 
+            document.getElementById('i-price').value = ''; 
+            document.getElementById('i-sub-opts').value = ''; 
+            document.getElementById('i-report-tpl').value = ''; 
+            document.getElementById('i-is-main').checked = false; 
+            toggleSubOptionInput(); 
+            document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; 
+            document.getElementById('btn-svc-save').className = "btn btn-forest"; 
+            document.getElementById('btn-svc-cancel').style.display = 'none'; 
+        }
+    }
+
+    function copySqlCode() { 
+        const code = document.getElementById('sql-code-block').innerText; 
+        navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！")); 
+    }
+
+    // --- 啟動 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin();
+        fetchMenuData();
+    });
+</script>
+</body>
+</html>

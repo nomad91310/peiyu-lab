@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公告管理</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- 基礎與通用樣式 --- */
+        :root { --forest: #1a2f23; --accent: #c6a87c; --danger: #e74c3c; --info: #3498db; --success: #27ae60; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 20px; color: #333; }
+        
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); overflow-x: auto; }
+        
+        /* 表單與按鈕 */
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; font-size: 14px; margin-bottom: 5px; box-sizing: border-box; font-family: inherit; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* 表格與標籤 */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap; }
+        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
+        tr:hover { background: #fdfaf1; }
+        
+        .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; border-radius: 4px; font-size:12px; font-weight:bold; }
+        .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 4px; font-size:12px; font-weight:bold; }
+
+        /* 彈窗樣式 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-body { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0; color:var(--forest);">📢 首頁公告管理</h3>
+        <button class="btn btn-success" onclick="openAnnounceModal()">＋ 新增公告</button>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th width="8%">排序</th>
+                    <th width="27%">按鈕標題</th>
+                    <th width="15%">類型</th> 
+                    <th width="15%">狀態</th>
+                    <th width="15%">建立時間</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="announce-list"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="announce-modal" class="modal">
+    <div class="modal-body">
+        <span onclick="closeAnnounceModal()" class="close-btn">×</span>
+        <h2 id="anc-modal-title" style="border-bottom:1px solid #eee; padding-bottom:10px; margin-top:0; color:var(--forest);">新增公告</h2>
+        
+        <input type="hidden" id="anc-id">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-bottom:15px;">
+            <div><label style="font-weight:bold; color:#555; display:block; margin-bottom:5px;">按鈕標題</label><input type="text" id="anc-title" placeholder="例如：🎉 開幕慶"></div>
+            <div><label style="font-weight:bold; color:#555; display:block; margin-bottom:5px;">排序 (小至大)</label><input type="number" id="anc-order" value="1"></div>
+        </div>
+        
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold; color:#555; display:block; margin-bottom:5px;">狀態</label>
+            <select id="anc-active">
+                <option value="true">🟢 上架顯示</option>
+                <option value="false">🔴 下架隱藏</option>
+            </select>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold; color:#555; display:block; margin-bottom:5px;">公告類型</label>
+            <select id="anc-type">
+                <option value="must_read">📘 必讀專區 (常駐)</option>
+                <option value="temp">🔥 臨時快訊 (活動/公休)</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <label style="margin:0; font-weight:bold; color:#555;">彈窗內容 (支援 HTML)</label>
+            <button class="btn btn-outline" onclick="copyTemplate()" style="font-size:12px; padding:4px 10px;">
+                📋 複製標準範本 (給AI用)
+            </button>
+        </div>
+        
+        <textarea id="anc-content" style="height: 200px; font-family: monospace;" placeholder="請輸入內容 HTML..."></textarea>
+        <div style="text-align:right; margin-top:20px;">
+            <button class="btn btn-forest" onclick="saveAnnouncement()">💾 儲存公告</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+    // --- 1. 讀取公告列表 ---
+    async function fetchAnnouncements() { 
+        const { data, error } = await myDB.from('announcements').select('*').order('sort_order', { ascending: true }); 
+        if (error) { console.error(error); return; } 
+        
+        const list = document.getElementById('announce-list'); 
+        list.innerHTML = data.map(item => {
+            let typeHtml = '';
+            if (item.type === 'must_read') typeHtml = `<span style="color:#2980b9; font-weight:bold; font-size:13px;">📘 必讀</span>`;
+            else if (item.type === 'temp') typeHtml = `<span style="color:#d35400; font-weight:bold; font-size:13px;">🔥 快訊</span>`;
+            else typeHtml = `<span style="color:#999; font-size:13px;">一般</span>`;
+
+            return `
+            <tr>
+                <td><span style="background:#eee; padding:2px 6px; border-radius:4px; font-size:12px; color:#555;">${item.sort_order}</span></td>
+                <td style="font-weight:bold; color:var(--forest);">${item.title}</td>
+                <td>${typeHtml}</td>
+                <td>${item.is_active ? '<span class="tag-paid">🟢 上架中</span>' : '<span class="tag-wait">🔴 已隱藏</span>'}</td>
+                <td style="font-size:12px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-info" onclick="editAnnouncement('${item.id}')">✏️ 編輯</button>
+                    <button class="btn btn-danger" onclick="deleteAnnouncement('${item.id}')">🗑️ 刪除</button>
+                </td>
+            </tr>`;
+        }).join(''); 
+    }
+
+    // --- 2. 彈窗控制 ---
+    function openAnnounceModal() { 
+        document.getElementById('anc-id').value = ''; 
+        document.getElementById('anc-title').value = ''; 
+        document.getElementById('anc-order').value = '10'; 
+        document.getElementById('anc-content').value = ''; 
+        document.getElementById('anc-active').value = 'true'; 
+        document.getElementById('anc-modal-title').innerText = "新增公告"; 
+        document.getElementById('announce-modal').style.display = 'flex'; 
+    }
+    
+    function closeAnnounceModal() { document.getElementById('announce-modal').style.display = 'none'; }
+    
+    // --- 3. 編輯與儲存 ---
+    async function editAnnouncement(id) { 
+        const { data } = await myDB.from('announcements').select('*').eq('id', id).single(); 
+        if (data) { 
+            document.getElementById('anc-id').value = data.id; 
+            document.getElementById('anc-title').value = data.title; 
+            document.getElementById('anc-order').value = data.sort_order; 
+            document.getElementById('anc-content').value = data.content; 
+            document.getElementById('anc-active').value = data.is_active.toString(); 
+            document.getElementById('anc-type').value = data.type || 'must_read'; 
+            document.getElementById('anc-modal-title').innerText = "編輯公告"; 
+            document.getElementById('announce-modal').style.display = 'flex'; 
+        } 
+    }
+
+    async function saveAnnouncement() { 
+        const id = document.getElementById('anc-id').value; 
+        const payload = { 
+            title: document.getElementById('anc-title').value, 
+            sort_order: parseInt(document.getElementById('anc-order').value), 
+            content: document.getElementById('anc-content').value, 
+            is_active: document.getElementById('anc-active').value === 'true', 
+            type: document.getElementById('anc-type').value 
+        }; 
+        if (!payload.title) return alert("標題必填！"); 
+        
+        let error; 
+        if (id) { const res = await myDB.from('announcements').update(payload).eq('id', id); error = res.error; } 
+        else { const res = await myDB.from('announcements').insert([payload]); error = res.error; } 
+        
+        if (error) alert("儲存失敗: " + error.message); 
+        else { alert("✅ 公告已儲存！"); closeAnnounceModal(); fetchAnnouncements(); } 
+    }
+
+    async function deleteAnnouncement(id) { 
+        if (confirm("⚠️ 確定要刪除此公告嗎？刪除後無法復原！")) { 
+            await myDB.from('announcements').delete().eq('id', id); 
+            fetchAnnouncements(); 
+        } 
+    }
+
+    // --- 4. 複製範本 ---
+    function copyTemplate() {
+        const template = `
+<h4>📌 第一部分：主標題 (例如：我的故事 / 服務異動)</h4>
+<p>這裡是前言段落，敘述主要的情境或是發生的背景故事...</p>
+
+<div class="anno-box-tip">
+    <strong>💡 核心觀點：</strong><br>
+    這裡放一句金句，或是你想強調的重點概念。
+</div>
+
+<h4>🔸 第二部分：條列式說明</h4>
+<p>針對細節進行說明：</p>
+<ul>
+    <li><strong>重點一：</strong> 詳細內容敘述...</li>
+    <li><strong>重點二：</strong> 詳細內容敘述...</li>
+    <li><strong>重點三：</strong> 詳細內容敘述...</li>
+</ul>
+
+<div style="text-align: center; margin: 25px 0;">
+    <img src="https://你的圖片網址.jpg" alt="圖片說明" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <div style="font-size: 13px; color: #888; margin-top: 8px;">▲ 圖片註解文字</div>
+</div>
+
+<h4>🔹 第三部分：流程或規範</h4>
+<ol>
+    <li><strong>步驟一：</strong> 先做什麼...</li>
+    <li><strong>步驟二：</strong> 再做什麼...</li>
+</ol>
+
+<div style="background: #f4f7f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <strong>💳 補充資訊：</strong>
+    <ul>
+        <li>資訊 A：內容...</li>
+        <li>資訊 B：內容...</li>
+    </ul>
+</div>
+
+<div class="anno-box-warn">
+    <strong style="font-size: 1.1rem;">⚠️ 重要須知 / 結語</strong>
+    <p style="margin: 10px 0 0 0;">
+        這裡放最後的叮嚀，例如「送出即代表同意」或是「請務必準時」。
+    </p>
+    
+    <div style="text-align:center; margin-top: 20px;">
+        <button class="btn-primary" onclick="closeModal('dynamic-overlay'); showSection('booking-step-1');">
+            ➔ 我已了解，前往預約
+        </button>
+    </div>
+</div>
+`;
+        navigator.clipboard.writeText(template).then(() => {
+            alert("✅ 萬用範本已複製！\n\n您可以貼給 AI 並下指令：\n「請依照這個 HTML 格式，幫我撰寫一篇關於 [主題] 的公告，內容要包含...」");
+        }).catch(err => {
+            console.error('複製失敗', err);
+            alert("❌ 複製失敗");
+        });
+    }
+
+    // --- 啟動 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin();
+        fetchAnnouncements();
+    });
+</script>
+</body>
+</html>

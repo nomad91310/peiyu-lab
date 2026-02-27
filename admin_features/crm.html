@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個案 CRM 管理</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* --- 1. 基礎與通用樣式 --- */
+        :root { 
+            --forest: #1a2f23; --accent: #c6a87c; 
+            --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; 
+        }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+            background: #f4f7f6; margin: 0; padding: 20px; color: #333;
+        }
+        .card { 
+            background: white; padding: 25px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); 
+            overflow-x: auto; 
+        }
+        
+        /* --- 2. 表單與按鈕 --- */
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
+        .btn { 
+            padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; 
+            font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; 
+            margin-right: 5px; text-decoration: none;
+        }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* --- 3. 表格 --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap; }
+        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
+        tr:hover { background: #fdfaf1; }
+
+        /* --- 4. 狀態標籤與彈窗 --- */
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight:bold; color: white; display: inline-block; margin-right: 3px; }
+        .tag-paid { background: #d4edda; color: #155724; }
+        .tag-wait { background: #fff3cd; color: #856404; }
+        .tag-ota { background: #f39c12; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-body { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999; }
+        
+        .history-card { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fafafa; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 style="margin: 0; color: var(--forest);">👤 會員管理系統 (CRM)</h3>
+        <button class="btn btn-outline" onclick="fetchCRMData()">🔄 刷新列表</button>
+    </div>
+    
+    <input type="text" id="search-member" placeholder="🔍 搜尋姓名或手機..." onkeyup="renderPro()" style="margin-bottom:15px;">
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">姓名</th>
+                    <th width="15%">手機</th>
+                    <th width="20%">Email</th>
+                    <th width="15%">累積消費</th>
+                    <th width="15%">最近預約</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="pro-list"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-body">
+        <span onclick="closeModal()" class="close-btn">×</span>
+        <h2 id="m-title" style="border-bottom:1px solid #eee; padding-bottom:10px; margin-top:0; color:var(--forest);">詳情</h2>
+        <div id="m-content"></div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+    // --- 狀態與工具 ---
+    let cache = { pros: [], bks: [] };
+    const cleanPhone = (p) => p ? p.replace(/\D/g, '') : '';
+    
+    const STATUS_MAP = {
+        'paid': '<span class="tag tag-paid">已付款</span>',
+        'pending': '<span class="tag tag-wait">未付款</span>',
+        'awaiting_payment': '<span class="tag tag-wait">待確認</span>',
+        'awaiting_service': '<span class="tag tag-ota">服務中</span>',
+        'completed': '<span class="tag" style="background:#333">已結案</span>'
+    };
+
+    // --- 讀取資料 ---
+    async function fetchCRMData() {
+        try {
+            // CRM 只需要會員資料(profiles)和訂單資料(bookings)來算錢
+            const [p, b] = await Promise.all([
+                myDB.from('profiles').select('*').order('created_at', {ascending:false}),
+                myDB.from('bookings').select('id, user_id, temp_phone, price, status, created_at, service_item').order('created_at', {ascending:false})
+            ]);
+            cache.pros = p.data || [];
+            cache.bks = b.data || [];
+            renderPro();
+        } catch(e) { console.error("讀取失敗:", e); }
+    }
+
+    // --- 渲染列表 ---
+    function renderPro() { 
+        const k = document.getElementById('search-member').value.toLowerCase(); 
+        document.getElementById('pro-list').innerHTML = cache.pros.filter(p => !k || (p.full_name && p.full_name.includes(k)) || p.phone.includes(k)).map(p => { 
+            
+            // 找出這個會員的所有訂單 (透過 ID 或是 手機比對)
+            const ub = cache.bks.filter(b => b.user_id === p.id || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); 
+            
+            // 計算累積消費 (只算已付款或已結案的)
+            const t = ub.filter(b => b.status === 'paid' || b.status === 'completed').reduce((s, b) => s + (b.price || 0), 0); 
+            
+            return `
+            <tr>
+                <td><b>${p.full_name}</b></td>
+                <td>${p.phone}</td>
+                <td><small>${p.email || '-'}</small></td>
+                <td style="color:#d35400; font-weight:bold; font-family:monospace; font-size:16px;">$${t.toLocaleString()}</td>
+                <td>${ub.length ? ub[0].created_at.slice(0,10) : '-'}</td>
+                <td>
+                    <button class="btn btn-forest" onclick="showHistory('${p.id}', '${p.full_name}')" title="歷史紀錄">📜</button>
+                    <button class="btn btn-warning" onclick="editProfile('${p.id}')" title="編輯">✏️</button>
+                    <button class="btn btn-danger" onclick="deleteMember('${p.id}', '${p.full_name}')" title="刪除">🗑️</button>
+                </td>
+            </tr>`; 
+        }).join(''); 
+    }
+
+    // --- 編輯會員 ---
+    function editProfile(uid) { 
+        const p = cache.pros.find(x => x.id === uid); 
+        document.getElementById('m-title').innerText = "編輯會員"; 
+        document.getElementById('m-content').innerHTML = `
+            <label style="font-weight:bold; color:#555;">姓名</label>
+            <input id="ep-n" value="${p.full_name}" style="margin-bottom:15px;">
+            <label style="font-weight:bold; color:#555;">手機 (登入帳號)</label>
+            <input id="ep-p" value="${p.phone}" style="margin-bottom:15px;">
+            <label style="font-weight:bold; color:#555;">Email</label>
+            <input id="ep-e" value="${p.email||''}" style="margin-bottom:20px;">
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-success" style="flex:1; padding:12px;" onclick="updPro('${p.id}')">💾 儲存變更</button>
+                <button class="btn btn-danger" style="flex:1; padding:12px;" onclick="resetMemberPassword('${p.id}', '${p.phone}')">🔑 重置密碼</button>
+            </div>
+        `; 
+        document.getElementById('modal').style.display = 'flex'; 
+    }
+
+    async function updPro(id) { 
+        await myDB.from('profiles').update({ 
+            full_name: document.getElementById('ep-n').value, 
+            phone: document.getElementById('ep-p').value, 
+            email: document.getElementById('ep-e').value 
+        }).eq('id', id); 
+        closeModal(); fetchCRMData(); alert("✅ 更新成功"); 
+    }
+
+    // --- 重置密碼 & 刪除 ---
+    async function resetMemberPassword(uid, phone) { 
+        if(!confirm(`確定要重置密碼嗎？\\n預設為：guest${phone.slice(-4)}`)) return; 
+        const newPw = 'guest' + phone.slice(-4); 
+        const { error } = await myDB.from('profiles').update({ password: newPw }).eq('id', uid); 
+        if(error) alert("失敗: " + error.message); else alert("✅ 密碼已重置"); 
+    }
+
+    async function deleteMember(uid, name) { 
+        if(confirm(`⚠️ 確定刪除會員 ${name} 嗎？這將無法復原！`)) { 
+            await myDB.from('profiles').delete().eq('id', uid); 
+            fetchCRMData(); 
+        } 
+    }
+
+    // --- 歷史紀錄 ---
+    function showHistory(uid, name) { 
+        const p = cache.pros.find(x => x.id === uid); 
+        const userBks = cache.bks.filter(b => b.user_id === uid || cleanPhone(b.temp_phone) === cleanPhone(p.phone)); 
+        
+        // 🌟 這裡加上了 onclick="window.parent.openBooking('${b.id}')" 以及 hover 變色的滑鼠游標效果
+        let html = userBks.length === 0 ? "<p style='color:#999; text-align:center;'>無訂單紀錄</p>" : userBks.map(b => ` 
+            <div class="history-card" onclick="window.parent.openBooking('${b.id}')" style="cursor:pointer; transition:0.2s; border:1px solid #eee;" onmouseover="this.style.borderColor='var(--info)'; this.style.background='#f0f7ff';" onmouseout="this.style.borderColor='#eee'; this.style.background='#fafafa';"> 
+                <div style="display:flex; justify-content:space-between; align-items:center;"> 
+                    <b style="color:var(--forest); font-size:15px;">${b.service_item}</b> 
+                    ${STATUS_MAP[b.status] || b.status} 
+                </div> 
+                <div style="font-size:13px; color:#666; margin-top:8px; display:flex; justify-content:space-between;">
+                    <span>📅 ${b.created_at.slice(0,10)}</span>
+                    <span style="color:#d35400; font-weight:bold; font-family:monospace;">$${b.price}</span>
+                </div> 
+            </div> 
+        `).join(''); 
+        
+        document.getElementById('m-title').innerText = `${name} 的歷史訂單`; 
+        document.getElementById('m-content').innerHTML = `<div style="max-height:400px; overflow-y:auto; padding-right:5px;">${html}</div>`; 
+        document.getElementById('modal').style.display = 'flex'; 
+    }
+
+    function closeModal() { document.getElementById('modal').style.display='none'; }
+
+    // --- 啟動 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin(); // 安全防護
+        fetchCRMData(); // 讀取資料
+    });
+</script>
+</body>
+</html>

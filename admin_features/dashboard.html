@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預約看板</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- 基礎樣式 --- */
+        :root { --forest: #1a2f23; --accent: #c6a87c; --info: #3498db; --success: #27ae60; --purple: #9b59b6; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 10px 10px 20px 10px; color: #333; }        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--accent); }
+        .dashboard-layout { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; }ashboard-layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px; }
+       .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; white-space: nowrap; }    
+        tr:hover { background: #fdfaf1; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; font-size: 14px; }
+        
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; margin-right: 5px; }
+        .btn:hover { opacity: 0.8; }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* --- 標籤 --- */
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight:bold; color: white; display: inline-block; margin-right: 3px; }
+        .tag-paid { background: #d4edda; color: #155724; padding: 3px 6px; font-size: 12px; }
+        .tag-wait { background: #fff3cd; color: #856404; padding: 3px 6px; font-size: 12px; }
+        .tag-ota { background: #f39c12; }
+        .u-slot { display: inline-block; margin: 3px; padding: 4px 8px; background: #f0f7ff; border: 1px solid #d6e9f9; border-radius: 4px; font-size: 12px; color: #2980b9; }
+        .u-slot.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+        
+        @media (max-width: 1024px) { .dashboard-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <div>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">📋 近期預約清單</h3>
+                <button class="btn btn-outline" onclick="fetchDashboardData()">🔄 刷新</button>
+            </div>
+            <input type="text" id="search-key" placeholder="🔍 搜尋 姓名 / 手機 / 單號 / OTA..." style="margin-bottom:15px;" onkeyup="renderBks()">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th width="20%">單號/日期</th><th width="25%">個案資訊</th><th width="25%">服務內容</th><th width="10%">金額</th><th width="10%">狀態</th><th width="10%">操作</th></tr></thead>
+                    <tbody id="bk-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div class="card" style="flex:1; padding:15px; border-top-color:var(--success);">
+                <small>💰 本月實收</small><h2 id="inc-val" style="margin:5px 0; color:var(--success);">$0</h2>
+            </div>
+            <div class="card" style="flex:1; padding:15px; border-top-color:var(--info);">
+                <small>👤 累積個案</small><h2 id="total-val" style="margin:5px 0;">0</h2>
+            </div>
+        </div>
+        <div class="card" style="border-top-color: var(--purple);">
+            <h3 style="margin-top:0;">📅 7日排程概覽</h3>
+            <div id="dashboard-7day-schedule" style="font-size:13px; line-height:1.8;">載入中...</div>
+        </div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script>
+    let cache = { bks: [], pros: [], otas: [], slots: [] };
+    
+    const STATUS_MAP = {
+        'paid': '<span class="tag tag-paid">已付款</span>',
+        'pending': '<span class="tag tag-wait">未付款</span>',
+        'awaiting_payment': '<span class="tag tag-wait">待確認</span>',
+        'awaiting_service': '<span class="tag tag-ota">服務中</span>',
+        'completed': '<span class="tag" style="background:#333">已結案</span>'
+    };
+
+    async function fetchDashboardData() {
+        try {
+            const [b, p, o, sl] = await Promise.all([
+                myDB.from('bookings').select('*').order('created_at', {ascending:false}).limit(100),
+                myDB.from('profiles').select('id, full_name, phone'),
+                myDB.from('ota_settings').select('code, name'),
+                myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time') // 用於7日排程
+            ]);
+
+            cache.pros = p.data || [];
+            cache.bks = (b.data || []).map(bk => ({ ...bk, profiles: cache.pros.find(pr => pr.id === bk.user_id) || null }));
+            cache.otas = o.data || [];
+            cache.slots = sl.data || [];
+
+            renderBks();
+            render7DaySchedule();
+        } catch(e) { console.error("讀取失敗:", e); }
+    }
+
+    function renderBks() {
+        const search = document.getElementById('search-key').value.trim().toUpperCase();
+        document.getElementById('bk-list').innerHTML = cache.bks.filter(x => !search || JSON.stringify(x).toUpperCase().includes(search)).map(x => {
+            const hasPro = !!x.profiles;
+            let guestName = '', guestEmail = '';
+            
+            // 🌟 修復重點：更安全的正則表達式與防呆檢查
+            if (x.wish_detail) {
+                // 改用 (?:\||$) 容許結尾沒有 | 符號的狀況
+                const nm = x.wish_detail.match(/姓名:(.*?)(?:\||$)/);
+                // 必須確認 nm[1] 真的存在，才執行 trim()
+                if (nm && nm[1]) {
+                    guestName = nm[1].trim();
+                }
+            }
+            
+            let otaTag = '';
+            if (x.ota_order_id) {
+                const otaName = cache.otas.find(o => o.code === x.ota_source)?.name || 'OTA';
+                otaTag = `<br><span class="tag tag-ota">${otaName} #${x.ota_order_id.slice(-5)}</span>`;
+            } else if (x.payment_method === 'shopee') {
+                otaTag = `<br><span class="tag tag-ota">蝦皮(舊)</span>`;
+            }
+
+            // 呼叫外層大腦的彈窗
+            let userHtml = hasPro 
+                ? `<b>${x.profiles.full_name}</b><br><small>${x.profiles.phone}</small>` 
+                : `<b>${x.temp_phone}</b><br><button class="btn btn-info" style="font-size:10px;padding:2px;" onclick="window.parent.openCreateMemberModal('${x.temp_phone}', '${x.id}', '${guestName}', '')">＋建立</button>`;
+            
+            let serviceHtml = `<div style="font-weight:bold; color:#2c3e50; font-size:14px;">${x.service_item || '未知類別'}</div>`;
+            let moneyHtml = `<div style="font-weight:bold; font-size:15px; color:#27ae60; font-family:monospace;">$${x.price}</div>`;
+
+            return `<tr>
+                <td><small>${x.created_at.slice(0,10)}</small><br><small style="color:#999;">${x.booking_id ? x.booking_id.slice(-6) : '無單號'}</small>${otaTag}</td>
+                <td>${userHtml}</td>
+                <td>${serviceHtml}</td>
+                <td>${moneyHtml}</td>
+                <td>${STATUS_MAP[x.status] || x.status}</td>
+                <td>
+                    <button class="btn btn-forest" onclick="window.parent.openBooking('${x.id}')">詳情</button>
+                    <button class="btn btn-danger" onclick="deleteBooking('${x.id}')" style="padding:2px 8px;">刪</button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        // 計算實收與人數
+        const m = new Date().toISOString().slice(0, 7);
+        const inc = cache.bks.filter(x => (x.status === 'paid' || x.status === 'completed') && x.created_at.startsWith(m)).reduce((s, x) => s + (x.price || 0), 0);
+        document.getElementById('inc-val').innerText = "$" + inc.toLocaleString();
+        document.getElementById('total-val').innerText = cache.pros.length;
+    }
+
+    function render7DaySchedule() {
+        const t = new Date(); let h = '';
+        for(let i=0; i<7; i++) {
+            const d = new Date(t); d.setDate(t.getDate()+i);
+            const ds = d.toISOString().split('T')[0];
+            const s = cache.slots.filter(x => x.slot_date === ds).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+            if(s.length) {
+                h += `<div style="margin-bottom:10px; border-bottom:1px dashed #eee; padding-bottom:8px;">
+                        <div style="font-weight:bold; color:var(--forest); margin-bottom:5px;">📅 ${ds}</div>
+                        <div>${s.map(x => `<span class="u-slot ${x.is_booked?'booked':''}">${x.slot_time.slice(0,5)}</span>`).join('')}</div>
+                      </div>`;
+            }
+        }
+        document.getElementById('dashboard-7day-schedule').innerHTML = h || "<p style='color:#999;'>未來七天無排程</p>";
+    }
+
+    async function deleteBooking(id) { 
+        if(confirm("確定刪除這筆訂單？")) { 
+            await myDB.from('bookings').delete().eq('id',id); 
+            fetchDashboardData(); 
+        } 
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin();
+        fetchDashboardData();
+    });
+</script>
+</body>
+</html>

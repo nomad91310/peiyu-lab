@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知識庫 (CMS)</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- 1. 基礎與變數 --- */
+        :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --dark: #2c3e50; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 10px; color: #333; height: 100vh; overflow: hidden; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; text-decoration: none; white-space:nowrap; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
+
+        /* --- 2. 知識庫與圖庫專屬樣式 --- */
+        .kb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 20px); transition: all 0.3s ease; }
+        .kb-layout.collapsed { grid-template-columns: 0 1fr; gap: 0; }
+        .kb-sidebar { background: #2c3e50; color: #ecf0f1; border-radius: 8px; overflow-y: auto; display: flex; flex-direction: column; overflow-x: hidden; white-space: nowrap; }
+        .kb-header { padding: 15px; background: #1a252f; border-bottom: 1px solid #34495e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
+        .kb-tree-content { padding: 10px; flex: 1; }
+        
+        details.big-cat { margin-bottom: 5px; }
+        details.big-cat > summary { padding: 10px; cursor: pointer; font-weight: bold; list-style: none; border-radius: 4px; color: #ecf0f1; }
+        details.big-cat > summary:hover { background: rgba(255,255,255,0.1); }
+        details.mid-cat { margin-left: 12px; border-left: 1px solid #555; }
+        details.mid-cat > summary { padding: 8px; cursor: pointer; color: #ccc; font-size: 0.95rem; }
+        details.mid-cat > summary:hover { color: #fff; }
+        .article-item { padding: 8px 10px 8px 20px; cursor: pointer; color: #bdc3c7; display: flex; align-items: center; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #34495e; }
+        .article-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .article-item.active { color: #fff; background: #c6a87c; font-weight: bold; }
+        .article-item.draft { color: #e74c3c; } 
+        .article-item.draft::before { content: '🔴 '; font-size: 10px; }
+        .article-title-span { flex: 1; }
+
+        .sort-actions { display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle; }
+        .btn-sort-arrow { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; cursor: pointer; padding: 0 4px; font-size: 10px; border-radius: 3px; line-height: 1.2; }
+        .btn-sort-arrow:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .article-item .sort-actions { margin-right: 10px; opacity: 0.3; transition: 0.2s; }
+        .article-item:hover .sort-actions { opacity: 1; }
+
+        /* --- 3. 編輯器專屬 --- */
+        .editor-wrapper { flex: 1; background: white; border: 1px solid #ccc; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; position: relative; min-height: 500px; }
+        .toolbar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .tb-group { display: flex; gap: 2px; padding-right: 8px; margin-right: 8px; border-right: 1px solid #ddd; align-items: center; }
+        .tb-group:last-child { border-right: none; }
+        .editor-btn { padding: 6px 10px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 4px; color: #444; font-size: 14px; transition: 0.2s; display:flex; align-items:center; justify-content:center; white-space: nowrap; }
+        .editor-btn:hover { background: #e2e6ea; }
+        .btn-magic { font-weight: bold; font-size: 12px; background: white; border: 1px solid #ccc; color: var(--forest); }
+        .btn-magic:hover { border-color: var(--accent); background: #fffcf5; }
+        #editor { flex: 1; padding: 40px 50px; overflow-y: auto; outline: none; color: #2c3e50; font-size: 16px; }
+        #editor:empty:before { content: '請在此輸入內容...'; color: #ccc; }
+        .source-view { flex: 1; width: 100%; box-sizing: border-box; background: #2d2d2d; color: #e6e6e6; padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; border: none; resize: none; display: none; outline: none; overflow-y: auto; }
+        select.tb-select { padding: 4px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; background: white; cursor: pointer; height: 30px; }
+        .color-picker-wrapper { position: relative; width: 30px; height: 30px; overflow: hidden; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; display:inline-block; }
+        .color-picker-wrapper input { position: absolute; top: -5px; left: -5px; width: 40px; height: 40px; cursor: pointer; }
+
+        /* 浮動選單與物件 */
+        .obj-selected { outline: 3px dashed #3498db !important; outline-offset: 2px; }
+        #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
+        .peiyu-table { border-collapse: collapse; margin: 15px 0; width: 100%; max-width: 100%; }
+        .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; }
+        .resizable-wrapper { position: relative; display: block; margin: 10px 0; max-width: 100%; clear: both; }
+        .resizable-wrapper img { display: block; max-width: 100%; border-radius: 8px; width: 100%; } 
+        
+        /* 彈窗與圖庫 */
+        .editor-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .editor-modal-box { background: white; padding: 25px; border-radius: 12px; width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .editor-gallery-box { width: 90%; max-width: 850px; height: 80vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+        .editor-gallery-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .editor-gallery-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); grid-auto-rows: 120px; gap: 15px; padding: 20px; background: #fdfdfd; align-content: start; }
+        .editor-gallery-item { position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; background: #fff; display: flex; align-items: center; justify-content: center; }
+        .editor-gallery-item:hover { border-color: #3498db; transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
+        .editor-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .gallery-item-name { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.65); color: #fff; font-size: 11px; padding: 5px 8px; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+        .editor-form-group { margin-bottom: 15px; }
+        .editor-form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .editor-form-group label { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .editor-sp-slider { width: 100%; cursor: pointer; margin-top: 5px; }
+        .editor-sp-val { color: var(--forest); font-family: monospace; font-size: 14px; }
+
+        /* --- 4. 你的手機版終極優化 RWD (原封不動保留) --- */
+        @media (max-width: 1024px) {
+            body { 
+                overflow-y: auto !important; 
+                height: auto !important; 
+                background: #f4f7f6 !important; 
+            }
+            
+            .kb-layout { 
+                display: flex !important; 
+                flex-direction: column; 
+                height: auto !important; 
+                overflow-y: visible !important; 
+            }
+            
+            .kb-sidebar { 
+                height: 350px; 
+                min-height: 350px; 
+                margin-bottom: 20px; 
+                width: 100%; 
+                flex-shrink: 0;
+            }
+
+            .kb-layout > .card { 
+                height: auto !important; 
+                overflow: visible !important; 
+                padding: 15px !important; 
+                margin-bottom: 80px !important; /* 留空間給浮動按鈕 */
+            }
+
+            .editor-wrapper { 
+                height: auto !important; 
+                overflow: visible !important; 
+                min-height: 600px;
+            }
+
+            #editor { 
+                height: auto !important; 
+                min-height: 500px; 
+                padding: 15px !important; 
+                overflow: visible !important; 
+            }
+
+            /* 分類與標題優化 */
+            .kb-layout > .card > div:has(#kb-big), 
+            .kb-layout > .card > div:has(#kb-title) { 
+                flex-direction: column !important; 
+                align-items: flex-start !important; 
+                gap: 10px !important; 
+                margin-bottom: 15px !important; 
+            }
+
+            #kb-big, #kb-mid { width: 100% !important; max-width: none !important; }
+            #kb-title { width: 100% !important; }
+
+            /* 修正後的抽屜面板位置 */
+            .editor-sticky-header { 
+                position: fixed !important; 
+                top: 50% !important;             /* 🌟 定位在 50% 高度 */
+                right: 15px !important; 
+                z-index: 6000; 
+                background: rgba(255, 255, 255, 0.95) !important; 
+                backdrop-filter: blur(10px); 
+                width: 130px !important; 
+                max-height: 70vh !important;     /* 稍微加長面板高度，讓按鈕好按 */
+                box-shadow: 0 5px 25px rgba(0,0,0,0.2) !important; 
+                border-radius: 12px !important; 
+                border: 1px solid #eee; 
+                
+                /* 🌟 核心修正：垂直置中並預設藏在右側 */
+                transform: translateY(-50%) translateX(150%) !important; 
+                
+                opacity: 0; 
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                display: flex !important; 
+                flex-direction: column !important; 
+                overflow-y: auto !important; 
+                padding: 12px 10px !important; 
+            }
+
+            /* 🌟 核心修正：打開時保持垂直置中 */
+            .editor-sticky-header.show-drawer { 
+                transform: translateY(-50%) translateX(0) !important; 
+                opacity: 1 !important; 
+            }
+            .editor-sticky-header::-webkit-scrollbar { display: none; }
+            .editor-sticky-header .toolbar { display: flex !important; flex-direction: column !important; width: 100% !important; padding: 0 !important; border: none !important; background: transparent !important; gap: 12px !important; }
+            .tb-group { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; justify-content: center !important; width: 100% !important; padding: 0 0 12px 0 !important; margin: 0 !important; border-right: none !important; border-bottom: 1px dashed #ddd !important; gap: 6px !important; }
+            .tb-group:last-child { border-bottom: none !important; padding-bottom: 0 !important; }
+            .tb-group b { display: none !important; }
+            .editor-btn { width: 32px !important; height: 32px !important; padding: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important; border-radius: 6px !important; flex-shrink: 0; }
+            .btn-magic, .editor-btn[onclick="toggleSource()"], .editor-btn[onclick="openModal('spacing')"] { width: 100% !important; height: 36px !important; padding: 0 10px !important; margin: 0 !important; white-space: nowrap !important; font-size: 13px !important; justify-content: center !important; border-radius: 8px !important; }
+            select.tb-select { width: 100% !important; height: 34px !important; font-size: 12px !important; padding: 0 5px !important; margin: 0 !important; }
+            .color-picker-wrapper { margin: 0 !important; }
+            
+            /* 圖庫手機版 */
+            .editor-gallery-box { width: 95% !important; height: 90vh !important; }
+            .editor-gallery-header { flex-direction: column !important; align-items: stretch !important; gap: 15px !important; padding: 20px 15px !important; }
+            .editor-gallery-header > div:first-child { display: flex !important; justify-content: space-between !important; width: 100% !important; margin-bottom: 5px; }
+            .editor-gallery-header > div:last-child { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 10px !important; }
+            #custom-img-name { width: 100% !important; box-sizing: border-box; height: 40px; }
+            .editor-gallery-header > div:last-child .editor-btn { width: 100% !important; height: 40px; font-size: 15px !important; display: flex; justify-content: center; }
+            .editor-gallery-grid { grid-template-columns: repeat(2, 1fr) !important; grid-auto-rows: 150px !important; gap: 10px !important; padding: 10px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="editor-modal-overlay" id="config-modal">
+    <div class="editor-modal-box" id="general-modal-box">
+        <div style="font-weight:bold; font-size:1.2rem; margin-bottom:15px; color:var(--forest);" id="m-title-editor">設定</div>
+        <div id="m-body-editor"></div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button class="editor-btn" onclick="document.getElementById('config-modal').style.display='none'">取消</button>
+            <button class="editor-btn" style="background:var(--forest); color:white; font-weight:bold;" id="m-confirm-btn" onclick="confirmInsert()">✅ 確認插入</button>
+        </div>
+    </div>
+</div>
+
+<div class="editor-modal-overlay" id="gallery-modal">
+    <div class="editor-modal-box editor-gallery-box">
+        <div class="editor-gallery-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <h3 style="margin:0;">圖庫</h3>
+                <select id="bucket-select" onchange="switchBucket()" style="padding:5px; border-radius:4px;">
+                    <option value="kb-images">文章配圖 (kb-images)</option>
+                    <option value="site-assets">網站素材 (site-assets)</option>
+                    <option value="banners">橫幅 (banners)</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="custom-img-name" placeholder="自訂檔名 (選填，例如：gate01)" style="width:200px; padding:5px; border:1px solid #ddd; border-radius:4px;">
+                <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="uploadToDB(this)">
+                <button class="editor-btn" style="background:var(--forest); color:white;" onclick="document.getElementById('upload-input').click()">
+                    <i class="fas fa-plus-circle"></i> 插入新圖片
+                </button>
+                <button class="editor-btn" style="background:#fee2e2; color:#e74c3c; border-color:#fca5a5;" onclick="document.getElementById('gallery-modal').style.display='none'">關閉</button>
+            </div>
+        </div>
+        <div id="gallery-content" class="editor-gallery-grid">載入中...</div>
+    </div>
+</div>
+
+<div class="kb-layout">
+    <div class="kb-sidebar">
+        <div class="kb-header">
+            <span style="font-weight:bold;">知識庫列表</span>
+            <button class="btn btn-success" style="padding:4px 8px; font-size:12px;" onclick="resetKbForm()">＋ 新增</button>
+        </div>
+        <div id="kb-tree" class="kb-tree-content"></div>
+    </div>
+    
+    <div class="card" style="display:flex; flex-direction:column; overflow-y:hidden; height:100%; margin:0;">
+        <span id="mode-title" style="display:none;">新增文章</span>
+        <div style="display:flex; gap:15px; margin-bottom:8px; margin-top:5px; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">大分類</label>
+                <input list="kb-big-list" id="kb-big" placeholder="例: 人類圖" style="width:140px; margin:0; padding:6px 10px;">
+                <datalist id="kb-big-list"></datalist>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">中分類</label>
+                <input list="kb-mid-list" id="kb-mid" placeholder="例: 通道" style="width:140px; margin:0; padding:6px 10px;">
+                <datalist id="kb-mid-list"></datalist>
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:15px; margin-bottom:12px; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                <label style="font-weight:bold; white-space:nowrap; font-size:14px; color:#555;">文章標題</label>
+                <input type="text" id="kb-title" placeholder="輸入標題..." style="margin:0; padding:6px 10px;">
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+                <label style="display:flex; align-items:center; gap:5px; font-weight:bold; margin:0; cursor:pointer; font-size:14px; white-space:nowrap;">
+                    <input type="checkbox" id="kb-pub" checked style="width:18px; height:18px; cursor:pointer;"> 前台顯示
+                </label>
+                <input type="hidden" id="kb-id">
+                <button class="btn btn-danger" onclick="delArticle()" style="display:none; padding: 6px 10px;" id="btn-kb-del">刪除</button>
+                <button class="btn btn-forest" onclick="saveArticle()" style="padding: 6px 15px; font-weight:bold;">💾 儲存文章</button>
+            </div>
+        </div>
+
+        <style id="dynamic-spacing"></style>
+        <div class="editor-wrapper">
+            <div class="editor-sticky-header">
+                <div class="toolbar">
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="customUndo()" title="復原"><i class="fas fa-undo"></i></button>
+                        <button class="editor-btn" onclick="customRedo()" title="重做"><i class="fas fa-redo"></i></button>
+                    </div>
+                    <div class="tb-group">
+                        <select class="tb-select" onchange="exec('fontName', this.value); this.value='';">
+                            <option value="">字體</option>
+                            <option value="sans-serif">標準黑體</option>
+                            <option value="'Noto Serif TC', serif">優雅明體</option>
+                            <option value="monospace">等寬字體</option>
+                        </select>
+                        <select class="tb-select" onchange="applyFontSize(this.value); this.value='';">
+                            <option value="">大小</option>
+                            <option value="10">10pt (偏小)</option>
+                            <option value="12">12pt (標準)</option>
+                            <option value="14">14pt (稍大)</option>
+                            <option value="18">18pt (副標)</option>
+                            <option value="24">24pt (主標)</option>
+                            <option value="36">36pt (巨大)</option>
+                        </select>
+                    </div>
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="exec('bold')"><i class="fas fa-bold"></i></button>
+                        <button class="editor-btn" onclick="exec('italic')"><i class="fas fa-italic"></i></button>
+                        <button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button>
+                    </div>
+                    <div class="tb-group">
+                        <div class="color-picker-wrapper" title="文字顏色"><input type="color" onchange="exec('foreColor', this.value)" value="#2c3e50"><i class="fas fa-font" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
+                        <div class="color-picker-wrapper" title="螢光筆" style="margin-left:5px;" onmousedown="saveSelection()"> <input type="color" onchange="applyHighlighter(this.value)" value="#ffffff"><i class="fas fa-highlighter" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
+                    </div>
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button>
+                        <button class="editor-btn" onclick="exec('justifyCenter')"><i class="fas fa-align-center"></i></button>
+                        <button class="editor-btn" onclick="exec('justifyRight')"><i class="fas fa-align-right"></i></button>
+                    </div>
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="exec('indent')"><i class="fas fa-indent"></i></button>
+                        <button class="editor-btn" onclick="exec('outdent')"><i class="fas fa-outdent"></i></button>
+                        <button class="editor-btn" onclick="applyFirstLineIndent()" style="font-weight:bold;">⇥ 2</button>
+                    </div>
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="exec('insertOrderedList')"><i class="fas fa-list-ol"></i></button>
+                        <button class="editor-btn" onclick="exec('insertUnorderedList')"><i class="fas fa-list-ul"></i></button>
+                    </div>
+                    
+                    <div class="tb-group">
+                        <button class="editor-btn" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
+                        <button class="editor-btn" onclick="openGallery()" style="color:var(--info);" title="開啟圖庫"><i class="fas fa-image"></i></button>
+                        <button class="editor-btn" onclick="openModal('table')" title="插入表格"><i class="fas fa-table"></i></button>
+                        <button class="editor-btn" onclick="exec('insertHorizontalRule')" title="水平線"><i class="fas fa-minus"></i></button>
+                        <button class="editor-btn" onclick="exec('removeFormat')" title="清除樣式"><i class="fas fa-eraser"></i></button>
+                        <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
+                    </div>
+                </div>
+
+                <div class="toolbar" style="background:#fff; border-bottom:1px solid #eee;">
+                    <div class="tb-group">
+                        <button class="editor-btn" style="font-weight:bold; color:var(--forest);" onclick="openModal('spacing')"><i class="fas fa-sliders-h"></i> 排版設定</button>
+                    </div>
+                    <div class="tb-group" style="margin-left: auto;">
+                        <button class="editor-btn btn-magic" onclick="cleanCurrentArticle()" style="background:#fff5f5; border-color:#fadbd8; color:#c0392b; margin-right: 5px;">🧹 除髒</button>
+                        <button class="editor-btn btn-magic" onclick="openModal('h2')">🟡 主標</button>
+                        <button class="editor-btn btn-magic" onclick="openModal('h3')">🟢 副標</button>
+                        <button class="editor-btn btn-magic" onclick="openModal('card')">💡 資訊卡</button>
+                        <button class="editor-btn btn-magic" onclick="openModal('warn')">🚨 警告框</button>
+                    </div>
+                </div>
+            </div>
+            <div id="editor" contenteditable="true"><p>請在此開始撰寫...</p></div>
+            <div id="float-menu"></div>
+            <textarea id="source-area" class="source-view"></textarea>
+        </div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+    // 🌟 知識庫專屬變數
+    let cache = { articles: [] };
+    let kbCatOrder = { big: [], mid: {} };
+    let currentBucket = 'kb-images';
+
+    // ==========================================
+    // 1. 啟動與讀取資料 (取代原本的 fetchAll)
+    // ==========================================
+    async function fetchKbData() {
+        try {
+            // 讀取文章列表
+            let ar = await myDB.from('kb_articles').select('*').order('sort_order');
+            if (ar.error) ar = await myDB.from('kb_articles').select('*').order('created_at', {ascending:false});
+            
+            // 讀取排序設定
+            const cfg = await myDB.from('site_content').select('content').eq('title', 'kb_category_order').single();
+            
+            cache.articles = ar.data || [];
+            if (cfg.data && cfg.data.content) { kbCatOrder = cfg.data.content; } else { kbCatOrder = { big: [], mid: {} }; }
+            
+            syncKbOrderKeys();
+            renderKbTree(); 
+        } catch(e) { console.error("讀取知識庫失敗:", e); }
+    }
+
+    // ==========================================
+    // 2. 你的原版 JavaScript 靈魂 (100% 複製不更動)
+    // ==========================================
+    function toggleKbSidebar() { document.querySelector('.kb-layout').classList.toggle('collapsed'); }
+    async function editKb(id) {
+        try { 
+            const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single(); 
+            if(error || !data) return alert("讀取失敗"); 
+            
+            document.getElementById('kb-id').value = data.id; 
+            document.getElementById('kb-title').value = data.title;
+            document.getElementById('kb-big').value = data.big_category; 
+            document.getElementById('kb-mid').value = data.mid_category;
+            document.getElementById('btn-kb-del').style.display = 'inline-block';
+            document.getElementById('kb-pub').checked = data.is_published !== false;
+
+            const wrapper = (new DOMParser()).parseFromString(data.body || '', 'text/html').querySelector('.peiyu-article');
+            document.getElementById('editor').innerHTML = wrapper ? wrapper.innerHTML : (data.body || '');
+            history = [document.getElementById('editor').innerHTML]; historyIndex = 0; 
+        } catch (e) { alert("開啟失敗"); }
+    }
+
+    function resetKbForm() {
+        document.getElementById('kb-id').value=''; document.getElementById('kb-title').value=''; 
+        document.getElementById('kb-big').value=''; document.getElementById('kb-mid').value=''; 
+        document.getElementById('btn-kb-del').style.display = 'none';
+        document.getElementById('kb-pub').checked = true;
+        document.getElementById('editor').innerHTML = '<p>請在此開始撰寫...</p>';
+        history = [document.getElementById('editor').innerHTML]; historyIndex = 0;
+        spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; applySpacingToEditor();
+    }
+
+    async function saveArticle() {
+        const editor = document.getElementById('editor');
+        const sourceArea = document.getElementById('source-area');
+        if (sourceArea.style.display === 'block') {
+            const parser = new DOMParser(); const doc = parser.parseFromString(sourceArea.value, 'text/html');
+            const wrapper = doc.querySelector('.peiyu-article'); editor.innerHTML = wrapper ? wrapper.innerHTML : sourceArea.value;
+        }
+
+        const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+        const p = { title: document.getElementById('kb-title').value.trim(), big_category: document.getElementById('kb-big').value.trim(), mid_category: document.getElementById('kb-mid').value.trim(), is_published: document.getElementById('kb-pub').checked, body: exportHTML.trim() };
+        const id = document.getElementById('kb-id').value;
+        if (!p.title || !p.big_category) return alert("❌ 標題與大分類為必填！");
+
+        const saveBtn = document.querySelector('button[onclick="saveArticle()"]');
+        const originalText = saveBtn.innerText; saveBtn.innerText = "⏳ 儲存中..."; saveBtn.disabled = true; saveBtn.style.opacity = "0.7"; saveBtn.style.cursor = "not-allowed";
+        
+        try { 
+            if (id) { await myDB.from('kb_articles').update(p).eq('id', id); } 
+            else { const { data } = await myDB.from('kb_articles').select('sort_order').order('sort_order', { ascending: false }).limit(1); p.sort_order = (data && data.length) ? data[0].sort_order + 1 : 1; await myDB.from('kb_articles').insert([p]); } 
+            alert("✅ 文章已成功儲存！"); fetchKbData(); if (!id) resetKbForm(); 
+        } catch (e) { alert("❌ 儲存失敗: " + e.message); } 
+        finally { saveBtn.innerText = originalText; saveBtn.disabled = false; saveBtn.style.opacity = "1"; saveBtn.style.cursor = "pointer"; }
+    }
+
+    function toggleSource() { 
+        const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
+        if (s.style.display === 'none' || s.style.display === '') { 
+            const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+            s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
+        } else { 
+            const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
+            editor.innerHTML = wrapper ? wrapper.innerHTML : s.value; s.style.display = 'none'; editor.style.display = ''; saveHistory(); 
+        } 
+    }
+
+    // --- 編輯器核心 ---
+    let spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 };
+    function applySpacingToEditor() { 
+        const css = `#editor { line-height: ${spacingCfg.lh}; } #editor p, #editor div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; } #editor h1, #editor h2, #editor h3, #editor h4, #editor h5, #editor h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; } #editor h1+h1, #editor h2+h2, #editor h3+h3, #editor h4+h4, #editor h5+h5, #editor h6+h6 { margin-top: 0; } #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } #editor li { margin-bottom: ${spacingCfg.limb}em; } #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; }`; 
+        const styleTag = document.getElementById('dynamic-spacing'); if(styleTag) styleTag.innerHTML = css; 
+    }        
+
+    let history = ['<p>請在此開始撰寫...</p>']; let historyIndex = 0; let typingTimeout;
+    function saveHistory() {
+        const editor = document.getElementById('editor'); if (!editor) return; const sel = window.getSelection(); let markedHTML = editor.innerHTML;
+        if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            try { const range = sel.getRangeAt(0); const marker = document.createElement("span"); marker.id = "cursor-marker"; marker.style.display = "none"; range.insertNode(marker); markedHTML = editor.innerHTML; marker.remove(); } catch(e) {}
+        }
+        const currentPure = markedHTML.replace(/<span id="cursor-marker".*?><\/span>/g, ""); const lastPure = history[historyIndex].replace(/<span id="cursor-marker".*?><\/span>/g, "");
+        if (currentPure !== lastPure) { if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1); history.push(markedHTML); if (history.length > 50) history.shift(); else historyIndex = history.length - 1; }
+    }
+    
+    function customUndo() { clearTimeout(typingTimeout); saveHistory(); if (historyIndex > 0) { historyIndex--; applyHistoryState(); } }
+    function customRedo() { clearTimeout(typingTimeout); if (historyIndex < history.length - 1) { historyIndex++; applyHistoryState(); } }
+    function applyHistoryState() {
+        const editor = document.getElementById('editor'); editor.innerHTML = history[historyIndex]; const marker = document.getElementById('cursor-marker');
+        if (marker) { const range = document.createRange(); const sel = window.getSelection(); range.setStartAfter(marker); range.collapse(true); sel.removeAllRanges(); sel.addRange(range); marker.remove(); }
+        editor.focus({ preventScroll: true });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const editor = document.getElementById('editor');
+        if (editor) { editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); }); }
+    });
+
+    let savedRange = null;
+    function saveSelection() { const editor = document.getElementById('editor'); const sel = window.getSelection(); if (sel.getRangeAt && sel.rangeCount) { const range = sel.getRangeAt(0); if (editor.contains(range.commonAncestorContainer)) savedRange = range; } }
+    function restoreSelection() {
+        editor.focus({ preventScroll: true });
+        if (savedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); } 
+        else { const range = document.createRange(); range.selectNodeContents(editor); range.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+    }
+
+    function exec(command, value = null) { document.execCommand(command, false, value); document.getElementById('editor').focus(); saveHistory(); }
+    
+    function applyFontSize(pt) {
+        restoreSelection(); const sel = window.getSelection(); if (!sel.toString()) return; 
+        document.execCommand('styleWithCSS', false, false); document.execCommand('fontSize', false, '7');
+        const fonts = document.getElementById('editor').querySelectorAll('font[size="7"]');
+        fonts.forEach(f => { const span = document.createElement('span'); span.style.fontSize = pt + 'pt'; span.innerHTML = f.innerHTML; f.replaceWith(span); });
+        const spans = document.getElementById('editor').querySelectorAll('span');
+        spans.forEach(s => { if (s.style.fontSize === '-webkit-xxx-large' || s.style.fontSize === 'xxx-large' || s.style.fontSize === '48px') { s.style.fontSize = pt + 'pt'; } });
+        document.getElementById('editor').focus({ preventScroll: true }); saveHistory();
+    }
+
+    function applyFirstLineIndent() { 
+        const sel = window.getSelection(); if (!sel.rangeCount) return; 
+        let node = sel.focusNode; if(node.nodeType === 3) node = node.parentNode; 
+        while(node && node.id !== 'editor' && !['P','DIV','LI'].includes(node.tagName)) node = node.parentNode; 
+        if(node && node.id !== 'editor') { node.style.textIndent = node.style.textIndent === '2em' ? '' : '2em'; saveHistory(); } 
+        else { exec('formatBlock', 'DIV'); setTimeout(applyFirstLineIndent, 50); } 
+    }
+
+    function applyHighlighter(color) {
+        restoreSelection(); const sel = window.getSelection(); if (!sel.toString()) return; 
+        document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, color); document.execCommand('backColor', false, color); 
+        const blocks = document.getElementById('editor').querySelectorAll('p, div, li, ul, ol, td, th, tr, table, h2, h3');
+        blocks.forEach(block => { if (sel.containsNode(block, true)) { block.style.backgroundColor = ''; } });
+        let node = sel.focusNode; if (node && node.nodeType === 3) node = node.parentNode;
+        while (node && node.id !== 'editor') { if (['P', 'DIV', 'LI', 'UL', 'OL', 'TD', 'TH'].includes(node.tagName)) { node.style.backgroundColor = ''; } node = node.parentNode; }
+        document.getElementById('editor').focus({ preventScroll: true }); saveHistory();
+    }
+
+    function insertLink() { const url = prompt("網址：", "https://"); if(url) exec('createLink', url); }
+    function insertHtml(html) {
+        restoreSelection(); const editor = document.getElementById('editor'); editor.focus({ preventScroll: true }); 
+        let success = document.execCommand('insertHTML', false, html);
+        if (!success) {
+            const sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) { const range = sel.getRangeAt(0); range.deleteContents(); const el = document.createElement("div"); el.innerHTML = html; let frag = document.createDocumentFragment(), node, lastNode; while ((node = el.firstChild)) lastNode = frag.appendChild(node); range.insertNode(frag); if (lastNode) { range.setStartAfter(lastNode); range.collapse(true); sel.removeAllRanges(); sel.addRange(range); } } else editor.innerHTML += html;
+        }
+        saveHistory(); 
+    }
+    
+    window.insertImageToEditor = function(u) { const html = `<div class="resizable-wrapper peiyu-obj" style="margin-left:auto; margin-right:auto; width:100%;"><img src="${u}"></div><p><br></p>`; insertHtml(html); closeGallery(); }
+    
+    function cleanCurrentArticle() {
+        saveSelection(); const editor = document.getElementById('editor'); let html = editor.innerHTML; const parser = new DOMParser(); const doc = parser.parseFromString(html, 'text/html');
+        doc.querySelectorAll('*').forEach(el => {
+            if (el.className && typeof el.className === 'string' && el.className.includes('ql-')) { const cleanClasses = el.className.split(' ').filter(c => !c.startsWith('ql-')).join(' '); if (cleanClasses) el.className = cleanClasses; else el.removeAttribute('class'); }
+            if (el.tagName.toLowerCase() === 'font') { const frag = document.createDocumentFragment(); while(el.firstChild) frag.appendChild(el.firstChild); el.parentNode.replaceChild(frag, el); }
+            if (el.tagName.toLowerCase() === 'span' && el.style.fontFamily) { el.style.fontFamily = ''; if (!el.getAttribute('style')) el.removeAttribute('style'); }
+        });
+        doc.querySelectorAll('h3.title-boxed-h3').forEach(h3 => { const text = h3.textContent.trim(); const newDiv = document.createElement('div'); newDiv.style.cssText = "margin: 25px 0 10px 0;"; newDiv.innerHTML = `<h3 style="border: 2px solid rgb(198, 168, 124); background: rgb(255, 252, 245); color: rgb(26, 47, 35); padding: 8px 35px; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0px;">${text}</h3>`; h3.parentNode.replaceChild(newDiv, h3); });
+        editor.innerHTML = doc.body.innerHTML; saveHistory(); alert("✨ 報告！已清除舊版語法與字體，請檢查畫面後點擊儲存！");
+    }
+
+    let modalMode = null;
+    function openModal(type) {
+        saveSelection(); modalMode = type; const body = document.getElementById('m-body-editor'); const confirmBtn = document.getElementById('m-confirm-btn'); confirmBtn.style.display = 'block';
+        if (type === 'spacing') { document.getElementById('m-title-editor').innerText = "⚙️ 排版設定"; confirmBtn.style.display = 'none'; body.innerHTML = `<div style="background:#f9f9f9; padding:15px; border-radius:8px;"><div class="editor-form-group"><label>文字行高 <span id="val-lh" class="editor-sp-val">${spacingCfg.lh}</span></label><input type="range" id="sp-lh" class="editor-sp-slider" min="1.0" max="3.0" step="0.1" value="${spacingCfg.lh}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>段落間距 <span id="val-pmb" class="editor-sp-val">${spacingCfg.pmb}em</span></label><input type="range" id="sp-pmb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.pmb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>清單外距 <span id="val-lmtb" class="editor-sp-val">${spacingCfg.lmtb}em</span></label><input type="range" id="sp-lmtb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.lmtb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group" style="margin-bottom:0;"><label>清單內距 <span id="val-limb" class="editor-sp-val">${spacingCfg.limb}em</span></label><input type="range" id="sp-limb" class="editor-sp-slider" min="0" max="2" step="0.1" value="${spacingCfg.limb}" oninput="updateSpacingPreview()"></div></div>`; }
+        else if (type === 'table') { document.getElementById('m-title-editor').innerText = '插入表格'; body.innerHTML = `<div class="editor-form-group"><label>列數</label><input type="number" id="inp-rows" class="editor-form-input" value="3"></div><div class="editor-form-group"><label>欄數</label><input type="number" id="inp-cols" class="editor-form-input" value="3"></div><div class="editor-form-group"><label>邊框</label><input type="color" id="inp-border" class="editor-form-input" value="#dddddd" style="height:40px;"></div>`; }
+        else if (type === 'h2' || type === 'h3') { document.getElementById('m-title-editor').innerText = type === 'h2' ? '插入主標題' : '插入副標題'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-text" class="editor-form-input"></div><div class="editor-form-group"><label>風格</label><select id="inp-theme" class="editor-form-input"><option value="forest">🌲 經典深綠</option><option value="gold">👑 尊爵金底</option><option value="cream">🍦 溫柔奶油</option></select></div>`; }
+        else if (type === 'card') { document.getElementById('m-title-editor').innerText = '插入卡片'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-title" class="editor-form-input"></div><div class="editor-form-group"><label>標籤 (逗號分隔)</label><input type="text" id="inp-tags" class="editor-form-input"></div><div class="editor-form-group"><label>圖示</label><input type="text" id="inp-icon" class="editor-form-input" value="✨"></div>`; }
+        else if (type === 'warn') { document.getElementById('m-title-editor').innerText = '插入警告'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-title" class="editor-form-input" value="注意"></div><div class="editor-form-group"><label>顏色</label><select id="inp-theme" class="editor-form-input"><option value="red">🔴 紅色</option><option value="yellow">🟡 黃色</option><option value="blue">🔵 藍色</option></select></div>`; }
+        document.getElementById('config-modal').style.display = 'flex';
+    }
+
+    function updateSpacingPreview() { 
+        const currentScroll = document.getElementById('editor').scrollTop; spacingCfg.lh = document.getElementById('sp-lh').value; spacingCfg.pmb = document.getElementById('sp-pmb').value; spacingCfg.lmtb = document.getElementById('sp-lmtb').value; spacingCfg.limb = document.getElementById('sp-limb').value; document.getElementById('val-lh').innerText = spacingCfg.lh; document.getElementById('val-pmb').innerText = spacingCfg.pmb + 'em'; document.getElementById('val-lmtb').innerText = spacingCfg.lmtb + 'em'; document.getElementById('val-limb').innerText = spacingCfg.limb + 'em'; applySpacingToEditor(); document.getElementById('editor').scrollTop = currentScroll; saveHistory(); 
+    }
+
+    function confirmInsert() {
+        restoreSelection(); let html = '';
+        if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
+        else if(modalMode === 'h2' || modalMode === 'h3') { const text = document.getElementById('inp-text').value || '標題'; const theme = document.getElementById('inp-theme').value; const styles = { forest: { bg: '#1a2f23', col: '#fff', bor: '#c6a87c' }, gold: { bg: '#c6a87c', col: '#1a2f23', bor: '#1a2f23' }, cream: { bg: '#fffcf5', col: '#1a2f23', bor: '#c6a87c' } }; const s = styles[theme]; if (modalMode === 'h2') html = `<div style="margin: 30px 0 15px 0;"><h2 style="border-left: 8px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 10px 20px; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; display: inline-block; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); margin: 0;">${text}</h2></div><p><br></p>`; else html = `<div style="margin: 25px 0 10px 0;"><h3 style="border: 2px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 8px 35px; border-radius: 50px; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0;">${text}</h3></div><p><br></p>`; }
+        else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
+        else if(modalMode === 'warn') { const title = document.getElementById('inp-title').value || '注意'; const theme = document.getElementById('inp-theme').value; const styles = { red: { bg: '#fdf2f2', bor: '#fadbd8', txt: '#c0392b' }, yellow: { bg: '#fffbe6', bor: '#ffe58f', txt: '#d48806' }, blue: { bg: '#e6f7ff', bor: '#91d5ff', txt: '#096dd9' } }; const s = styles[theme]; html = `<div class="peiyu-obj" style="background-color: ${s.bg}; border: 1px solid ${s.bor}; border-radius: 8px; padding: 20px; margin: 25px 0;"><strong style="color: ${s.txt}; display: block; margin-bottom: 10px; font-size: 16px;">${title}</strong><div style="color: #555; font-size: 15px; line-height: 1.6;">請輸入內容...</div></div><p><br></p>`; }
+        insertHtml(html); document.getElementById('config-modal').style.display = 'none';
+    }
+
+    async function openGallery(){ saveSelection(); document.getElementById('gallery-modal').style.display='flex'; loadGalleryImages(); }
+    function closeGallery(){ document.getElementById('gallery-modal').style.display='none'; }
+    function switchBucket(){ currentBucket=document.getElementById('bucket-select').value; loadGalleryImages(); }
+    
+    async function loadGalleryImages(){ 
+        const g = document.getElementById('gallery-content'); g.innerHTML = "讀取中..."; 
+        const {data} = await myDB.storage.from(currentBucket).list('',{limit:100, sortBy:{column:'created_at', order:'desc'}}); 
+        if(!data){ g.innerHTML="讀取失敗"; return; } 
+        g.innerHTML = data.map(f => { 
+            if(f.name === '.emptyFolderPlaceholder') return ''; 
+            const u = myDB.storage.from(currentBucket).getPublicUrl(f.name).data.publicUrl; 
+            return `<div class="editor-gallery-item"><img src="${u}" onclick="insertGalleryImage('${u}')" style="cursor:pointer;" title="點擊插入"><div class="gallery-item-name">${f.name}</div><button onclick="deleteGalleryImage('${f.name}')" style="position:absolute; top:5px; right:5px; background:rgba(231,76,60,0.9); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:20;"><i class="fas fa-trash"></i></button></div>`; 
+        }).join(''); 
+    }
+
+    async function deleteGalleryImage(fileName) {
+        if (!confirm(`確定要永久刪除「${fileName}」嗎？\n注意：如果已有文章使用此圖片，將會破圖！`)) return;
+        try {
+            const { error: storageErr } = await myDB.storage.from(currentBucket).remove([fileName]);
+            if (storageErr) throw storageErr;
+            await myDB.from('site_content').delete().like('image_url', `%${fileName}%`);
+            alert("✅ 圖片已刪除"); loadGalleryImages(); 
+        } catch (err) { alert("❌ 刪除失敗：" + err.message); }
+    }
+    
+    function insertGalleryImage(url) { const html = `<div class="resizable-wrapper peiyu-obj" style="margin-left:auto; margin-right:auto; width:100%;"><img src="${url}"></div><p><br></p>`; insertHtml(html); closeGallery(); }
+    
+    async function uploadToDB(input){ 
+        const file = input.files[0]; if(!file) return; 
+        const btn = document.querySelector('.editor-gallery-header button[onclick*="upload-input"]');
+        const nameInput = document.getElementById('custom-img-name'); const originalText = btn.innerHTML;
+        let rawName = nameInput.value.trim() || file.name.split('.').slice(0, -1).join('.');
+        const cleanName = rawName.replace(/[^a-z0-9]/gi, '_').toLowerCase(); const finalID = `art_${Date.now()}_${cleanName}`;
+        const targetBucket = 'kb-images'; const dbCategory = 'kb_asset'; const fName = `${finalID}.jpg`;
+
+        btn.innerHTML = "⏳ 處理中..."; btn.disabled = true;
+
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            const img = new Image(); img.src = e.target.result;
+            img.onload = function() {
+                const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                const MAX = 1200; let w = img.width, h = img.height; 
+                if(w > MAX || h > MAX){ if(w > h) { h *= MAX/w; w = MAX; } else { w *= MAX/h; h = MAX; } }
+                cvs.width = w; cvs.height = h; ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
+                cvs.toBlob(async function(blob){
+                    try {
+                        const { error: storageErr } = await myDB.storage.from(targetBucket).upload(fName, blob, { upsert: true });
+                        if(storageErr) throw storageErr;
+                        const { data: urlData } = myDB.storage.from(targetBucket).getPublicUrl(fName); const publicUrl = urlData.publicUrl;
+                        await myDB.from('site_content').insert([{ title: rawName, category: dbCategory, image_url: publicUrl, body: 'asset' }]);
+                        insertGalleryImage(publicUrl); 
+                        btn.innerHTML = originalText; btn.disabled = false; nameInput.value = ''; input.value = ''; closeGallery();
+                    } catch (err) { alert("插入失敗：" + err.message); btn.innerHTML = originalText; btn.disabled = false; }
+                }, 'image/jpeg', 0.85); 
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const editor = document.getElementById('editor'); const floatMenu = document.getElementById('float-menu');
+        let currentTarget = null; let currentTargetCell = null; 
+
+        if (editor) {
+            editor.addEventListener('click', function(e) { 
+                document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected')); 
+                floatMenu.style.display = 'none'; currentTarget = null; currentTargetCell = null;
+                let targetImg = e.target.closest('img'); let targetTable = e.target.closest('table'); let targetCell = e.target.closest('td, th');
+
+                if (targetImg) { 
+                    let wrapper = targetImg.closest('.resizable-wrapper');
+                    if (!wrapper) {
+                        let oldW = targetImg.getAttribute('width') || targetImg.style.width || '100%';
+                        if (oldW && !oldW.includes('%') && !oldW.includes('px') && !oldW.includes('auto')) { oldW += 'px'; }
+                        wrapper = document.createElement('div'); wrapper.className = 'resizable-wrapper peiyu-obj';
+                        wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
+                        targetImg.style.width = '100%'; targetImg.style.height = 'auto'; targetImg.style.display = 'block'; targetImg.removeAttribute('width'); 
+                        targetImg.parentNode.insertBefore(wrapper, targetImg); wrapper.appendChild(targetImg);
+                    }
+                    currentTarget = wrapper; currentTarget.classList.add('obj-selected'); showFloatMenu(e.clientX, e.clientY, 'image'); 
+                } else if (targetTable) { 
+                    targetTable.classList.add('peiyu-table', 'peiyu-obj');
+                    if(targetTable.style.display === 'block') targetTable.style.display = 'table';
+                    currentTarget = targetTable; currentTargetCell = targetCell; currentTarget.classList.add('obj-selected'); showFloatMenu(e.clientX, e.clientY, 'table'); 
+                } 
+            });
+        }
+        
+        window.showFloatMenu = function(x, y, type) { 
+            floatMenu.style.display = 'flex'; floatMenu.style.position = 'fixed'; 
+            let topPos = y - 80; if(topPos < 50) topPos = y + 20; floatMenu.style.left = (x - 50) + 'px'; floatMenu.style.top = topPos + 'px';
+            const alignBtns = `<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('left')"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('center')"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('right')"><i class="fas fa-align-right"></i></button></div>`; 
+            if (type === 'table') { 
+                const currW = parseInt(currentTarget.style.width) || 100; let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;"><div style="display:flex; justify-content:space-between;">${alignBtns}<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下</button><button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button></div></div><div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-row')">+列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button><input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;"></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">總寬:</span><input type="range" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="tbl-w-val" style="font-weight:bold; width:35px; text-align:right;">${currW}%</span></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">單欄:</span><input type="range" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="col-w-val" style="font-weight:bold; width:35px; text-align:right;">${currColW ? currColW+'%' : '自動'}</span></div></div>`; 
+            } else if (type === 'image') { 
+                let currW = 100; let currUnit = '%';
+                if (currentTarget.style.width) { if (currentTarget.style.width.includes('px')) { currW = parseInt(currentTarget.style.width); currUnit = 'px'; } else if (currentTarget.style.width.includes('%')) { currW = parseInt(currentTarget.style.width); currUnit = '%'; } }
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; gap:2px; background:#f0f4f8; padding:3px; border-radius:6px; border:1px solid #dcebf7;"><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-left')" title="置左 (獨立一行不繞圖)"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-center')" title="置中 (獨立一行不繞圖)"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-right')" title="置右 (獨立一行不繞圖)"><i class="fas fa-align-right"></i></button><div style="width:1px; background:#bdc3c7; margin:0 4px;"></div><button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-left')" title="靠左 (文字在右側環繞)"><i class="fas fa-indent" style="margin-right:2px;"></i>左繞</button><button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-right')" title="靠右 (文字在左側環繞)"><i class="fas fa-outdent" style="margin-right:2px;"></i>右繞</button></div></div><div style="display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; padding:5px; border-radius:4px;"><div style="display:flex; align-items:center; gap:5px;"><span style="white-space:nowrap; font-weight:bold; font-size:12px; color:#555;">大小:</span><input type="number" id="img-custom-w" value="${currW}" onchange="setImgCustomWidth()" onkeyup="if(event.key==='Enter')setImgCustomWidth()" style="width:50px; padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; text-align:center;"><select id="img-custom-unit" onchange="setImgCustomWidth()" style="padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; cursor:pointer;"><option value="%" ${currUnit === '%' ? 'selected' : ''}>%</option><option value="px" ${currUnit === 'px' ? 'selected' : ''}>px</option></select></div><div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button><button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button></div></div></div>`; 
+            } 
+        }
+        
+        window.setImgAlign = function(mode) {
+            if(!currentTarget) return; currentTarget.style.display = 'block'; currentTarget.style.clear = 'both';
+            if (mode === 'block-left') { currentTarget.style.float = 'none'; currentTarget.style.margin = '15px auto 15px 0'; } else if (mode === 'block-center') { currentTarget.style.float = 'none'; currentTarget.style.margin = '15px auto'; } else if (mode === 'block-right') { currentTarget.style.float = 'none'; currentTarget.style.margin = '15px 0 15px auto'; } else if (mode === 'float-left') { currentTarget.style.float = 'left'; currentTarget.style.margin = '15px 20px 15px 0'; } else if (mode === 'float-right') { currentTarget.style.float = 'right'; currentTarget.style.margin = '15px 0 15px 20px'; }
+            saveHistory();
+        }
+
+        window.setAlign = function(align) { 
+            if(!currentTarget) return; 
+            if (currentTarget.tagName === 'TABLE') { currentTarget.style.display = 'table'; currentTarget.style.clear = 'both'; if (align === 'center') { currentTarget.style.margin = '15px auto'; } else if (align === 'left') { currentTarget.style.margin = '15px auto 15px 0'; } else if (align === 'right') { currentTarget.style.margin = '15px 0 15px auto'; } } 
+            saveHistory(); 
+        }
+        
+        window.setImgCustomWidth = function() { 
+            if(!currentTarget) return; const wVal = document.getElementById('img-custom-w').value; const unit = document.getElementById('img-custom-unit').value;
+            currentTarget.style.width = wVal + unit; currentTarget.style.maxWidth = '100%';
+            const img = currentTarget.querySelector('img'); if(img) { img.style.width = "100%"; img.style.height = "auto"; } saveHistory(); 
+        }
+        
+        window.updateTableWidth = function(val) { if(!currentTarget) return; currentTarget.style.setProperty('width', val + '%', 'important'); currentTarget.style.setProperty('min-width', 'auto', 'important'); const label = document.getElementById('tbl-w-val'); if (label) label.innerText = val + "%"; }
+        window.updateColWidth = function(val) { if(!currentTarget || !currentTargetCell) return; const cellIndex = currentTargetCell.cellIndex; Array.from(currentTarget.rows).forEach(row => { if (row.cells[cellIndex]) { row.cells[cellIndex].style.setProperty('width', val + '%', 'important'); row.cells[cellIndex].style.setProperty('white-space', 'normal', 'important'); row.cells[cellIndex].style.setProperty('word-break', 'break-all', 'important'); } }); const label = document.getElementById('col-w-val'); if (label) label.innerText = val + "%"; }
+        window.modImg = function(a) { if(a === 'delete') { currentTarget.remove(); floatMenu.style.display = 'none'; saveHistory(); } }
+        
+        window.modCut = async function() {
+            if(!currentTarget) return;
+            try { const html = currentTarget.outerHTML; const typeHtml = new Blob([html], { type: "text/html" }); const typeText = new Blob(["[物件]"], { type: "text/plain" }); await navigator.clipboard.write([ new ClipboardItem({ "text/html": typeHtml, "text/plain": typeText }) ]); currentTarget.remove(); floatMenu.style.display = 'none'; saveHistory(); alert("✂️ 已剪下！\n請將游標點擊到想放的地方，按下鍵盤 Ctrl+V (或 Cmd+V) 貼上。"); } catch (err) { console.error(err); alert("❌ 瀏覽器阻擋剪切，請改用滑鼠從外側反白後按 Ctrl+X"); }
+        }
+
+        window.modTable = function(a, val) { 
+            if(!currentTarget) return; const tbody = currentTarget.querySelector('tbody'); 
+            if(a === 'delete') { currentTarget.remove(); floatMenu.style.display = 'none'; } 
+            else if(a === 'border') { const bs = (val === '#ffffff') ? 'none' : `1px solid ${val}`; currentTarget.style.border = bs; currentTarget.querySelectorAll('th, td').forEach(c => c.style.border = bs); } 
+            else if(a === 'add-row') { const cols = tbody.rows[0].cells.length; const r = tbody.insertRow(); for(let i=0; i<cols; i++) { const c = r.insertCell(); c.innerText = "文字"; c.style.border = tbody.rows[0].cells[0].style.border; c.style.padding="8px 12px"; } } 
+            else if(a === 'del-row') { if(tbody.rows.length>1) tbody.deleteRow(-1); } 
+            else if(a === 'add-col') { Array.from(tbody.rows).forEach(r => { const c = r.insertCell(); c.innerText = "文字"; c.style.border = r.cells[0].style.border; c.style.padding="8px 12px"; }); } 
+            else if(a === 'del-col') { if(tbody.rows[0].cells.length>1) Array.from(tbody.rows).forEach(r => r.deleteCell(-1)); } 
+            saveHistory(); 
+        }
+    });
+
+    async function delArticle(){ if(confirm("確定刪除？")) { await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value); alert("已刪除"); resetKbForm(); fetchKbData(); } }
+    
+    function syncKbOrderKeys() {
+        let c = false; if (!kbCatOrder.hide_note) { kbCatOrder.hide_note = []; c = true; }
+        const ct = {}; cache.articles.forEach(a => { if (!ct[a.big_category]) ct[a.big_category] = new Set(); ct[a.big_category].add(a.mid_category); });
+        Object.keys(ct).forEach(b => { if (!kbCatOrder.big.includes(b)) { kbCatOrder.big.push(b); c = true; } });
+        Object.keys(ct).forEach(b => { if (!kbCatOrder.mid[b]) kbCatOrder.mid[b] = []; [...ct[b]].forEach(m => { if (!kbCatOrder.mid[b].includes(m)) { kbCatOrder.mid[b].push(m); c = true; } }); });
+        if (c) saveKbOrderConfig();
+    }    
+    function renderKbTree() {
+        const t = {}; cache.articles.forEach(a => { if (!t[a.big_category]) t[a.big_category] = {}; if (!t[a.big_category][a.mid_category]) t[a.big_category][a.mid_category] = []; t[a.big_category][a.mid_category].push(a); });
+        document.getElementById('kb-tree').innerHTML = kbCatOrder.big.filter(b => t[b]).map(b => {
+            const isHidden = (kbCatOrder.hide_note || []).includes(b); const noteIcon = isHidden ? '🔇' : '📢';
+            const noteBtn = `<span onclick="toggleKbNote('${b}', event)" style="cursor:pointer; margin-right:8px; font-size:14px; opacity:0.8;" title="切換便利貼">${noteIcon}</span>`;
+            const ms = (kbCatOrder.mid[b] || []).filter(m => t[b][m]).map(m => {
+                const as = t[b][m].map(a => `<div class="article-item ${a.is_published ? '' : 'draft'}"><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveArt('${a.id}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveArt('${a.id}',1,event)">▼</button></div><span class="article-title-span" onclick="editKb('${a.id}')">📄 ${a.title}</span></div>`).join('');
+                return `<details class="mid-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveMid('${b}','${m}',1,event)">▼</button></div>└ ${m}</summary>${as}</details>`;
+            }).join('');
+            return `<details class="big-cat" open><summary><div class="sort-actions"><button class="btn-sort-arrow" onclick="moveBig('${b}',-1,event)">▲</button><button class="btn-sort-arrow" onclick="moveBig('${b}',1,event)">▼</button></div>${noteBtn} 📂 ${b}</summary>${ms}</details>`;
+        }).join('');
+        document.getElementById('kb-big-list').innerHTML = kbCatOrder.big.map(v => `<option value="${v}">`).join('');
+        const allMids = new Set(); Object.values(kbCatOrder.mid).forEach(a => a.forEach(m => allMids.add(m)));
+        document.getElementById('kb-mid-list').innerHTML = [...allMids].map(v => `<option value="${v}">`).join('');
+    }
+
+    async function moveBig(n,d,e){e.stopPropagation();const i=kbCatOrder.big.indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.big.length)return;[kbCatOrder.big[i],kbCatOrder.big[i+d]]=[kbCatOrder.big[i+d],kbCatOrder.big[i]];renderKbTree();await saveKbOrderConfig();}
+    async function moveMid(b,n,d,e){e.stopPropagation();const i=kbCatOrder.mid[b].indexOf(n);if(i===-1||i+d<0||i+d>=kbCatOrder.mid[b].length)return;[kbCatOrder.mid[b][i],kbCatOrder.mid[b][i+d]]=[kbCatOrder.mid[b][i+d],kbCatOrder.mid[b][i]];renderKbTree();await saveKbOrderConfig();}
+    async function moveArt(id, dir, e) {
+        e.stopPropagation(); const art = cache.articles.find(a => a.id === id); if (!art) return;
+        const siblings = cache.articles.filter(a => a.big_category === art.big_category && a.mid_category === art.mid_category);
+        const idx = siblings.findIndex(a => a.id === id); if (idx === -1 || idx + dir < 0 || idx + dir >= siblings.length) return;
+        const temp = siblings[idx]; siblings[idx] = siblings[idx + dir]; siblings[idx + dir] = temp;
+        const updates = siblings.map((a, index) => { a.sort_order = index; return { id: a.id, sort_order: index, title: a.title, big_category: a.big_category, mid_category: a.mid_category }; });
+        cache.articles.sort((a, b) => a.sort_order - b.sort_order); renderKbTree();
+        try { await myDB.from('kb_articles').upsert(updates, { onConflict: 'id' }); } catch (err) { alert("排序儲存失敗: " + err.message); }
+    }    
+    async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
+    async function toggleKbNote(cat, e) { e.stopPropagation(); if (!kbCatOrder.hide_note) kbCatOrder.hide_note = []; const idx = kbCatOrder.hide_note.indexOf(cat); if (idx > -1) kbCatOrder.hide_note.splice(idx, 1); else kbCatOrder.hide_note.push(cat); renderKbTree(); await saveKbOrderConfig(); }
+
+    function initMobileEditorTools() {
+        document.querySelectorAll('.side-float-toggle').forEach(e => e.remove());
+        const fab = document.createElement('div'); fab.className = 'side-float-toggle'; fab.innerHTML = '<i class="fas fa-pen"></i>'; 
+        fab.style.cssText = `
+            display: none; 
+            position: fixed; 
+            top: 50%;                     /* 🌟 定位在 50% */
+            right: 15px; 
+            transform: translateY(-50%);  /* 🌟 垂直位置修正 */
+            width: 45px; height: 45px; 
+            background: var(--forest); 
+            color: white; 
+            border-radius: 50%; 
+            align-items: center; justify-content: center; 
+            z-index: 6001; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+            border: 2px solid var(--accent); 
+            cursor: pointer; 
+            font-size: 18px; 
+            transition: 0.3s;
+        `;
+        document.body.appendChild(fab);
+
+        if (window.innerWidth <= 1024) fab.style.display = 'flex';
+        window.addEventListener('resize', () => { if (window.innerWidth <= 1024) fab.style.display = 'flex'; else fab.style.display = 'none'; });
+
+        const toolbarHeader = document.querySelector('.editor-sticky-header');
+        if(toolbarHeader) toolbarHeader.classList.remove('show-drawer');
+
+        fab.addEventListener('click', function(e) {
+            e.preventDefault(); if(!toolbarHeader) return; toolbarHeader.classList.toggle('show-drawer');
+            if (toolbarHeader.classList.contains('show-drawer')) { fab.innerHTML = '<i class="fas fa-times"></i>'; fab.style.background = '#e74c3c'; fab.style.borderColor = '#c0392b'; } 
+            else { fab.innerHTML = '<i class="fas fa-pen"></i>'; fab.style.background = 'var(--forest)'; fab.style.borderColor = 'var(--accent)'; }
+        });
+    }
+
+    // --- 啟動程序 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin();
+        initMobileEditorTools();
+        fetchKbData();
+    });
+</script>
+</body>
+</html>

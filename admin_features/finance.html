@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財務與優惠券管理</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- 1. 基礎與通用樣式 --- */
+        :root { 
+            --forest: #1a2f23; --accent: #c6a87c; 
+            --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; 
+        }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
+            background: #f4f7f6; margin: 0; padding: 20px; color: #333;
+        }
+        .card { 
+            background: white; padding: 25px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); 
+            overflow-x: auto; 
+        }
+        .btn { 
+            padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; 
+            font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; 
+            margin-right: 5px; 
+        }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+
+        /* --- 2. 表格與標籤 --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #666; font-weight: bold; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
+        tr:hover { background: #fdfaf1; }
+        .tag-ota { background: #f39c12; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight:bold; }
+        .tag-coupon { background: #e91e63; padding: 4px 8px; font-size: 12px; border-radius: 20px; color: white; font-weight:bold;}
+        .num-money { color: #27ae60; font-weight: 900; font-family: monospace; letter-spacing: -0.5px; }
+        .num-rate { color: #d35400; font-weight: 900; font-family: monospace; }
+        .num-discount { color: #e91e63; font-weight: 900; font-family: monospace; }
+
+        /* --- 3. 財務專屬佈局 --- */
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; }
+        input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+        .finance-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .finance-nav button { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold; color: #666; transition: 0.2s; }
+        .finance-nav button.active { background: var(--forest); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="finance-nav">
+        <button onclick="switchFinanceSub('ota')" id="btn-sub-ota" class="active">💰 OTA 平台設定</button>
+        <button onclick="switchFinanceSub('coupon')" id="btn-sub-coupon">🎫 優惠券管理</button>
+    </div>
+
+    <div id="sub-ota">
+        <div style="background:#fffcf5; padding:25px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
+            <h4 style="margin-top:0; color:#e65100; border-bottom:1px dashed #e65100; padding-bottom:10px; margin-bottom:20px;">➕ 新增 / 修改平台</h4>
+            <input type="hidden" id="ota-id">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                <div><label>平台名稱</label><input type="text" id="ota-name" placeholder="例: 蝦皮購物"></div>
+                <div><label>英文代號 (Code)</label><input type="text" id="ota-code" placeholder="例: shopee"></div>
+                <div><label>佣金費率 (%)</label><input type="number" id="ota-rate" placeholder="5.5"></div>
+                <div><label>前台網址 (客人看的)</label><input type="text" id="ota-front" placeholder="https://..."></div>
+                <div style="grid-column: 1 / -1;"><label>後台網址 (您登入用的)</label><input type="text" id="ota-admin" placeholder="https://..."></div>
+            </div>
+            <div style="text-align:right; margin-top:25px; padding-top:15px; border-top:1px dashed #fae1c3;">
+                <button class="btn btn-outline" id="btn-ota-cancel" onclick="cancelOTA()" style="display:none; margin-right:5px;">取消</button>
+                <button class="btn btn-warning" id="btn-ota-save" onclick="saveOTA()" style="width:150px;">💾 儲存設定</button>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th width="15%">平台名稱</th><th width="10%">代號</th><th width="10%">佣金</th><th width="45%">網址連結</th><th width="20%">操作</th></tr></thead>
+            <tbody id="ota-list"></tbody>
+        </table>
+    </div>
+
+    <div id="sub-coupon" style="display:none;">
+        <input type="hidden" id="cp-edit-id">
+        <div style="background:#fffcf5; padding:25px; border:1px solid #fae1c3; border-radius:10px; margin-bottom:20px;">
+            <h4 style="margin-top:0; color:#e65100; border-bottom:1px dashed #e65100; padding-bottom:10px; margin-bottom:20px;">🎫 優惠券編輯器</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                <div><label>優惠券名稱</label><input type="text" id="cp-name" placeholder="例如：新春調頻 9 折"></div>
+                <div><label>優惠代碼 (Code)</label><input type="text" id="cp-code" placeholder="例如：2026NEW" style="text-transform:uppercase;"></div>
+                <div><label>折扣類型</label><select id="cp-type" onchange="updateCpHint()"><option value="percentage">打折 (Percentage)</option><option value="fixed">折抵金額 (Fixed Amount)</option></select></div>
+                <div><label id="cp-val-hint">折扣數值 (90 = 9折)</label><input type="number" id="cp-val" placeholder="輸入數值"></div>
+                <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
+                    <label style="margin-bottom: 8px; display:block;">使用期限</label>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="date" id="cp-exp" style="flex:1; margin:0;">
+                        <div style="display:flex; align-items:center; gap:5px; white-space:nowrap;">
+                            <input type="checkbox" id="cp-no-limit" onchange="toggleCpExp()" style="width:18px; height:18px; cursor:pointer; margin:0;"> 
+                            <label for="cp-no-limit" style="margin:0; cursor:pointer; font-weight:normal;">無期限</label>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
+                    <label style="margin-bottom: 8px; display:block;">適用對象</label>
+                    <div style="display:flex; gap:20px; align-items:center; height: 42px;"> 
+                        <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
+                            <input type="checkbox" id="cp-mem" checked style="width:18px; height:18px; margin:0;"> 需會員
+                        </label>
+                        <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-weight:normal;">
+                            <input type="checkbox" id="cp-guest" style="width:18px; height:18px; margin:0;"> 訪客可用
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:right; margin-top:25px; padding-top:15px; border-top:1px dashed #fae1c3;">
+                <button class="btn btn-outline" id="btn-cp-cancel" onclick="resetCouponForm()" style="display:none; margin-right: 10px;">取消</button>
+                <button class="btn btn-forest" id="btn-cp-save" onclick="saveCoupon()" style="padding:10px 40px; font-size:1.1rem;">建立優惠券</button>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th>名稱</th><th>代碼</th><th>內容</th><th>期限</th><th>對象</th><th>次數</th><th>操作</th></tr></thead>
+            <tbody id="cp-list"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 1. 初始化資料庫連線
+    const SB_URL = "https://geyrpowhaqfhnxghpokr.supabase.co";
+    const SB_KEY = "sb_publishable_aXucdq8UtvMbCKbriqpJCw_gtpYBw-r";
+    const myDB = supabase.createClient(SB_URL, SB_KEY);
+    
+    // 專屬於這個頁面的快取，只存 OTA 和 優惠券
+    let cache = { otas: [], coupons: [] };
+
+    // 2. 專屬讀取資料函數 (比原本的 fetchAll 輕量非常多！)
+    async function fetchFinanceData() {
+        try {
+            const [o, cp] = await Promise.all([
+                myDB.from('ota_settings').select('*'),
+                myDB.from('coupons').select('*').order('created_at', {ascending:false})
+            ]);
+            cache.otas = o.data || [];
+            cache.coupons = cp.data || [];
+            renderFinance();
+        } catch(e) { console.error("讀取失敗:", e); }
+    }
+
+    // 3. 畫面渲染邏輯
+    function renderFinance() {
+        // 渲染 OTA
+        document.getElementById('ota-list').innerHTML = cache.otas.map(o => `
+            <tr>
+                <td style="font-weight:bold; color:#2c3e50;">${o.name}</td>
+                <td><span class="tag tag-ota">${o.code}</span></td>
+                <td><span class="num-rate">${o.commission_rate}%</span></td>
+                <td style="font-size:12px; color:#999; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${o.front_url || '-'}</td>
+                <td>
+                    <button class="btn btn-info" onclick="editOTA('${o.id}')">修</button>
+                    <button class="btn btn-danger" onclick="delFinanceData('ota_settings', '${o.id}')">刪</button>
+                </td>
+            </tr>
+        `).join('');
+
+        // 渲染 優惠券
+        document.getElementById('cp-list').innerHTML = cache.coupons.map(c => {
+            let displayVal = c.discount_type === 'percentage' 
+                ? `<span class="num-discount">${c.discount_value / 10} 折</span>` 
+                : `<span class="num-money">-$${c.discount_value}</span>`;
+
+            let roleText = `<span style="color:#666; font-size:12px;">不限</span>`;
+            if (c.allow_member && !c.allow_guest) roleText = `<span style="color:#2980b9; font-weight:bold; font-size:12px;">僅會員</span>`;
+            else if (!c.allow_member && c.allow_guest) roleText = `<span style="color:#e67e22; font-weight:bold; font-size:12px;">僅新客(訪客)</span>`;
+
+            return `
+            <tr>
+                <td style="font-weight:bold; color:#2c3e50;">${c.name}</td>
+                <td><span class="tag tag-coupon">${c.code}</span></td>
+                <td>${displayVal}</td>
+                <td style="font-size:13px;">${c.expires_at ? c.expires_at.slice(0,10) : '<span style="color:#ccc">無期限</span>'}</td>
+                <td>${roleText}</td>
+                <td style="font-size:13px; color:#555;">${c.usage_count || 0} 次</td>
+                <td>
+                    <button class="btn btn-info" onclick="editCoupon('${c.id}')">修</button>
+                    <button class="btn btn-danger" onclick="delFinanceData('coupons', '${c.id}')">刪</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // 4. 切換頁籤
+    function switchFinanceSub(tab) { 
+        document.getElementById('sub-ota').style.display = tab === 'ota' ? 'block' : 'none'; 
+        document.getElementById('sub-coupon').style.display = tab === 'coupon' ? 'block' : 'none'; 
+        document.getElementById('btn-sub-ota').className = tab === 'ota' ? 'active' : ''; 
+        document.getElementById('btn-sub-coupon').className = tab === 'coupon' ? 'active' : ''; 
+    }
+
+    // 5. 專屬刪除函數
+    async function delFinanceData(table, id) {
+        if(confirm("確定刪除嗎？")) {
+            await myDB.from(table).delete().eq('id', id);
+            fetchFinanceData(); // 刪除後重新讀取
+        }
+    }
+
+    // --- OTA 邏輯 ---
+    async function saveOTA() {
+        const id = document.getElementById('ota-id').value;
+        const name = document.getElementById('ota-name').value.trim();
+        const code = document.getElementById('ota-code').value.trim();
+        const rate = parseFloat(document.getElementById('ota-rate').value);
+        if (!name || !code || isNaN(rate)) return alert("❌ 平台名稱、代號與佣金為必填！");
+        const payload = { name, code, commission_rate: rate, front_url: document.getElementById('ota-front').value.trim(), admin_url: document.getElementById('ota-admin').value.trim() };
+        if (id) await myDB.from('ota_settings').update(payload).eq('id', id);
+        else await myDB.from('ota_settings').insert([payload]);
+        alert(id ? "✅ 修改成功！" : "✅ 新增成功！");
+        cancelOTA(); fetchFinanceData();
+    }
+    function editOTA(id) {
+        const o = cache.otas.find(x => x.id === id); if (!o) return;
+        document.getElementById('ota-id').value = o.id; document.getElementById('ota-name').value = o.name;
+        document.getElementById('ota-code').value = o.code; document.getElementById('ota-rate').value = o.commission_rate;
+        document.getElementById('ota-front').value = o.front_url || ''; document.getElementById('ota-admin').value = o.admin_url || '';
+        document.getElementById('btn-ota-save').innerText = "💾 儲存修改"; document.getElementById('btn-ota-cancel').style.display = "inline-block";
+    }
+    function cancelOTA() {
+        document.getElementById('ota-id').value = ''; document.getElementById('ota-name').value = ''; document.getElementById('ota-code').value = '';
+        document.getElementById('ota-rate').value = ''; document.getElementById('ota-front').value = ''; document.getElementById('ota-admin').value = '';
+        document.getElementById('btn-ota-save').innerText = "💾 儲存設定"; document.getElementById('btn-ota-cancel').style.display = "none";
+    }
+
+    // --- 優惠券邏輯 ---
+    function updateCpHint() { document.getElementById('cp-val-hint').innerText = document.getElementById('cp-type').value === 'percentage' ? '折扣數值 (90 = 9折)' : '折抵金額 (例: 100)'; }
+    function toggleCpExp() { const isNoLimit = document.getElementById('cp-no-limit').checked; document.getElementById('cp-exp').disabled = isNoLimit; if(isNoLimit) document.getElementById('cp-exp').value = ''; }
+    async function saveCoupon() {
+        const id = document.getElementById('cp-edit-id').value; const name = document.getElementById('cp-name').value.trim(); const code = document.getElementById('cp-code').value.trim().toUpperCase();
+        const val = parseInt(document.getElementById('cp-val').value); const isNoLimit = document.getElementById('cp-no-limit').checked;
+        const isMem = document.getElementById('cp-mem').checked; const isGuest = document.getElementById('cp-guest').checked;
+        if (!name || !code || isNaN(val)) return alert("❌ 名稱、代碼與折扣數值為必填！");
+        if (!isMem && !isGuest) return alert("❌ 請至少選擇一種適用對象！");
+        let exp = (!isNoLimit && document.getElementById('cp-exp').value) ? `${document.getElementById('cp-exp').value}T23:59:59+08:00` : null;
+        const payload = { name, code, discount_type: document.getElementById('cp-type').value, discount_value: val, expires_at: exp, allow_member: isMem, allow_guest: isGuest };
+        if (id) await myDB.from('coupons').update(payload).eq('id', id); else await myDB.from('coupons').insert([payload]);
+        alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); resetCouponForm(); fetchFinanceData();
+    }
+    function editCoupon(id) {
+        const c = cache.coupons.find(x => x.id === id); if (!c) return;
+        document.getElementById('cp-edit-id').value = c.id; document.getElementById('cp-name').value = c.name; document.getElementById('cp-code').value = c.code;
+        document.getElementById('cp-type').value = c.discount_type; document.getElementById('cp-val').value = c.discount_value;
+        if (c.expires_at) { document.getElementById('cp-no-limit').checked = false; document.getElementById('cp-exp').value = c.expires_at.slice(0, 10); document.getElementById('cp-exp').disabled = false; } 
+        else { document.getElementById('cp-no-limit').checked = true; document.getElementById('cp-exp').value = ''; document.getElementById('cp-exp').disabled = true; }
+        document.getElementById('cp-mem').checked = c.allow_member !== false; document.getElementById('cp-guest').checked = c.allow_guest === true;
+        updateCpHint(); document.getElementById('btn-cp-save').innerText = "💾 儲存修改"; document.getElementById('btn-cp-cancel').style.display = "inline-block";
+    }
+    function resetCouponForm() {
+        document.getElementById('cp-edit-id').value = ''; document.getElementById('cp-name').value = ''; document.getElementById('cp-code').value = '';
+        document.getElementById('cp-type').value = 'percentage'; document.getElementById('cp-val').value = ''; document.getElementById('cp-no-limit').checked = false;
+        document.getElementById('cp-exp').value = ''; document.getElementById('cp-exp').disabled = false; document.getElementById('cp-mem').checked = true; document.getElementById('cp-guest').checked = false;
+        updateCpHint(); document.getElementById('btn-cp-save').innerText = "建立優惠券"; document.getElementById('btn-cp-cancel').style.display = "none";
+    }
+
+    // 6. 網頁載入完成後，自動讀取資料
+    document.addEventListener("DOMContentLoaded", fetchFinanceData);
+</script>
+</body>
+</html>

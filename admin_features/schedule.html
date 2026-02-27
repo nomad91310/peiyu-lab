@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排程管理</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- 1. 你原版的變數與通用樣式 --- */
+        :root { 
+            --forest: #1a2f23; --accent: #c6a87c; 
+            --danger: #e74c3c; --info: #3498db; --success: #27ae60; --dark: #2c3e50; 
+        }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 10px; color: #333; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .btn { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition:0.2s; font-size: 13px; }
+        .btn:hover { opacity: 0.8; }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+        
+        input[type="date"] { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; box-sizing: border-box; }
+
+        /* --- 2. 你原版的排程專用樣式 --- */
+        /* 快速排班格子 */
+        .batch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; align-content: start; }
+        .batch-slot { position: relative; height: 35px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
+        .batch-slot input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; left: 0; top: 0; }
+        .batch-slot label { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; background: #fff; font-size: 13px; color: #333; font-weight: bold; transition: 0.2s; }
+        .batch-slot input:checked + label { background: var(--forest); color: white; border-color: var(--forest); }
+
+        /* 月曆本體 */
+        #calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #fff; margin-top: 15px; padding-bottom: 10px; }
+        .cal-week-header { text-align: center; font-weight: bold; color: var(--forest); background-color: #e8f5e9; padding: 8px 0; border-radius: 4px; font-size: 14px; }
+        .cal-cell { min-height: 65px; padding: 4px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; background: #fff; }
+        .cal-cell:hover { background: #fdfaf1; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.05); }
+        .cal-cell.active { border: 2px solid var(--forest); background: #f4f9f4; }
+        .cal-past { background: #f8f8f8; color: #ddd; pointer-events: none; cursor: default; border-color: #eee; }
+        .cal-past .cal-stat { opacity: 0.3; filter: grayscale(100%); }
+        .cal-date { font-size: 14px; font-weight: bold; color: var(--dark); margin-bottom: 4px; width: 100%; text-align: center; border-bottom: 1px solid #f5f5f5; padding-bottom: 2px; }
+        
+        /* 月曆內標籤 */
+        .cal-stat { font-size: 11px; padding: 2px 6px; border-radius: 10px; color: white; margin-bottom: 2px; width: 90%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: normal; }
+        .st-free { background-color: #3498db; }
+        .st-book { background-color: #e74c3c; }
+        .st-off { background-color: #95a5a6; font-weight: bold; color:#fff;}
+
+        /* 單日詳情 */
+        .day-detail-list { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; justify-content: flex-start; }
+        .detail-row { flex: 0 0 45px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: #fff; border: 1px solid #eee; border-radius: 6px; }
+        .detail-row:hover { background: #f0f7ff; border-color: var(--info); }
+        .detail-row.booked { background: #fff5f5; border-color: #e74c3c; color: #c0392b; text-decoration: line-through; opacity: 0.7; }
+        .detail-chk { width: 18px; height: 18px; cursor: pointer; }
+        .day-off-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #999; }
+        .day-off-icon { font-size: 50px; margin-bottom: 10px; color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div style="display: flex; gap: 10px; height: calc(100vh - 20px);">
+    
+    <div class="card" style="width:240px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto;">
+        <h4 style="color:var(--forest); margin-top:0;">⚡ 快速排班</h4>
+        <div style="display:flex; flex-direction: column; gap:8px; margin-bottom:15px;">
+            <input type="date" id="batch-start" style="width:100%;">
+            <div style="text-align:center; font-size:12px; color:#999;">⬇️ 至 ⬇️</div>
+            <input type="date" id="batch-end" style="width:100%;">
+        </div>
+        <div style="display:flex; gap:5px; margin-bottom:5px;">
+            <button class="btn btn-outline" style="font-size:10px; flex:1;" onclick="toggleAllSlots(true)">全選</button>
+            <button class="btn btn-outline" style="font-size:10px; flex:1;" onclick="toggleAllSlots(false)">清空</button>
+        </div>
+        <div id="time-grid" class="batch-grid" style="flex:1; overflow-y:auto;"></div>
+        <button class="btn btn-forest" style="width:100%; margin-top:15px;" onclick="batchAddSchedule()">🚀 生成</button>
+    </div>
+
+    <div class="card" style="flex:1; display:flex; flex-direction:column; min-width:0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <button class="btn btn-outline" onclick="changeMonth(-1)">◀</button>
+            <h3 id="cal-title" style="margin:0; font-size:1.2rem;">Loading...</h3>
+            <button class="btn btn-outline" onclick="changeMonth(1)">▶</button>
+        </div>
+        <div id="calendar-body"></div>
+    </div>
+
+    <div class="card" style="width:400px; flex-shrink:0; background:#fdfdfd; display:flex; flex-direction:column;">
+        <h4 id="detail-date-title" style="margin-top:0; border-bottom:2px solid var(--accent); padding-bottom:10px;">請選擇日期</h4>
+        <div id="detail-actions" style="display:none; gap:5px; margin-bottom:10px; flex-shrink:0;">
+            <button class="btn btn-outline" style="font-size:12px; flex:1;" onclick="toggleDetailChecks(true)">全選</button>
+            <button class="btn btn-outline" style="font-size:12px; flex:1;" onclick="toggleDetailChecks(false)">取消</button>
+            <button class="btn btn-danger" style="font-size:12px; flex:1;" onclick="deleteSelectedSlots()">🗑️ 刪除</button>
+            <button class="btn btn-warning" style="font-size:12px; flex:1;" onclick="setDayOff()">☕ 休假</button>
+        </div>
+        <div id="day-detail-container" class="day-detail-list" style="flex:1; overflow-y:auto;"></div>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+
+<script>
+    // 🌟 原版變數宣告
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
+    let selectedDateStr = "";
+    let cache = { slots: [] }; // 專屬快取
+
+    // --- 1. 專屬資料讀取 (取代 fetchAll) ---
+    async function fetchScheduleData() {
+        try {
+            // 只抓取排程資料，讓畫面載入超快
+            const { data, error } = await myDB.from('schedule_slots').select('*').order('slot_date').order('slot_time');
+            if (error) throw error;
+            
+            cache.slots = data || [];
+            
+            renderCalendar();
+            // 如果右側有選中日期，重新整理該日資料
+            if (selectedDateStr) selectDate(selectedDateStr);
+        } catch (e) {
+            console.error("讀取排程失敗:", e);
+        }
+    }
+
+    // --- 2. 100% 你寫的原版邏輯 (一字不改) ---
+    
+    function renderTimeGrid() { 
+        let h = ''; 
+        for(let i=0; i<=23; i++) { 
+            ['00','30'].forEach(m => { 
+                let timeVal = i + (m === '30' ? 0.5 : 0);
+                if (timeVal <= 3 || timeVal >= 13) {
+                    let t = `${i.toString().padStart(2,'0')}:${m}`; 
+                    let v = `${i}:${m}`; 
+                    h += `<div class="batch-slot"><input type="checkbox" name="ts" id="t-${v}" value="${v}"><label for="t-${v}">${t}</label></div>`; 
+                }
+            }) 
+        } 
+        document.getElementById('time-grid').innerHTML = h; 
+        
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('batch-start').value = today;
+        document.getElementById('batch-end').value = today;
+    }
+
+    function toggleAllSlots(c){document.querySelectorAll('input[name="ts"]').forEach(e=>e.checked=c);}
+    
+    async function batchAddSchedule() {
+        const d1 = document.getElementById('batch-start').value; 
+        const d2 = document.getElementById('batch-end').value || d1; 
+        const ts = Array.from(document.querySelectorAll('input[name="ts"]:checked')).map(e => e.value); 
+        
+        if (!d1 || !ts.length) return alert("請選擇日期與時段");
+
+        let ins = []; 
+        let skipped = 0; 
+        let currentDate = new Date(d1 + "T12:00:00"); 
+        let endDate = new Date(d2 + "T12:00:00");
+
+        while (currentDate <= endDate) {
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`; 
+
+            ts.forEach(t => {
+                const finalTime = `${t}:00`;
+                const exists = cache.slots.some(s => s.slot_date === dateStr && s.slot_time.startsWith(t));
+                
+                if (!exists) {
+                    ins.push({ slot_date: dateStr, slot_time: finalTime, is_booked: false }); 
+                } else {
+                    skipped++;
+                }
+            }); 
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (ins.length === 0) return alert(`所有選定時段均已存在。(跳過 ${skipped} 筆)`);
+        
+        const { error } = await myDB.from('schedule_slots').insert(ins); 
+        if (error) alert("生成失敗: " + error.message); 
+        else { 
+            alert(`✅ 成功新增 ${ins.length} 筆時段` + (skipped > 0 ? `\n(已自動跳過 ${skipped} 筆重複資料)` : "")); 
+            fetchScheduleData(); // 改呼叫專屬讀取
+            toggleAllSlots(false); 
+        }
+    }
+
+    function renderCalendar() {
+        const t = new Date(); document.getElementById('cal-title').innerText = `${currentYear}/${currentMonth}`;
+        const fd = new Date(currentYear, currentMonth - 1, 1).getDay(); const dim = new Date(currentYear, currentMonth, 0).getDate(); const today = new Date().toISOString().split('T')[0];
+        const weeks = ['日', '一', '二', '三', '四', '五', '六']; let h = ''; weeks.forEach(w => { h += `<div class="cal-week-header">${w}</div>`; });
+        for (let i = 0; i < fd; i++) h += '<div class="cal-cell" style="background:#f9f9f9; border:none; cursor:default;"></div>';
+        for (let d = 1; d <= dim; d++) {
+            const ds = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+            const s = cache.slots.filter(x => x.slot_date === ds); const isOff = s.some(x => x.type === 'off'); const f = s.filter(x => !x.is_booked && x.type !== 'off').length; const bk = s.filter(x => x.is_booked && x.type !== 'off').length; const isPast = ds < today; const activeClass = ds === selectedDateStr ? 'active' : ''; const pastClass = isPast ? 'cal-past' : '';
+            h += `<div class="cal-cell ${activeClass} ${pastClass}" onclick="selectDate('${ds}')"><div class="cal-date">${d}</div>${isOff ? `<div class="cal-stat st-off">☕ 休假中</div>` : ''}${!isOff && f ? `<div class="cal-stat st-free">空檔 ${f}</div>` : ''}${!isOff && bk ? `<div class="cal-stat st-book">預約 ${bk}</div>` : ''}</div>`;
+        }
+        document.getElementById('calendar-body').innerHTML = h;
+    }
+
+    function changeMonth(o){currentMonth+=o;if(currentMonth>12){currentMonth=1;currentYear++}else if(currentMonth<1){currentMonth=12;currentYear--}renderCalendar();}
+    
+    function selectDate(d) {
+        selectedDateStr = d; renderCalendar(); document.getElementById('detail-date-title').innerText = `${d}`; document.getElementById('detail-actions').style.display = 'flex';
+        const s = cache.slots.filter(x => x.slot_date === d); const dayOffRecord = s.find(x => x.type === 'off');
+        if (dayOffRecord) { document.getElementById('day-detail-container').innerHTML = `<div class="day-off-state"><div class="day-off-icon">☕</div><h3>本日已設為休假</h3><p style="font-size:12px; color:#ccc;">未來首頁將顯示為不開放</p><button class="btn btn-outline" onclick="cancelDayOff('${dayOffRecord.id}')" style="margin-top:15px;">❌ 取消休假</button></div>`; return; }
+        if (s.length === 0) { document.getElementById('day-detail-container').innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">本日無排程</p>'; return; }
+        const sortedS = s.sort((a, b) => a.slot_time.localeCompare(b.slot_time));
+        document.getElementById('day-detail-container').innerHTML = sortedS.map(x => `<div class="detail-row ${x.is_booked ? 'booked' : ''}" style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:4px; ${x.is_booked ? 'background:#ffebee; border-color:#ef9a9a;' : ''}"><input type="checkbox" class="detail-chk" value="${x.id}" ${x.is_booked ? 'disabled' : ''}><span style="font-weight:bold; font-size:1.1rem; ${x.is_booked ? 'text-decoration:line-through; color:#c62828;' : ''}">${x.slot_time.slice(0, 5)}</span></div>`).join('');
+    }
+
+    function toggleDetailChecks(checked) { document.querySelectorAll('.detail-chk:not(:disabled)').forEach(el => el.checked = checked); }
+    
+    async function deleteSelectedSlots() { 
+        const ids = Array.from(document.querySelectorAll('.detail-chk:checked')).map(e => e.value); 
+        if (ids.length === 0) return alert("請先勾選要刪除的時段"); 
+        if (!confirm(`確定要刪除這 ${ids.length} 個時段嗎？`)) return; 
+        const { error } = await myDB.from('schedule_slots').delete().in('id', ids); 
+        if (error) alert("刪除失敗: " + error.message); 
+        else { fetchScheduleData(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); } 
+    }
+    
+    async function setDayOff() { 
+        if (!selectedDateStr) return alert("請先選擇日期"); 
+        const hasRealBooking = cache.slots.some(s => s.slot_date === selectedDateStr && s.is_booked && s.type !== 'off'); 
+        if (hasRealBooking) return alert("⚠️ 無法休假：當天已有客戶預約，請先手動取消訂單。"); 
+        if (!confirm(`確定要將 ${selectedDateStr} 設為休假嗎？`)) return; 
+        await myDB.from('schedule_slots').delete().eq('slot_date', selectedDateStr); 
+        const { error } = await myDB.from('schedule_slots').insert([{ slot_date: selectedDateStr, slot_time: '00:00:00', is_booked: true, type: 'off' }]); 
+        if (error) alert("設定失敗: " + error.message); 
+        else { fetchScheduleData(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); } 
+    }
+    
+    async function cancelDayOff(id) { 
+        if (!confirm("確定取消休假？")) return; 
+        await myDB.from('schedule_slots').delete().eq('id', id); 
+        fetchScheduleData(); setTimeout(() => { if(selectedDateStr) selectDate(selectedDateStr); }, 500); 
+    }
+
+    // --- 3. 啟動函數 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        requireLogin();
+        renderTimeGrid();
+        fetchScheduleData(); // 載入資料庫
+    });
+</script>
+</body>
+</html>

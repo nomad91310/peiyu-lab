@@ -58,7 +58,7 @@
         .btn-magic { font-weight: bold; font-size: 12px; background: white; border: 1px solid #ccc; color: var(--forest); }
         .btn-magic:hover { border-color: var(--accent); background: #fffcf5; }
         #editor { flex: 1; padding: 40px 50px; overflow-y: auto; outline: none; color: #2c3e50; font-size: 16px; }
-        #editor:empty:before { content: '請在此輸入內容...'; color: #ccc; }
+        #editor:empty:before { content: '請在此輸入內容... (💡 提示：雙擊圖片或表格可開啟設定選單)'; color: #ccc; }
         .source-view { flex: 1; width: 100%; box-sizing: border-box; background: #2d2d2d; color: #e6e6e6; padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; border: none; resize: none; display: none; outline: none; overflow-y: auto; }
         select.tb-select { padding: 4px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; background: white; cursor: pointer; height: 30px; }
         .color-picker-wrapper { position: relative; width: 30px; height: 30px; overflow: hidden; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; display:inline-block; }
@@ -68,7 +68,9 @@
         .obj-selected { outline: 3px dashed #3498db !important; outline-offset: 2px; }
         #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
         .peiyu-table { border-collapse: collapse; margin: 15px 0; width: 100%; max-width: 100%; }
-        .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; }
+        .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; vertical-align: middle; }
+        .peiyu-table td div { margin: 4px 0 !important; }
+        .peiyu-table td p { margin-bottom: 4px !important; }
         .resizable-wrapper { position: relative; display: block; margin: 10px 0; max-width: 100%; clear: both; }
         .resizable-wrapper img { display: block; max-width: 100%; border-radius: 8px; width: 100%; } 
         
@@ -418,7 +420,9 @@
             const wrapper = doc.querySelector('.peiyu-article'); editor.innerHTML = wrapper ? wrapper.innerHTML : sourceArea.value;
         }
 
-        const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+        // 🔥 更新了這裡的 exportHTML，加入表格專用壓縮設定
+        const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n.peiyu-article table td { vertical-align: middle; }\n.peiyu-article table td div { margin: 4px 0 !important; }\n.peiyu-article table td p { margin-bottom: 4px !important; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+        
         const p = { title: document.getElementById('kb-title').value.trim(), big_category: document.getElementById('kb-big').value.trim(), mid_category: document.getElementById('kb-mid').value.trim(), is_published: document.getElementById('kb-pub').checked, body: exportHTML.trim() };
         const id = document.getElementById('kb-id').value;
         if (!p.title || !p.big_category) return alert("❌ 標題與大分類為必填！");
@@ -437,7 +441,8 @@
     function toggleSource() { 
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
-            const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+            // 🔥 這裡也同步更新
+            const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n.peiyu-article table td { vertical-align: middle; }\n.peiyu-article table td div { margin: 4px 0 !important; }\n.peiyu-article table td p { margin-bottom: 4px !important; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
@@ -448,9 +453,9 @@
     // --- 編輯器核心 ---
     let spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 };
     function applySpacingToEditor() { 
-        const css = `#editor { line-height: ${spacingCfg.lh}; } #editor p, #editor div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; } #editor h1, #editor h2, #editor h3, #editor h4, #editor h5, #editor h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; } #editor h1+h1, #editor h2+h2, #editor h3+h3, #editor h4+h4, #editor h5+h5, #editor h6+h6 { margin-top: 0; } #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } #editor li { margin-bottom: ${spacingCfg.limb}em; } #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; }`; 
+        const css = `#editor { line-height: ${spacingCfg.lh}; } #editor p, #editor div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; } #editor h1, #editor h2, #editor h3, #editor h4, #editor h5, #editor h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; } #editor h1+h1, #editor h2+h2, #editor h3+h3, #editor h4+h4, #editor h5+h5, #editor h6+h6 { margin-top: 0; } #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } #editor li { margin-bottom: ${spacingCfg.limb}em; } #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; } #editor table td { vertical-align: middle; } #editor table td div { margin: 4px 0 !important; } #editor table td p { margin-bottom: 4px !important; }`; 
         const styleTag = document.getElementById('dynamic-spacing'); if(styleTag) styleTag.innerHTML = css; 
-    }        
+    }
 
     let history = ['<p>請在此開始撰寫...</p>']; let historyIndex = 0; let typingTimeout;
     function saveHistory() {
@@ -475,26 +480,74 @@
         if (editor) { editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); }); }
     });
 
-    let savedRange = null;
-    function saveSelection() { const editor = document.getElementById('editor'); const sel = window.getSelection(); if (sel.getRangeAt && sel.rangeCount) { const range = sel.getRangeAt(0); if (editor.contains(range.commonAncestorContainer)) savedRange = range; } }
-    function restoreSelection() {
-        editor.focus({ preventScroll: true });
-        if (savedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); } 
-        else { const range = document.createRange(); range.selectNodeContents(editor); range.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
-    }
-
-    function exec(command, value = null) { document.execCommand(command, false, value); document.getElementById('editor').focus(); saveHistory(); }
     
-    function applyFontSize(pt) {
-        restoreSelection(); const sel = window.getSelection(); if (!sel.toString()) return; 
-        document.execCommand('styleWithCSS', false, false); document.execCommand('fontSize', false, '7');
-        const fonts = document.getElementById('editor').querySelectorAll('font[size="7"]');
-        fonts.forEach(f => { const span = document.createElement('span'); span.style.fontSize = pt + 'pt'; span.innerHTML = f.innerHTML; f.replaceWith(span); });
-        const spans = document.getElementById('editor').querySelectorAll('span');
-        spans.forEach(s => { if (s.style.fontSize === '-webkit-xxx-large' || s.style.fontSize === 'xxx-large' || s.style.fontSize === '48px') { s.style.fontSize = pt + 'pt'; } });
-        document.getElementById('editor').focus({ preventScroll: true }); saveHistory();
+
+    // 🌟 1. 全域自動記憶反白區塊 (追蹤雷達)
+    let savedRange = null;
+    document.addEventListener("selectionchange", () => {
+        const editor = document.getElementById('editor');
+        const sel = window.getSelection();
+        if (editor && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            if (editor.contains(range.commonAncestorContainer)) savedRange = range;
+        }
+    });
+
+    // 🌟 2. 保留空函數避免你的 HTML 按鈕報錯
+    function saveSelection() { } 
+
+    // 🌟 3. 恢復反白記憶
+    function restoreSelection() {
+        const editor = document.getElementById('editor');
+        editor.focus({ preventScroll: true });
+        if (savedRange) { 
+            const sel = window.getSelection(); 
+            sel.removeAllRanges(); 
+            sel.addRange(savedRange); 
+        } else { 
+            const range = document.createRange(); 
+            range.selectNodeContents(editor); 
+            range.collapse(false); 
+            const sel = window.getSelection(); 
+            sel.removeAllRanges(); 
+            sel.addRange(range); 
+        }
     }
 
+    function exec(command, value = null) { 
+        document.execCommand(command, false, value); 
+        document.getElementById('editor').focus(); 
+        saveHistory(); 
+    }
+    
+    // 🌟 最純淨的字體大小功能
+    function applyFontSize(pt) {
+        restoreSelection(); 
+        const sel = window.getSelection(); 
+        if (!sel.toString()) return alert("⚠️ 請先反白選取要放大的文字喔！"); 
+
+        document.execCommand('styleWithCSS', false, false); 
+        document.execCommand('fontSize', false, 7);
+        
+        const fonts = document.getElementById('editor').querySelectorAll('font[size="7"]');
+        fonts.forEach(f => { 
+            const span = document.createElement('span'); 
+            span.style.fontSize = pt + 'pt'; 
+            span.innerHTML = f.innerHTML; 
+            f.replaceWith(span); 
+        });
+        const spans = document.getElementById('editor').querySelectorAll('span');
+        spans.forEach(s => { 
+            if (s.style.fontSize === '-webkit-xxx-large' || s.style.fontSize === 'xxx-large' || s.style.fontSize === '48px' || s.style.fontSize === '3em' || s.style.fontSize === '7em') { 
+                s.style.fontSize = pt + 'pt'; 
+            } 
+        });
+        
+        document.getElementById('editor').focus({ preventScroll: true }); 
+        saveHistory(); 
+    }
+
+    // 🌟 5. 首行縮排 (維持原樣)
     function applyFirstLineIndent() { 
         const sel = window.getSelection(); if (!sel.rangeCount) return; 
         let node = sel.focusNode; if(node.nodeType === 3) node = node.parentNode; 
@@ -503,14 +556,21 @@
         else { exec('formatBlock', 'DIV'); setTimeout(applyFirstLineIndent, 50); } 
     }
 
+    // 🌟 6. 修正螢光筆功能
     function applyHighlighter(color) {
-        restoreSelection(); const sel = window.getSelection(); if (!sel.toString()) return; 
-        document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, color); document.execCommand('backColor', false, color); 
+        restoreSelection(); 
+        const sel = window.getSelection(); 
+        if (!sel.toString()) return alert("⚠️ 請先反白選取要畫螢光筆的文字喔！"); 
+        
+        document.execCommand('styleWithCSS', false, true); 
+        document.execCommand('hiliteColor', false, color); 
+        document.execCommand('backColor', false, color); 
         const blocks = document.getElementById('editor').querySelectorAll('p, div, li, ul, ol, td, th, tr, table, h2, h3');
         blocks.forEach(block => { if (sel.containsNode(block, true)) { block.style.backgroundColor = ''; } });
         let node = sel.focusNode; if (node && node.nodeType === 3) node = node.parentNode;
         while (node && node.id !== 'editor') { if (['P', 'DIV', 'LI', 'UL', 'OL', 'TD', 'TH'].includes(node.tagName)) { node.style.backgroundColor = ''; } node = node.parentNode; }
-        document.getElementById('editor').focus({ preventScroll: true }); saveHistory();
+        document.getElementById('editor').focus({ preventScroll: true }); 
+        saveHistory();
     }
 
     function insertLink() { const url = prompt("網址：", "https://"); if(url) exec('createLink', url); }
@@ -555,8 +615,18 @@
     function confirmInsert() {
         restoreSelection(); let html = '';
         if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
-        else if(modalMode === 'h2' || modalMode === 'h3') { const text = document.getElementById('inp-text').value || '標題'; const theme = document.getElementById('inp-theme').value; const styles = { forest: { bg: '#1a2f23', col: '#fff', bor: '#c6a87c' }, gold: { bg: '#c6a87c', col: '#1a2f23', bor: '#1a2f23' }, cream: { bg: '#fffcf5', col: '#1a2f23', bor: '#c6a87c' } }; const s = styles[theme]; if (modalMode === 'h2') html = `<div style="margin: 30px 0 15px 0;"><h2 style="border-left: 8px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 10px 20px; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; display: inline-block; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); margin: 0;">${text}</h2></div><p><br></p>`; else html = `<div style="margin: 25px 0 10px 0;"><h3 style="border: 2px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 8px 35px; border-radius: 50px; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0;">${text}</h3></div><p><br></p>`; }
-        else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
+        // 🌟 修身版的魔法積木 (減小 Margin、鎖死 Line-height)
+        else if(modalMode === 'h2' || modalMode === 'h3') { 
+            const text = document.getElementById('inp-text').value || '標題'; 
+            const theme = document.getElementById('inp-theme').value; 
+            const styles = { forest: { bg: '#1a2f23', col: '#fff', bor: '#c6a87c' }, gold: { bg: '#c6a87c', col: '#1a2f23', bor: '#1a2f23' }, cream: { bg: '#fffcf5', col: '#1a2f23', bor: '#c6a87c' } }; 
+            const s = styles[theme]; 
+            if (modalMode === 'h2') {
+                html = `<div style="margin: 15px 0 10px 0;"><h2 style="border-left: 8px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 8px 18px; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.3; display: inline-block; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); margin: 0;">${text}</h2></div><p><br></p>`; 
+            } else {
+                html = `<div style="margin: 15px 0 5px 0;"><h3 style="border: 2px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 6px 25px; border-radius: 50px; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.3; display: inline-block; font-weight: bold; margin: 0;">${text}</h3></div><p><br></p>`; 
+            }
+        }        else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
         else if(modalMode === 'warn') { const title = document.getElementById('inp-title').value || '注意'; const theme = document.getElementById('inp-theme').value; const styles = { red: { bg: '#fdf2f2', bor: '#fadbd8', txt: '#c0392b' }, yellow: { bg: '#fffbe6', bor: '#ffe58f', txt: '#d48806' }, blue: { bg: '#e6f7ff', bor: '#91d5ff', txt: '#096dd9' } }; const s = styles[theme]; html = `<div class="peiyu-obj" style="background-color: ${s.bg}; border: 1px solid ${s.bor}; border-radius: 8px; padding: 20px; margin: 25px 0;"><strong style="color: ${s.txt}; display: block; margin-bottom: 10px; font-size: 16px;">${title}</strong><div style="color: #555; font-size: 15px; line-height: 1.6;">請輸入內容...</div></div><p><br></p>`; }
         insertHtml(html); document.getElementById('config-modal').style.display = 'none';
     }
@@ -621,14 +691,43 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        const editor = document.getElementById('editor'); const floatMenu = document.getElementById('float-menu');
-        let currentTarget = null; let currentTargetCell = null; 
+        const editor = document.getElementById('editor'); 
+        const floatMenu = document.getElementById('float-menu');
+        let currentTarget = null; 
+        let currentTargetCell = null; 
 
         if (editor) {
+            // 打字時自動存檔
+            editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); });
+            
+            // 🔥 終極修復：強制接管鍵盤 Ctrl+Z，解決「上一步變貼上亂碼」的問題！
+            editor.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                    e.preventDefault(); // 擋掉瀏覽器愚蠢的預設復原
+                    if (e.shiftKey) customRedo();
+                    else customUndo();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                    e.preventDefault(); 
+                    customRedo();
+                }
+            });
+
+            // 🔥 表格優化：單擊 (Click) 只會取消外框、關閉選單，讓你安心打字
             editor.addEventListener('click', function(e) { 
-                document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected')); 
-                floatMenu.style.display = 'none'; currentTarget = null; currentTargetCell = null;
-                let targetImg = e.target.closest('img'); let targetTable = e.target.closest('table'); let targetCell = e.target.closest('td, th');
+                if (!e.target.closest('.obj-selected') && !e.target.closest('#float-menu')) {
+                    document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected')); 
+                    floatMenu.style.display = 'none'; 
+                    currentTarget = null; 
+                    currentTargetCell = null;
+                }
+            });
+
+            // 🔥 表格優化：雙擊 (Double Click) 才會開啟表格/圖片設定選單
+            editor.addEventListener('dblclick', function(e) {
+                let targetImg = e.target.closest('img'); 
+                let targetTable = e.target.closest('table'); 
+                let targetCell = e.target.closest('td, th');
 
                 if (targetImg) { 
                     let wrapper = targetImg.closest('.resizable-wrapper');
@@ -649,6 +748,8 @@
             });
         }
         
+        // (下面的 window.showFloatMenu 保持原樣不用動)
+        
         window.showFloatMenu = function(x, y, type) { 
             floatMenu.style.display = 'flex'; floatMenu.style.position = 'fixed'; 
             let topPos = y - 80; if(topPos < 50) topPos = y + 20; floatMenu.style.left = (x - 50) + 'px'; floatMenu.style.top = topPos + 'px';
@@ -657,10 +758,55 @@
                 const currW = parseInt(currentTarget.style.width) || 100; let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;"><div style="display:flex; justify-content:space-between;">${alignBtns}<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下</button><button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button></div></div><div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-row')">+列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button><input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;"></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">總寬:</span><input type="range" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="tbl-w-val" style="font-weight:bold; width:35px; text-align:right;">${currW}%</span></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">單欄:</span><input type="range" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="col-w-val" style="font-weight:bold; width:35px; text-align:right;">${currColW ? currColW+'%' : '自動'}</span></div></div>`; 
             } else if (type === 'image') { 
-                let currW = 100; let currUnit = '%';
-                if (currentTarget.style.width) { if (currentTarget.style.width.includes('px')) { currW = parseInt(currentTarget.style.width); currUnit = 'px'; } else if (currentTarget.style.width.includes('%')) { currW = parseInt(currentTarget.style.width); currUnit = '%'; } }
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; gap:2px; background:#f0f4f8; padding:3px; border-radius:6px; border:1px solid #dcebf7;"><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-left')" title="置左 (獨立一行不繞圖)"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-center')" title="置中 (獨立一行不繞圖)"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-right')" title="置右 (獨立一行不繞圖)"><i class="fas fa-align-right"></i></button><div style="width:1px; background:#bdc3c7; margin:0 4px;"></div><button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-left')" title="靠左 (文字在右側環繞)"><i class="fas fa-indent" style="margin-right:2px;"></i>左繞</button><button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-right')" title="靠右 (文字在左側環繞)"><i class="fas fa-outdent" style="margin-right:2px;"></i>右繞</button></div></div><div style="display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; padding:5px; border-radius:4px;"><div style="display:flex; align-items:center; gap:5px;"><span style="white-space:nowrap; font-weight:bold; font-size:12px; color:#555;">大小:</span><input type="number" id="img-custom-w" value="${currW}" onchange="setImgCustomWidth()" onkeyup="if(event.key==='Enter')setImgCustomWidth()" style="width:50px; padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; text-align:center;"><select id="img-custom-unit" onchange="setImgCustomWidth()" style="padding:2px; border:1px solid #ccc; border-radius:4px; font-size:12px; cursor:pointer;"><option value="%" ${currUnit === '%' ? 'selected' : ''}>%</option><option value="px" ${currUnit === 'px' ? 'selected' : ''}>px</option></select></div><div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button><button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button></div></div></div>`; 
-            } 
+                // 抓取圖片原始寬度，作為 100% 的計算基準
+                const imgEl = currentTarget.querySelector('img');
+                const natW = imgEl && imgEl.naturalWidth ? imgEl.naturalWidth : 800; 
+                let currW_pct = 100; 
+                let currW_px = natW;
+                
+                // 判斷當前的設定值是 % 還是 px，並自動推算另一個
+                if (currentTarget.style.width) { 
+                    if (currentTarget.style.width.includes('%')) { 
+                        currW_pct = parseInt(currentTarget.style.width);
+                        currW_px = Math.round(natW * (currW_pct / 100));
+                    } else if (currentTarget.style.width.includes('px')) { 
+                        currW_px = parseInt(currentTarget.style.width);
+                        currW_pct = Math.round((currW_px / natW) * 100);
+                    } 
+                }
+                
+                // 把原始寬度偷偷存在目標上，等一下換算要用
+                currentTarget.dataset.natW = natW; 
+
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:2px; background:#f0f4f8; padding:3px; border-radius:6px; border:1px solid #dcebf7;">
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-left')" title="置左"><i class="fas fa-align-left"></i></button>
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-center')" title="置中"><i class="fas fa-align-center"></i></button>
+                            <button class="editor-btn" style="padding:2px 6px; color:#34495e;" onclick="setImgAlign('block-right')" title="置右"><i class="fas fa-align-right"></i></button>
+                            <div style="width:1px; background:#bdc3c7; margin:0 4px;"></div>
+                            <button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-left')" title="文字在右側環繞"><i class="fas fa-indent" style="margin-right:2px;"></i>左繞</button>
+                            <button class="editor-btn" style="padding:2px 6px; font-size:11px; color:#16a085; font-weight:bold;" onclick="setImgAlign('float-right')" title="文字在左側環繞"><i class="fas fa-outdent" style="margin-right:2px;"></i>右繞</button>
+                        </div>
+                        <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:5px; background:#f9f9f9; padding:10px; border-radius:6px; border:1px solid #eee;">
+                        <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#555;">
+                            <span style="white-space:nowrap; font-weight:bold; width:55px;">大小 (%)</span>
+                            <input type="range" id="img-w-slider" min="10" max="100" value="${currW_pct}" oninput="syncImgWidth('pct', this.value)" onchange="saveHistory()" style="flex:1; cursor:pointer;">
+                            <span id="img-w-pct-val" style="width:35px; text-align:right; font-weight:bold; color:var(--forest);">${currW_pct}%</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#555;">
+                            <span style="white-space:nowrap; font-weight:bold; width:55px;">像素 (px)</span>
+                            <input type="number" id="img-w-px" value="${currW_px}" oninput="syncImgWidth('px', this.value)" onchange="saveHistory()" style="flex:1; padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-family:monospace; font-size:13px;">
+                        </div>
+                    </div>
+                </div>`; 
+            }
         }
         
         window.setImgAlign = function(mode) {
@@ -675,10 +821,35 @@
             saveHistory(); 
         }
         
-        window.setImgCustomWidth = function() { 
-            if(!currentTarget) return; const wVal = document.getElementById('img-custom-w').value; const unit = document.getElementById('img-custom-unit').value;
-            currentTarget.style.width = wVal + unit; currentTarget.style.maxWidth = '100%';
-            const img = currentTarget.querySelector('img'); if(img) { img.style.width = "100%"; img.style.height = "auto"; } saveHistory(); 
+        // 🔥 圖片寬度：% 與 px 的雙向連動換算引擎
+        window.syncImgWidth = function(mode, val) { 
+            if(!currentTarget) return; 
+            const natW = parseInt(currentTarget.dataset.natW) || 800; // 讀取原始寬度
+            let newPct, newPx;
+            
+            if (mode === 'pct') {
+                // 滑動百分比，推算 px
+                newPct = parseInt(val);
+                newPx = Math.round(natW * (newPct / 100));
+                document.getElementById('img-w-px').value = newPx; // 更新 px 輸入框
+                document.getElementById('img-w-pct-val').innerText = newPct + '%';
+                currentTarget.style.width = newPct + '%'; // 實際套用至網頁
+                
+            } else if (mode === 'px') {
+                // 輸入 px，推算百分比
+                newPx = parseInt(val) || 0;
+                newPct = Math.round((newPx / natW) * 100);
+                if (newPct > 100) newPct = 100; // 保護機制：滑桿視覺上限為 100%
+                
+                document.getElementById('img-w-slider').value = newPct; // 更新滑桿
+                document.getElementById('img-w-pct-val').innerText = newPct + '%';
+                currentTarget.style.width = newPx + 'px'; // 實際套用至網頁
+            }
+            
+            // 確保圖片在各種大小下不會破版
+            currentTarget.style.maxWidth = '100%';
+            const img = currentTarget.querySelector('img'); 
+            if(img) { img.style.width = "100%"; img.style.height = "auto"; } 
         }
         
         window.updateTableWidth = function(val) { if(!currentTarget) return; currentTarget.style.setProperty('width', val + '%', 'important'); currentTarget.style.setProperty('min-width', 'auto', 'important'); const label = document.getElementById('tbl-w-val'); if (label) label.innerText = val + "%"; }

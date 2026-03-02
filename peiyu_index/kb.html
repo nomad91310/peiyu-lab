@@ -62,6 +62,7 @@
     .brand-capsule::before, .brand-capsule::after { content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem; }
 
     .kb-cat-view { background: #fdfaf5 !important; padding: 20px 20px 25px 20px !important; border-radius: 24px; box-shadow: inset 0 0 20px rgba(26, 47, 35, 0.02); margin-top: 0 !important; position: relative !important;}
+    .kb-cat-view.is-category { padding: 50px 40px 30px 40px !important; } /* 🔥 分類頁專屬加寬 */
     .kb-inner-header-row { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; margin-bottom: 5px !important; gap: 10px; }
     .kb-action-group { display: flex; gap: 10px; align-items: center; }
     
@@ -98,6 +99,29 @@
     .kb-mid-badge::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s; }
     details[open] summary .kb-mid-badge::after { transform: rotate(180deg); }
 
+    /* ======================================================
+       🔥 新增：現代化頁籤 Tabs 設計 
+       ====================================================== */
+    .kb-tabs-container {
+        display: flex; gap: 10px; overflow-x: auto; padding: 5px 5px 15px 5px; margin-bottom: 15px;
+        scrollbar-width: none; /* Firefox 隱藏捲軸 */
+        -ms-overflow-style: none; /* IE 隱藏捲軸 */
+        scroll-behavior: smooth;
+    }
+    .kb-tabs-container::-webkit-scrollbar { display: none; /* Chrome/Safari 隱藏捲軸 */ }
+    
+    .kb-tab-btn {
+        flex-shrink: 0; padding: 8px 24px; border-radius: 50px; font-size: 1rem; font-weight: bold; 
+        font-family: 'Noto Serif TC', serif; cursor: pointer; transition: all 0.3s;
+        background: #ffffff; border: 1px solid #e0e0e0; color: #777; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .kb-tab-btn:hover { border-color: var(--accent); color: var(--forest); }
+    .kb-tab-btn.active {
+        background: var(--forest); color: var(--accent); border-color: var(--forest);
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); transform: translateY(-2px);
+    }
+    #kb-article-list-area { animation: fadeSlideUp 0.3s ease-out; }
+
     .kb-search-group { display: flex !important; flex-direction: column !important; gap: 8px !important; margin-bottom: 15px !important; background: #f9f9f9; padding: 15px 40px 15px 15px !important; border-radius: 10px; border: 1px solid #eee; position: relative !important; animation: fadeSlideUp 0.3s ease-out; }
     .kb-search-title-input, .kb-search-key-input { width: 100% !important; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; box-sizing: border-box; flex: none !important; font-size: 16px !important; }
     .kb-group-remove-btn { position: absolute !important; top: 12px !important; right: 8px !important; background: #ffebee; color: #d32f2f; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
@@ -117,7 +141,27 @@
     .kb-divider { color: #ccc; font-size: 0.8rem; }
     .kb-header-actions { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 25px !important; width: 100% !important; }
 
-    .article-render-area { padding: 0; color: #2c3e50; font-size: 16px; font-family: -apple-system, sans-serif; overflow-wrap: break-word; line-height: 1.8; }
+    .article-render-area { 
+        padding: 0; 
+        color: #2c3e50; 
+        font-size: 16px; 
+        font-family: -apple-system, sans-serif; 
+        line-height: 1.8; 
+        
+        /* 🔥 終極防爆護盾：強制換行、隱藏溢出、鎖死最大寬度 */
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden; 
+        overflow-wrap: anywhere; /* 比 break-word 更強的強制斷行 */
+        word-break: break-all; /* 針對長串英文或網址強力切斷 */
+    }
+    
+    /* 🔥 確保文章內所有元素都不准超過父容器 */
+    .article-render-area * {
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
     .article-render-area img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 15px auto; }
     .article-render-area .resizable-wrapper { max-width: 100%; }
     .article-render-area .resizable-wrapper img { width: 100%; display: block; }
@@ -144,6 +188,8 @@
         .btn-pill-search, .kb-action-btn, .kb-internal-back { font-size: 13px !important; height: 36px !important; padding: 0 16px !important; }
         
         .kb-article-view { padding: 30px 18px 20px 18px !important; }
+        .kb-cat-view { padding: 20px 15px 20px 15px !important; }
+        .kb-cat-view.is-category { padding: 30px 18px 20px 18px !important; }
         .kb-list-container { gap: 10px !important; }
         
         .kb-article-card { padding: 5px 10px !important; min-height: 45px !important; margin-bottom: 3px !important; }
@@ -194,8 +240,9 @@
         <div style="padding: 30px; background: #fff;">
             <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee;">
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
-                    <div><label style="font-size: 0.85rem; color: #888;">自訂報告標題 (選填)</label><input type="text" id="kb-search-report-title" placeholder="例如：我的天賦報告" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-top:5px; outline:none; font-size: 16px;"></div>
-                    <div><label style="font-size: 0.85rem; color: #888;">篩選大分類</label><select id="kb-search-big-cat" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-top:5px; outline:none; font-size: 16px;"><option value="">全域搜尋</option></select></div> </div>
+                    <div><label style="font-size: 0.85rem; color: #888;">自訂報告標題 (選填)</label><input type="text" id="kb-search-report-title" placeholder="例如：我的天賦報告" style="width:100%; height:42px; padding:0 10px; border:1px solid #ddd; border-radius:8px; margin-top:5px; outline:none; font-size: 16px; box-sizing:border-box;"></div>
+                    <div><label style="font-size: 0.85rem; color: #888;">篩選大分類</label><select id="kb-search-big-cat" style="width:100%; height:42px; padding:0 10px; border:1px solid #ddd; border-radius:8px; margin-top:5px; outline:none; font-size: 16px; box-sizing:border-box;"><option value="">全域搜尋</option></select></div> 
+                </div>
             </div>
             <hr style="border: 0; border-top: 2px dashed #eee; margin: 0 0 15px 0;">
             <div id="modal-search-groups-area" style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 10px;"></div>
@@ -304,7 +351,7 @@
                 <div class="kb-inner-header-row">
                     <div></div> 
                     <button class="btn-pill-search" onclick="openSearchPanel()">
-                        <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋生成器
+                        <i class="fa-solid fa-magnifying-glass"></i> 文章搜尋
                     </button>
                 </div>
                 <div class="kb-list-container">${listHtml}</div>
@@ -316,6 +363,7 @@
         kbState.level = 1;
         kbState.activeBig = big;
         
+        // 🔥 靈魂便利貼強勢回歸！
         const isHidden = kbCatOrder.hide_note && kbCatOrder.hide_note.includes(big);
         const noteHtml = isHidden ? '' : `<div class="kb-tiny-note">如果內容有誤 歡迎協助修正<br>如果看了覺得不專業或不開心<br>請直接關閉 謝謝掰掰 👋</div>`;
 
@@ -327,56 +375,91 @@
             sortedMids = Object.keys(kbTree[big]);
         }
 
-        const contentHtml = sortedMids.map((mid, index) => {
-            const arts = kbTree[big][mid]; 
-            const articlesHtml = arts.map(a => {
-                let displayHtml = "";
-                const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
-                if (match) {
-                    displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
-                } else {
-                    displayHtml = `<div class="kb-card-num star-only">✦</div><div class="kb-card-text">${a.title}</div>`;
-                }
-                
-                return `<div class="kb-article-card" data-id="${a.id}" onclick="event.stopPropagation(); readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
-            }).join('');
+        if (sortedMids.length === 0) return;
 
-            const safeMidId = `mid-group-${mid.replace(/\s+/g, '-')}`;
-            let openAttr = '';
-            if (isBack && kbState.activeMid) { if (mid === kbState.activeMid) openAttr = 'open'; } 
-            else { if (index === 0) openAttr = 'open'; }
+        const defaultMid = (isBack && kbState.activeMid && sortedMids.includes(kbState.activeMid)) 
+                            ? kbState.activeMid 
+                            : sortedMids[0];
 
-            return `
-                <details id="${safeMidId}" class="kb-section-group" ${openAttr}>
-                    <summary class="kb-mid-separator"><span class="kb-mid-badge">${mid}</span></summary>
-                    <div class="kb-list-container">${articlesHtml}</div>
-                </details>`;
+        const tabsHtml = sortedMids.map(mid => {
+            const isActive = (mid === defaultMid) ? 'active' : '';
+            return `<button class="kb-tab-btn ${isActive}" onclick="switchMidCat('${big}', '${mid}', this)">${mid}</button>`;
         }).join('');
         
         document.getElementById('kb-container').innerHTML = `
-            <div class="kb-cat-view">
+            <div class="brand-section-header" style="margin-bottom: 15px !important;">
+                 <div class="brand-h3-zh">${big}</div>                    
+                 <div class="brand-h2-en">CATEGORY</div>
+                 <div class="brand-capsule">請選擇下方分類頁籤</div> </div>
+            
+            <div class="kb-cat-view is-category">
+                ${noteHtml} 
                 <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
                 <div class="kb-header-actions">
                     <button onclick="kbGoBack()" class="kb-internal-back"><i class="fa-solid fa-arrow-left"></i> 返回目錄</button>
                 </div>
-                <div class="kb-cat-header"><h1 class="kb-cat-title-h1">${big}</h1>${noteHtml}</div>
-                ${contentHtml}
+                
+                <div class="kb-tabs-container" id="kb-mid-tabs">
+                    ${tabsHtml}
+                </div>
+                
+                <div id="kb-article-list-area"></div>
             </div>`;
         
+        switchMidCat(big, defaultMid, null, isBack);
+    }
+
+    // 🔥 新增：中分類切換引擎
+    function switchMidCat(big, mid, btnElement, isBack = false) {
+        kbState.activeMid = mid;
+        
+        // 更新按鈕外觀
+        if (btnElement) {
+            document.querySelectorAll('.kb-tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            // 讓被點擊的按鈕自動滑動到畫面中間
+            btnElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } else {
+            // 初始化時，自動將 active 按鈕置中
+            setTimeout(() => {
+                const activeBtn = document.querySelector('.kb-tab-btn.active');
+                if(activeBtn) activeBtn.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+            }, 50);
+        }
+
+        // 渲染文章列表
+        const arts = kbTree[big][mid] || [];
+        const articlesHtml = arts.map(a => {
+            let displayHtml = "";
+            const match = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
+            if (match) {
+                displayHtml = `<div class="kb-card-num">${match[1]}</div><div class="kb-card-text">${match[2]}</div>`;
+            } else {
+                displayHtml = `<div class="kb-card-num star-only">✦</div><div class="kb-card-text">${a.title}</div>`;
+            }
+            return `<div class="kb-article-card" data-id="${a.id}" onclick="event.stopPropagation(); readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
+        }).join('');
+
+        const listArea = document.getElementById('kb-article-list-area');
+        // 為了觸發 CSS 動畫，先清空再塞入
+        listArea.style.animation = 'none';
+        listArea.offsetHeight; // 觸發重繪
+        listArea.style.animation = 'fadeSlideUp 0.3s ease-out';
+        
+        listArea.innerHTML = `<div class="kb-list-container">${articlesHtml}</div>`;
+
+        // 處理返回時的捲動定位
         if (isBack && kbState.lastClickedId) {
             setTimeout(() => {
                 const target = document.querySelector(`.kb-article-card[data-id="${kbState.lastClickedId}"]`);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'auto', block: 'center' });
-                    const parentDetails = target.closest('details');
-                    if (parentDetails && !parentDetails.open) parentDetails.open = true;
-                }
+                if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
             }, 50);
-        } else {
+        } else if (!btnElement) {
+            // 只有「第一次」剛點進大分類時，才把畫面捲到最上面
+            // 如果是手動點擊切換頁籤 (有 btnElement)，畫面垂直位置絕對不亂動！
             window.scrollTo(0, 0);
         }
     }    
-    
     async function readArt(idOrSlug) {
         kbState.lastClickedId = idOrSlug; 
         const isUUID = idOrSlug.length > 20; 
@@ -393,7 +476,6 @@
 
         const displayId = data.slug ? data.slug : data.id;
         
-        // 🔥 修正：使用 window.parent 改變外層網址
         const newUrl = `${window.parent.location.pathname}?view=knowledge&article=${displayId}`;
         window.parent.history.pushState({ path: newUrl }, '', newUrl);
 
@@ -402,14 +484,13 @@
         
         document.getElementById('kb-container').innerHTML = `
             <div class="kb-article-view">
-                <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
+                ${noteHtml} <div class="kb-fab-back" onclick="kbGoBack()"><i class="fa-solid fa-reply"></i></div>
                 <div class="kb-header-actions">
                     <div class="kb-action-group">
                         <button onclick="kbGoBack()" class="kb-internal-back"><i class="fa-solid fa-arrow-left"></i> 返回</button>
                         <button id="kb-share-btn" onclick="copyArtLink()" title="複製文章連結"><i class="fa-solid fa-share-nodes"></i></button>
                     </div>
                 </div>
-                ${noteHtml}
                 <h1 class="kb-article-title-h1">${data.title}</h1>
                 <div class="kb-meta-row">
                     <span class="kb-tag kb-tag-big">${data.big_category}</span><span class="kb-divider">●</span><span class="kb-tag kb-tag-mid">${data.mid_category}</span>
@@ -419,6 +500,8 @@
             
         window.scrollTo(0, 0); 
     }
+
+
 
     function openSearchPanel(existingData = null) {
         const area = document.getElementById('modal-search-groups-area');
@@ -495,7 +578,7 @@
         let finalHtml = ""; let totalCount = 0;
         const displayTitle = searchData.reportTitle || "文章搜尋結果";
 
-        searchData.groups.forEach((group) => {
+        searchData.groups.forEach((group, gIdx) => {
             const keywords = group.keys.split(/[,.，、\s]+/).filter(k => k.trim() !== "");
             let pool = kbArticlesFlat;
             if (searchData.filterCat) pool = pool.filter(a => a.big_category === searchData.filterCat);
@@ -511,36 +594,76 @@
             
             totalCount += results.length;
             const sectionTitle = group.title || `搜尋：${keywords.join('、')}`;
+            
+            // 🔥 橘色膠囊包裝搜尋標題
+            const titleCapsuleHtml = `<div style="text-align: center; margin-bottom: 20px;">
+                <span class="kb-tag kb-tag-mid" style="font-size: 1.1rem; padding: 8px 25px; box-shadow: 0 4px 10px rgba(198,168,124,0.15); display: inline-block;">
+                    ${sectionTitle}
+                </span>
+            </div>`;
+
             let contentHtml = "";
 
             if (results.length === 0) {
-                contentHtml = `<div style="text-align:center; color:#ccc; padding:20px;">(此區無相關文章)</div>`;
+                contentHtml = `<div style="text-align:center; color:#ccc; padding:20px; font-weight:bold;">(此區無相關文章)</div>`;
             } else {
                 const grouped = {};
                 results.forEach(art => { const mid = art.mid_category || '其他'; if (!grouped[mid]) grouped[mid] = []; grouped[mid].push(art); });
 
-                Object.keys(grouped).forEach(midCat => {
+                const midCats = Object.keys(grouped);
+                const defaultMid = midCats[0];
+                const groupId = `search-group-${gIdx}`;
+
+                // 🔥 1. 產生橫向膠囊按鈕 (Tabs)
+                const tabsHtml = midCats.map(mid => {
+                    const isActive = (mid === defaultMid) ? 'active' : '';
+                    return `<button class="kb-tab-btn ${isActive}" onclick="switchSearchMidCat('${groupId}', '${mid}', this)">${mid}</button>`;
+                }).join('');
+
+                // 🔥 2. 產生對應的文章列表 (預設只有第一個顯示，其餘隱藏)
+                let listsHtml = "";
+                midCats.forEach(midCat => {
                     const cards = grouped[midCat].map(a => {
                         const m = a.title.match(/^([0-9\-\.]+)\s+(.*)/);
                         let displayHtml = m ? `<div class="kb-card-num">${m[1]}</div><div class="kb-card-text">${m[2]}</div>` : `<div class="kb-card-num star-only">✦</div><div class="kb-card-text">${a.title}</div>`;
                         
                         return `<div class="kb-article-card" data-id="${a.id}" onclick="readArt('${a.id}')"><div class="kb-card-content">${displayHtml}</div><div class="kb-arrow">➔</div></div>`;
                     }).join('');
-                    contentHtml += `<div><div class="kb-search-mid-header">${midCat}</div><div class="kb-list-container">${cards}</div></div>`;
+                    
+                    const isVisible = (midCat === defaultMid) ? 'block' : 'none';
+                    listsHtml += `
+                        <div class="search-mid-content ${groupId}-content" data-mid="${midCat}" style="display: ${isVisible}; animation: fadeSlideUp 0.3s ease-out;">
+                            <div class="kb-list-container">${cards}</div>
+                        </div>`;
                 });
+
+                contentHtml = `
+                    <div class="kb-tabs-container" style="margin-bottom: 15px; padding-bottom: 5px;">
+                        ${tabsHtml}
+                    </div>
+                    <div id="${groupId}-area">
+                        ${listsHtml}
+                    </div>`;
             }
-            finalHtml += `<div style="margin-bottom:30px;"><div class="kb-result-section-title"><span class="kb-result-section-badge">${sectionTitle}</span></div>${contentHtml}</div>`;
+            
+            finalHtml += `
+                <div style="background: #ffffff; padding: 30px 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(26,47,35,0.03); border: 1px solid #eee;">
+                    ${titleCapsuleHtml}
+                    ${contentHtml}
+                </div>`;
         });
 
         document.getElementById('kb-container').innerHTML = `
             <div id="search-anchor-top" style="height:1px; width:100%;"></div>
-            <div class="brand-section-header" style="margin-top: 10px;">
+            
+            <div class="brand-section-header" style="margin-bottom: 15px !important;">
                 <div class="brand-h3-zh">${displayTitle}</div>                    
                 <div class="brand-h2-en">SEARCH RESULTS</div>
                 <div class="brand-capsule">共搜尋到 ${totalCount} 篇文章</div>
             </div>
-            <div class="kb-cat-view">
-                <div class="kb-inner-header-row">
+            
+            <div class="kb-cat-view is-category"> 
+                <div class="kb-inner-header-row" style="margin-bottom: 20px !important;">
                     <div class="kb-action-group">
                         <button onclick="kbGoBack()" class="kb-internal-back"><i class="fa-solid fa-arrow-left"></i> 返回</button>
                         <button id="kb-share-btn" onclick="copyArtLink()" title="分享此報告"><i class="fa-solid fa-share-nodes"></i></button>
@@ -564,6 +687,28 @@
         }
     }
 
+    // 🔥 新增：專給「搜尋結果卡片」使用的頁籤切換引擎
+    function switchSearchMidCat(groupId, mid, btnElement) {
+        // 更新按鈕外觀與橫向捲動
+        const tabsContainer = btnElement.parentElement;
+        tabsContainer.querySelectorAll('.kb-tab-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+        btnElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+
+        // 切換下方文章清單
+        const allContents = document.querySelectorAll('.' + groupId + '-content');
+        allContents.forEach(el => {
+            if (el.getAttribute('data-mid') === mid) {
+                el.style.display = 'block';
+                el.style.animation = 'none';
+                el.offsetHeight; // 觸發重繪
+                el.style.animation = 'fadeSlideUp 0.3s ease-out';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+    }
+    
     function kbGoBack() {
         document.title = "培癒試驗室";
         document.getElementById('knowledge').classList.remove('kb-reading-mode');

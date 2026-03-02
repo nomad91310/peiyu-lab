@@ -89,6 +89,11 @@
         .editor-form-group label { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
         .editor-sp-slider { width: 100%; cursor: pointer; margin-top: 5px; }
         .editor-sp-val { color: var(--forest); font-family: monospace; font-size: 14px; }
+        /* --- 5. 右鍵選單專屬樣式 --- */
+        #custom-context-menu { position: fixed; display: none; background: white; border: 1px solid #ccc; box-shadow: 0 5px 20px rgba(0,0,0,0.15); border-radius: 8px; z-index: 9999; padding: 5px 0; min-width: 200px; font-size: 14px; color: #333; overflow: hidden; }
+        .context-menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .context-menu-item:hover { background: #f4f7f6; color: var(--forest); font-weight: bold; }
+        .context-shortcut { color: #aaa; font-size: 11px; font-family: monospace; font-weight: normal; }
 
         /* --- 4. 你的手機版終極優化 RWD (原封不動保留) --- */
         @media (max-width: 1024px) {
@@ -348,6 +353,13 @@
             <div id="editor" contenteditable="true"><p>請在此開始撰寫...</p></div>
             <div id="float-menu"></div>
             <textarea id="source-area" class="source-view"></textarea>
+            <div id="custom-context-menu">
+                <div class="context-menu-item" onclick="contextAction('cut')"><span>✂️ 剪下</span><span class="context-shortcut">Ctrl+X</span></div>
+                <div class="context-menu-item" onclick="contextAction('copy')"><span>📋 複製</span><span class="context-shortcut">Ctrl+C</span></div>
+                <hr style="margin: 5px 0; border: none; border-top: 1px dashed #eee;">
+                <div class="context-menu-item" onclick="contextAction('paste-rich')"><span>📝 貼上 (保留來源格式)</span><span class="context-shortcut">Ctrl+V</span></div>
+                <div class="context-menu-item" onclick="contextAction('paste-plain')" style="color:var(--info);"><span>📄 貼上 (僅貼純文字)</span><span class="context-shortcut">Ctrl+Shift+V</span></div>
+            </div>
         </div>
     </div>
 </div>
@@ -384,6 +396,7 @@
     // 2. 你的原版 JavaScript 靈魂 (100% 複製不更動)
     // ==========================================
     function toggleKbSidebar() { document.querySelector('.kb-layout').classList.toggle('collapsed'); }
+    // 🌟 升級版讀取文章：自動回到最上方，並精準還原專屬排版設定
     async function editKb(id) {
         try { 
             const {data, error} = await myDB.from('kb_articles').select('*').eq('id',id).single(); 
@@ -396,9 +409,33 @@
             document.getElementById('btn-kb-del').style.display = 'inline-block';
             document.getElementById('kb-pub').checked = data.is_published !== false;
 
-            const wrapper = (new DOMParser()).parseFromString(data.body || '', 'text/html').querySelector('.peiyu-article');
+            // 準備解析存檔的 HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.body || '', 'text/html');
+
+            // 🔥 1. 抓取這篇文章專屬的排版設定，並還原到滑桿系統中
+            const styleTag = doc.querySelector('.peiyu-dynamic-config');
+            if (styleTag && styleTag.getAttribute('data-cfg')) {
+                try {
+                    spacingCfg = JSON.parse(styleTag.getAttribute('data-cfg'));
+                } catch(e) {
+                    spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; // 解析失敗則用預設
+                }
+            } else {
+                spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; // 舊文章沒有設定則用預設
+            }
+            applySpacingToEditor(); // 立即套用排版到編輯器預覽畫面
+
+            // 🔥 2. 載入文章內容
+            const wrapper = doc.querySelector('.peiyu-article');
             document.getElementById('editor').innerHTML = wrapper ? wrapper.innerHTML : (data.body || '');
             history = [document.getElementById('editor').innerHTML]; historyIndex = 0; 
+            
+            // 🔥 3. 強制讓編輯器的捲軸回到最上面
+            document.getElementById('editor').scrollTop = 0;
+            // 如果是手機版，順便把整個網頁也捲到最上面，方便編輯
+            if (window.innerWidth <= 1024) window.scrollTo({ top: 0, behavior: 'smooth' });
+            
         } catch (e) { alert("開啟失敗"); }
     }
 
@@ -420,9 +457,31 @@
             const wrapper = doc.querySelector('.peiyu-article'); editor.innerHTML = wrapper ? wrapper.innerHTML : sourceArea.value;
         }
 
-        // 🔥 更新了這裡的 exportHTML，加入表格專用壓縮設定
-        const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n.peiyu-article table td { vertical-align: middle; }\n.peiyu-article table td div { margin: 4px 0 !important; }\n.peiyu-article table td p { margin-bottom: 4px !important; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
-        
+        const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
+.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+.peiyu-article * { -webkit-text-size-adjust: 100%; }
+.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+
+.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
+.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
+.peiyu-article table td div { margin: 4px 0 !important; }
+.peiyu-article table td p { margin-bottom: 4px !important; }
+.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
+.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+
+@media (max-width: 768px) and (orientation: portrait) {
+    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
+    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
+    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+}
+</style>
+<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+
         const p = { title: document.getElementById('kb-title').value.trim(), big_category: document.getElementById('kb-big').value.trim(), mid_category: document.getElementById('kb-mid').value.trim(), is_published: document.getElementById('kb-pub').checked, body: exportHTML.trim() };
         const id = document.getElementById('kb-id').value;
         if (!p.title || !p.big_category) return alert("❌ 標題與大分類為必填！");
@@ -441,8 +500,30 @@
     function toggleSource() { 
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
-            // 🔥 這裡也同步更新
-            const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>\n.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }\n.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }\n.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }\n.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }\n.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }\n.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }\n.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }\n.peiyu-article table td { vertical-align: middle; }\n.peiyu-article table td div { margin: 4px 0 !important; }\n.peiyu-article table td p { margin-bottom: 4px !important; }\n</style>\n<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+            const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
+.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+.peiyu-article * { -webkit-text-size-adjust: 100%; }
+.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+
+.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
+.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
+.peiyu-article table td div { margin: 4px 0 !important; }
+.peiyu-article table td p { margin-bottom: 4px !important; }
+.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
+.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+
+@media (max-width: 768px) and (orientation: portrait) {
+    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
+    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
+    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+}
+</style>
+<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
@@ -452,11 +533,31 @@
 
     // --- 編輯器核心 ---
     let spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 };
+    // 🌟 編輯器內部預覽 CSS (忠實呈現版，僅直式強制保護)
     function applySpacingToEditor() { 
-        const css = `#editor { line-height: ${spacingCfg.lh}; } #editor p, #editor div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; } #editor h1, #editor h2, #editor h3, #editor h4, #editor h5, #editor h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; } #editor h1+h1, #editor h2+h2, #editor h3+h3, #editor h4+h4, #editor h5+h5, #editor h6+h6 { margin-top: 0; } #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } #editor li { margin-bottom: ${spacingCfg.limb}em; } #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; } #editor table td { vertical-align: middle; } #editor table td div { margin: 4px 0 !important; } #editor table td p { margin-bottom: 4px !important; }`; 
+        const css = `#editor { line-height: ${spacingCfg.lh}; -webkit-text-size-adjust: 100%; } 
+        #editor * { -webkit-text-size-adjust: 100%; } 
+        #editor p, #editor div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; } 
+        #editor h1, #editor h2, #editor h3, #editor h4, #editor h5, #editor h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; } 
+        #editor h1+h1, #editor h2+h2, #editor h3+h3, #editor h4+h4, #editor h5+h5, #editor h6+h6 { margin-top: 0; } 
+        #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } 
+        #editor li { margin-bottom: ${spacingCfg.limb}em; } 
+        #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; } 
+        
+        #editor table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; } 
+        #editor table td, #editor table th { vertical-align: middle; padding: 8px 12px; } 
+        #editor table td div { margin: 4px 0 !important; } 
+        #editor table td p { margin-bottom: 4px !important; } 
+        #editor .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
+        #editor img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+
+        @media (max-width: 768px) and (orientation: portrait) { 
+            #editor table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; } 
+            #editor table td, #editor table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
+            #editor .resizable-wrapper, #editor img { margin-left: 0 !important; margin-right: 0 !important; }
+        }`; 
         const styleTag = document.getElementById('dynamic-spacing'); if(styleTag) styleTag.innerHTML = css; 
     }
-
     let history = ['<p>請在此開始撰寫...</p>']; let historyIndex = 0; let typingTimeout;
     function saveHistory() {
         const editor = document.getElementById('editor'); if (!editor) return; const sel = window.getSelection(); let markedHTML = editor.innerHTML;
@@ -477,7 +578,20 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const editor = document.getElementById('editor');
-        if (editor) { editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); }); }
+        if (editor) { 
+            // 🔥 劫持預設右鍵，呼叫自訂選單
+            const contextMenu = document.getElementById('custom-context-menu');
+            editor.addEventListener('contextmenu', function(e) {
+                e.preventDefault(); // 擋掉瀏覽器預設右鍵
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.clientX + 'px';
+                contextMenu.style.top = e.clientY + 'px';
+            });
+            // 點擊旁邊空白處時，關閉右鍵選單
+            document.addEventListener('click', function(e) {
+                if (contextMenu && !contextMenu.contains(e.target)) contextMenu.style.display = 'none';
+            });
+            editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); }); }
     });
 
     
@@ -586,15 +700,75 @@
     
     window.insertImageToEditor = function(u) { const html = `<div class="resizable-wrapper peiyu-obj" style="margin-left:auto; margin-right:auto; width:100%;"><img src="${u}"></div><p><br></p>`; insertHtml(html); closeGallery(); }
     
+    // 🌟 終極版除髒模式：一鍵清除垃圾，並將舊表格與圖片自動升級為最新防爆 RWD 格式
+    // 🌟 終極版除髒模式：一鍵清除垃圾、拔除寬度死鎖，並升級 RWD
     function cleanCurrentArticle() {
-        saveSelection(); const editor = document.getElementById('editor'); let html = editor.innerHTML; const parser = new DOMParser(); const doc = parser.parseFromString(html, 'text/html');
+        saveSelection(); 
+        const editor = document.getElementById('editor'); 
+        let html = editor.innerHTML; 
+        const parser = new DOMParser(); 
+        const doc = parser.parseFromString(html, 'text/html');
+
         doc.querySelectorAll('*').forEach(el => {
-            if (el.className && typeof el.className === 'string' && el.className.includes('ql-')) { const cleanClasses = el.className.split(' ').filter(c => !c.startsWith('ql-')).join(' '); if (cleanClasses) el.className = cleanClasses; else el.removeAttribute('class'); }
-            if (el.tagName.toLowerCase() === 'font') { const frag = document.createDocumentFragment(); while(el.firstChild) frag.appendChild(el.firstChild); el.parentNode.replaceChild(frag, el); }
-            if (el.tagName.toLowerCase() === 'span' && el.style.fontFamily) { el.style.fontFamily = ''; if (!el.getAttribute('style')) el.removeAttribute('style'); }
+            if (el.className && typeof el.className === 'string' && el.className.includes('ql-')) { 
+                const cleanClasses = el.className.split(' ').filter(c => !c.startsWith('ql-')).join(' '); 
+                if (cleanClasses) el.className = cleanClasses; else el.removeAttribute('class'); 
+            }
+            if (el.tagName.toLowerCase() === 'font') { 
+                const frag = document.createDocumentFragment(); 
+                while(el.firstChild) frag.appendChild(el.firstChild); 
+                el.parentNode.replaceChild(frag, el); 
+            }
+            if (el.tagName.toLowerCase() === 'span' && el.style.fontFamily) { 
+                el.style.fontFamily = ''; 
+                if (!el.getAttribute('style')) el.removeAttribute('style'); 
+            }
+            
+            // 🔥 核心排毒：拔除所有標籤身上的 !important 寬度死鎖
+            if (el.style.length > 0) {
+                let w = el.style.getPropertyValue('width');
+                if (w && el.style.getPropertyPriority('width') === 'important') {
+                    el.style.setProperty('width', w, ''); 
+                }
+                let mw = el.style.getPropertyValue('min-width');
+                if (mw && el.style.getPropertyPriority('min-width') === 'important') {
+                    el.style.setProperty('min-width', mw, '');
+                }
+            }
         });
-        doc.querySelectorAll('h3.title-boxed-h3').forEach(h3 => { const text = h3.textContent.trim(); const newDiv = document.createElement('div'); newDiv.style.cssText = "margin: 25px 0 10px 0;"; newDiv.innerHTML = `<h3 style="border: 2px solid rgb(198, 168, 124); background: rgb(255, 252, 245); color: rgb(26, 47, 35); padding: 8px 35px; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0px;">${text}</h3>`; h3.parentNode.replaceChild(newDiv, h3); });
-        editor.innerHTML = doc.body.innerHTML; saveHistory(); alert("✨ 報告！已清除舊版語法與字體，請檢查畫面後點擊儲存！");
+
+        doc.querySelectorAll('h3.title-boxed-h3').forEach(h3 => { 
+            const text = h3.textContent.trim(); 
+            const newDiv = document.createElement('div'); 
+            newDiv.style.cssText = "margin: 25px 0 10px 0;"; 
+            newDiv.innerHTML = `<h3 style="border: 2px solid rgb(198, 168, 124); background: rgb(255, 252, 245); color: rgb(26, 47, 35); padding: 8px 35px; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0px;">${text}</h3>`; 
+            h3.parentNode.replaceChild(newDiv, h3); 
+        });
+
+        doc.querySelectorAll('table').forEach(tbl => {
+            tbl.classList.add('peiyu-table', 'peiyu-obj');
+        });
+
+        doc.querySelectorAll('img').forEach(img => {
+            let wrapper = img.closest('.resizable-wrapper');
+            if (!wrapper) {
+                let oldW = img.getAttribute('width') || img.style.width || '100%';
+                if (oldW && !oldW.includes('%') && !oldW.includes('px') && !oldW.includes('auto')) { oldW += 'px'; }
+                wrapper = document.createElement('div'); 
+                wrapper.className = 'resizable-wrapper peiyu-obj';
+                wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
+                img.style.width = '100%'; 
+                img.style.height = 'auto'; 
+                img.style.display = 'block'; 
+                img.removeAttribute('width'); 
+                img.parentNode.insertBefore(wrapper, img); 
+                wrapper.appendChild(img);
+            }
+        });
+
+        editor.innerHTML = doc.body.innerHTML; 
+        saveHistory(); 
+        alert("✨ 報告！已成功拔除卡死版面的『寬度毒瘤』，並全面升級為 RWD 防爆格式！\n\n(請點擊右上方『💾 儲存文章』去前台看成果)");
     }
 
     let modalMode = null;
@@ -616,17 +790,19 @@
         restoreSelection(); let html = '';
         if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
         // 🌟 修身版的魔法積木 (減小 Margin、鎖死 Line-height)
+        // 🌟 魔法積木 (加入 white-space: nowrap 絕對防換行護盾)
         else if(modalMode === 'h2' || modalMode === 'h3') { 
             const text = document.getElementById('inp-text').value || '標題'; 
             const theme = document.getElementById('inp-theme').value; 
             const styles = { forest: { bg: '#1a2f23', col: '#fff', bor: '#c6a87c' }, gold: { bg: '#c6a87c', col: '#1a2f23', bor: '#1a2f23' }, cream: { bg: '#fffcf5', col: '#1a2f23', bor: '#c6a87c' } }; 
             const s = styles[theme]; 
             if (modalMode === 'h2') {
-                html = `<div style="margin: 15px 0 10px 0;"><h2 style="border-left: 8px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 8px 18px; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.3; display: inline-block; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); margin: 0;">${text}</h2></div><p><br></p>`; 
+                html = `<div style="margin: 15px 0 10px 0;"><h2 style="border-left: 8px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 8px 18px; border-radius: 4px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem; line-height: 1.3; white-space: nowrap; display: inline-block; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); margin: 0;">${text}</h2></div><p><br></p>`; 
             } else {
-                html = `<div style="margin: 15px 0 5px 0;"><h3 style="border: 2px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 6px 25px; border-radius: 50px; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.3; display: inline-block; font-weight: bold; margin: 0;">${text}</h3></div><p><br></p>`; 
+                html = `<div style="margin: 15px 0 5px 0;"><h3 style="border: 2px solid ${s.bor}; background: ${s.bg}; color: ${s.col}; padding: 6px 25px; border-radius: 50px; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.3; white-space: nowrap; display: inline-block; font-weight: bold; margin: 0;">${text}</h3></div><p><br></p>`; 
             }
-        }        else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
+        }
+        else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
         else if(modalMode === 'warn') { const title = document.getElementById('inp-title').value || '注意'; const theme = document.getElementById('inp-theme').value; const styles = { red: { bg: '#fdf2f2', bor: '#fadbd8', txt: '#c0392b' }, yellow: { bg: '#fffbe6', bor: '#ffe58f', txt: '#d48806' }, blue: { bg: '#e6f7ff', bor: '#91d5ff', txt: '#096dd9' } }; const s = styles[theme]; html = `<div class="peiyu-obj" style="background-color: ${s.bg}; border: 1px solid ${s.bor}; border-radius: 8px; padding: 20px; margin: 25px 0;"><strong style="color: ${s.txt}; display: block; margin-bottom: 10px; font-size: 16px;">${title}</strong><div style="color: #555; font-size: 15px; line-height: 1.6;">請輸入內容...</div></div><p><br></p>`; }
         insertHtml(html); document.getElementById('config-modal').style.display = 'none';
     }
@@ -701,15 +877,32 @@
             editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); });
             
             // 🔥 終極修復：強制接管鍵盤 Ctrl+Z，解決「上一步變貼上亂碼」的問題！
+            // 🔥 終極修復：強制接管鍵盤捷徑 (復原、重做、純文字貼上)
             editor.addEventListener('keydown', function(e) {
+                // 攔截 Ctrl+Z / Cmd+Z (復原)
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-                    e.preventDefault(); // 擋掉瀏覽器愚蠢的預設復原
+                    e.preventDefault(); 
                     if (e.shiftKey) customRedo();
                     else customUndo();
                 }
+                // 攔截 Ctrl+Y / Cmd+Y (重做)
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                     e.preventDefault(); 
                     customRedo();
+                }
+                
+                // 🚀 強制綁定 Cmd+Shift+V / Ctrl+Shift+V 為「純文字貼上」
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'v') {
+                    e.preventDefault(); // 擋掉瀏覽器的遲鈍反應
+                    
+                    // 強制讀取剪貼簿的純文字內容
+                    navigator.clipboard.readText().then(text => {
+                        // 將純文字插入游標位置
+                        document.execCommand('insertText', false, text);
+                        saveHistory();
+                    }).catch(err => {
+                        alert("⚠️ 您的瀏覽器安全層級較高，阻擋了快捷鍵貼上。\n請改用「滑鼠右鍵 ➔ 僅貼純文字」！");
+                    });
                 }
             });
 
@@ -755,9 +948,36 @@
             let topPos = y - 80; if(topPos < 50) topPos = y + 20; floatMenu.style.left = (x - 50) + 'px'; floatMenu.style.top = topPos + 'px';
             const alignBtns = `<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('left')"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('center')"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setAlign('right')"><i class="fas fa-align-right"></i></button></div>`; 
             if (type === 'table') { 
-                const currW = parseInt(currentTarget.style.width) || 100; let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;"><div style="display:flex; justify-content:space-between;">${alignBtns}<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下</button><button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button></div></div><div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-row')">+列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button><button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button><input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;"></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">總寬:</span><input type="range" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="tbl-w-val" style="font-weight:bold; width:35px; text-align:right;">${currW}%</span></div><div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;"><span style="white-space:nowrap; font-weight:bold;">單欄:</span><input type="range" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1;"><span id="col-w-val" style="font-weight:bold; width:35px; text-align:right;">${currColW ? currColW+'%' : '自動'}</span></div></div>`; 
-            } else if (type === 'image') { 
+                const currW = parseInt(currentTarget.style.width) || 100; 
+                let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        ${alignBtns}
+                        <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:3px;">
+                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-row')">+列</button>
+                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button>
+                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button>
+                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button>
+                        <input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;">
+                        <span style="white-space:nowrap; font-weight:bold;">總寬:</span>
+                        <input type="range" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1;">
+                        <span id="tbl-w-val" style="font-weight:bold; width:35px; text-align:right;">${currW}%</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;">
+                        <span style="white-space:nowrap; font-weight:bold;">單欄:</span>
+                        <input type="range" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1;">
+                        <span id="col-w-val" style="font-weight:bold; width:35px; text-align:right;">${currColW ? currColW+'%' : '自動'}</span>
+                    </div>
+                </div>`; 
+            }
+            else if (type === 'image') { 
                 // 抓取圖片原始寬度，作為 100% 的計算基準
                 const imgEl = currentTarget.querySelector('img');
                 const natW = imgEl && imgEl.naturalWidth ? imgEl.naturalWidth : 800; 
@@ -852,8 +1072,26 @@
             if(img) { img.style.width = "100%"; img.style.height = "auto"; } 
         }
         
-        window.updateTableWidth = function(val) { if(!currentTarget) return; currentTarget.style.setProperty('width', val + '%', 'important'); currentTarget.style.setProperty('min-width', 'auto', 'important'); const label = document.getElementById('tbl-w-val'); if (label) label.innerText = val + "%"; }
-        window.updateColWidth = function(val) { if(!currentTarget || !currentTargetCell) return; const cellIndex = currentTargetCell.cellIndex; Array.from(currentTarget.rows).forEach(row => { if (row.cells[cellIndex]) { row.cells[cellIndex].style.setProperty('width', val + '%', 'important'); row.cells[cellIndex].style.setProperty('white-space', 'normal', 'important'); row.cells[cellIndex].style.setProperty('word-break', 'break-all', 'important'); } }); const label = document.getElementById('col-w-val'); if (label) label.innerText = val + "%"; }
+        window.updateTableWidth = function(val) { 
+            if(!currentTarget) return; 
+            currentTarget.style.setProperty('width', val + '%'); 
+            currentTarget.style.setProperty('min-width', 'auto'); 
+            const label = document.getElementById('tbl-w-val'); 
+            if (label) label.innerText = val + "%"; 
+        }
+       window.updateColWidth = function(val) { 
+            if(!currentTarget || !currentTargetCell) return; 
+            const cellIndex = currentTargetCell.cellIndex; 
+            Array.from(currentTarget.rows).forEach(row => { 
+                if (row.cells[cellIndex]) { 
+                    row.cells[cellIndex].style.setProperty('width', val + '%'); 
+                    row.cells[cellIndex].style.setProperty('white-space', 'normal'); 
+                    row.cells[cellIndex].style.setProperty('word-break', 'break-all'); 
+                } 
+            }); 
+            const label = document.getElementById('col-w-val'); 
+            if (label) label.innerText = val + "%"; 
+        }
         window.modImg = function(a) { if(a === 'delete') { currentTarget.remove(); floatMenu.style.display = 'none'; saveHistory(); } }
         
         window.modCut = async function() {
@@ -946,6 +1184,47 @@
             if (toolbarHeader.classList.contains('show-drawer')) { fab.innerHTML = '<i class="fas fa-times"></i>'; fab.style.background = '#e74c3c'; fab.style.borderColor = '#c0392b'; } 
             else { fab.innerHTML = '<i class="fas fa-pen"></i>'; fab.style.background = 'var(--forest)'; fab.style.borderColor = 'var(--accent)'; }
         });
+    }
+    // 🌟 處理自訂右鍵選單的剪貼動作
+    async function contextAction(action) {
+        const contextMenu = document.getElementById('custom-context-menu');
+        contextMenu.style.display = 'none';
+        document.getElementById('editor').focus({ preventScroll: true });
+
+        try {
+            if (action === 'cut') {
+                document.execCommand('cut');
+            } else if (action === 'copy') {
+                document.execCommand('copy');
+            } else if (action === 'paste-rich') {
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    let html = '';
+                    for (const item of clipboardItems) {
+                        if (item.types.includes('text/html')) {
+                            const blob = await item.getType('text/html');
+                            html = await blob.text();
+                            break;
+                        }
+                    }
+                    if (html) document.execCommand('insertHTML', false, html);
+                    else {
+                        const text = await navigator.clipboard.readText();
+                        document.execCommand('insertText', false, text);
+                    }
+                } catch(e) { 
+                    alert("⚠️ 您的瀏覽器安全限制阻擋了按鈕貼上，請直接使用鍵盤：Ctrl + V"); 
+                }
+            } else if (action === 'paste-plain') {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    document.execCommand('insertText', false, text);
+                } catch(e) { 
+                    alert("⚠️ 您的瀏覽器安全限制阻擋了按鈕貼上，請直接使用鍵盤神器：Ctrl + Shift + V"); 
+                }
+            }
+            saveHistory();
+        } catch(e) { console.error(e); }
     }
 
     // --- 啟動程序 ---

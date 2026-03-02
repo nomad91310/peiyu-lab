@@ -127,22 +127,23 @@
 
             .kb-layout > .card { 
                 height: auto !important; 
-                overflow: visible !important; 
+                overflow-x: hidden !important; /* 🔥 嚴格鎖死 X 軸，不准破窗 */
                 padding: 15px !important; 
-                margin-bottom: 80px !important; /* 留空間給浮動按鈕 */
+                margin-bottom: 80px !important; 
             }
 
             .editor-wrapper { 
                 height: auto !important; 
-                overflow: visible !important; 
+                overflow-x: hidden !important; /* 🔥 嚴格鎖死 X 軸 */
                 min-height: 600px;
+                max-width: 100% !important;
             }
 
             #editor { 
                 height: auto !important; 
                 min-height: 500px; 
                 padding: 15px !important; 
-                overflow: visible !important; 
+                overflow-x: hidden !important; /* 🔥 嚴格鎖死 X 軸，圖片再大也會被切斷在框內 */
             }
 
             /* 分類與標題優化 */
@@ -511,29 +512,29 @@
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
             const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-                    .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-                    .peiyu-article * { -webkit-text-size-adjust: 100%; }
-                    .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-                    .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-                    .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-                    .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-                    .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-                    .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+.peiyu-article * { -webkit-text-size-adjust: 100%; }
+.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-                    .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; }
-                    .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
-                    .peiyu-article table td div { margin: 4px 0 !important; }
-                    .peiyu-article table td p { margin-bottom: 4px !important; }
-                    .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
-                    .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
+.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
+.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
+.peiyu-article table td div { margin: 4px 0 !important; }
+.peiyu-article table td p { margin-bottom: 4px !important; }
+.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
+.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
 
-                    @media (max-width: 768px) and (orientation: portrait) {
-                        .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
-                        .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; }
-                        .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                    }
-                    </style>
-                    <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+@media (max-width: 768px) and (orientation: portrait) {
+    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
+    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
+    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+}
+</style>
+<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');

@@ -468,29 +468,29 @@
         }
 
         const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-.peiyu-article * { -webkit-text-size-adjust: 100%; }
-.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+                            .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+                            .peiyu-article * { -webkit-text-size-adjust: 100%; }
+                            .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+                            .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+                            .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+                            .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+                            .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+                            .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
-.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
-.peiyu-article table td div { margin: 4px 0 !important; }
-.peiyu-article table td p { margin-bottom: 4px !important; }
-.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
-.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+                            .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; }
+                            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
+                            .peiyu-article table td div { margin: 4px 0 !important; }
+                            .peiyu-article table td p { margin-bottom: 4px !important; }
+                            .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+                            .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
-@media (max-width: 768px) and (orientation: portrait) {
-    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
-    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
-    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-}
-</style>
-<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+                            @media (max-width: 768px) and (orientation: portrait) {
+                                .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
+                                .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; }
+                                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                            }
+                            </style>
+                            <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
 
         const p = { title: document.getElementById('kb-title').value.trim(), big_category: document.getElementById('kb-big').value.trim(), mid_category: document.getElementById('kb-mid').value.trim(), is_published: document.getElementById('kb-pub').checked, body: exportHTML.trim() };
         const id = document.getElementById('kb-id').value;
@@ -511,29 +511,29 @@
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
             const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-.peiyu-article * { -webkit-text-size-adjust: 100%; }
-.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+                    .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+                    .peiyu-article * { -webkit-text-size-adjust: 100%; }
+                    .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+                    .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+                    .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+                    .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+                    .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+                    .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
-.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
-.peiyu-article table td div { margin: 4px 0 !important; }
-.peiyu-article table td p { margin-bottom: 4px !important; }
-.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
-.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+                    .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; }
+                    .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
+                    .peiyu-article table td div { margin: 4px 0 !important; }
+                    .peiyu-article table td p { margin-bottom: 4px !important; }
+                    .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+                    .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
-@media (max-width: 768px) and (orientation: portrait) {
-    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
-    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
-    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-}
-</style>
-<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+                    @media (max-width: 768px) and (orientation: portrait) {
+                        .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
+                        .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; }
+                        .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                    }
+                    </style>
+                    <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
@@ -554,18 +554,18 @@
         #editor li { margin-bottom: ${spacingCfg.limb}em; } 
         #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; } 
         
-        #editor table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; } 
-        #editor table td, #editor table th { vertical-align: middle; padding: 8px 12px; } 
+        #editor table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; } 
+        #editor table td, #editor table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; } 
         #editor table td div { margin: 4px 0 !important; } 
         #editor table td p { margin-bottom: 4px !important; } 
-        #editor .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
-        #editor img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+        #editor .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+        #editor img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
         @media (max-width: 768px) and (orientation: portrait) { 
-            #editor table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; } 
-            #editor table td, #editor table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
+            #editor table { width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; } 
+            #editor table td, #editor table th { padding-left: 5px !important; padding-right: 5px !important; }
             #editor .resizable-wrapper, #editor img { margin-left: 0 !important; margin-right: 0 !important; }
-        }`; 
+        }`;
         const styleTag = document.getElementById('dynamic-spacing'); if(styleTag) styleTag.innerHTML = css; 
     }
     let history = ['<p>請在此開始撰寫...</p>']; let historyIndex = 0; let typingTimeout;
@@ -1063,8 +1063,20 @@
         
         window.showFloatMenu = function(x, y, type) { 
             floatMenu.style.display = 'flex'; floatMenu.style.position = 'fixed'; 
-            let topPos = y - 80; if(topPos < 50) topPos = y + 20; floatMenu.style.left = Math.max(10, x - 20) + 'px'; floatMenu.style.top = topPos + 'px';
-            const alignBtns = `<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-left')" title="置左對齊"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-center')" title="置中對齊"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-right')" title="置右對齊"><i class="fas fa-align-right"></i></button></div>`; 
+            
+            // 1. 垂直防撞 (防上方超界)
+            let topPos = y - 80; if(topPos < 50) topPos = y + 20; 
+            
+            // 2. 水平防撞 (防右側超界)
+            let menuW = type === 'text' ? 340 : (type === 'image' ? 290 : 230); // 預估各選單寬度
+            let leftPos = x - 20;
+            if (leftPos + menuW > window.innerWidth) {
+                leftPos = window.innerWidth - menuW - 15; // 撞到右邊就強制往左擠
+            }
+            floatMenu.style.left = Math.max(10, leftPos) + 'px'; 
+            floatMenu.style.top = topPos + 'px';
+
+            const alignBtns = `<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-left')" title="置左對齊"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-center')" title="置中對齊"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-right')" title="置右對齊"><i class="fas fa-align-right"></i></button></div>`;
             
             if (type === 'table') { 
                 const currW = parseInt(currentTarget.style.width) || 100; 

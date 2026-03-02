@@ -1099,12 +1099,15 @@
                 const parentElement = currentTarget.parentElement;
                 const parentW = parentElement ? parentElement.clientWidth : document.getElementById('editor').clientWidth;
                 let currW_pct = 100; let currW_px = parentW;
+                let currentUnit = '%'; // 預設單位
                 
                 if (currentTarget.style.width) { 
                     if (currentTarget.style.width.includes('%')) { 
+                        currentUnit = '%';
                         currW_pct = parseInt(currentTarget.style.width);
                         currW_px = Math.round(parentW * (currW_pct / 100));
                     } else if (currentTarget.style.width.includes('px')) { 
+                        currentUnit = 'px';
                         currW_px = parseInt(currentTarget.style.width);
                         currW_pct = Math.round((currW_px / parentW) * 100);
                         if (currW_pct > 100) currW_pct = 100;
@@ -1119,7 +1122,14 @@
                             <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:5px; background:#f9f9f9; padding:10px; border-radius:6px; border:1px solid #eee;">
+                    <div style="display:flex; flex-direction:column; gap:6px; background:#f9f9f9; padding:10px; border-radius:6px; border:1px solid #eee;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:2px;">
+                            <span style="font-weight:bold; color:#333;">目前模式：</span>
+                            <div style="display:flex; gap:5px;">
+                                <span id="badge-pct" style="padding:2px 6px; border-radius:4px; font-weight:bold; transition:0.3s; ${currentUnit === '%' ? 'background:var(--forest); color:white;' : 'background:#e0e0e0; color:#888;'}">流體縮放 (%)</span>
+                                <span id="badge-px" style="padding:2px 6px; border-radius:4px; font-weight:bold; transition:0.3s; ${currentUnit === 'px' ? 'background:var(--info); color:white;' : 'background:#e0e0e0; color:#888;'}">固定鎖死 (px)</span>
+                            </div>
+                        </div>
                         <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#555;">
                             <span style="white-space:nowrap; font-weight:bold; width:55px;">大小 (%)</span>
                             <input type="range" id="img-w-slider" min="10" max="100" value="${currW_pct}" oninput="syncImgWidth('pct', this.value)" onchange="saveHistory()" style="flex:1; cursor:pointer;">
@@ -1192,18 +1202,28 @@
 
         window.setAlign = function(align) { window.setImgAlign(`block-${align}`); }
         
+        // 🔥 圖片寬度引擎：連動指示燈的切換
         window.syncImgWidth = function(mode, val) { 
             if(!currentTarget) return; 
             const parentElement = currentTarget.parentElement;
             const parentW = parentElement ? parentElement.clientWidth : document.getElementById('editor').clientWidth;
             let newPct, newPx;
             
+            const badgePct = document.getElementById('badge-pct');
+            const badgePx = document.getElementById('badge-px');
+
             if (mode === 'pct') {
                 newPct = parseInt(val);
                 newPx = Math.round(parentW * (newPct / 100));
                 document.getElementById('img-w-px').value = newPx;
                 document.getElementById('img-w-pct-val').innerText = newPct + '%';
                 currentTarget.style.width = newPct + '%'; 
+                
+                // 點亮 % 燈號
+                if (badgePct && badgePx) {
+                    badgePct.style.background = 'var(--forest)'; badgePct.style.color = 'white';
+                    badgePx.style.background = '#e0e0e0'; badgePx.style.color = '#888';
+                }
             } else if (mode === 'px') {
                 newPx = parseInt(val) || 0;
                 newPct = Math.round((newPx / parentW) * 100);
@@ -1211,6 +1231,12 @@
                 document.getElementById('img-w-slider').value = newPct;
                 document.getElementById('img-w-pct-val').innerText = newPct + '%';
                 currentTarget.style.width = newPx + 'px'; 
+                
+                // 點亮 px 燈號
+                if (badgePct && badgePx) {
+                    badgePct.style.background = '#e0e0e0'; badgePct.style.color = '#888';
+                    badgePx.style.background = 'var(--info)'; badgePx.style.color = 'white';
+                }
             }
             currentTarget.style.maxWidth = '100%';
             const img = currentTarget.querySelector('img'); 
@@ -1460,7 +1486,7 @@
         }
         
         document.querySelectorAll('.tb-select[onchange*="applyCustomFont"]').forEach(sel => sel.value = mappedFont);
-        
+
         // 3. 透視大小 (computed.fontSize 絕對會回傳精準 px，例如 "16px")
         let sizePx = parseFloat(computed.fontSize) || 16;
         let pt = sizePx * 0.75; // 將 px 翻譯回 pt 給下拉選單看

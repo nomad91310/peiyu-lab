@@ -74,7 +74,7 @@
         #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
 
         /* 嚴格的全局防爆規則 (解決橫向溢出) */
-        .peiyu-table, table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; }
+        .peiyu-table, table { border-collapse: collapse; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
         .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; vertical-align: middle; max-width: 100% !important; box-sizing: border-box !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
         .peiyu-table td div { margin: 4px 0 !important; }
         .peiyu-table td p { margin-bottom: 4px !important; }
@@ -478,16 +478,16 @@
                             .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
                             .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-                            .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; }
-                            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
+                            .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+                            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
                             .peiyu-article table td div { margin: 4px 0 !important; }
                             .peiyu-article table td p { margin-bottom: 4px !important; }
                             .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
                             .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
                             @media (max-width: 768px) and (orientation: portrait) {
-                                .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
-                                .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; }
+                                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                                .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; white-space: normal !important; }
                                 .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
                             }
                             </style>
@@ -512,29 +512,29 @@
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
             const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-.peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-.peiyu-article * { -webkit-text-size-adjust: 100%; }
-.peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-.peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-.peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-.peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-.peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-.peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+                                .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+                                .peiyu-article * { -webkit-text-size-adjust: 100%; }
+                                .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+                                .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+                                .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+                                .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+                                .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+                                .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-.peiyu-article table { border-collapse: collapse; max-width: 100%; box-sizing: border-box; }
-.peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; }
-.peiyu-article table td div { margin: 4px 0 !important; }
-.peiyu-article table td p { margin-bottom: 4px !important; }
-.peiyu-article .resizable-wrapper { max-width: 100%; clear: both; box-sizing: border-box; }
-.peiyu-article img { max-width: 100%; height: auto !important; box-sizing: border-box; }
+                                .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+                                .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
+                                .peiyu-article table td div { margin: 4px 0 !important; }
+                                .peiyu-article table td p { margin-bottom: 4px !important; }
+                                .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+                                .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
-@media (max-width: 768px) and (orientation: portrait) {
-    .peiyu-article table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; }
-    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; box-sizing: border-box !important; }
-    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-}
-</style>
-<div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+                                @media (max-width: 768px) and (orientation: portrait) {
+                                    .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                                    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; white-space: normal !important; }
+                                    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                                }
+                                </style>
+                                <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
@@ -554,17 +554,17 @@
         #editor ul, #editor ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; } 
         #editor li { margin-bottom: ${spacingCfg.limb}em; } 
         #editor li > p, #editor li > div:not([class]) { margin-bottom: 0; display: inline; } 
-        
-        #editor table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; } 
-        #editor table td, #editor table th { vertical-align: middle; padding: 8px 12px; max-width: 100% !important; word-wrap: break-word !important; overflow-wrap: break-word !important; } 
+
+        #editor table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; } 
+        #editor table td, #editor table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; } 
         #editor table td div { margin: 4px 0 !important; } 
         #editor table td p { margin-bottom: 4px !important; } 
         #editor .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
         #editor img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
 
         @media (max-width: 768px) and (orientation: portrait) { 
-            #editor table { width: 100% !important; table-layout: fixed !important; margin-left: 0 !important; margin-right: 0 !important; } 
-            #editor table td, #editor table th { padding-left: 5px !important; padding-right: 5px !important; }
+            #editor table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; } 
+            #editor table td, #editor table th { padding-left: 5px !important; padding-right: 5px !important; white-space: normal !important; }
             #editor .resizable-wrapper, #editor img { margin-left: 0 !important; margin-right: 0 !important; }
         }`;
         const styleTag = document.getElementById('dynamic-spacing'); if(styleTag) styleTag.innerHTML = css; 
@@ -1082,11 +1082,12 @@
             if (type === 'table') { 
                 const currW = parseInt(currentTarget.style.width) || 100; 
                 let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
+                
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;">
                     <div style="display:flex; justify-content:space-between;">
                         <div style="display:flex; gap:3px;">
                             <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️ 剪下表格</button>
-                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️ 刪除</button>
                         </div>
                     </div>
                     <div style="display:flex; gap:3px;">
@@ -1094,17 +1095,22 @@
                         <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button>
                         <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button>
                         <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button>
-                        <input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;">
+                        <input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;" title="邊框顏色">
                     </div>
+                    
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;">
                         <span style="white-space:nowrap; font-weight:bold;">總寬:</span>
-                        <input type="range" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1;">
-                        <span id="tbl-w-val" style="font-weight:bold; width:35px; text-align:right;">${currW}%</span>
+                        <input type="number" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; padding:2px 5px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+                        <span style="font-weight:bold; width:15px;">%</span>
+                        <button class="editor-btn" style="padding:2px 6px; font-size:11px; background:#e2e6ea;" onclick="updateTableWidth(100); document.querySelector('input[oninput*=\\'updateTableWidth\\']').value=100; saveHistory();">滿版</button>
                     </div>
-                    <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;">
+                    
+                    <div style="display:flex; align-items:center; gap:3px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;">
                         <span style="white-space:nowrap; font-weight:bold;">此欄:</span>
-                        <input type="range" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1;">
-                        <span id="col-w-val" style="font-weight:bold; width:35px; text-align:right;">${currColW ? currColW+'%' : '自動'}</span>
+                        <input type="number" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="width:40px; padding:2px 4px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+                        <span style="font-weight:bold;">%</span>
+                        <button class="editor-btn" style="padding:2px 5px; font-size:11px; background:#e6f2ff;" onclick="updateColWidth(33); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=33; saveHistory();" title="三欄平分">33%</button>
+                        <button class="editor-btn" style="padding:2px 5px; font-size:11px; background:#dcebf7;" onclick="updateColWidth(50); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=50; saveHistory();" title="兩欄平分">50%</button>
                     </div>
                 </div>`; 
             }

@@ -73,8 +73,8 @@
         #edit-badge:hover { background: #c0392b; transform: scale(1.05); }
         #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
 
-        /* 嚴格的全局防爆規則 (解決橫向溢出) */
-        .peiyu-table, table { border-collapse: collapse; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+        /* 嚴格的全局防爆規則 (修正：允許手動縮小寬度，但上限鎖死 100%) */
+        .peiyu-table, table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
         .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; vertical-align: middle; max-width: 100% !important; box-sizing: border-box !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
         .peiyu-table td div { margin: 4px 0 !important; }
         .peiyu-table td p { margin-bottom: 4px !important; }
@@ -478,7 +478,7 @@
                             .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
                             .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-                            .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+                            .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
                             .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
                             .peiyu-article table td div { margin: 4px 0 !important; }
                             .peiyu-article table td p { margin-bottom: 4px !important; }
@@ -521,7 +521,7 @@
                                 .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
                                 .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
 
-                                .peiyu-article table { border-collapse: collapse; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+                                .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
                                 .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
                                 .peiyu-article table td div { margin: 4px 0 !important; }
                                 .peiyu-article table td p { margin-bottom: 4px !important; }
@@ -1083,30 +1083,31 @@
                 const currW = parseInt(currentTarget.style.width) || 100; 
                 let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
                 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:220px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div style="display:flex; gap:3px;">
-                            <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:230px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        ${alignBtns} <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下表格">✂️</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button>
                         </div>
                     </div>
+
                     <div style="display:flex; gap:3px;">
-                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-row')">+列</button>
-                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-row')">-列</button>
-                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('add-col')">+行</button>
-                        <button class="editor-btn" style="padding:2px 8px;" onclick="modTable('del-col')">-行</button>
-                        <input type="color" onchange="modTable('border', this.value)" style="width:24px;height:24px;border:none;padding:0;cursor:pointer;" title="邊框顏色">
+                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('add-row')">+列</button>
+                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('del-row')">-列</button>
+                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('add-col')">+行</button>
+                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('del-col')">-行</button>
+                        <input type="color" onchange="modTable('border', this.value)" style="width:30px;height:28px;border:none;padding:0;cursor:pointer;" title="邊框顏色">
                     </div>
                     
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;">
-                        <span style="white-space:nowrap; font-weight:bold;">總寬:</span>
+                        <span style="white-space:nowrap; font-weight:bold; width:35px;">總寬:</span>
                         <input type="number" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; padding:2px 5px; border:1px solid #ccc; border-radius:4px; text-align:center;">
                         <span style="font-weight:bold; width:15px;">%</span>
                         <button class="editor-btn" style="padding:2px 6px; font-size:11px; background:#e2e6ea;" onclick="updateTableWidth(100); document.querySelector('input[oninput*=\\'updateTableWidth\\']').value=100; saveHistory();">滿版</button>
                     </div>
                     
                     <div style="display:flex; align-items:center; gap:3px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;">
-                        <span style="white-space:nowrap; font-weight:bold;">此欄:</span>
+                        <span style="white-space:nowrap; font-weight:bold; width:35px;">此欄:</span>
                         <input type="number" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="width:40px; padding:2px 4px; border:1px solid #ccc; border-radius:4px; text-align:center;">
                         <span style="font-weight:bold;">%</span>
                         <button class="editor-btn" style="padding:2px 5px; font-size:11px; background:#e6f2ff;" onclick="updateColWidth(33); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=33; saveHistory();" title="三欄平分">33%</button>
@@ -1540,21 +1541,28 @@
     document.getElementById('editor').addEventListener('click', updateToolbarState);
     document.getElementById('editor').addEventListener('keyup', updateToolbarState);
 
-    // 🌟 格式油漆刷引擎
-    let formatPainterState = { active: false, styles: {} };
+    // 🌟 格式油漆刷引擎 (升級：雙擊連續模式 + X光精準抓取)
+    let formatPainterState = { active: false, continuous: false, styles: {}, clickTime: 0 };
     
     window.toggleFormatPainter = function() {
         const btnTop = document.getElementById('btn-format-painter');
         const btnFloat = document.getElementById('float-format-painter');
+        const editor = document.getElementById('editor');
         
-        if (formatPainterState.active) {
-            // 關閉油漆刷
+        const now = Date.now();
+        const isDouble = (now - formatPainterState.clickTime < 400); 
+        formatPainterState.clickTime = now;
+
+        if (formatPainterState.active && !isDouble) {
             formatPainterState.active = false;
-            if(btnTop) btnTop.classList.remove('active');
-            if(btnFloat) btnFloat.classList.remove('active');
-            document.getElementById('editor').style.cursor = 'auto';
-        } else {
-            // 啟動油漆刷：偷取目前的格式
+            formatPainterState.continuous = false;
+            if(btnTop) { btnTop.classList.remove('active'); btnTop.style.background = ''; btnTop.style.borderColor = ''; }
+            if(btnFloat) { btnFloat.classList.remove('active'); btnFloat.style.background = ''; btnFloat.style.borderColor = ''; btnFloat.style.color = 'var(--forest)'; }
+            editor.style.cursor = 'auto';
+            return;
+        }
+
+        if (!formatPainterState.active) {
             const sel = window.getSelection();
             if (!sel.rangeCount || sel.isCollapsed) return alert("⚠️ 請先「反白一段文字」，系統才知道要偷誰的格式喔！");
             
@@ -1564,33 +1572,58 @@
             
             let node = sel.focusNode;
             if (node && node.nodeType === 3) node = node.parentNode;
+            if (!node || node === editor) return;
+
+            // 🔥 換上透視眼 X 光，絕對精準抓取真實渲染狀態
+            const computed = window.getComputedStyle(node);
             
-            let currentFont = ''; let currentSize = ''; let currentColor = ''; let currentBgColor = '';
+            // 抓字體
+            let fontStr = computed.fontFamily.toLowerCase();
+            let mappedFont = "sans-serif"; 
+            if (fontStr.includes('mono') || fontStr.includes('courier')) mappedFont = "monospace";
+            else if (fontStr.includes('noto serif tc') || fontStr.includes('ming') || fontStr.includes('song') || (fontStr.includes('serif') && !fontStr.includes('sans-serif'))) mappedFont = "'Noto Serif TC', serif";
             
-            while (node && node.id !== 'editor') {
-                if (node.style) {
-                    if (!currentFont && node.style.fontFamily) currentFont = node.style.fontFamily;
-                    if (!currentSize && node.style.fontSize) currentSize = node.style.fontSize;
-                    if (!currentColor && node.style.color) currentColor = node.style.color;
-                    if (!currentBgColor && node.style.backgroundColor) currentBgColor = node.style.backgroundColor;
+            // 抓大小並精準換算 pt
+            let sizePx = parseFloat(computed.fontSize) || 16;
+            let pt = sizePx * 0.75;
+            const pts = [10, 12, 14, 18, 24, 36];
+            let mappedSize = pts.reduce((p, c) => Math.abs(c - pt) < Math.abs(p - pt) ? c : p).toString();
+            
+            // 抓顏色
+            let hexColor = rgb2hex(computed.color) || '#2c3e50';
+            
+            // 抓背景色
+            let bgNode = node; let hexBg = 'transparent';
+            while (bgNode && bgNode !== editor) {
+                let bg = window.getComputedStyle(bgNode).backgroundColor;
+                if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+                    hexBg = rgb2hex(bg); break;
                 }
-                node = node.parentNode;
+                bgNode = bgNode.parentNode;
             }
             
-            if (currentFont.includes('Noto Serif')) currentFont = "'Noto Serif TC', serif";
-            else if (currentFont.includes('monospace')) currentFont = "monospace";
-            else if (currentFont.includes('sans-serif')) currentFont = "sans-serif";
-            if (currentSize.includes('pt')) currentSize = currentSize.replace('pt', '').trim();
-            
-            formatPainterState.styles.fontName = currentFont;
-            formatPainterState.styles.fontSize = currentSize;
-            formatPainterState.styles.foreColor = rgb2hex(currentColor);
-            formatPainterState.styles.backColor = rgb2hex(currentBgColor);
+            formatPainterState.styles.fontName = mappedFont;
+            formatPainterState.styles.fontSize = mappedSize;
+            formatPainterState.styles.foreColor = hexColor;
+            formatPainterState.styles.backColor = hexBg;
             
             formatPainterState.active = true;
+            formatPainterState.continuous = false;
             if(btnTop) btnTop.classList.add('active');
             if(btnFloat) btnFloat.classList.add('active');
-            document.getElementById('editor').style.cursor = 'crosshair'; // 滑鼠變成十字準星
+            editor.style.cursor = 'crosshair'; // 滑鼠變成十字準星
+        }
+
+        if (isDouble) {
+            formatPainterState.continuous = true;
+            if(btnTop) { btnTop.style.background = 'var(--warning)'; btnTop.style.borderColor = 'var(--warning)'; }
+            if(btnFloat) { btnFloat.style.background = 'var(--warning)'; btnFloat.style.borderColor = 'var(--warning)'; btnFloat.style.color = '#fff'; }
+            
+            const toast = document.createElement('div');
+            toast.innerText = "🔄 已啟用「連續格式刷」！(再點一次按鈕關閉)";
+            toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--warning); color:#fff; padding:10px 20px; border-radius:50px; z-index:9999; font-size:14px; font-weight:bold; pointer-events:none; box-shadow:0 4px 15px rgba(0,0,0,0.2);";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
         }
     };
 
@@ -1603,20 +1636,53 @@
                 if (sel.rangeCount > 0 && sel.toString().trim().length > 0) {
                     const s = formatPainterState.styles;
                     
+                    // 1. 在反白還活著的時候，一口氣把所有原生命令壓上去
                     if (document.queryCommandState('bold') !== s.bold) exec('bold');
                     if (document.queryCommandState('italic') !== s.italic) exec('italic');
                     if (document.queryCommandState('underline') !== s.underline) exec('underline');
                     
-                    if (s.fontName) exec('fontName', s.fontName);
-                    if (s.fontSize) applyFontSize(s.fontSize);
-                    if (s.foreColor) exec('foreColor', s.foreColor);
-                    if (s.backColor) applyHighlighter(s.backColor);
-                    else document.execCommand('backColor', false, 'transparent');
+                    if (s.fontName) document.execCommand('fontName', false, s.fontName);
+                    if (s.fontSize) document.execCommand('fontSize', false, 7); // 先借用最大級別 7，後面再精準轉碼
+                    if (s.foreColor) document.execCommand('foreColor', false, s.foreColor);
+                    
+                    if (s.backColor && s.backColor !== 'transparent') {
+                        document.execCommand('styleWithCSS', false, true);
+                        document.execCommand('hiliteColor', false, s.backColor);
+                        document.execCommand('backColor', false, s.backColor);
+                    } else {
+                        document.execCommand('styleWithCSS', false, true);
+                        document.execCommand('backColor', false, 'transparent');
+                    }
+                    
+                    // 2. 噴漆完成後 (此時反白狀態可能被破壞，但沒關係了)，一次性進行標籤除髒與轉碼
+                    document.querySelectorAll('#editor font').forEach(f => {
+                        const span = document.createElement('span');
+                        span.style.cssText = f.style.cssText;
+                        if (f.face) span.style.fontFamily = f.face;
+                        if (f.color) span.style.color = f.color;
+                        if (f.size === '7' && s.fontSize) {
+                            span.style.fontSize = s.fontSize + 'pt'; // 轉回精準的 pt 單位
+                        }
+                        span.innerHTML = f.innerHTML;
+                        f.replaceWith(span);
+                    });
+
+                    document.querySelectorAll('#editor span').forEach(sp => {
+                        if (sp.style.fontSize === '-webkit-xxx-large' || sp.style.fontSize === 'xxx-large' || sp.style.fontSize === '48px' || sp.style.fontSize === '7em') {
+                            if (s.fontSize) sp.style.fontSize = s.fontSize + 'pt';
+                        }
+                    });
                     
                     saveHistory();
+                    
+                    // 3. 刷完後，判斷是否為連續模式
+                    if (!formatPainterState.continuous) {
+                        toggleFormatPainter(); // 單次模式：自動關閉
+                    } else {
+                        // 連續模式：自動取消反白，讓你視覺更清晰，可立刻去刷下一段
+                        sel.removeAllRanges();
+                    }
                 }
-                // 刷完一次後，自動關閉油漆刷
-                toggleFormatPainter(); 
                 updateToolbarState();
             }, 50);
         }

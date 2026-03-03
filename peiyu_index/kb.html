@@ -182,6 +182,60 @@
     .result-overlay.active { display: flex; }
     .text-modal-card { width: 90%; max-width: 650px; max-height: 90vh; background: #fff; border-radius: 16px; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; }
 
+    /* ======================================================
+       🌟 前台專屬：內文頁籤群組 CSS (完美複製中分類膠囊 + 終極去背)
+       ====================================================== */
+    /* 1. 強制殺除後台殘留的黃底色、虛線框與內縮限制 */
+    .peiyu-tabs-wrapper { 
+        width: 100% !important; 
+        margin: 30px 0 !important; 
+        padding: 0 !important; 
+        background: transparent !important; /* 絕對去背 */
+        border: none !important;            /* 殺除外框 */
+        box-shadow: none !important;
+        clear: both; 
+    }
+    
+    /* 2. 殺除後台的提示文字與內部底色 */
+    .peiyu-tabs-wrapper::before { display: none !important; content: none !important; }
+    .peiyu-tab-body, .peiyu-tab-container { 
+        background: transparent !important; 
+        padding: 0 !important; 
+        width: 100% !important; 
+    }
+    .peiyu-tab-section { 
+        display: none; animation: fadeInTab 0.4s ease; width: 100%; 
+        background: transparent !important; border: none !important; 
+    }
+    .peiyu-tab-section.active { display: block; }
+    
+    /* 3. 標題列：保留橫向膠囊，底部加一條淡淡的虛線分隔 */
+    .peiyu-tab-group-header { 
+        display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px 15px 5px; margin-bottom: 20px;
+        scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;
+        border-bottom: 2px dashed #eee; background: transparent !important;
+    }
+    .peiyu-tab-group-header::-webkit-scrollbar { display: none; }
+    
+    /* 4. 膠囊按鈕：預設狀態 */
+    .peiyu-tab-btn { 
+        flex-shrink: 0; padding: 8px 24px; border-radius: 50px; font-size: 1rem; font-weight: bold; 
+        font-family: 'Noto Serif TC', serif; cursor: pointer; transition: all 0.3s;
+        background: #ffffff; border: 1px solid #e0e0e0; color: #777; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        white-space: nowrap; user-select: none;
+    }
+    .peiyu-tab-btn:hover { border-color: var(--accent); color: var(--forest); }
+    
+    /* 5. 膠囊按鈕：選中狀態 (尊爵綠金) */
+    .peiyu-tab-btn.active { 
+        background: var(--forest); color: var(--accent); border-color: var(--forest);
+        box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); transform: translateY(-2px);
+    }
+    
+    /* 隱藏後台專用的醜標籤與按鈕 */
+    .peiyu-tab-group-header span, .kb-tab-admin-btns, .peiyu-tab-label-row { display: none !important; }
+    @keyframes fadeInTab { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
     @media (max-width: 768px) {
         .section { padding: 10px 15px 60px 15px !important; }
         .brand-h3-zh, .brand-h2-en { display: block !important; width: 100% !important; margin-left: 0 !important; text-align: center !important; }
@@ -499,6 +553,7 @@
             </div>`;
             
         window.scrollTo(0, 0); 
+        initArticleTabs();
     }
 
 
@@ -815,6 +870,50 @@
 
     function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
+    // ==========================================
+    // 🌟 前台專屬：初始化內文頁籤切換功能
+    // ==========================================
+    function initArticleTabs() {
+        const tabWrappers = document.querySelectorAll('.peiyu-tabs-wrapper');
+        
+        tabWrappers.forEach(wrapper => {
+            let header = wrapper.querySelector('.peiyu-tab-group-header');
+            const sections = wrapper.querySelectorAll('.peiyu-tab-section');
+            if (sections.length === 0) return;
+
+            if (!header) {
+                header = document.createElement('div');
+                header.className = 'peiyu-tab-group-header';
+                wrapper.insertBefore(header, wrapper.firstChild);
+            }
+
+            let buttonsHtml = '';
+            sections.forEach((sec, index) => {
+                const title = sec.getAttribute('data-tab-title') || `頁籤 ${index + 1}`;
+                const activeClass = index === 0 ? 'active' : '';
+                buttonsHtml += `<div class="peiyu-tab-btn ${activeClass}" data-idx="${index}">${title}</div>`;
+                
+                if (index === 0) sec.classList.add('active');
+                else sec.classList.remove('active');
+            });
+
+            header.innerHTML = buttonsHtml; 
+
+            const btns = header.querySelectorAll('.peiyu-tab-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    btns.forEach(b => b.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const targetIdx = this.getAttribute('data-idx');
+                    if (sections[targetIdx]) sections[targetIdx].classList.add('active');
+                    
+                    this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                });
+            });
+        });
+    }
     function safeB64Encode(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))); }
     function safeB64Decode(str) { str = str.replace(/ /g, '+'); return decodeURIComponent(atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')); }
 </script>

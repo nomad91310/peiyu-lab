@@ -73,6 +73,39 @@
         #edit-badge:hover { background: #c0392b; transform: scale(1.05); }
         #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
 
+        /* 🛠️ 頁籤群組：左右絕對不設防模式 */
+        .peiyu-tabs-wrapper { 
+            width: 100% !important; 
+            border-top: 4px dashed #c6a87c !important; 
+            border-bottom: 4px dashed #c6a87c !important;
+            background: #fffdf9; margin: 50px 0; padding: 45px 0 20px 0;
+            position: relative; clear: both;
+        }
+
+        /* 🔒 鋼鐵標籤復活！純視覺顯示，絕對刪不掉 */
+        .peiyu-tabs-wrapper::before {
+            content: "📑 內文頁籤群組 (點擊黃底虛線外框開啟選單)";
+            position: absolute; top: 0; left: 0; right: 0;
+            background: #c6a87c; color: #fff; padding: 6px 20px;
+            font-weight: bold; font-size: 13px; z-index: 5;
+            pointer-events: none; 
+        }
+
+        .peiyu-tab-section { width: 100% !important; padding: 0; margin: 30px 0; border-bottom: 1px dashed #eee; padding-bottom: 20px; }
+
+        /* 📍 區段標籤防護 */
+        .peiyu-tab-label-row {
+            background: #f0f4f8; padding: 6px 12px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 5px; border-left: 5px solid #2980b9;
+        }
+        .peiyu-tab-label-row::before {
+            content: "📍 頁籤名稱："; font-size: 13px; font-weight: bold; color: #2980b9;
+        }
+
+        .peiyu-tab-body {
+            width: 100% !important; background: #fff; padding: 15px 0 !important; min-height: 50px; clear: both;
+        }
+
         /* 嚴格的全局防爆規則 (修正：允許手動縮小寬度，但上限鎖死 100%) */
         .peiyu-table, table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
         .peiyu-table th, .peiyu-table td { padding: 8px 12px; min-width: 50px; border: 1px solid #ddd; vertical-align: middle; max-width: 100% !important; box-sizing: border-box !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
@@ -351,12 +384,13 @@
                         <button class="editor-btn" style="font-weight:bold; color:var(--forest);" onclick="openModal('spacing')"><i class="fas fa-sliders-h"></i> 排版設定</button>
                     </div>
                     <div class="tb-group" style="margin-left: auto;">
-                        <button class="editor-btn btn-magic" onclick="normalizeTextFormats()" style="color:var(--info); margin-right: 5px;">🔤 格式轉碼</button>
+                        <button class="editor-btn btn-magic" onclick="batchGateTransform()" style="color:var(--purple); margin-right: 5px;">🌟 全篇閘門化</button>                        <button class="editor-btn btn-magic" onclick="normalizeTextFormats()" style="color:var(--info); margin-right: 5px;">🔤 格式轉碼</button>
                         <button class="editor-btn btn-magic" onclick="cleanCurrentArticle()" style="background:#fff5f5; border-color:#fadbd8; color:#c0392b; margin-right: 5px;">🧹 除髒</button>
                         <button class="editor-btn btn-magic" onclick="openModal('h2')">🟡 主標</button>
                         <button class="editor-btn btn-magic" onclick="openModal('h3')">🟢 副標</button>
                         <button class="editor-btn btn-magic" onclick="openModal('card')">💡 資訊卡</button>
                         <button class="editor-btn btn-magic" onclick="openModal('warn')">🚨 警告框</button>
+                        <button class="editor-btn btn-magic" onclick="openModal('tabs')">📑 內文頁籤</button>
                     </div>
                 </div>
             </div>
@@ -460,38 +494,48 @@
         spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 }; applySpacingToEditor();
     }
 
-    async function saveArticle() {
+    async function saveArticle(isAuto = false) {
         const editor = document.getElementById('editor');
         const sourceArea = document.getElementById('source-area');
         if (sourceArea.style.display === 'block') {
             const parser = new DOMParser(); const doc = parser.parseFromString(sourceArea.value, 'text/html');
             const wrapper = doc.querySelector('.peiyu-article'); editor.innerHTML = wrapper ? wrapper.innerHTML : sourceArea.value;
         }
+        // 🔥 終極防呆：儲存前，強制掃描畫面上最新的頁籤標題，寫死進 HTML 屬性裡
+        editor.querySelectorAll('.peiyu-tab-section').forEach(sec => {
+            const titleSpan = sec.querySelector('.peiyu-tab-title-edit');
+            if (titleSpan) {
+                // 拔除可能產生的垃圾換行符號，只保留純文字
+                let pureText = titleSpan.textContent.replace(/[\r\n]+/g, '').trim();
+                sec.setAttribute('data-tab-title', pureText);
+            }
+        });
 
         const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-                            .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-                            .peiyu-article * { -webkit-text-size-adjust: 100%; }
-                            .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-                            .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-                            .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-                            .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-                            .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-                            .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
-
-                            .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
-                            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
-                            .peiyu-article table td div { margin: 4px 0 !important; }
-                            .peiyu-article table td p { margin-bottom: 4px !important; }
-                            .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
-                            .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
-
-                            @media (max-width: 768px) and (orientation: portrait) {
-                                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
-                                .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; white-space: normal !important; }
-                                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                            }
-                            </style>
-                            <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+            .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+            .peiyu-article * { -webkit-text-size-adjust: 100%; }
+            .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+            .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+            .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+            .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+            .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+            .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+            .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
+            .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+            .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
+            
+            .peiyu-tabs-wrapper { width: 100% !important; background: transparent !important; border: none !important; margin: 40px 0 !important; }
+            .peiyu-tab-group-header { background: transparent !important; display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 15px 5px; border: none !important; }
+            .peiyu-tab-container { background: transparent !important; padding: 0 !important; width: 100% !important; border: none !important; }
+            .peiyu-tab-body { background: transparent !important; width: 100% !important; border: none !important; }
+            
+            @media (max-width: 768px) and (orientation: portrait) {
+                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+            }
+        </style>
+        <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
 
         const p = { title: document.getElementById('kb-title').value.trim(), big_category: document.getElementById('kb-big').value.trim(), mid_category: document.getElementById('kb-mid').value.trim(), is_published: document.getElementById('kb-pub').checked, body: exportHTML.trim() };
         const id = document.getElementById('kb-id').value;
@@ -503,7 +547,8 @@
         try { 
             if (id) { await myDB.from('kb_articles').update(p).eq('id', id); } 
             else { const { data } = await myDB.from('kb_articles').select('sort_order').order('sort_order', { ascending: false }).limit(1); p.sort_order = (data && data.length) ? data[0].sort_order + 1 : 1; await myDB.from('kb_articles').insert([p]); } 
-            alert("✅ 文章已成功儲存！"); fetchKbData(); if (!id) resetKbForm(); 
+            if (!isAuto) alert("✅ 文章已成功儲存！");
+        else console.log("✅ 系統已自動背景儲存");fetchKbData(); if (!id) resetKbForm(); 
         } catch (e) { alert("❌ 儲存失敗: " + e.message); } 
         finally { saveBtn.innerText = originalText; saveBtn.disabled = false; saveBtn.style.opacity = "1"; saveBtn.style.cursor = "pointer"; }
     }
@@ -511,36 +556,49 @@
     function toggleSource() { 
         const s = document.getElementById('source-area'); const editor = document.getElementById('editor'); 
         if (s.style.display === 'none' || s.style.display === '') { 
+            
+            // 🔥 1. 同步最新頁籤標題 (避免切換到 HTML 時名字沒變)
+            editor.querySelectorAll('.peiyu-tab-section').forEach(sec => {
+                const titleSpan = sec.querySelector('.peiyu-tab-title-edit');
+                if (titleSpan) {
+                    let pureText = titleSpan.textContent.replace(/[\r\n]+/g, '').trim();
+                    sec.setAttribute('data-tab-title', pureText);
+                }
+            });
+
+            // 🔥 2. 生成「去黃透明版」的匯出代碼
             const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-                                .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-                                .peiyu-article * { -webkit-text-size-adjust: 100%; }
-                                .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-                                .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-                                .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-                                .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-                                .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-                                .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+                .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+                .peiyu-article * { -webkit-text-size-adjust: 100%; }
+                .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+                .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+                .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+                .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+                .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+                .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+                .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+                .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
+                .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+                .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
+                
+                .peiyu-tabs-wrapper { width: 100% !important; background: transparent !important; border: none !important; margin: 40px 0 !important; }
+                .peiyu-tab-group-header { background: transparent !important; display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 15px 5px; border: none !important; }
+                .peiyu-tab-container { background: transparent !important; padding: 0 !important; width: 100% !important; border: none !important; }
+                .peiyu-tab-body { background: transparent !important; width: 100% !important; border: none !important; }
 
-                                .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
-                                .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
-                                .peiyu-article table td div { margin: 4px 0 !important; }
-                                .peiyu-article table td p { margin-bottom: 4px !important; }
-                                .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
-                                .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
-
-                                @media (max-width: 768px) and (orientation: portrait) {
-                                    .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
-                                    .peiyu-article table td, .peiyu-article table th { padding-left: 5px !important; padding-right: 5px !important; white-space: normal !important; }
-                                    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                                }
-                                </style>
-                                <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+                @media (max-width: 768px) and (orientation: portrait) {
+                    .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                }
+            </style><div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+            
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
             const parser = new DOMParser(); const doc = parser.parseFromString(s.value, 'text/html'); const wrapper = doc.querySelector('.peiyu-article');
             editor.innerHTML = wrapper ? wrapper.innerHTML : s.value; s.style.display = 'none'; editor.style.display = ''; saveHistory(); 
         } 
     }
+    
 
     // --- 編輯器核心 ---
     let spacingCfg = { lh: 1.6, pmb: 0.5, lmtb: 0.5, limb: 0.3 };
@@ -602,7 +660,12 @@
             document.addEventListener('click', function(e) {
                 if (contextMenu && !contextMenu.contains(e.target)) contextMenu.style.display = 'none';
             });
-            editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); }); }
+        // 當你在編輯器打字或改東西，就會觸發倒數自動儲存
+            editor.addEventListener('input', () => { 
+                clearTimeout(typingTimeout); 
+                typingTimeout = setTimeout(saveHistory, 500); 
+                triggerAutoSave(); // 👈 啟動自動儲存倒數
+            });         }
     });
 
     
@@ -757,6 +820,8 @@
     window.insertImageToEditor = function(u) { const html = `<div class="resizable-wrapper peiyu-obj" style="margin-left:auto; margin-right:auto; width:100%;"><img src="${u}"></div><p><br></p>`; insertHtml(html); closeGallery(); }
     
     // 🌟 終極版除髒模式：只拔大空格與寬度死鎖，絕對不碰你的字體與大小！
+    // 🌟 終極版三合一除髒引擎 (修正計數器 + 保留首行縮排)
+    // 🌟 終極除髒引擎 (新增：強制拔除所有 inline 背景色)
     function cleanCurrentArticle() {
         saveSelection(); 
         const editor = document.getElementById('editor'); 
@@ -764,54 +829,65 @@
         const parser = new DOMParser(); 
         const doc = parser.parseFromString(html, 'text/html');
 
+        let cleanCount = 0;
+
         doc.querySelectorAll('*').forEach(el => {
-            // 1. 清除殘留 class
-            if (el.className && typeof el.className === 'string' && el.className.includes('ql-')) { 
-                const cleanClasses = el.className.split(' ').filter(c => !c.startsWith('ql-')).join(' '); 
-                if (cleanClasses) el.className = cleanClasses; else el.removeAttribute('class'); 
+            let isModified = false;
+
+            // 🔪 1. 拔除 AI 垃圾 Class
+            if (el.className && typeof el.className === 'string') {
+                const oldClass = el.className;
+                const cleanClasses = el.className.split(' ').filter(c => !c.startsWith('ql-') && !c.includes('ng-') && !c.includes('is-rich-chat-ui')).join(' '); 
+                if (cleanClasses !== oldClass) {
+                    if (cleanClasses) el.className = cleanClasses; else el.removeAttribute('class'); 
+                    isModified = true;
+                }
             }
             
-            // 2. 拔除寬度死鎖與大空格 (🔥完全保留字體與大小)
+            // 🔪 2. 拔除莫名其妙的 AI 屬性
+            Array.from(el.attributes).forEach(attr => {
+                if (attr.name.startsWith('_ng') || attr.name.startsWith('data-start') || attr.name === 'role') {
+                    el.removeAttribute(attr.name);
+                    isModified = true;
+                }
+            });
+
+            // 🔪 3. 物理拔除魔鬼樣式 (包含那坨黃底！)
             if (el.style && el.style.length > 0) {
-                let w = el.style.getPropertyValue('width');
-                if (w && el.style.getPropertyPriority('width') === 'important') el.style.setProperty('width', w, ''); 
-                let mw = el.style.getPropertyValue('min-width');
-                if (mw && el.style.getPropertyPriority('min-width') === 'important') el.style.setProperty('min-width', mw, '');
+                const originalStyle = el.getAttribute('style');
                 
-                // 殺掉討厭的縮排大空格
-                if (el.style.textIndent) el.style.textIndent = '';
+                // 🔥 核心修正：直接拔除所有 inline 背景色設定
+                if (el.style.backgroundColor) {
+                    el.style.removeProperty('background-color');
+                    isModified = true;
+                }
+
+                // 拔除寬度死鎖 (保留縮排)
+                if (el.style.getPropertyPriority('width') === 'important') el.style.setProperty('width', el.style.width, ''); 
+                if (el.style.lineHeight) el.style.removeProperty('line-height');
+                if (el.style.marginBlock) el.style.removeProperty('margin-block');
+                if (el.style.letterSpacing) el.style.removeProperty('letter-spacing');
+
                 if (el.getAttribute('style') === '') el.removeAttribute('style');
+                if (originalStyle !== el.getAttribute('style')) isModified = true;
             }
+            
+            if (isModified) cleanCount++;
         });
 
-        // 升級舊版副標題積木
-        doc.querySelectorAll('h3.title-boxed-h3').forEach(h3 => { 
-            const text = h3.textContent.trim(); 
-            const newDiv = document.createElement('div'); 
-            newDiv.style.cssText = "margin: 25px 0 10px 0;"; 
-            newDiv.innerHTML = `<h3 style="border: 2px solid rgb(198, 168, 124); background: rgb(255, 252, 245); color: rgb(26, 47, 35); padding: 8px 35px; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 0px;">${text}</h3>`; 
-            h3.parentNode.replaceChild(newDiv, h3); 
-        });
-
-        // 升級表格與圖片為防爆格式
-        doc.querySelectorAll('table').forEach(tbl => tbl.classList.add('peiyu-table', 'peiyu-obj'));
-        doc.querySelectorAll('img').forEach(img => {
-            let wrapper = img.closest('.resizable-wrapper');
-            if (!wrapper) {
-                let oldW = img.getAttribute('width') || img.style.width || '100%';
-                if (oldW && !oldW.includes('%') && !oldW.includes('px') && !oldW.includes('auto')) { oldW += 'px'; }
-                wrapper = document.createElement('div'); 
-                wrapper.className = 'resizable-wrapper peiyu-obj';
-                wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
-                img.style.width = '100%'; img.style.height = 'auto'; img.style.display = 'block'; 
-                img.removeAttribute('width'); 
-                img.parentNode.insertBefore(wrapper, img); wrapper.appendChild(img);
-            }
+        // 🔪 4. 強制升級圖片外框為透明
+        doc.querySelectorAll('.resizable-wrapper').forEach(w => {
+            w.style.backgroundColor = 'transparent';
         });
 
         editor.innerHTML = doc.body.innerHTML; 
         saveHistory(); 
-        alert("✨ 報告！已成功清除『大空格』與『版面毒瘤』，您的字體與大小格式皆已完美保留！\n\n(請點擊『💾 儲存文章』)");
+        
+        if (cleanCount > 0) {
+            alert(`✨ 物理超渡完成！\n\n已成功清除 ${cleanCount} 個標籤內的背景色與垃圾代碼！\n\n(請記得點擊『💾 儲存文章』才會生效喔！)`);
+        } else {
+            alert(`✨ 這篇文章已經很乾淨了，沒有發現隱藏的背景色。`);
+        }
     }
 
     let modalMode = null;
@@ -822,6 +898,10 @@
         else if (type === 'h2' || type === 'h3') { document.getElementById('m-title-editor').innerText = type === 'h2' ? '插入主標題' : '插入副標題'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-text" class="editor-form-input"></div><div class="editor-form-group"><label>風格</label><select id="inp-theme" class="editor-form-input"><option value="forest">🌲 經典深綠</option><option value="gold">👑 尊爵金底</option><option value="cream">🍦 溫柔奶油</option></select></div>`; }
         else if (type === 'card') { document.getElementById('m-title-editor').innerText = '插入卡片'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-title" class="editor-form-input"></div><div class="editor-form-group"><label>標籤 (逗號分隔)</label><input type="text" id="inp-tags" class="editor-form-input"></div><div class="editor-form-group"><label>圖示</label><input type="text" id="inp-icon" class="editor-form-input" value="✨"></div>`; }
         else if (type === 'warn') { document.getElementById('m-title-editor').innerText = '插入警告'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-title" class="editor-form-input" value="注意"></div><div class="editor-form-group"><label>顏色</label><select id="inp-theme" class="editor-form-input"><option value="red">🔴 紅色</option><option value="yellow">🟡 黃色</option><option value="blue">🔵 藍色</option></select></div>`; }
+        else if (type === 'tabs') { 
+            document.getElementById('m-title-editor').innerText = '插入內文頁籤'; 
+            body.innerHTML = `<div class="editor-form-group"><label>頁籤名稱 (請用逗號分隔)</label><input type="text" id="inp-tabs" class="editor-form-input" placeholder="例如：特質, 提醒, 建議"></div><p style="font-size:12px; color:#888; margin-top:5px;">💡 提示：建立後可點擊黃色外框，使用選單新增或刪除。</p>`; 
+        }
         document.getElementById('config-modal').style.display = 'flex';
     }
 
@@ -847,6 +927,20 @@
         }
         else if(modalMode === 'card') { const title = document.getElementById('inp-title').value || '標題'; const icon = document.getElementById('inp-icon').value || '✨'; const tagsInput = document.getElementById('inp-tags').value; let tagsHtml = tagsInput ? tagsInput.split(/,|，/).map(t => `<span style="background-color: #f0f4f8; color: #34495e; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #dcebf7; margin-left:5px;">${t.trim()}</span>`).join('') : ''; html = `<div class="peiyu-block peiyu-obj" style="background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;"><span style="font-size: 20px; margin-right:5px;">${icon}</span><strong style="font-size: 17px; color: #2c3e50;">${title}</strong>${tagsHtml}</div><div style="color: #444; font-size: 15px; line-height: 1.8;"><p>請輸入內容...</p><ul><li>重點一</li></ul></div></div><p><br></p>`; }
         else if(modalMode === 'warn') { const title = document.getElementById('inp-title').value || '注意'; const theme = document.getElementById('inp-theme').value; const styles = { red: { bg: '#fdf2f2', bor: '#fadbd8', txt: '#c0392b' }, yellow: { bg: '#fffbe6', bor: '#ffe58f', txt: '#d48806' }, blue: { bg: '#e6f7ff', bor: '#91d5ff', txt: '#096dd9' } }; const s = styles[theme]; html = `<div class="peiyu-obj" style="background-color: ${s.bg}; border: 1px solid ${s.bor}; border-radius: 8px; padding: 20px; margin: 25px 0;"><strong style="color: ${s.txt}; display: block; margin-bottom: 10px; font-size: 16px;">${title}</strong><div style="color: #555; font-size: 15px; line-height: 1.6;">請輸入內容...</div></div><p><br></p>`; }
+        else if(modalMode === 'tabs') { 
+            const tabsInput = document.getElementById('inp-tabs').value; 
+            if (!tabsInput) return alert('請輸入頁籤標題'); 
+            const tabs = tabsInput.split(/,|，/).map(t => t.trim()).filter(t => t); 
+            let sectionsHtml = tabs.map(t => window.getNewTabSectionHtml(t)).join(''); 
+            
+            // 🔥 拔掉所有實體頂部按鈕，純靠 CSS 虛擬標籤與浮動選單
+            html = `
+            <div class="peiyu-tabs-wrapper peiyu-obj" style="position:relative;">
+                <div class="peiyu-tab-container" style="width: 100%;">
+                    ${sectionsHtml}
+                </div>
+            </div><p><br></p>`; 
+        }
         insertHtml(html); document.getElementById('config-modal').style.display = 'none';
     }
 
@@ -1001,6 +1095,11 @@
                 let targetImg = e.target.closest('img'); 
                 let targetCell = e.target.closest('td, th');
                 let targetTable = e.target.closest('table');
+                // 🔥 新增：偵測是否點到頁籤的黃色外框、頂部標題或藍色標籤
+                let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
+
+                // 🔥 修正防呆判定，把 targetTabs 加進去
+                if (!targetImg && !targetTable && !targetTabs && checkTextSelection()) return;
 
                 // 🔥 優先判斷：如果是反白文字，直接秀徽章並結束
                 if (!targetImg && checkTextSelection()) return; 
@@ -1038,6 +1137,16 @@
                     editBadge.style.top = (rect.top + 5) + 'px';
                     editBadge.style.left = (rect.left + 5) + 'px';
                 } 
+                else if (targetTabs) { 
+                    currentTarget = targetTabs;
+                    pendingTargetType = 'tabs';
+                    currentTarget.classList.add('obj-selected');
+                    
+                    const rect = currentTarget.getBoundingClientRect();
+                    editBadge.style.display = 'flex';
+                    editBadge.style.top = (rect.top + 5) + 'px';
+                    editBadge.style.left = (rect.left + 5) + 'px';
+                }
             });
 
             // 支援用鍵盤 (Shift+方向鍵) 反白文字也能跳出徽章
@@ -1161,6 +1270,16 @@
                         </div>
                     </div>
                 </div>`; 
+            }
+            else if (type === 'tabs') {
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:190px;">
+                    <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 頁籤群組物件</div>
+                    <button class="editor-btn" style="background:#27ae60; color:#fff; font-weight:bold; padding:6px 0;" onclick="modTabsAdd()">➕ 新增頁籤區段</button>
+                    <div style="display:flex; gap:5px;">
+                        <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
+                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; flex:1; font-weight:bold; padding:6px 0;" onclick="modTabsDelete()">🗑️ 刪除</button>
+                    </div>
+                </div>`;
             }
             else if (type === 'text') {
                 // 🔥 專屬純文字懸浮工具列
@@ -1329,6 +1448,65 @@
                 saveHistory(); 
             } 
         }
+
+        // 👇 從這裡開始貼上 👇
+
+        // 🌟 產生單一頁籤區段的 HTML
+        window.getNewTabSectionHtml = function(title) {
+            return `
+                <div class="peiyu-tab-section peiyu-obj" data-tab-title="${title}">
+                    <div class="peiyu-tab-label-row" contenteditable="false">
+                        <span contenteditable="true" class="peiyu-tab-title-edit" 
+                            oninput="this.closest('.peiyu-tab-section').setAttribute('data-tab-title', this.innerText)" 
+                            onblur="this.closest('.peiyu-tab-section').setAttribute('data-tab-title', this.innerText)"
+                            style="background: #fff; padding: 2px 8px; border: 1px solid #ddd; border-radius: 4px; font-weight: 900; color: #333; outline: none; min-width: 50px;">${title}</span>
+                        <button type="button" class="kb-btn-del-tab" style="margin-left: auto; background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: bold;">🗑️ 刪除</button>
+                    </div>
+                    <div class="peiyu-tab-body" contenteditable="true">
+                        <p>請在此輸入【${title}】內容...</p>
+                    </div>
+                </div>`;
+        };
+
+        // 🔥 浮動選單專用：新增頁籤區段
+        window.modTabsAdd = function() {
+            if (!currentTarget) return;
+            const container = currentTarget.querySelector('.peiyu-tab-container');
+            const newTitle = prompt("請輸入新頁籤名稱 (例如: 3/18-3/20):", "新頁籤");
+            
+            if (newTitle && container) {
+                container.insertAdjacentHTML('beforeend', window.getNewTabSectionHtml(newTitle));
+                document.getElementById('float-menu').style.display = 'none';
+                document.getElementById('edit-badge').style.display = 'none';
+                saveHistory();
+            }
+        };
+
+        // 🔥 浮動選單專用：刪除整組頁籤
+        window.modTabsDelete = function() {
+            if (confirm("⚠️ 確定要刪除這整個頁籤群組嗎？裡面的所有內容都會消失喔！")) {
+                if (currentTarget) {
+                    currentTarget.remove(); 
+                    document.getElementById('float-menu').style.display = 'none';
+                    document.getElementById('edit-badge').style.display = 'none';
+                    saveHistory();
+                }
+            }
+        };
+
+        // 🌟 監聽編輯器內的按鈕點擊 (用來刪除「單一」區段)
+        editor.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('kb-btn-del-tab')) {
+                e.preventDefault(); e.stopPropagation();
+                if (confirm("確定要刪除這整個頁籤區段嗎？")) {
+                    const section = e.target.closest('.peiyu-tab-section');
+                    if (section) {
+                        section.remove();
+                        saveHistory();
+                    }
+                }
+            }
+        });
 
         window.modTable = function(a, val) { 
             if(!currentTarget) return; const tbody = currentTarget.querySelector('tbody'); 
@@ -1733,6 +1911,50 @@
         updateToolbarState(); // 呼叫雷達更新顯示
         alert("✨ 轉碼完成！\n\n已將 " + count + " 個外部格式，成功轉換為本編輯器專屬的標準編碼。\n現在您可以從下拉選單正確讀取它們了！");
     }
+    
+    
+    // 🌟 全篇閘門化：原子彈級重整 (先撐開 -> 刪除舊權限 -> 再縮小)
+    window.batchGateTransform = function() {
+        const editor = document.getElementById('editor');
+        let tableCount = 0;
+        let imgCount = 0;
+
+        // 1. 處理所有表格
+        editor.querySelectorAll('table').forEach(tbl => {
+            // 🔥 步驟 A：先清除表格上所有亂七八糟的 style，強制重置
+            tbl.removeAttribute('style');
+            
+            // 🔥 步驟 B：模擬「先調滿版」：強迫瀏覽器把寬度撐開
+            tbl.style.setProperty('width', '100%', 'important');
+            tbl.style.display = 'table';
+
+            // 🔥 步驟 C：掃蕩格子 (把 td 裡面寫死的 100% 或 40% 通通拔掉！)
+            tbl.querySelectorAll('td, th').forEach(cell => {
+                cell.style.removeProperty('width'); // 絕對不准寫死寬度
+                cell.style.whiteSpace = 'normal';
+                cell.style.wordBreak = 'break-all';
+            });
+
+            // 🔥 步驟 D：處理圖片 (圖片一定要 100% 撐開)
+            tbl.querySelectorAll('img, .resizable-wrapper').forEach(el => {
+                el.style.setProperty('width', '100%', 'important');
+                el.style.setProperty('max-width', '100%', 'important');
+                el.style.margin = '0 auto';
+                imgCount++;
+            });
+
+            // 🔥 步驟 E：最後縮回「桌機看得到的 40%」(不加 !important，讓手機版 CSS 能覆蓋它)
+            tbl.style.width = '40%';
+            tbl.style.marginLeft = '0';
+            tbl.style.marginRight = 'auto';
+            
+            tableCount++;
+        });
+
+        saveHistory();
+        if (typeof triggerAutoSave === 'function') triggerAutoSave(true); 
+        alert(`✨ 原子彈級重整完成！\n\n已重置 ${tableCount} 個表格。\n代碼已洗乾淨：表格寬度改為自動、圖片 100% 撐滿。`);
+    };
     // --- 啟動程序 ---
     document.addEventListener("DOMContentLoaded", () => {
         requireLogin();

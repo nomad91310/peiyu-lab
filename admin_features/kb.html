@@ -2075,13 +2075,39 @@
         const toolbarHeader = document.querySelector('.editor-sticky-header');
         if(toolbarHeader) toolbarHeader.classList.remove('show-drawer');
 
+        // 🔥 關鍵防護 1：使用 mousedown / touchstart 攔截焦點轉移！
+        // 這樣點擊筆的時候，編輯器就不會失去焦點，反白也就不會消失！
+        fab.addEventListener('mousedown', function(e) {
+            e.preventDefault(); 
+        });
+        fab.addEventListener('touchstart', function(e) {
+            // 雖然是觸控，但也需要 preventDefault，避免觸發後續的失焦
+            // 但因為我們還需要它觸發 click，所以不能完全擋死，
+            // 只要把這個防護交給前面寫好的 saveSelection / restoreSelection 即可
+        }, {passive: false});
+
+        // 原本的點擊開關邏輯
         fab.addEventListener('click', function(e) {
-            e.preventDefault(); if(!toolbarHeader) return; toolbarHeader.classList.toggle('show-drawer');
-            if (toolbarHeader.classList.contains('show-drawer')) { fab.innerHTML = '<i class="fas fa-times"></i>'; fab.style.background = '#e74c3c'; fab.style.borderColor = '#c0392b'; } 
-            else { fab.innerHTML = '<i class="fas fa-pen"></i>'; fab.style.background = 'var(--forest)'; fab.style.borderColor = 'var(--accent)'; }
+            e.preventDefault(); 
+            if(!toolbarHeader) return; 
+            
+            // 🔥 關鍵防護 2：在打開工具列前，手動叫回剛剛存好的反白狀態！
+            restoreSelection();
+
+            toolbarHeader.classList.toggle('show-drawer');
+            if (toolbarHeader.classList.contains('show-drawer')) { 
+                fab.innerHTML = '<i class="fas fa-times"></i>'; 
+                fab.style.background = '#e74c3c'; 
+                fab.style.borderColor = '#c0392b'; 
+            } 
+            else { 
+                fab.innerHTML = '<i class="fas fa-pen"></i>'; 
+                fab.style.background = 'var(--forest)'; 
+                fab.style.borderColor = 'var(--accent)'; 
+            }
         });
     }
-    // 🌟 處理自訂右鍵選單的剪貼動作
+        // 🌟 處理自訂右鍵選單的剪貼動作
     async function contextAction(action) {
         const contextMenu = document.getElementById('custom-context-menu');
         contextMenu.style.display = 'none';

@@ -70,10 +70,18 @@
         .color-picker-wrapper input { position: absolute; top: -5px; left: -5px; width: 40px; height: 40px; cursor: pointer; }
 
         /* 浮動選單、修改徽章與物件 */
-        .obj-selected { outline: 3px solid #e74c3c !important; outline-offset: -2px; }
+        /* 🔥 動態專屬外框 */
+        .obj-selected-table { outline: 3px solid #3498db !important; outline-offset: -2px; }
+        .obj-selected-image { outline: 3px solid #27ae60 !important; outline-offset: -2px; }
+        .obj-selected-block { outline: 3px solid #e74c3c !important; outline-offset: -2px; }
+
         #edit-badge { display: none; position: fixed; z-index: 1999; gap: 5px; }
         .badge-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; color: white; box-shadow: 0 3px 10px rgba(0,0,0,0.3); border: 1px solid #fff; transition: 0.2s; }
         .badge-icon:hover { transform: scale(1.1); }
+        
+        /* 🔥 各類別專屬按鈕顏色 */
+        .badge-black { background: #333; } .badge-black:hover { background: #000; }
+        .badge-green { background: #27ae60; } .badge-green:hover { background: #2ecc71; }
         .badge-red { background: #e74c3c; } .badge-red:hover { background: #c0392b; }
         .badge-blue { background: #3498db; } .badge-blue:hover { background: #2980b9; }
         #float-menu { position: fixed !important; display: none; background: #fff; border: 1px solid #c6a87c; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2000 !important; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 400px; }
@@ -393,17 +401,7 @@
                         <button class="editor-btn" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
                         <button class="editor-btn" onclick="openGallery()" style="color:var(--info);" title="開啟圖庫"><i class="fas fa-image"></i></button>
                         <button class="editor-btn" onclick="openModal('table')" title="插入表格"><i class="fas fa-table"></i></button>
-                        <button class="editor-btn" onclick="exec('insertHorizontalRule')" title="水平線"><i class="fas fa-minus"></i></button>
-                        <div style="position: relative; display: flex; align-items: center;" id="spacer-dropdown-wrapper">
-                            <button class="editor-btn" onclick="toggleSpacerMenu(event)" title="插入空白行"><i class="fas fa-arrows-alt-v" style="color: var(--info);"></i></button>
-                            
-                            <div id="spacer-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); flex-direction: column; z-index: 9999; min-width: 110px; padding: 5px 0; margin-top: 5px;">
-                                <div style="padding: 8px 15px; cursor: pointer; font-size: 13px; color: #333; transition: 0.2s;" onmouseover="this.style.background='#f4f7f6'; this.style.color='var(--forest)';" onmouseout="this.style.background='transparent'; this.style.color='#333';" onclick="insertSpacer(8)">微距 (8px)</div>
-                                <div style="padding: 8px 15px; cursor: pointer; font-size: 13px; color: #333; transition: 0.2s;" onmouseover="this.style.background='#f4f7f6'; this.style.color='var(--forest)';" onmouseout="this.style.background='transparent'; this.style.color='#333';" onclick="insertSpacer(15)">小距 (15px)</div>
-                                <div style="padding: 8px 15px; cursor: pointer; font-size: 13px; color: #333; transition: 0.2s;" onmouseover="this.style.background='#f4f7f6'; this.style.color='var(--forest)';" onmouseout="this.style.background='transparent'; this.style.color='#333';" onclick="insertSpacer(30)">中距 (30px)</div>
-                                <div style="padding: 8px 15px; cursor: pointer; font-size: 13px; color: #333; transition: 0.2s;" onmouseover="this.style.background='#f4f7f6'; this.style.color='var(--forest)';" onmouseout="this.style.background='transparent'; this.style.color='#333';" onclick="insertSpacer(50)">大距 (50px)</div>
-                            </div>
-                        </div>
+                        <button class="editor-btn" onclick="openModal('divider')" title="插入分隔線/間距" style="color: #8e44ad; font-weight:bold;"><i class="fas fa-cut"></i> 分隔線</button>
                         <button class="editor-btn" id="btn-format-painter" onclick="toggleFormatPainter()" title="複製格式 (油漆刷)"><i class="fas fa-paint-roller"></i></button>
                         <button class="editor-btn" onclick="exec('removeFormat')" title="清除格式"><i class="fas fa-eraser"></i></button>
                         <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
@@ -1044,8 +1042,61 @@
 
     let modalMode = null;
     function openModal(type) {
-        saveSelection(); modalMode = type; const body = document.getElementById('m-body-editor'); const confirmBtn = document.getElementById('m-confirm-btn'); confirmBtn.style.display = 'block';
-        if (type === 'spacing') { document.getElementById('m-title-editor').innerText = "⚙️ 排版設定"; confirmBtn.style.display = 'none'; body.innerHTML = `<div style="background:#f9f9f9; padding:15px; border-radius:8px;"><div class="editor-form-group"><label>文字行高 <span id="val-lh" class="editor-sp-val">${spacingCfg.lh}</span></label><input type="range" id="sp-lh" class="editor-sp-slider" min="1.0" max="3.0" step="0.1" value="${spacingCfg.lh}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>段落間距 <span id="val-pmb" class="editor-sp-val">${spacingCfg.pmb}em</span></label><input type="range" id="sp-pmb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.pmb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>清單外距 <span id="val-lmtb" class="editor-sp-val">${spacingCfg.lmtb}em</span></label><input type="range" id="sp-lmtb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.lmtb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group" style="margin-bottom:0;"><label>清單內距 <span id="val-limb" class="editor-sp-val">${spacingCfg.limb}em</span></label><input type="range" id="sp-limb" class="editor-sp-slider" min="0" max="2" step="0.1" value="${spacingCfg.limb}" oninput="updateSpacingPreview()"></div></div>`; }
+        saveSelection(); 
+        modalMode = type; 
+        const body = document.getElementById('m-body-editor'); 
+        const confirmBtn = document.getElementById('m-confirm-btn'); 
+        
+        // 🔥 核心修復 1：每次打開面板，強制「顯示插入、隱藏修改」，絕不留殘影！
+        confirmBtn.style.display = 'block';
+        document.getElementById('m-update-btn').style.display = 'none';
+
+        if (type === 'divider') {
+            document.getElementById('m-title-editor').innerText = '✂️ 設定分隔線 / 間距';
+            let style = 'solid', width = '1px', color = '#dddddd', margin = '30px';
+            
+            // 抓取原本的線條設定
+            if (currentTarget && currentTarget.tagName === 'HR' && currentTarget.classList.contains('peiyu-divider')) {
+                const comp = window.getComputedStyle(currentTarget);
+                if (comp.borderTopStyle === 'none' || comp.borderTopWidth === '0px') {
+                    style = 'none';
+                } else {
+                    style = comp.borderTopStyle; width = comp.borderTopWidth; color = rgb2hex(comp.borderTopColor) || color;
+                }
+                margin = comp.marginTop; 
+                
+                confirmBtn.style.display = 'none';
+                const updateBtn = document.getElementById('m-update-btn');
+                updateBtn.style.display = 'block'; 
+                updateBtn.innerText = "✅ 確認修改線條"; 
+                updateBtn.setAttribute('onclick', 'updateDivider()');
+            }
+            
+            body.innerHTML = `
+                <div class="editor-form-group"><label>線條樣式</label><select id="div-style" class="editor-form-input">
+                    <option value="none" ${style==='none'?'selected':''}>🫥 隱形 (僅作為空白間距)</option>
+                    <option value="solid" ${style==='solid'?'selected':''}>直線 (Solid)</option>
+                    <option value="dashed" ${style==='dashed'?'selected':''}>虛線 (Dashed)</option>
+                    <option value="dotted" ${style==='dotted'?'selected':''}>點線 (Dotted)</option>
+                </select></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="editor-form-group" style="flex:1;"><label>粗細</label><select id="div-width" class="editor-form-input">
+                        <option value="1px" ${width==='1px'?'selected':''}>1px</option><option value="2px" ${width==='2px'?'selected':''}>2px</option>
+                        <option value="4px" ${width==='4px'?'selected':''}>4px</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1;"><label>上下間距</label><select id="div-margin" class="editor-form-input">
+                        <option value="8px" ${margin==='8px'?'selected':''}>微小 (8px)</option><option value="15px" ${margin==='15px'?'selected':''}>小 (15px)</option>
+                        <option value="30px" ${margin==='30px'||margin==='25px'?'selected':''}>中 (30px)</option>
+                        <option value="50px" ${margin==='50px'?'selected':''}>大 (50px)</option><option value="80px" ${margin==='80px'?'selected':''}>超大 (80px)</option>
+                    </select></div>
+                </div>
+                <div class="editor-form-group" style="margin-bottom:0;"><label>線條顏色</label><input type="color" id="div-color" class="editor-form-input" value="${color}" style="height:40px; padding:2px;"></div>
+            `;
+        }
+        // 🔥 核心修復 2：加上 else，讓選項不會互相衝突
+        else if (type === 'spacing') { 
+            document.getElementById('m-title-editor').innerText = "⚙️ 排版設定"; 
+            confirmBtn.style.display = 'none'; body.innerHTML = `<div style="background:#f9f9f9; padding:15px; border-radius:8px;"><div class="editor-form-group"><label>文字行高 <span id="val-lh" class="editor-sp-val">${spacingCfg.lh}</span></label><input type="range" id="sp-lh" class="editor-sp-slider" min="1.0" max="3.0" step="0.1" value="${spacingCfg.lh}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>段落間距 <span id="val-pmb" class="editor-sp-val">${spacingCfg.pmb}em</span></label><input type="range" id="sp-pmb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.pmb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group"><label>清單外距 <span id="val-lmtb" class="editor-sp-val">${spacingCfg.lmtb}em</span></label><input type="range" id="sp-lmtb" class="editor-sp-slider" min="0" max="3" step="0.1" value="${spacingCfg.lmtb}" oninput="updateSpacingPreview()"></div><div class="editor-form-group" style="margin-bottom:0;"><label>清單內距 <span id="val-limb" class="editor-sp-val">${spacingCfg.limb}em</span></label><input type="range" id="sp-limb" class="editor-sp-slider" min="0" max="2" step="0.1" value="${spacingCfg.limb}" oninput="updateSpacingPreview()"></div></div>`; }
         else if (type === 'table') { document.getElementById('m-title-editor').innerText = '插入表格'; body.innerHTML = `<div class="editor-form-group"><label>列數</label><input type="number" id="inp-rows" class="editor-form-input" value="3"></div><div class="editor-form-group"><label>欄數</label><input type="number" id="inp-cols" class="editor-form-input" value="3"></div><div class="editor-form-group"><label>邊框</label><input type="color" id="inp-border" class="editor-form-input" value="#dddddd" style="height:40px;"></div>`; }
         else if (type === 'h2' || type === 'h3') { document.getElementById('m-title-editor').innerText = type === 'h2' ? '插入主標題' : '插入副標題'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-text" class="editor-form-input"></div><div class="editor-form-group"><label>風格</label><select id="inp-theme" class="editor-form-input"><option value="forest">🌲 經典深綠</option><option value="gold">👑 尊爵金底</option><option value="cream">🍦 溫柔奶油</option></select></div>`; }
         else if (type === 'card') { document.getElementById('m-title-editor').innerText = '插入卡片'; body.innerHTML = `<div class="editor-form-group"><label>標題</label><input type="text" id="inp-title" class="editor-form-input"></div><div class="editor-form-group"><label>標籤 (逗號分隔)</label><input type="text" id="inp-tags" class="editor-form-input"></div><div class="editor-form-group"><label>圖示</label><input type="text" id="inp-icon" class="editor-form-input" value="✨"></div>`; }
@@ -1239,8 +1290,73 @@
                 html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; font-weight: bold;"><div>${text}</div></div><p><br></p>`;
             }
         }
-            insertHtml(html); document.getElementById('config-modal').style.display = 'none';
+        else if (modalMode === 'divider') {
+            const style = document.getElementById('div-style').value;
+            const width = document.getElementById('div-width').value;
+            const margin = document.getElementById('div-margin').value;
+            const color = document.getElementById('div-color').value;
+            let borderCss = style === 'none' ? 'none' : `${width} ${style} ${color}`;
+            
+            // 🔥 改用原生 <hr> 標籤，保證絕對不能在裡面打字！
+            html = `<hr class="peiyu-block peiyu-obj peiyu-divider" style="border: none; border-top: ${borderCss}; margin: ${margin} 0; clear: both; cursor: pointer; width: 100%;">`;
+        }
+
+        // 🌟 統一的智慧物理插入引擎：保證不吃原本語法，強迫另起新行
+        restoreSelection();
+        const sel = window.getSelection();
+        const editor = document.getElementById('editor');
+        
+        if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            let node = sel.anchorNode;
+            let blockNode = node.nodeType === 3 ? node.parentNode : node;
+            
+            // 往上找最近的獨立「區塊級元素」
+            while (blockNode && blockNode !== editor && !['P', 'DIV', 'H2', 'H3', 'LI', 'TD', 'TH'].includes(blockNode.tagName)) {
+                blockNode = blockNode.parentNode;
+            }
+            
+            if (blockNode && blockNode !== editor && !blockNode.classList.contains('peiyu-article')) {
+                if (blockNode.tagName === 'TD' || blockNode.tagName === 'TH') {
+                    // 表格格子內插入
+                    blockNode.insertAdjacentHTML('beforeend', html + `<p><br></p>`);
+                    const newP = blockNode.lastElementChild;
+                    if (newP && newP.tagName === 'P') {
+                        const range = document.createRange(); range.selectNodeContents(newP); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+                    }
+                } else {
+                    // 一般段落，插在該段落的「正下方」
+                    blockNode.insertAdjacentHTML('afterend', html + `<p><br></p>`);
+                    
+                    // 把游標移到下一個新段落裡面
+                    const newP = blockNode.nextElementSibling ? (blockNode.nextElementSibling.tagName === 'P' ? blockNode.nextElementSibling : blockNode.nextElementSibling.nextElementSibling) : null;
+                    if (newP && newP.tagName === 'P') {
+                        const range = document.createRange(); range.selectNodeContents(newP); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+                    }
+                }
+            } else {
+                editor.insertAdjacentHTML('beforeend', html + `<p><br></p>`); 
+            }
+        } else {
+            editor.insertAdjacentHTML('beforeend', html + `<p><br></p>`); 
+        }
+        
+        saveHistory();
+        document.getElementById('config-modal').style.display = 'none';
     }
+    
+    // 🌟 修改分隔線引擎
+    window.updateDivider = function() {
+        if (!currentTarget || currentTarget.tagName !== 'HR') return;
+        const style = document.getElementById('div-style').value;
+        const width = document.getElementById('div-width').value;
+        const margin = document.getElementById('div-margin').value;
+        const color = document.getElementById('div-color').value;
+
+        currentTarget.style.margin = `${margin} 0`;
+        currentTarget.style.borderTop = style === 'none' ? 'none' : `${width} ${style} ${color}`;
+        saveHistory();
+        document.getElementById('config-modal').style.display = 'none';
+    };
 
     async function openGallery(){ saveSelection(); document.getElementById('gallery-modal').style.display='flex'; loadGalleryImages(); }
     function closeGallery(){ document.getElementById('gallery-modal').style.display='none'; }
@@ -1372,26 +1488,19 @@
                     if (editor.contains(range.commonAncestorContainer)) {
                         const rect = range.getBoundingClientRect();
                         
-                        editBadge.style.display = 'flex';
-                        editBadge.style.top = (rect.top - 35) + 'px'; 
-                        editBadge.style.left = rect.left + 'px';
-                        pendingTargetType = 'text';
-
                         // 判斷反白的文字是不是在表格裡面
                         let node = range.commonAncestorContainer;
                         let parentTable = node.nodeType === 3 ? node.parentNode.closest('table') : node.closest('table');
                         
-                        const btnMain = document.getElementById('btn-badge-main');
-                        const btnTable = document.getElementById('btn-badge-table');
-
-                        btnMain.style.display = 'flex'; // 反白文字一定顯示紅筆 (因為要叫出文字工具列)
+                        // 🔥 關鍵修復：明確告訴系統現在選中的是純文字！
+                        pendingTargetType = 'text'; 
                         
                         if (parentTable) {
-                            btnTable.style.display = 'flex'; // 在表格內就追加藍色按鈕
-                            currentTarget = parentTable; // 偷偷把表格記下來，讓藍色按鈕點下去不會當機！
+                            currentTarget = parentTable; // 偷偷把表格記下來，讓藍色按鈕點下去不會當機
+                            setBadgePosition(rect, 'text', true); // 呼叫徽章引擎：文字模式 + 顯示藍表格
                         } else {
-                            btnTable.style.display = 'none'; // 在外面就把它藏好
                             currentTarget = null;
+                            setBadgePosition(rect, 'text', false); // 呼叫徽章引擎：純文字模式
                         }
 
                         return true;
@@ -1403,53 +1512,17 @@
             editor.addEventListener('click', function(e) { 
                 if (e.target.closest('#edit-badge') || e.target.closest('#float-menu')) return;
                 
-                document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected')); 
+                // 清空所有顏色的外框
+                document.querySelectorAll('[class*="obj-selected-"]').forEach(el => {
+                    el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
+                });
                 floatMenu.style.display = 'none'; 
                 editBadge.style.display = 'none';
                 currentTarget = null; 
                 currentTargetCell = null;
                 pendingTargetType = null;
 
-                let targetImg = e.target.closest('img'); 
-                let targetCell = e.target.closest('td, th');
-                let targetTable = e.target.closest('table');
-                let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
-                
-                // 🔥 終極相容版積木雷達
-                let rawBlock = e.target.closest('.peiyu-block');
-                
-                // 🚑 舊版標題救援：如果點到了沒有 peiyu-block 的 h2, h3，強制把它當作積木！
-                if (!rawBlock) {
-                    let heading = e.target.closest('h2, h3');
-                    if (heading) {
-                        // 找看看它外面有沒有包著一層用來置中的 div
-                        let parentDiv = heading.parentElement;
-                        if (parentDiv && parentDiv.tagName === 'DIV') {
-                            rawBlock = parentDiv;
-                        } else {
-                            rawBlock = heading;
-                        }
-                        // 當場幫它貼上合法標籤，以後就好抓了！
-                        rawBlock.classList.add('peiyu-block', 'peiyu-obj');
-                    }
-                }
-
-                let targetBlock = null;
-                if (rawBlock) {
-                    // 檢查外面是不是又包了一層純粹用來置中的 div (有時候會出現兩層)
-                    let parent = rawBlock.parentElement;
-                    if (parent && parent.tagName === 'DIV' && parent.style.textAlign === 'center' && parent.children.length === 1) {
-                        targetBlock = parent; 
-                    } else {
-                        targetBlock = rawBlock; 
-                    }
-                }
-
-                // 如果點到了這些特殊物件，就不算純文字反白
-                if (!targetImg && !targetTable && !targetTabs && !targetBlock && checkTextSelection()) return;
-                if (!targetImg && checkTextSelection()) return;
-
-                // 🔥 獨立出一個計算徽章位置的智慧函數 (區分紅藍按鈕顯示邏輯)
+                // 🔥 獨立出一個計算徽章位置的智慧函數 (動態切換圖示與顏色)
                 function setBadgePosition(rect, targetType, isInsideTable) {
                     editBadge.style.display = 'flex';
                     let topPos = rect.top - 32; 
@@ -1461,18 +1534,77 @@
                     const btnMain = document.getElementById('btn-badge-main');
                     const btnTable = document.getElementById('btn-badge-table');
 
-                    if (targetType === 'table') {
-                        // 🔵 如果點擊的是純表格格子，只顯示「藍色表格」圖示！
-                        btnMain.style.display = 'none';
-                        btnTable.style.display = 'flex';
-                    } else {
-                        // 🔴 如果點擊的是圖片/積木/頁籤，一定顯示紅筆。如果在表格內，追加顯示藍色表格
+                    // 先把原本的所有專屬顏色 class 拔掉，確保乾淨
+                    btnMain.classList.remove('badge-black', 'badge-green', 'badge-red', 'badge-blue');
+                    
+                    if (targetType === 'text') {
+                        btnMain.classList.add('badge-black'); 
+                        btnMain.innerHTML = '<i class="fas fa-pen"></i>';
                         btnMain.style.display = 'flex';
-                        btnTable.style.display = isInsideTable ? 'flex' : 'none';
+                    } else if (targetType === 'image') {
+                        btnMain.classList.add('badge-green');
+                        btnMain.innerHTML = '<i class="fas fa-image"></i>';
+                        btnMain.style.display = 'flex';
+                    } else if (targetType === 'block' || targetType === 'tabs') {
+                        btnMain.classList.add('badge-red');
+                        btnMain.innerHTML = '<i class="fas fa-cube"></i>'; 
+                        btnMain.style.display = 'flex';
+                    } else if (targetType === 'table') {
+                        btnMain.style.display = 'none'; 
+                    }
+                    // 顯示藍色表格圖示 (只要在表格內，它永遠排第一)
+                    btnTable.style.display = (targetType === 'table' || isInsideTable) ? 'flex' : 'none';
+                }
+
+                // 🌟 1. 霸王條款：文字反白擁有最高優先權！
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0 && sel.toString().trim().length > 0 && editor.contains(sel.anchorNode)) {
+                    const rect = sel.getRangeAt(0).getBoundingClientRect();
+                    let node = sel.anchorNode;
+                    let parentTable = node.nodeType === 3 ? node.parentNode.closest('table') : node.closest('table');
+                    
+                    pendingTargetType = 'text'; 
+                    if (parentTable) {
+                        currentTarget = parentTable; 
+                        setBadgePosition(rect, 'text', true); 
+                    } else {
+                        currentTarget = null;
+                        setBadgePosition(rect, 'text', false); 
+                    }
+                    return; // 只要是文字反白，就到此為止，絕對不要再去抓積木！
+                }
+
+                // 🌟 2. 如果不是純文字反白，才開始抓物件
+                let targetImg = e.target.closest('img'); 
+                let targetCell = e.target.closest('td, th');
+                let targetTable = e.target.closest('table');
+                let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
+                let rawBlock = e.target.closest('.peiyu-block');
+                
+                // 標題轉積木防爆處理
+                if (!rawBlock) {
+                    let heading = e.target.closest('h2, h3');
+                    if (heading) {
+                        let parentDiv = heading.parentElement;
+                        if (parentDiv && parentDiv.tagName === 'DIV' && !parentDiv.classList.contains('peiyu-article') && parentDiv.id !== 'editor') {
+                            rawBlock = parentDiv;
+                        } else {
+                            rawBlock = heading;
+                        }
+                        rawBlock.classList.add('peiyu-block', 'peiyu-obj');
                     }
                 }
 
-                // 🌟 優先權調整：先判定圖片
+                let targetBlock = null;
+                if (rawBlock) {
+                    let parent = rawBlock.parentElement;
+                    if (parent && parent.tagName === 'DIV' && parent.style.textAlign === 'center' && parent.children.length === 1) {
+                        targetBlock = parent; 
+                    } else {
+                        targetBlock = rawBlock; 
+                    }
+                }
+
                 if (targetImg) { 
                     let wrapper = targetImg.closest('.resizable-wrapper');
                     if (!wrapper) {
@@ -1485,32 +1617,28 @@
                     }
                     currentTarget = wrapper; 
                     pendingTargetType = 'image';
-                    currentTarget.classList.add('obj-selected');
+                    currentTarget.classList.add('obj-selected-image');
                     setBadgePosition(currentTarget.getBoundingClientRect(), 'image', currentTarget.closest('table') !== null);
                 } 
-                // 🌟 優先權調整：再來判定是否為魔法積木 (主副標、警告框、卡片)
                 else if (targetBlock) { 
                     currentTarget = targetBlock;
                     pendingTargetType = 'block';
-                    currentTarget.classList.add('obj-selected');
+                    currentTarget.classList.add('obj-selected-block');
                     setBadgePosition(currentTarget.getBoundingClientRect(), 'block', currentTarget.closest('table') !== null);
                 }
-                // 🌟 優先權調整：再來判定是否為內文頁籤
                 else if (targetTabs) { 
                     currentTarget = targetTabs;
                     pendingTargetType = 'tabs';
-                    currentTarget.classList.add('obj-selected');
+                    currentTarget.classList.add('obj-selected-block');
                     setBadgePosition(currentTarget.getBoundingClientRect(), 'tabs', currentTarget.closest('table') !== null);
                 }
-                // 🌟 優先權調整：如果以上都不是，最後才判定為表格格子
                 else if (targetCell && targetTable) { 
                     targetTable.classList.add('peiyu-table', 'peiyu-obj');
                     if(targetTable.style.display === 'block') targetTable.style.display = 'table';
                     currentTarget = targetTable; 
                     currentTargetCell = targetCell; 
                     pendingTargetType = 'table';
-                    
-                    targetCell.classList.add('obj-selected'); 
+                    targetCell.classList.add('obj-selected-table'); 
                     setBadgePosition(targetCell.getBoundingClientRect(), 'table', false); 
                 }
             });
@@ -1518,7 +1646,12 @@
             // 支援用鍵盤 (Shift+方向鍵) 反白文字也能跳出徽章
             editor.addEventListener('keyup', function(e) {
                 if (e.key === 'Shift' || e.shiftKey || e.key.includes('Arrow')) {
-                    if (!checkTextSelection()) {
+                    if (checkTextSelection()) {
+                        // 確保鍵盤反白出來的徽章也是黑色的！
+                        document.getElementById('btn-badge-main').classList.remove('badge-green', 'badge-red', 'badge-blue');
+                        document.getElementById('btn-badge-main').classList.add('badge-black');
+                        document.getElementById('btn-badge-main').innerHTML = '<i class="fas fa-pen"></i>';
+                    } else {
                         editBadge.style.display = 'none';
                         floatMenu.style.display = 'none';
                     }
@@ -1531,17 +1664,18 @@
                 const rect = editBadge.getBoundingClientRect();
                 
                 if (e.target.closest('#btn-badge-table')) {
-                    // 🔵 點擊藍色按鈕：瞬間把目標切換成外層表格！
                     currentTarget = currentTarget.closest('table');
                     pendingTargetType = 'table';
                     
-                    // 把紅框轉移到外層表格上
-                    document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected'));
-                    currentTarget.classList.add('obj-selected');
+                    // 把藍框轉移到外層表格上
+                    document.querySelectorAll('[class*="obj-selected-"]').forEach(el => {
+                        el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
+                    });
+                    currentTarget.classList.add('obj-selected-table');
                     
                     showFloatMenu(rect.left, rect.top + 35, 'table');
                     editBadge.style.display = 'none';
-                } 
+                }
                 else if (e.target.closest('#btn-badge-main')) {
                     // 🔴 點擊紅色按鈕：正常編輯目前的物件
                     if(pendingTargetType) {
@@ -1721,9 +1855,13 @@
             }
             else if (type === 'block') {
                 let isCustomBox = currentTarget.classList.contains('peiyu-custom-box');
-                let editBtnHtml = isCustomBox ? `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>` : '';
+                let isDivider = currentTarget.tagName === 'HR' && currentTarget.classList.contains('peiyu-divider');
+                
+                let editBtnHtml = '';
+                if (isCustomBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
+                else if (isDivider) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${isCustomBox ? '260px' : '200px'};">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider) ? '260px' : '200px'};">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
                     <div style="display:flex; gap:5px;">
                         ${editBtnHtml}
@@ -2724,29 +2862,74 @@
         }, delay); 
     };
 
-    // 🌟 輕巧下拉選單：控制開關與點擊外面自動關閉
-    window.toggleSpacerMenu = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const menu = document.getElementById('spacer-menu');
-        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    };
-
-    // 點擊編輯器其他地方時，自動把選單收起來
-    document.addEventListener('click', function(e) {
-        const wrapper = document.getElementById('spacer-dropdown-wrapper');
-        const menu = document.getElementById('spacer-menu');
-        if (wrapper && menu && !wrapper.contains(e.target)) {
-            menu.style.display = 'none';
-        }
-    });
-
-    // 🌟 插入空白行 (抗除髒護盾版)
+    // 🌟 插入空白行 (暴力精準版：在哪裡按，就插在哪裡，絕對不跑到最下面)
     window.insertSpacer = function(val) {
         if (!val) return;
-        const html = `<div class="peiyu-spacer peiyu-obj" style="height: ${val}px; line-height: 0; font-size: 0; overflow: hidden; clear: both;"><br></div><p><br></p>`;
-        insertHtml(html);
-        document.getElementById('spacer-menu').style.display = 'none'; // 插入後自動收起選單
+        
+        // 準備好要插入的兩個乾淨積木：一個間距，一個新段落
+        const spacerHtml = `<div class="peiyu-spacer peiyu-obj" style="height: ${val}px; line-height: 0; font-size: 0; overflow: hidden; clear: both;" contenteditable="false"></div>`;
+        const nextPHtml = `<p><br></p>`;
+        
+        restoreSelection();
+        const sel = window.getSelection();
+        const editor = document.getElementById('editor');
+
+        if (sel.rangeCount > 0) {
+            let range = sel.getRangeAt(0);
+            let node = range.commonAncestorContainer;
+
+            // 如果游標還在編輯器內
+            if (editor.contains(node)) {
+                // 1. 尋找最近的獨立區塊元素 (包含段落、標題、清單、表格)
+                let blockNode = node.nodeType === 3 ? node.parentNode : node;
+                while (blockNode && blockNode !== editor && !['P', 'DIV', 'H2', 'H3', 'H4', 'LI', 'TD', 'TH'].includes(blockNode.tagName)) {
+                    blockNode = blockNode.parentNode;
+                }
+                
+                // 精準判斷：如果是普通的段落、標題或 DIV，插在它「後面」
+                if (blockNode && blockNode !== editor && (blockNode.tagName === 'P' || blockNode.tagName.startsWith('H') || (blockNode.tagName === 'DIV' && !blockNode.classList.contains('peiyu-article')))) {
+                    blockNode.insertAdjacentHTML('afterend', spacerHtml + nextPHtml);
+                    
+                    // 把游標移到新的空行裡面
+                    const newP = blockNode.nextElementSibling.nextElementSibling;
+                    if (newP && newP.tagName === 'P') {
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(newP);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
+                    }
+                } 
+                // 如果找不到合適的段落 (例如游標卡在很奇怪的地方)，就直接暴力用 range 插入
+                else {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = spacerHtml + nextPHtml;
+                    let frag = document.createDocumentFragment();
+                    let lastNode;
+                    while (tempDiv.firstChild) {
+                        lastNode = frag.appendChild(tempDiv.firstChild);
+                    }
+                    range.insertNode(frag);
+                    
+                    if (lastNode) {
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            } else {
+                // 如果游標不在編輯器裡，才墊底插入
+                editor.querySelector('.peiyu-article').insertAdjacentHTML('beforeend', spacerHtml + nextPHtml);
+            }
+        } else {
+            // 如果什麼都沒選到，也墊底插入
+            let targetContainer = editor.querySelector('.peiyu-article') || editor;
+            targetContainer.insertAdjacentHTML('beforeend', spacerHtml + nextPHtml);
+        }
+        
+        saveHistory();
+        document.getElementById('spacer-menu').style.display = 'none'; 
     };
 
     // --- 啟動程序 ---

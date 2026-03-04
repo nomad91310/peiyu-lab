@@ -448,7 +448,8 @@
 
     // 🌟 手機版反藍護盾：防止點擊工具列時鍵盤收起與反藍消失
     document.addEventListener("DOMContentLoaded", () => {
-        const toolbarBtns = document.querySelectorAll('.editor-sticky-header .editor-btn, .tb-select');
+        // 🔥 修正：把 .tb-select 拿掉，只攔截按鈕，放行下拉選單跟調色盤！
+        const toolbarBtns = document.querySelectorAll('.editor-sticky-header .editor-btn');
         toolbarBtns.forEach(btn => {
             btn.addEventListener('mousedown', function(e) {
                 // 攔截焦點轉移，保護編輯器裡的反白狀態
@@ -1559,16 +1560,25 @@
             let topPos = y - 80; if(topPos < 50) topPos = y + 20; 
             
             // 2. 水平防撞 (防右側超界)
-            let menuW = type === 'text' ? 340 : (type === 'image' ? 290 : 230); // 預估各選單寬度
+            // 稍微加寬選單，以容納 5 顆按鈕
+            let menuW = type === 'text' ? 340 : (type === 'image' ? 320 : 260); 
             let leftPos = x - 20;
             if (leftPos + menuW > window.innerWidth) {
-                leftPos = window.innerWidth - menuW - 15; // 撞到右邊就強制往左擠
+                leftPos = window.innerWidth - menuW - 15; 
             }
             floatMenu.style.left = Math.max(10, leftPos) + 'px'; 
             floatMenu.style.top = topPos + 'px';
 
-            const alignBtns = `<div style="display:flex; gap:3px;"><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-left')" title="置左對齊"><i class="fas fa-align-left"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-center')" title="置中對齊"><i class="fas fa-align-center"></i></button><button class="editor-btn" style="padding:2px 8px;" onclick="setImgAlign('block-right')" title="置右對齊"><i class="fas fa-align-right"></i></button></div>`;
-            
+            // 🔥 完整 5 種對齊模式按鈕 (獨立置左/中/右 + 文繞圖左/右)
+            const alignBtns = `<div style="display:flex; gap:2px; align-items:center;">
+                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-left')" title="置左 (獨立行)"><i class="fas fa-align-left"></i></button>
+                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-center')" title="置中 (獨立行)"><i class="fas fa-align-center"></i></button>
+                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-right')" title="置右 (獨立行)"><i class="fas fa-align-right"></i></button>
+                <div style="width:1px; background:#ddd; height:15px; margin:0 2px;"></div>
+                <button class="editor-btn" style="padding:2px 6px; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-left')" title="文繞圖 (靠左)">繞左</button>
+                <button class="editor-btn" style="padding:2px 6px; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-right')" title="文繞圖 (靠右)">繞右</button>
+            </div>`;
+                        
             if (type === 'table') { 
                 const currW = parseInt(currentTarget.style.width) || 100; 
                 let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
@@ -1607,18 +1617,26 @@
             }
             else if (type === 'image') { 
                 const parentElement = currentTarget.parentElement;
-                const parentW = parentElement ? parentElement.clientWidth : document.getElementById('editor').clientWidth;
-                let currW_pct = 100; let currW_px = parentW;
+                
+                // 🔥 強化防呆：確保寬度計算絕對不會是 0
+                const editorW = document.getElementById('editor').clientWidth || (window.innerWidth - 60);
+                const parentW = (parentElement && parentElement.clientWidth > 0) ? parentElement.clientWidth : editorW;
+                
+                // 🔥 物理抓取：優先抓取目前網頁上真實渲染的像素寬度 (offsetWidth)
+                let currW_px = currentTarget.offsetWidth || parentW;
+                let currW_pct = Math.round((currW_px / parentW) * 100);
+                if (currW_pct > 100) currW_pct = 100;
+                
                 let currentUnit = '%'; // 預設單位
                 
                 if (currentTarget.style.width) { 
                     if (currentTarget.style.width.includes('%')) { 
                         currentUnit = '%';
-                        currW_pct = parseInt(currentTarget.style.width);
+                        currW_pct = parseInt(currentTarget.style.width) || currW_pct;
                         currW_px = Math.round(parentW * (currW_pct / 100));
                     } else if (currentTarget.style.width.includes('px')) { 
                         currentUnit = 'px';
-                        currW_px = parseInt(currentTarget.style.width);
+                        currW_px = parseInt(currentTarget.style.width) || currW_px;
                         currW_pct = Math.round((currW_px / parentW) * 100);
                         if (currW_pct > 100) currW_pct = 100;
                     } 
@@ -1717,21 +1735,35 @@
             }
         }
         
-        // 🔥 極度嚴格的對齊強制覆蓋 (解決表格內圖片無法置中的問題)
+        // 🔥 圖片與表格對齊引擎 (完整支援 5 種模式：獨立行左/中/右 + 文繞圖左/右)
         window.setImgAlign = function(mode) {
             if(!currentTarget) return; 
-            currentTarget.style.setProperty('display', 'block', 'important'); 
-            currentTarget.style.setProperty('clear', 'both', 'important');
             
             if (mode === 'block-left') { 
+                currentTarget.style.setProperty('display', 'block', 'important'); 
+                currentTarget.style.setProperty('float', 'none', 'important'); 
+                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
                 currentTarget.style.setProperty('margin', '15px auto 15px 0', 'important'); 
-                currentTarget.style.setProperty('float', 'none', 'important'); 
             } else if (mode === 'block-center') { 
+                currentTarget.style.setProperty('display', 'block', 'important'); 
+                currentTarget.style.setProperty('float', 'none', 'important'); 
+                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
                 currentTarget.style.setProperty('margin', '15px auto', 'important'); 
-                currentTarget.style.setProperty('float', 'none', 'important'); 
             } else if (mode === 'block-right') { 
-                currentTarget.style.setProperty('margin', '15px 0 15px auto', 'important'); 
+                currentTarget.style.setProperty('display', 'block', 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
+                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
+                currentTarget.style.setProperty('margin', '15px 0 15px auto', 'important'); 
+            } else if (mode === 'wrap-left') { 
+                currentTarget.style.setProperty('display', 'inline-block', 'important'); 
+                currentTarget.style.setProperty('float', 'left', 'important'); 
+                currentTarget.style.removeProperty('clear'); // 解除斷行，讓文字繞上來
+                currentTarget.style.setProperty('margin', '10px 15px 10px 0', 'important'); 
+            } else if (mode === 'wrap-right') { 
+                currentTarget.style.setProperty('display', 'inline-block', 'important'); 
+                currentTarget.style.setProperty('float', 'right', 'important'); 
+                currentTarget.style.removeProperty('clear'); // 解除斷行，讓文字繞上來
+                currentTarget.style.setProperty('margin', '10px 0 10px 15px', 'important'); 
             } 
             saveHistory();
         }

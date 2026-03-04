@@ -16,20 +16,20 @@
     /* 模擬手機外框 */
     .mobile-simulator {
         width: 100%;
-        max-width: 420px; /* 模擬手機寬度 */
+        max-width: 420px;
         background: var(--cream);
         border-radius: 30px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-        overflow: hidden;
+        overflow-y: auto;
         border: 8px solid #fff;
-        padding-bottom: 30px;
+        height: 90vh; 
     }
 
-    .app-header { background: var(--forest); color: var(--accent); text-align: center; padding: 20px; font-family: 'Noto Serif TC', serif; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; }
+    .app-header { background: var(--forest); color: var(--accent); text-align: center; padding: 20px; font-family: 'Noto Serif TC', serif; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; position: sticky; top: 0; z-index: 100;}
 
-    .test-section { padding: 20px 15px; border-bottom: 2px dashed #ddd; background: #fff; margin-bottom: 10px; }
-    .section-title { font-size: 0.9rem; color: #888; margin-bottom: 15px; font-weight: bold; border-left: 4px solid var(--accent); padding-left: 8px; }
-    .section-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; line-height: 1.4; }
+    .test-section { padding: 25px 15px; border-bottom: 4px dashed #ddd; background: #fff; }
+    .section-title { font-size: 1rem; color: var(--forest); margin-bottom: 10px; font-weight: bold; border-left: 4px solid var(--accent); padding-left: 8px;}
+    .section-desc { font-size: 0.8rem; color: #888; margin-bottom: 15px; line-height: 1.5; }
 
     /* 通用膠囊按鈕樣式 */
     .kb-tab-btn {
@@ -43,12 +43,10 @@
         box-shadow: 0 4px 15px rgba(26, 47, 35, 0.2); transform: translateY(-2px);
     }
 
-    /* ======================================================
-       🎯 方案 1：邊緣漸層 + 半截誘餌 (目前主流)
-       ====================================================== */
+    /* 方案 1：邊緣漸層 */
     .ux-type-1 {
         display: flex; gap: 10px; overflow-x: auto; 
-        padding: 5px 40px 15px 5px; /* 右邊預留 40px 的 padding，保證最後一個字被切一半 */
+        padding: 5px 40px 10px 5px; 
         scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
         mask-image: linear-gradient(to right, black 85%, transparent 100%);
@@ -56,45 +54,52 @@
     }
     .ux-type-1::-webkit-scrollbar { display: none; }
 
-    /* ======================================================
-       🎯 方案 2：多行折行展開 (一目瞭然版)
-       ====================================================== */
-    .ux-type-2 {
-        display: flex; flex-wrap: wrap; gap: 8px; padding: 5px 0;
-    }
-    .ux-type-2 .kb-tab-btn {
-        font-size: 0.85rem; padding: 6px 16px; 
-    }
+    /* 方案 2：全展開 */
+    .ux-type-2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 5px 0 10px 0; }
+    .ux-type-2 .kb-tab-btn { font-size: 0.85rem; padding: 6px 16px; }
 
-    /* ======================================================
-       🎯 方案 3：滑動 + 右側展開/收起鈕 (專業升級版)
-       ====================================================== */
+    /* 方案 3：展開鈕 */
     .ux-type-3-wrapper { position: relative; width: 100%; transition: 0.3s; }
     .ux-type-3 {
-        display: flex; gap: 10px; overflow-x: auto; padding: 5px 50px 15px 5px; 
+        display: flex; gap: 10px; overflow-x: auto; padding: 5px 50px 10px 5px; 
         scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch; transition: 0.3s;
     }
     .ux-type-3::-webkit-scrollbar { display: none; }
-    
-    /* 展開狀態：多行折行、右邊留空間給收合按鈕 */
     .ux-type-3.expanded { flex-wrap: wrap; padding-right: 50px; }
 
     .expand-btn {
         position: absolute; right: 0; top: 0; height: 46px; width: 50px;
         background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 40%);
         border: none; cursor: pointer; display: flex; align-items: center; justify-content: flex-end;
-        padding-right: 5px; color: var(--forest); font-size: 1.2rem;
-        z-index: 10; transition: 0.3s;
+        padding-right: 5px; color: var(--forest); font-size: 1.2rem; z-index: 10; transition: 0.3s;
     }
-    
-    /* 展開後，按鈕變成純白底色，避免跟後面的膠囊文字疊在一起看不清楚 */
-    .ux-type-3-wrapper.is-open .expand-btn { 
-        background: rgba(255,255,255,0.9); 
-        border-radius: 0 0 0 10px; /* 給個小圓角更精緻 */
-        backdrop-filter: blur(2px);
+    .ux-type-3-wrapper.is-open .expand-btn { background: rgba(255,255,255,0.9); border-radius: 0 0 0 10px; backdrop-filter: blur(2px); }
+
+    /* ======================================================
+       🔥 內容切換與動畫區域
+       ====================================================== */
+    .content-area {
+        background: #fdfaf5; border-radius: 12px; padding: 10px;
+        min-height: 200px; /* 固定高度避免畫面一直跳動 */
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        margin-top: 10px;
     }
 
+    .content-panel { display: none; width: 100%; }
+    .content-panel.active { display: block; animation: fadeSlideUp 0.4s ease-out forwards; }
+
+    .dummy-card {
+        background: #fff; padding: 15px 20px; border-radius: 12px;
+        border: 1px solid #f0f0f0; border-left: 6px solid var(--accent); margin-bottom: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03); font-weight: bold; color: var(--forest); display: flex; align-items: center;
+    }
+    .dummy-card .icon { margin-right: 15px; font-size: 1.2rem; color: var(--accent); }
+
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 </head>
 <body>
@@ -104,89 +109,156 @@
 
     <div class="test-section">
         <div class="section-title">方案 1：漸層消失 + 半截誘餌</div>
-        <div class="section-desc">利用右側的漸層淡出效果，加上刻意被切掉一半的按鈕，直覺暗示使用者「右邊還有東西可以滑」。</div>
+        <div class="section-desc">直覺暗示「右邊還有東西」。</div>
         
         <div class="ux-type-1" id="group-1">
-            <button class="kb-tab-btn active">顯示全部</button>
-            <button class="kb-tab-btn">1/22-1/27</button>
-            <button class="kb-tab-btn">1/28-2/2</button>
-            <button class="kb-tab-btn">2/3-2/8</button>
-            <button class="kb-tab-btn">2/9-2/13</button>
-            <button class="kb-tab-btn">2/14-2/19</button>
+            <button class="kb-tab-btn active" data-target="p1-all">顯示全部</button>
+            <button class="kb-tab-btn" data-target="p1-t1">閘門 1</button>
+            <button class="kb-tab-btn" data-target="p1-t2">閘門 2</button>
+            <button class="kb-tab-btn" data-target="p1-t3">閘門 3</button>
+            <button class="kb-tab-btn" data-target="p1-t4">閘門 4</button>
+        </div>
+        
+        <div class="content-area">
+            <div class="content-panel active" id="p1-all">
+                <div class="dummy-card"><i class="fa-solid fa-star icon"></i> 方案 1 的所有文章</div>
+            </div>
+            <div class="content-panel" id="p1-t1">
+                <div class="dummy-card" style="border-left-color: #3498db;"><i class="fa-solid fa-water icon" style="color:#3498db;"></i> 方案 1 - 閘門 1 內容</div>
+            </div>
+            <div class="content-panel" id="p1-t2">
+                <div class="dummy-card" style="border-left-color: #e74c3c;"><i class="fa-solid fa-fire icon" style="color:#e74c3c;"></i> 方案 1 - 閘門 2 內容</div>
+            </div>
+            <div class="content-panel" id="p1-t3">
+                <div class="dummy-card" style="border-left-color: #27ae60;"><i class="fa-solid fa-leaf icon" style="color:#27ae60;"></i> 方案 1 - 閘門 3 內容</div>
+            </div>
+            <div class="content-panel" id="p1-t4">
+                <div class="dummy-card" style="border-left-color: #9b59b6;"><i class="fa-solid fa-moon icon" style="color:#9b59b6;"></i> 方案 1 - 閘門 4 內容</div>
+            </div>
         </div>
     </div>
 
     <div class="test-section">
         <div class="section-title">方案 2：全展開標籤雲模式</div>
-        <div class="section-desc">放棄橫向滑動，直接讓所有選項像積木一樣疊下來。適合分類不多的情況。</div>
+        <div class="section-desc">不需滑動，一眼看懂所有分類。</div>
         
         <div class="ux-type-2" id="group-2">
-            <button class="kb-tab-btn active">顯示全部</button>
-            <button class="kb-tab-btn">1/22-1/27</button>
-            <button class="kb-tab-btn">1/28-2/2</button>
-            <button class="kb-tab-btn">2/3-2/8</button>
-            <button class="kb-tab-btn">2/9-2/13</button>
-            <button class="kb-tab-btn">2/14-2/19</button>
+            <button class="kb-tab-btn active" data-target="p2-all">顯示全部</button>
+            <button class="kb-tab-btn" data-target="p2-t1">閘門 1</button>
+            <button class="kb-tab-btn" data-target="p2-t2">閘門 2</button>
+            <button class="kb-tab-btn" data-target="p2-t3">閘門 3</button>
+            <button class="kb-tab-btn" data-target="p2-t4">閘門 4</button>
+        </div>
+
+        <div class="content-area">
+            <div class="content-panel active" id="p2-all">
+                <div class="dummy-card"><i class="fa-solid fa-star icon"></i> 方案 2 的所有文章</div>
+            </div>
+            <div class="content-panel" id="p2-t1">
+                <div class="dummy-card" style="border-left-color: #3498db;"><i class="fa-solid fa-water icon" style="color:#3498db;"></i> 方案 2 - 閘門 1 內容</div>
+            </div>
+            <div class="content-panel" id="p2-t2">
+                <div class="dummy-card" style="border-left-color: #e74c3c;"><i class="fa-solid fa-fire icon" style="color:#e74c3c;"></i> 方案 2 - 閘門 2 內容</div>
+            </div>
+            <div class="content-panel" id="p2-t3">
+                <div class="dummy-card" style="border-left-color: #27ae60;"><i class="fa-solid fa-leaf icon" style="color:#27ae60;"></i> 方案 2 - 閘門 3 內容</div>
+            </div>
+            <div class="content-panel" id="p2-t4">
+                <div class="dummy-card" style="border-left-color: #9b59b6;"><i class="fa-solid fa-moon icon" style="color:#9b59b6;"></i> 方案 2 - 閘門 4 內容</div>
+            </div>
         </div>
     </div>
 
     <div class="test-section" style="border-bottom: none;">
-        <div class="section-title">方案 3：滑動 + 下拉展開/收起鈕</div>
-        <div class="section-desc">平時單行滑動，點擊右側箭頭「展開所有標籤」，再點一次「收合」。(已加入箭頭動態切換)</div>
+        <div class="section-title">方案 3：滑動 + 下拉展開鈕</div>
+        <div class="section-desc">結合兩者優點，點箭頭可展開/收合。</div>
         
         <div class="ux-type-3-wrapper" id="wrapper-3">
             <div class="ux-type-3" id="group-3">
-                <button class="kb-tab-btn active">顯示全部</button>
-                <button class="kb-tab-btn">1/22-1/27</button>
-                <button class="kb-tab-btn">1/28-2/2</button>
-                <button class="kb-tab-btn">2/3-2/8</button>
-                <button class="kb-tab-btn">2/9-2/13</button>
-                <button class="kb-tab-btn">2/14-2/19</button>
+                <button class="kb-tab-btn active" data-target="p3-all">顯示全部</button>
+                <button class="kb-tab-btn" data-target="p3-t1">閘門 1</button>
+                <button class="kb-tab-btn" data-target="p3-t2">閘門 2</button>
+                <button class="kb-tab-btn" data-target="p3-t3">閘門 3</button>
+                <button class="kb-tab-btn" data-target="p3-t4">閘門 4</button>
             </div>
             <button class="expand-btn" onclick="toggleExpand()">
                 <i class="fa-solid fa-circle-chevron-down"></i>
             </button>
+        </div>
+
+        <div class="content-area">
+            <div class="content-panel active" id="p3-all">
+                <div class="dummy-card"><i class="fa-solid fa-star icon"></i> 方案 3 的所有文章</div>
+            </div>
+            <div class="content-panel" id="p3-t1">
+                <div class="dummy-card" style="border-left-color: #3498db;"><i class="fa-solid fa-water icon" style="color:#3498db;"></i> 方案 3 - 閘門 1 內容</div>
+            </div>
+            <div class="content-panel" id="p3-t2">
+                <div class="dummy-card" style="border-left-color: #e74c3c;"><i class="fa-solid fa-fire icon" style="color:#e74c3c;"></i> 方案 3 - 閘門 2 內容</div>
+            </div>
+            <div class="content-panel" id="p3-t3">
+                <div class="dummy-card" style="border-left-color: #27ae60;"><i class="fa-solid fa-leaf icon" style="color:#27ae60;"></i> 方案 3 - 閘門 3 內容</div>
+            </div>
+            <div class="content-panel" id="p3-t4">
+                <div class="dummy-card" style="border-left-color: #9b59b6;"><i class="fa-solid fa-moon icon" style="color:#9b59b6;"></i> 方案 3 - 閘門 4 內容</div>
+            </div>
         </div>
     </div>
 
 </div>
 
 <script>
-    // 綁定點擊變色效果
-    function bindTabEvents(groupId) {
+    // 綁定各組的點擊變色與內容切換
+    function bindTabSystem(groupId, panelPrefix) {
         const group = document.getElementById(groupId);
         const btns = group.querySelectorAll('.kb-tab-btn');
+        // 抓取所有以此前綴開頭的面板 (例如 p1-, p2-, p3-)
+        const panels = document.querySelectorAll(`[id^="${panelPrefix}"]`);
+
         btns.forEach(btn => {
             btn.addEventListener('click', function() {
+                // 1. 切換按鈕狀態
                 btns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
+                
+                // 2. 方案 1 和 3 讓選中按鈕置中
                 if(groupId !== 'group-2') {
                     this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                 }
+
+                // 3. 切換對應內容並觸發動畫
+                const targetId = this.getAttribute('data-target');
+                panels.forEach(p => {
+                    p.classList.remove('active');
+                    if (p.id === targetId) {
+                        p.classList.add('active');
+                        // 強制重繪以觸發 CSS 動畫
+                        p.style.animation = 'none';
+                        p.offsetHeight; 
+                        p.style.animation = null; 
+                    }
+                });
             });
         });
     }
 
-    bindTabEvents('group-1');
-    bindTabEvents('group-2');
-    bindTabEvents('group-3');
+    bindTabSystem('group-1', 'p1-');
+    bindTabSystem('group-2', 'p2-');
+    bindTabSystem('group-3', 'p3-');
 
-    // 🔥 方案 3 的展開/收合邏輯 (加入切換箭頭)
+    // 方案 3 專屬的展開/收合邏輯
     function toggleExpand() {
         const wrapper = document.getElementById('wrapper-3');
         const container = document.getElementById('group-3');
         const icon = wrapper.querySelector('.expand-btn i');
         
-        // 切換展開/收合的 class
         wrapper.classList.toggle('is-open');
         const isOpen = container.classList.toggle('expanded');
         
-        // 根據狀態改變箭頭圖示
         if (isOpen) {
             icon.className = 'fa-solid fa-circle-chevron-up';
         } else {
             icon.className = 'fa-solid fa-circle-chevron-down';
-            // 收合時，把目前選中的那顆按鈕拉回視線中間
             const activeBtn = container.querySelector('.kb-tab-btn.active');
             if(activeBtn) {
                 setTimeout(() => activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 300);

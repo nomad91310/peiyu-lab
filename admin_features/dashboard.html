@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>預約看板</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
     <style>
         /* --- 基礎樣式 --- */
         :root { --forest: #1a2f23; --accent: #c6a87c; --info: #3498db; --success: #27ae60; --purple: #9b59b6; }
@@ -178,7 +181,12 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+         // 1. 呼叫 config.js 裡的門神查水表
         requireLogin();
+        
+        // 2. 驗證通過，脫下黑布讓畫面顯示
+        const curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
         fetchDashboardData();
     });
 </script>

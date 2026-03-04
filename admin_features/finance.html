@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>財務與優惠券管理</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
     <style>
         /* --- 1. 基礎與通用樣式 --- */
         :root { 
@@ -259,8 +262,19 @@
         updateCpHint(); document.getElementById('btn-cp-save').innerText = "建立優惠券"; document.getElementById('btn-cp-cancel').style.display = "none";
     }
 
-    // 6. 網頁載入完成後，自動讀取資料
-    document.addEventListener("DOMContentLoaded", fetchFinanceData);
+    // 6. 網頁載入完成後，先驗證再讀取資料
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. 呼叫 config.js 裡的門神查水表
+        requireLogin();
+        
+        // 2. 驗證通過，脫下黑布讓畫面顯示
+        const curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
+
+        // 3. 正常啟動後台功能
+        fetchFinanceData();
+    });
+    
 </script>
 </body>
 </html>

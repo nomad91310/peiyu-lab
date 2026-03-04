@@ -7,7 +7,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
     <style>
         /* --- 1. 基礎與變數 --- */
         :root { --forest: #1a2f23; --cream: #fdfaf1; --accent: #c6a87c; --dark: #2c3e50; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; }
@@ -242,6 +244,19 @@
             #custom-img-name { width: 100% !important; box-sizing: border-box; height: 40px; }
             .editor-gallery-header > div:last-child .editor-btn { width: 100% !important; height: 40px; font-size: 15px !important; display: flex; justify-content: center; }
             .editor-gallery-grid { grid-template-columns: repeat(2, 1fr) !important; grid-auto-rows: 150px !important; gap: 10px !important; padding: 10px !important; }
+
+            /* 🔥 手機版：修復 Modal 按鈕被擠壓的問題 */
+            .editor-modal-box { width: 90% !important; padding: 20px !important; }
+            #general-modal-box > div:last-child { 
+                flex-direction: column-reverse !important; /* 改成上下排列，取消在下，確認在上 */
+                gap: 10px !important; 
+            }
+            #general-modal-box > div:last-child .editor-btn { 
+                width: 100% !important; 
+                height: 45px !important; 
+                font-size: 16px !important; 
+                margin: 0 !important; 
+            }
         }
     </style>
 </head>
@@ -425,11 +440,22 @@
 <script src="../js/config.js"></script>
 
 <script>
+    
     // 🌟 知識庫專屬變數
     let cache = { articles: [] };
     let kbCatOrder = { big: [], mid: {} };
     let currentBucket = 'kb-images';
 
+    // 🌟 手機版反藍護盾：防止點擊工具列時鍵盤收起與反藍消失
+    document.addEventListener("DOMContentLoaded", () => {
+        const toolbarBtns = document.querySelectorAll('.editor-sticky-header .editor-btn, .tb-select');
+        toolbarBtns.forEach(btn => {
+            btn.addEventListener('mousedown', function(e) {
+                // 攔截焦點轉移，保護編輯器裡的反白狀態
+                e.preventDefault(); 
+            });
+        });
+    });
     // ==========================================
     // 1. 啟動與讀取資料 (取代原本的 fetchAll)
     // ==========================================
@@ -694,7 +720,8 @@
             editor.addEventListener('input', () => { 
                 clearTimeout(typingTimeout); 
                 typingTimeout = setTimeout(saveHistory, 500); 
-            });         
+            });
+            
         }
     });
 
@@ -835,12 +862,35 @@
     }
 
     function insertLink() { const url = prompt("網址：", "https://"); if(url) exec('createLink', url); }
+    // 🌟 強制 DOM 插入法：絕對保留所有樣式，拒絕瀏覽器雞婆刪除
     function insertHtml(html) {
         restoreSelection(); const editor = document.getElementById('editor'); editor.focus({ preventScroll: true }); 
-        let success = document.execCommand('insertHTML', false, html);
-        if (!success) {
-            const sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) { const range = sel.getRangeAt(0); range.deleteContents(); const el = document.createElement("div"); el.innerHTML = html; let frag = document.createDocumentFragment(), node, lastNode; while ((node = el.firstChild)) lastNode = frag.appendChild(node); range.insertNode(frag); if (lastNode) { range.setStartAfter(lastNode); range.collapse(true); sel.removeAllRanges(); sel.addRange(range); } } else editor.innerHTML += html;
+        const sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) { 
+            const range = sel.getRangeAt(0); 
+            range.deleteContents(); 
+            const el = document.createElement("div"); el.innerHTML = html; 
+            let frag = document.createDocumentFragment(), node, lastNode; 
+            while ((node = el.firstChild)) lastNode = frag.appendChild(node); 
+            
+            // 直接物理安插節點，不經過瀏覽器過濾
+            range.insertNode(frag); 
+            
+            if (lastNode) { 
+                // 為了防止游標被困在外框裡面，插入後自動在後面補一個看不見的空白字元
+                if (lastNode.nodeType === 1 && lastNode.tagName === 'SPAN') {
+                    const space = document.createTextNode('\u00A0');
+                    lastNode.parentNode.insertBefore(space, lastNode.nextSibling);
+                    range.setStartAfter(space);
+                } else {
+                    range.setStartAfter(lastNode); 
+                }
+                range.collapse(true); 
+                sel.removeAllRanges(); 
+                sel.addRange(range); 
+            } 
+        } else {
+            editor.innerHTML += html;
         }
         saveHistory(); 
     }
@@ -860,8 +910,7 @@
         let cleanCount = 0;
 
         // 定義我們系統「合法」的 class，其他的通通殺掉
-        const validClasses = ['peiyu-article', 'peiyu-table', 'peiyu-obj', 'peiyu-tabs-wrapper', 'peiyu-tab-group-header', 'peiyu-tab-container', 'peiyu-tab-section', 'peiyu-tab-label-row', 'peiyu-tab-title-edit', 'peiyu-tab-body', 'peiyu-block', 'resizable-wrapper', 'kb-btn-del-tab'];
-
+        const validClasses = ['peiyu-article', 'peiyu-table', 'peiyu-obj', 'peiyu-tabs-wrapper', 'peiyu-tab-group-header', 'peiyu-tab-container', 'peiyu-tab-section', 'peiyu-tab-label-row', 'peiyu-tab-title-edit', 'peiyu-tab-body', 'peiyu-block', 'resizable-wrapper', 'kb-btn-del-tab', 'peiyu-custom-box'];
         doc.querySelectorAll('*').forEach(el => {
             let isModified = false;
 
@@ -1045,11 +1094,16 @@
         }
         else if (type === 'custom-box') {
             document.getElementById('m-title-editor').innerText = '🔲 自訂文字外框';
-            let bg = '#fffcf5', borderCol = '#c6a87c', textCol = '#1a2f23';
-            let radius = '50px', borderStyle = 'solid', borderWidth = '2px';
+            
+            // 🔥 樣式記憶引擎：讀取上次使用的設定，沒用過才給預設值
+            let savedPrefs = localStorage.getItem('peiyu_box_prefs');
+            let prefs = savedPrefs ? JSON.parse(savedPrefs) : {};
+            
+            let bg = prefs.bg || '#fffcf5', borderCol = prefs.borderCol || '#c6a87c', textCol = prefs.color || '#1a2f23';
+            let radius = prefs.radius || '50px', borderStyle = prefs.style || 'solid', borderWidth = prefs.width || '2px';
+            let displayType = prefs.displayType || 'inline-block';
             let textValue = '';
 
-            // 🔥 如果是修改已存在的框，就用 X光把原本的設定讀出來！
             if (currentTarget && currentTarget.classList.contains('peiyu-custom-box')) {
                 const comp = window.getComputedStyle(currentTarget);
                 bg = rgb2hex(comp.backgroundColor) || bg;
@@ -1058,23 +1112,30 @@
                 radius = comp.borderRadius;
                 borderStyle = comp.borderTopStyle;
                 borderWidth = comp.borderTopWidth;
-                textValue = currentTarget.innerText;
+                displayType = comp.display === 'block' ? 'block' : 'inline-block';
                 
                 confirmBtn.style.display = 'none';
                 const updateBtn = document.getElementById('m-update-btn');
                 updateBtn.style.display = 'block';
                 updateBtn.innerText = "✅ 確認修改外框";
-                updateBtn.setAttribute('onclick', 'updateCustomBox()'); // 綁定外框修改函數
+                updateBtn.setAttribute('onclick', 'updateCustomBox()');
+                textValue = "⚠️ 修改模式：請直接在編輯器內改字或插圖"; 
             } else {
-                // 這是新增模式
                 const sel = window.getSelection();
-                textValue = sel.toString(); // 自動抓取目前反白文字
+                textValue = sel.toString(); 
                 confirmBtn.style.display = 'block';
                 document.getElementById('m-update-btn').style.display = 'none';
             }
 
             body.innerHTML = `
-                <div class="editor-form-group"><label>文字內容 (支援反白帶入)</label><input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="請輸入內容或先在編輯器反白文字"></div>
+                <div class="editor-form-group">
+                    <label>外框類型 (決定換行行為)</label>
+                    <select id="cb-display" class="editor-form-input">
+                        <option value="inline-block" ${displayType==='inline-block'?'selected':''}>🏷️ 文字外框 (隨字寬度，適合當標題/標籤)</option>
+                        <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器 (滿版寬度，按 Enter 可在框內換行/插圖)</option>
+                    </select>
+                </div>
+                <div class="editor-form-group"><label>文字內容</label><input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="請輸入內容或先在編輯器反白文字" ${currentTarget ? 'disabled' : ''}></div>
                 <div style="display:flex; gap:10px;">
                     <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="cb-radius" class="editor-form-input">
                         <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
@@ -1095,7 +1156,7 @@
                     </select></div>
                 </div>
                 <div style="display:flex; gap:10px; margin-bottom:0;">
-                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>字體顏色</label><input type="color" id="cb-color" class="editor-form-input" value="${textCol}" style="height:40px; padding:2px;"></div>
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>字體色</label><input type="color" id="cb-color" class="editor-form-input" value="${textCol}" style="height:40px; padding:2px;"></div>
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="cb-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;"></div>
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="cb-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;"></div>
                 </div>
@@ -1161,13 +1222,23 @@
             const color = document.getElementById('cb-color').value;
             const bg = document.getElementById('cb-bg').value;
             const borderCol = document.getElementById('cb-border-color').value;
-            
+            const displayType = document.getElementById('cb-display').value; // 抓取使用者的選擇
+            // 寫入記憶大腦
+            const prefs = { bg, color, borderCol, radius, style, width, displayType };
+            localStorage.setItem('peiyu_box_prefs', JSON.stringify(prefs));
             const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
             
-            // 賦予 peiyu-custom-box 專屬標籤，讓雷達認得它！
-            html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: inline-block; padding: 6px 20px; margin: 15px 0 5px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.4; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; font-weight: bold;">${text}</div><p><br></p>`;
+            if (displayType === 'inline-block') {
+                // 🔥 模式 1：文字外框 
+                // 關鍵修復：改用 <span> 標籤，不加結尾換行，完美融入段落中！
+                html = `<span class="peiyu-block peiyu-obj peiyu-custom-box" style="display: inline-block; padding: 2px 14px; margin: 0 4px; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.05rem; vertical-align: baseline; box-sizing: border-box; font-weight: bold;">${text}</span>&nbsp;`;
+            } else {
+                // 🔥 模式 2：段落容器
+                // 維持 <div> 標籤與強制換行，適合做成獨立的重點區塊
+                html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; font-weight: bold;"><div>${text}</div></div><p><br></p>`;
+            }
         }
-        insertHtml(html); document.getElementById('config-modal').style.display = 'none';
+            insertHtml(html); document.getElementById('config-modal').style.display = 'none';
     }
 
     async function openGallery(){ saveSelection(); document.getElementById('gallery-modal').style.display='flex'; loadGalleryImages(); }
@@ -1557,6 +1628,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         ${alignBtns}
                         <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#8e44ad; background:#f4ecf7; border-color:#d7bde2;" onclick="modCopy()" title="複製">📋</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
                         </div>
@@ -1586,6 +1658,7 @@
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 頁籤群組物件</div>
                     <button class="editor-btn" style="background:#27ae60; color:#fff; font-weight:bold; padding:6px 0;" onclick="modTabsAdd()">➕ 新增頁籤區段</button>
                     <div style="display:flex; gap:5px;">
+                        <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
                         <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
                         <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; flex:1; font-weight:bold; padding:6px 0;" onclick="modTabsDelete()">🗑️ 刪除</button>
                     </div>
@@ -1629,16 +1702,16 @@
                 setTimeout(updateToolbarState, 10); 
             }
             else if (type === 'block') {
-                // 偵測這是不是我們的高級自訂外框
                 let isCustomBox = currentTarget.classList.contains('peiyu-custom-box');
-                let editBtnHtml = isCustomBox ? `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改樣式</button>` : '';
+                let editBtnHtml = isCustomBox ? `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>` : '';
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${isCustomBox ? '240px' : '160px'};">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${isCustomBox ? '260px' : '200px'};">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
                     <div style="display:flex; gap:5px;">
                         ${editBtnHtml}
+                        <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
                         <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
-                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; flex:1; font-weight:bold; padding:6px 0;" onclick="modBlockDelete()">🗑️ 刪除</button>
+                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; font-weight:bold; padding:6px 12px;" onclick="modBlockDelete()">🗑️</button>
                     </div>
                 </div>`;
             }
@@ -1764,6 +1837,62 @@
             }
         }
 
+        // 🌟 真正的剪貼簿複製引擎 (拷貝後可到處貼上)
+        // 🌟 物理級神盾複製引擎：模擬人類反白複製，突破所有瀏覽器限制！
+        window.modCopy = function() {
+            if(!currentTarget) return;
+            
+            // 1. 建立一個看不見的神祕結界
+            const tempDiv = document.createElement("div");
+            tempDiv.contentEditable = true;
+            tempDiv.style.cssText = "position:absolute; left:-9999px; top:-9999px; opacity:0;";
+            
+            // 2. 把目標的完美分身塞進去
+            const clone = currentTarget.cloneNode(true);
+            
+            // 如果是文字外框 (span)，要在前後加上空白，防止貼上後游標卡死
+            if (clone.tagName === 'SPAN') {
+                tempDiv.appendChild(document.createTextNode('\u00A0'));
+                tempDiv.appendChild(clone);
+                tempDiv.appendChild(document.createTextNode('\u00A0'));
+            } else {
+                tempDiv.appendChild(clone);
+            }
+            
+            document.body.appendChild(tempDiv);
+            
+            // 3. 模擬人類用滑鼠把它完美反白
+            const range = document.createRange();
+            range.selectNodeContents(tempDiv);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            // 4. 強制執行物理複製 (Ctrl+C)
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    floatMenu.style.display = 'none'; 
+                    document.getElementById('edit-badge').style.display = 'none';
+                    
+                    const toast = document.createElement('div');
+                    toast.innerText = "📋 已複製！請到想放的地方按貼上";
+                    toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:50px; z-index:9999; font-size:14px; pointer-events:none; box-shadow:0 4px 15px rgba(0,0,0,0.2);";
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                } else {
+                    throw new Error('Copy failed');
+                }
+            } catch (err) {
+                alert("❌ 瀏覽器阻擋了按鈕複製，請改用實體鍵盤 Ctrl+C");
+            } finally {
+                // 5. 毀屍滅跡，把神祕結界拆掉
+                document.body.removeChild(tempDiv);
+                sel.removeAllRanges();
+                document.getElementById('editor').focus();
+            }
+        };
+
         window.modImg = function(a) { 
             if(a === 'delete') { 
                 nativeDeleteElement(currentTarget); 
@@ -1813,6 +1942,28 @@
                 document.getElementById('edit-badge').style.display = 'none';
                 saveHistory();
             }
+        };
+        // 🌟 終極克隆引擎：一鍵複製物件並插入到旁邊
+        window.modClone = function() {
+            if (!currentTarget) return;
+            const clone = currentTarget.cloneNode(true); // 完美複製包含樣式與內容
+            
+            // 判斷是文字標籤還是段落，決定插入方式
+            if (window.getComputedStyle(currentTarget).display.includes('inline')) {
+                // 如果是文字標籤，插在旁邊，並補一個空白鍵防沾黏
+                currentTarget.parentNode.insertBefore(clone, currentTarget.nextSibling);
+                const space = document.createTextNode('\u00A0');
+                currentTarget.parentNode.insertBefore(space, clone);
+            } else {
+                // 如果是段落容器，插在下方，並補一個換行
+                const p = document.createElement('p'); p.innerHTML = '<br>';
+                currentTarget.parentNode.insertBefore(p, currentTarget.nextSibling);
+                currentTarget.parentNode.insertBefore(clone, currentTarget.nextSibling);
+            }
+            
+            document.getElementById('float-menu').style.display = 'none';
+            document.getElementById('edit-badge').style.display = 'none';
+            saveHistory();
         };
         // 🔥 浮動選單專用：刪除整組頁籤
         window.modTabsDelete = function() {
@@ -1942,23 +2093,13 @@
             } else if (action === 'copy') {
                 document.execCommand('copy');
             } else if (action === 'paste-rich') {
+                // 放棄容易被擋的高級 API，直接用物理點擊觸發原生貼上
+                // 這會自動喚醒我們上面寫的 editor.addEventListener('paste') 護盾！
                 try {
-                    const clipboardItems = await navigator.clipboard.read();
-                    let html = '';
-                    for (const item of clipboardItems) {
-                        if (item.types.includes('text/html')) {
-                            const blob = await item.getType('text/html');
-                            html = await blob.text();
-                            break;
-                        }
-                    }
-                    if (html) document.execCommand('insertHTML', false, html);
-                    else {
-                        const text = await navigator.clipboard.readText();
-                        document.execCommand('insertText', false, text);
-                    }
-                } catch(e) { 
-                    alert("⚠️ 您的瀏覽器安全限制阻擋了按鈕貼上，請直接使用鍵盤：Ctrl + V"); 
+                    const successful = document.execCommand('paste');
+                    if (!successful) throw new Error("Browser denied paste");
+                } catch(e) {
+                    alert("⚠️ 您的瀏覽器安全限制阻擋了按鈕貼上。\n請直接在畫面上長按選擇「貼上」，或是使用鍵盤 Cmd+V / Ctrl+V！"); 
                 }
             } else if (action === 'paste-plain') {
                 try {
@@ -2486,7 +2627,9 @@
     window.updateCustomBox = function() {
         if (!currentTarget || !currentTarget.classList.contains('peiyu-custom-box')) return;
         
-        currentTarget.innerText = document.getElementById('cb-text').value;
+        // 根據使用者的選擇，隨時把框框切換成「隨字寬度」或「滿版」
+        currentTarget.style.display = document.getElementById('cb-display').value;
+        
         currentTarget.style.borderRadius = document.getElementById('cb-radius').value;
         currentTarget.style.borderStyle = document.getElementById('cb-style').value;
         currentTarget.style.borderWidth = document.getElementById('cb-width').value;
@@ -2495,10 +2638,21 @@
         currentTarget.style.borderColor = document.getElementById('cb-border-color').value;
 
         if (document.getElementById('cb-style').value === 'none') currentTarget.style.border = 'none';
-
+        // 寫入記憶大腦
+        const prefs = {
+            bg: document.getElementById('cb-bg').value,
+            color: document.getElementById('cb-color').value,
+            borderCol: document.getElementById('cb-border-color').value,
+            radius: document.getElementById('cb-radius').value,
+            style: document.getElementById('cb-style').value,
+            width: document.getElementById('cb-width').value,
+            displayType: document.getElementById('cb-display').value
+        };
+        localStorage.setItem('peiyu_box_prefs', JSON.stringify(prefs));
         saveHistory();
         document.getElementById('config-modal').style.display = 'none';
     };
+    
     // 🔥 補回遺失的自動存檔引擎
     let autoSaveTimer;
     window.triggerAutoSave = function(immediate = false) {
@@ -2540,9 +2694,14 @@
     // --- 啟動程序 ---
     document.addEventListener("DOMContentLoaded", () => {
         requireLogin();
+        
+        const curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
+        
         initMobileEditorTools();
         fetchKbData();
     });
+
 </script>
 </body>
 </html>

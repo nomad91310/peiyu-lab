@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>個案 CRM 管理</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
+    <style id="security-curtain">
+        body { visibility: hidden !important; opacity: 0 !important; }
+    </style>
     <style>
         /* --- 1. 基礎與通用樣式 --- */
         :root { 
@@ -219,7 +221,12 @@
 
     // --- 啟動 ---
     document.addEventListener("DOMContentLoaded", () => {
-        requireLogin(); // 安全防護
+         // 1. 呼叫 config.js 裡的門神查水表
+        requireLogin();
+        
+        // 2. 驗證通過，脫下黑布讓畫面顯示
+        const curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
         fetchCRMData(); // 讀取資料
     });
 </script>

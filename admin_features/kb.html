@@ -1593,13 +1593,14 @@
             html = `<hr class="peiyu-block peiyu-obj peiyu-divider" style="border: none; border-top: ${borderCss}; margin: ${margin} 0; clear: both; cursor: pointer; width: 100%;">`;
         }
 
-        // 🌟 統一的智慧物理插入引擎：保證不吃原本語法，強迫另起新行
+        // 🌟 統一的智慧物理插入引擎：精準判斷游標方位
         restoreSelection();
         const sel = window.getSelection();
         const editor = document.getElementById('editor');
         
         if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
-            let node = sel.anchorNode;
+            let range = sel.getRangeAt(0);
+            let node = range.startContainer;
             let blockNode = node.nodeType === 3 ? node.parentNode : node;
             
             // 往上找最近的獨立「區塊級元素」
@@ -1610,26 +1611,57 @@
             if (blockNode && blockNode !== editor && !blockNode.classList.contains('peiyu-article')) {
                 if (blockNode.tagName === 'TD' || blockNode.tagName === 'TH') {
                     // 表格格子內插入
-                    blockNode.insertAdjacentHTML('beforeend', html + `<p><br></p>`);
+                    blockNode.insertAdjacentHTML('beforeend', html);
                     const newP = blockNode.lastElementChild;
                     if (newP && newP.tagName === 'P') {
-                        const range = document.createRange(); range.selectNodeContents(newP); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+                        const newRange = document.createRange(); newRange.selectNodeContents(newP); newRange.collapse(true); sel.removeAllRanges(); sel.addRange(newRange);
                     }
                 } else {
-                    // 一般段落，插在該段落的「正下方」
-                    blockNode.insertAdjacentHTML('afterend', html + `<p><br></p>`);
+                    // 🔥 核心修復：精準判斷游標位置與空行狀態！
+                    const isEmpty = blockNode.textContent.trim() === '' && blockNode.querySelectorAll('img, table, iframe').length === 0;
                     
-                    // 把游標移到下一個新段落裡面
-                    const newP = blockNode.nextElementSibling ? (blockNode.nextElementSibling.tagName === 'P' ? blockNode.nextElementSibling : blockNode.nextElementSibling.nextElementSibling) : null;
-                    if (newP && newP.tagName === 'P') {
-                        const range = document.createRange(); range.selectNodeContents(newP); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+                    const preRange = range.cloneRange();
+                    preRange.selectNodeContents(blockNode);
+                    preRange.setEnd(range.startContainer, range.startOffset);
+                    const isAtStart = preRange.toString().trim() === '' && preRange.cloneContents().querySelectorAll('img, table, iframe').length === 0;
+
+                    // 把 HTML 轉換成真實節點，準備完美安插
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html; // 此時的 html 已經自帶一個結尾的換行 <p>
+                    const frag = document.createDocumentFragment();
+                    let lastP = null;
+                    while (tempDiv.firstChild) {
+                        if (tempDiv.firstChild.tagName === 'P') lastP = tempDiv.firstChild;
+                        frag.appendChild(tempDiv.firstChild);
+                    }
+
+                    if (isEmpty) {
+                        // 1. 如果你在空行上：用積木「完美取代」這個空行！
+                        blockNode.parentNode.insertBefore(frag, blockNode);
+                        blockNode.remove();
+                    } else if (isAtStart) {
+                        // 2. 如果游標在文字「最前面」：插在文字「正上方」！
+                        blockNode.parentNode.insertBefore(frag, blockNode);
+                        lastP = null; // 游標保留在原本的文字上，不亂跑
+                    } else {
+                        // 3. 在文字中間或後面：插在段落「正下方」！
+                        blockNode.parentNode.insertBefore(frag, blockNode.nextSibling);
+                    }
+                    
+                    // 自動將游標移到產生的新空白行裡，方便繼續打字
+                    if (lastP) {
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(lastP);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
                     }
                 }
             } else {
-                editor.insertAdjacentHTML('beforeend', html + `<p><br></p>`); 
+                editor.insertAdjacentHTML('beforeend', html); 
             }
         } else {
-            editor.insertAdjacentHTML('beforeend', html + `<p><br></p>`); 
+            editor.insertAdjacentHTML('beforeend', html); 
         }
         
         saveHistory();
@@ -1905,10 +1937,21 @@
                 <button class="editor-btn" style="flex:1.2; padding:4px 0; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-right')" title="文繞圖 (靠右)">繞右</button>
             </div>`;
 
-            // 1. 🌟 先產生 HTML，才能讓系統精準測量高度
             if (type === 'table') { 
                 const currW = parseInt(currentTarget.style.width) || 100; 
-                let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
+                let currColW = 0; 
+                let colsCount = 1;
+                
+                // 🌟 抓取欄數，這是等下總寬度 "Step" 跳動的神奇基數！
+                if (currentTarget && currentTarget.rows.length > 0) {
+                    colsCount = currentTarget.rows[0].cells.length;
+                }
+                
+                if (currentTargetCell) { 
+                    let internalPct = parseFloat(currentTargetCell.style.width);
+                    if (isNaN(internalPct)) internalPct = 100 / colsCount;
+                    currColW = Math.round(currW * (internalPct / 100)); 
+                }
                 
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:6px; width:300px; max-width:90vw; padding:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1938,14 +1981,14 @@
                     <div style="display:flex; gap:5px;">
                         <div style="display:flex; align-items:center; gap:2px; flex:1; font-size:11px; color:#555; background:#f9f9f9; padding:4px; border-radius:4px; border:1px solid #eee;">
                             <b>總寬:</b>
-                            <input type="number" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; width:30px; height:20px; padding:0 2px; text-align:center; font-size:11px; margin:0;">
+                            <input type="number" min="0" max="100" step="${colsCount}" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; width:30px; height:20px; padding:0 2px; text-align:center; font-size:11px; margin:0;">
                             %
                         </div>
                         <div style="display:flex; align-items:center; gap:2px; flex:1.2; font-size:11px; color:#2980b9; background:#f0f8ff; padding:4px; border-radius:4px; border:1px solid #cce5ff;">
                             <b>此欄:</b>
                             <input type="number" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1; width:30px; height:20px; padding:0 2px; text-align:center; font-size:11px; margin:0;">
                             %
-                            <button class="editor-btn" style="padding:0 3px; height:20px; font-size:10px; background:#dcebf7;" onclick="updateColWidth(50); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=50; saveHistory();">平分</button>
+                            <button class="editor-btn" style="padding:0 3px; height:20px; font-size:10px; background:#dcebf7;" onclick="averageTableCols()">平分</button>
                         </div>
                     </div>
                 </div>`; 
@@ -2155,28 +2198,32 @@
             }
 
             // 2. 原本的圖片對齊邏輯 (使用 display / margin / float)
+            // 🔥 核心修復：如果目標是表格，絕對不能把它變成 block！必須維持 table 屬性！
+            let dVal = currentTarget.tagName === 'TABLE' ? 'table' : 'block';
+            let inlineDVal = currentTarget.tagName === 'TABLE' ? 'table' : 'inline-block';
+
             if (mode === 'block-left') { 
-                currentTarget.style.setProperty('display', 'block', 'important'); 
+                currentTarget.style.setProperty('display', dVal, 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
                 currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px auto 15px 0', 'important'); 
             } else if (mode === 'block-center') { 
-                currentTarget.style.setProperty('display', 'block', 'important'); 
+                currentTarget.style.setProperty('display', dVal, 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
                 currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px auto', 'important'); 
             } else if (mode === 'block-right') { 
-                currentTarget.style.setProperty('display', 'block', 'important'); 
+                currentTarget.style.setProperty('display', dVal, 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
                 currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px 0 15px auto', 'important'); 
             } else if (mode === 'wrap-left') { 
-                currentTarget.style.setProperty('display', 'inline-block', 'important'); 
+                currentTarget.style.setProperty('display', inlineDVal, 'important'); 
                 currentTarget.style.setProperty('float', 'left', 'important'); 
                 currentTarget.style.removeProperty('clear'); 
                 currentTarget.style.setProperty('margin', '10px 15px 10px 0', 'important'); 
             } else if (mode === 'wrap-right') { 
-                currentTarget.style.setProperty('display', 'inline-block', 'important'); 
+                currentTarget.style.setProperty('display', inlineDVal, 'important'); 
                 currentTarget.style.setProperty('float', 'right', 'important'); 
                 currentTarget.style.removeProperty('clear'); 
                 currentTarget.style.setProperty('margin', '10px 0 10px 15px', 'important'); 
@@ -2227,26 +2274,118 @@
             if(img) { img.style.width = "100%"; img.style.height = "auto"; } 
         }
         
+       // 🌟 調整表格總寬引擎 (完美契合欄位數量的 Step 邏輯)
         window.updateTableWidth = function(val) { 
-            if(!currentTarget) return; 
-            currentTarget.style.setProperty('width', val + '%'); 
-            currentTarget.style.setProperty('min-width', 'auto'); 
-            const label = document.getElementById('tbl-w-val'); 
-            if (label) label.innerText = val + "%"; 
-        }
+            if(!currentTarget || currentTarget.tagName !== 'TABLE') return; 
+            let newTableW = parseFloat(val);
+            if (isNaN(newTableW)) return;
+            
+            // 防呆：最小 10%，最大 100%
+            if (newTableW < 10) newTableW = 10;
+            if (newTableW > 100) newTableW = 100;
+            
+            currentTarget.style.setProperty('width', newTableW + '%', 'important'); 
+            currentTarget.style.setProperty('min-width', 'auto', 'important'); 
+            
+            // 🔥 強制寫回 input，防止你用上下鍵扣到低於 10 時畫面數字不同步
+            const tblWInput = document.querySelector('input[oninput*="updateTableWidth"]');
+            if (tblWInput && tblWInput.value != newTableW) {
+                tblWInput.value = newTableW;
+            }
+            
+            // 同步更新 UI「此欄」的數字 (總寬縮放了，各欄的絕對佔比也會跟著縮放)
+            if (currentTargetCell) {
+                let internalPct = parseFloat(currentTargetCell.style.width);
+                if (isNaN(internalPct)) internalPct = 100 / currentTarget.rows[0].cells.length;
+                const colInput = document.querySelector('input[oninput*="updateColWidth"]');
+                if (colInput) colInput.value = Math.round(newTableW * (internalPct / 100));
+            }
+            saveHistory(); 
+        };
+        
+        // 🌟 獨立調整單一欄位 (老闆的完美直覺版：此欄數字 = 畫面絕對佔比)
         window.updateColWidth = function(val) { 
             if(!currentTarget || !currentTargetCell) return; 
             const cellIndex = currentTargetCell.cellIndex; 
-            Array.from(currentTarget.rows).forEach(row => { 
-                if (row.cells[cellIndex]) { 
-                    row.cells[cellIndex].style.setProperty('width', val + '%'); 
-                    row.cells[cellIndex].style.setProperty('white-space', 'normal'); 
-                    row.cells[cellIndex].style.setProperty('word-break', 'break-all'); 
-                } 
+            const rows = currentTarget.rows;
+            if (!rows || rows.length === 0) return;
+
+            const colsCount = rows[0].cells.length;
+            let targetPagePct = parseFloat(val); // 你輸入的，是期望的「畫面絕對佔比」
+            if (targetPagePct < 1) targetPagePct = 1;
+
+            let currentTableW = parseFloat(currentTarget.style.width) || 100;
+            
+            // 1. 把 HTML 裡面所有的「內部比例」拿出來，算成你肉眼看到的「畫面絕對佔比」
+            let pagePcts = [];
+            Array.from(rows[0].cells).forEach(c => {
+                let internalPct = parseFloat(c.style.width);
+                if (isNaN(internalPct)) internalPct = 100 / colsCount;
+                pagePcts.push(currentTableW * (internalPct / 100));
+            });
+
+            // 2. 只改你要的那一欄！然後重新加總算出「新總寬」
+            pagePcts[cellIndex] = targetPagePct;
+            let newTableW = pagePcts.reduce((a, b) => a + b, 0);
+
+            // 3. 防爆機制：總寬不能超過 100% (如果超過，才去擠壓別人)
+            if (newTableW > 100) {
+                let diff = newTableW - 100;
+                let otherSum = newTableW - targetPagePct;
+                if (otherSum > 0) {
+                    for (let i=0; i<colsCount; i++) {
+                        if (i !== cellIndex) pagePcts[i] = pagePcts[i] - (diff * (pagePcts[i] / otherSum));
+                    }
+                }
+                newTableW = 100;
+                pagePcts[cellIndex] = targetPagePct;
+            }
+
+            // 4. 將人類看的「畫面絕對佔比」，偷偷轉回 HTML 看得懂的「內部相對比例」，寫入程式裡
+            Array.from(rows).forEach(row => { 
+                Array.from(row.cells).forEach((cell, idx) => {
+                    let internalPct = (pagePcts[idx] / newTableW) * 100;
+                    cell.style.setProperty('width', internalPct.toFixed(2) + '%'); 
+                    cell.style.setProperty('white-space', 'normal'); 
+                    cell.style.setProperty('word-break', 'break-all'); 
+                });
             }); 
-            const label = document.getElementById('col-w-val'); 
-            if (label) label.innerText = val + "%"; 
-        }
+            
+            // 5. 更新表格總寬
+            currentTarget.style.setProperty('width', Math.round(newTableW) + '%', 'important');
+            
+            // 同步更新選單上的「總寬」數字
+            const tblWInput = document.querySelector('input[oninput*="updateTableWidth"]');
+            if (tblWInput) tblWInput.value = Math.round(newTableW);
+            saveHistory(); 
+        };
+
+        // 🔥 全自動表格平分引擎
+        window.averageTableCols = function() {
+            if(!currentTarget || currentTarget.tagName !== 'TABLE') return;
+            const rows = currentTarget.rows;
+            if(!rows || rows.length === 0) return;
+            
+            const colsCount = rows[0].cells.length;
+            const currentTableW = parseFloat(currentTarget.style.width) || 100;
+            const internalPct = (100 / colsCount).toFixed(2); 
+            
+            Array.from(rows).forEach(row => {
+                Array.from(row.cells).forEach(cell => {
+                    // HTML 內部永遠保持完美平分 (33.33%)
+                    cell.style.setProperty('width', internalPct + '%');
+                    cell.style.setProperty('white-space', 'normal'); 
+                    cell.style.setProperty('word-break', 'break-all'); 
+                });
+            });
+            
+            // UI 上顯示的「此欄」會聰明地顯示絕對佔比 (例如總寬 90 / 3 欄 = 30%)
+            const colInput = document.querySelector('input[oninput*="updateColWidth"]');
+            if (colInput) colInput.value = Math.round(currentTableW / colsCount);
+            saveHistory();
+        };
+
+        
 
         // 🔥 原生級的 DOM 刪除 (保證 Cmd+Z 可以救回圖片與表格)
         function nativeDeleteElement(el) {

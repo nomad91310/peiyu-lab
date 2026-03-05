@@ -835,6 +835,19 @@
     }
 
     function exec(command, value = null) { 
+        // 🔥 攔截原生對齊指令：如果目前選中外框或積木，改用智慧對齊引擎，防止瀏覽器亂包 DIV！
+        if (['justifyLeft', 'justifyCenter', 'justifyRight'].includes(command)) {
+            if (currentTarget && (currentTarget.classList.contains('peiyu-obj') || currentTarget.classList.contains('peiyu-block'))) {
+                let mode = 'block-left';
+                if (command === 'justifyCenter') mode = 'block-center';
+                if (command === 'justifyRight') mode = 'block-right';
+                if (typeof window.setImgAlign === 'function') {
+                    window.setImgAlign(mode);
+                    return;
+                }
+            }
+        }
+        
         document.execCommand(command, false, value); 
         document.getElementById('editor').focus(); 
         saveHistory(); 
@@ -1556,8 +1569,13 @@
             
             if (displayType === 'inline-block') {
                 // 🔥 模式 1：文字外框 
-                // 關鍵修復：改用 <span> 標籤，不加結尾換行，完美融入段落中！
                 html = `<span class="peiyu-block peiyu-obj peiyu-custom-box" style="display: inline-block; padding: 2px 14px; margin: 0 4px; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.05rem; vertical-align: baseline; box-sizing: border-box; font-weight: bold;">${text}</span>&nbsp;`;
+                
+                // 🔥 關鍵修復：如果是「文字外框」，直接呼叫原生插入法原地替換反白的文字！
+                // 並且用 return 強制結束，絕對不進入下方的「強制另起新行引擎」！
+                insertHtml(html);
+                document.getElementById('config-modal').style.display = 'none';
+                return; 
             } else {
                 // 🔥 模式 2：段落容器
                 // 維持 <div> 標籤與強制換行，適合做成獨立的重點區塊
@@ -2014,16 +2032,25 @@
                 </div>`;
                 setTimeout(updateToolbarState, 10); 
             }
-            else if (type === 'block') {
+            else if (type === 'block') { 
                 let isCustomBox = currentTarget.classList.contains('peiyu-custom-box');
                 let isDivider = currentTarget.tagName === 'HR' && currentTarget.classList.contains('peiyu-divider');
+                let isHeading = currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3';
                 
                 let editBtnHtml = '';
                 if (isCustomBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
                 else if (isDivider) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider) ? '260px' : '200px'}; max-width:90vw;">
+                // 🔥 專屬積木的對齊按鈕
+                const blockAlignBtns = `<div style="display:flex; gap:2px; align-items:center; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee; width:100%; box-sizing:border-box;">
+                    <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-left')" title="靠左"><i class="fas fa-align-left"></i> 靠左</button>
+                    <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-center')" title="置中"><i class="fas fa-align-center"></i> 置中</button>
+                    <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-right')" title="靠右"><i class="fas fa-align-right"></i> 靠右</button>
+                </div>`;
+
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider || isHeading) ? '260px' : '200px'}; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
+                    ${(isCustomBox || isHeading) ? blockAlignBtns : ''}
                     <div style="display:flex; gap:5px;">
                         ${editBtnHtml}
                         <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
@@ -2092,34 +2119,66 @@
         };
 
         
-        // 🔥 圖片與表格對齊引擎 (完整支援 5 種模式：獨立行左/中/右 + 文繞圖左/右)
+        // 🔥 圖片與表格對齊引擎 (升級支援所有積木與外框)
         window.setImgAlign = function(mode) {
             if(!currentTarget) return; 
             
+            // 1. 處理自訂外框與積木 (SPAN 文字外框, DIV 容器, H2, H3)
+            if (currentTarget.classList.contains('peiyu-custom-box') || currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3' || currentTarget.classList.contains('peiyu-block')) {
+                
+                if (currentTarget.tagName === 'SPAN') {
+                    // 🔥 文字外框 (inline-block)：必須去找它外面包著的 P 段落，對段落設定 text-align
+                    let parent = currentTarget.parentElement;
+                    while (parent && parent.id !== 'editor' && !['P', 'DIV', 'TD', 'TH', 'LI'].includes(parent.tagName)) {
+                        parent = parent.parentElement;
+                    }
+                    if (parent && parent.id !== 'editor') {
+                        if (mode.includes('left')) parent.style.textAlign = 'left';
+                        else if (mode.includes('center')) parent.style.textAlign = 'center';
+                        else if (mode.includes('right')) parent.style.textAlign = 'right';
+                    }
+                } else {
+                    // 🔥 段落容器或標題 (DIV / H2)：直接設定內文對齊，並搭配 margin 置中
+                    if (mode.includes('left')) {
+                        currentTarget.style.textAlign = 'left';
+                        currentTarget.style.margin = '15px auto 15px 0';
+                    } else if (mode.includes('center')) {
+                        currentTarget.style.textAlign = 'center';
+                        currentTarget.style.margin = '15px auto'; // 確保外層區塊也置中
+                    } else if (mode.includes('right')) {
+                        currentTarget.style.textAlign = 'right';
+                        currentTarget.style.margin = '15px 0 15px auto';
+                    }
+                }
+                saveHistory();
+                return; // 處理完積木直接結束，不執行下方的圖片邏輯
+            }
+
+            // 2. 原本的圖片對齊邏輯 (使用 display / margin / float)
             if (mode === 'block-left') { 
                 currentTarget.style.setProperty('display', 'block', 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
-                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
+                currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px auto 15px 0', 'important'); 
             } else if (mode === 'block-center') { 
                 currentTarget.style.setProperty('display', 'block', 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
-                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
+                currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px auto', 'important'); 
             } else if (mode === 'block-right') { 
                 currentTarget.style.setProperty('display', 'block', 'important'); 
                 currentTarget.style.setProperty('float', 'none', 'important'); 
-                currentTarget.style.setProperty('clear', 'both', 'important'); // 強制斷行
+                currentTarget.style.setProperty('clear', 'both', 'important'); 
                 currentTarget.style.setProperty('margin', '15px 0 15px auto', 'important'); 
             } else if (mode === 'wrap-left') { 
                 currentTarget.style.setProperty('display', 'inline-block', 'important'); 
                 currentTarget.style.setProperty('float', 'left', 'important'); 
-                currentTarget.style.removeProperty('clear'); // 解除斷行，讓文字繞上來
+                currentTarget.style.removeProperty('clear'); 
                 currentTarget.style.setProperty('margin', '10px 15px 10px 0', 'important'); 
             } else if (mode === 'wrap-right') { 
                 currentTarget.style.setProperty('display', 'inline-block', 'important'); 
                 currentTarget.style.setProperty('float', 'right', 'important'); 
-                currentTarget.style.removeProperty('clear'); // 解除斷行，讓文字繞上來
+                currentTarget.style.removeProperty('clear'); 
                 currentTarget.style.setProperty('margin', '10px 0 10px 15px', 'important'); 
             } 
             saveHistory();

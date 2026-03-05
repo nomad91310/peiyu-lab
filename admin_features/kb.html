@@ -57,6 +57,16 @@
         .tb-group:last-child { border-right: none; }
         .editor-btn { padding: 6px 10px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 4px; color: #444; font-size: 14px; transition: 0.2s; display:flex; align-items:center; justify-content:center; white-space: nowrap; }
         .editor-btn:hover { background: #e2e6ea; }
+        /* 🔥 Word 級分割顏色按鈕 (左雷達 / 右記憶) */
+        .color-split-btn { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; height: 30px; background: white; }
+        .color-split-btn .btn-action { flex: 1; height: 100%; background: transparent; border: none; padding: 0 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; transition: 0.2s; color: #333; }
+        .color-split-btn .btn-action:hover { background: #e2e6ea; }
+        .color-split-btn .btn-picker-native { position: relative; width: 20px; height: 100%; border-left: 1px solid #eee; background: #f8f9fa; cursor: pointer; }
+        .color-split-btn .btn-picker-native:hover { background: #e2e6ea; }
+        .color-split-btn .btn-picker-native input[type="color"] { width: 100%; height: 100%; padding: 0; border: none; cursor: pointer; opacity: 0; position: absolute; top:0; left:0; z-index: 2; }
+        .color-split-btn .btn-picker-native i { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; color: #666; pointer-events: none; z-index: 1; }
+        /* 記憶顏色的底線 */
+        .memorized-border { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; pointer-events: none; z-index: 1; }
         /* 啟動狀態的按鈕發光 */
         .editor-btn.active { background: var(--forest) !important; color: white !important; border-color: var(--forest) !important; }
         .editor-btn.active i { color: white !important; }
@@ -207,31 +217,32 @@
             /* 修正後的抽屜面板位置 */
             .editor-sticky-header { 
                 position: fixed !important; 
-                top: 50% !important;             /* 🌟 定位在 50% 高度 */
-                right: 15px !important; 
+                top: 150px !important;  /* 🔥 與右側按鈕同高，用 px 鎖死防鍵盤推擠 */
+                right: 60px !important; /* 🔥 往左邊讓出 60px 的空間，絕對不會蓋住你右邊的按鈕！ */
                 z-index: 6000; 
                 background: rgba(255, 255, 255, 0.95) !important; 
                 backdrop-filter: blur(10px); 
-                width: 130px !important; 
-                max-height: 70vh !important;     /* 稍微加長面板高度，讓按鈕好按 */
+                width: 140px !important; 
+                max-height: 75vh !important;
                 box-shadow: 0 5px 25px rgba(0,0,0,0.2) !important; 
                 border-radius: 12px !important; 
                 border: 1px solid #eee; 
                 
-                /* 🌟 核心修正：垂直置中並預設藏在右側 */
-                transform: translateY(-50%) translateX(150%) !important; 
+                /* 🌟 水平滑動隱藏到畫面外 */
+                transform: translateX(200%) !important; 
                 
                 opacity: 0; 
-                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                /* 🔥 限制動畫範圍，防止 JS 追蹤時產生殘影 */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s !important;
                 display: flex !important; 
                 flex-direction: column !important; 
                 overflow-y: auto !important; 
                 padding: 12px 10px !important; 
             }
 
-            /* 🌟 核心修正：打開時保持垂直置中 */
+            /* 🌟 核心修正：打開時保持原高度，僅水平滑入 */
             .editor-sticky-header.show-drawer { 
-                transform: translateY(-50%) translateX(0) !important; 
+                transform: translateX(0) !important; 
                 opacity: 1 !important; 
             }
             .editor-sticky-header::-webkit-scrollbar { display: none; }
@@ -239,8 +250,9 @@
             .tb-group { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; justify-content: center !important; width: 100% !important; padding: 0 0 12px 0 !important; margin: 0 !important; border-right: none !important; border-bottom: 1px dashed #ddd !important; gap: 6px !important; }
             .tb-group:last-child { border-bottom: none !important; padding-bottom: 0 !important; }
             .tb-group b { display: none !important; }
-            .editor-btn { width: 32px !important; height: 32px !important; padding: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important; border-radius: 6px !important; flex-shrink: 0; }
-            .btn-magic, .editor-btn[onclick="toggleSource()"], .editor-btn[onclick="openModal('spacing')"] { width: 100% !important; height: 36px !important; padding: 0 10px !important; margin: 0 !important; white-space: nowrap !important; font-size: 13px !important; justify-content: center !important; border-radius: 8px !important; }
+            /* 🔥 核心修復：加上 .editor-sticky-header 限制範圍，絕對不干擾彈出視窗的按鈕隱藏邏輯！ */
+            .editor-sticky-header .editor-btn { width: 32px !important; height: 32px !important; padding: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important; border-radius: 6px !important; flex-shrink: 0; }
+            .editor-sticky-header .btn-magic, .editor-sticky-header .editor-btn[onclick="toggleSource()"], .editor-sticky-header .editor-btn[onclick="openModal('spacing')"] { width: 100% !important; height: 36px !important; padding: 0 10px !important; margin: 0 !important; white-space: nowrap !important; font-size: 13px !important; justify-content: center !important; border-radius: 8px !important; }
             select.tb-select { width: 100% !important; height: 34px !important; font-size: 12px !important; padding: 0 5px !important; margin: 0 !important; }
             .color-picker-wrapper { margin: 0 !important; }
             
@@ -254,9 +266,9 @@
             .editor-gallery-grid { grid-template-columns: repeat(2, 1fr) !important; grid-auto-rows: 150px !important; gap: 10px !important; padding: 10px !important; }
 
             /* 🔥 手機版：修復 Modal 按鈕被擠壓的問題 */
-            .editor-modal-box { width: 90% !important; padding: 20px !important; }
+            .editor-modal-box { width: 95% !important; padding: 15px !important; max-height: 85vh !important; overflow-y: auto !important; }
             #general-modal-box > div:last-child { 
-                flex-direction: column-reverse !important; /* 改成上下排列，取消在下，確認在上 */
+                flex-direction: column-reverse !important; 
                 gap: 10px !important; 
             }
             #general-modal-box > div:last-child .editor-btn { 
@@ -265,6 +277,45 @@
                 font-size: 16px !important; 
                 margin: 0 !important; 
             }
+            /* 讓魔法積木與格式清理的按鈕文字自動換行，絕對不擠壓 */
+            #m-body-editor .editor-btn {
+                height: auto !important;
+                min-height: 45px;
+                white-space: normal !important;
+                line-height: 1.4;
+                padding: 10px !important;
+            }
+            /* 🔥 手機版：設定面板的並排元素，太窄時自動往下折行，絕不擠壓 */
+            #m-body-editor div[style*="display:flex"] { 
+                flex-wrap: wrap !important; 
+            }
+            #m-body-editor div[style*="display:flex"] > div {
+                min-width: 45% !important; /* 讓下拉選單至少有空間顯示字 */
+                flex: 1 1 auto !important;
+            }
+            
+            /* 🔥 手機版：右鍵(長按)選單防超出螢幕 */
+            #custom-context-menu {
+                max-width: 90vw !important;
+                white-space: normal !important;
+            }
+
+            /* 🔥 手機版：浮動黑筆選單內元素自動折行 */
+            #float-menu div[style*="display:flex"] {
+                flex-wrap: wrap !important;
+            }
+            
+            /* 🔥 暴力置中修改選單，徹底解決飛天問題 */
+            #float-menu {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                max-height: 75vh; overflow-y: auto; margin: 0 !important;
+            }
+            
+            /* 隱藏舊的 edit-badge 避免干擾，我們改用右側工具列的按鈕 */
+            #edit-badge { display: none !important; }
         }
     </style>
 </head>
@@ -379,8 +430,27 @@
                         <button class="editor-btn" onclick="exec('underline')"><i class="fas fa-underline"></i></button>
                     </div>
                     <div class="tb-group">
-                        <div class="color-picker-wrapper" title="文字顏色"><input type="color" onchange="exec('foreColor', this.value)" value="#2c3e50"><i class="fas fa-font" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
-                        <div class="color-picker-wrapper" title="螢光筆" style="margin-left:5px;" onmousedown="saveSelection()"> <input type="color" onchange="applyHighlighter(this.value)" value="#ffffff"><i class="fas fa-highlighter" style="position:absolute; top:7px; left:8px; font-size:14px; pointer-events:none; color:#333;"></i></div>
+                        <div class="color-split-btn" style="width: 55px;" title="文字顏色 (左:套用記憶 右:選新色)">
+                            <button class="btn-action action-text-color" onmousedown="saveSelection()" ontouchstart="saveSelection()" onclick="applyTextColor(this.dataset.color)" data-color="#c0392b">
+                                <i class="fas fa-font"></i>
+                            </button>
+                            <div class="btn-picker-native" onmousedown="saveSelection()" ontouchstart="saveSelection()">
+                                <input type="color" class="picker-text-color" onchange="applyTextColor(this.value, true)" value="#c0392b">
+                                <i class="fas fa-caret-down"></i>
+                                <div class="memorized-border memorized-text-border" style="background-color: #c0392b;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="color-split-btn" style="width: 55px; margin-left: 5px;" title="螢光筆 (左:套用記憶 右:選新色)">
+                            <button class="btn-action action-bg-color" onmousedown="saveSelection()" ontouchstart="saveSelection()" onclick="applyTextBg(this.dataset.color)" data-color="#f39c12">
+                                <i class="fas fa-highlighter"></i>
+                            </button>
+                            <div class="btn-picker-native" onmousedown="saveSelection()" ontouchstart="saveSelection()">
+                                <input type="color" class="picker-bg-color" onchange="applyTextBg(this.value, true)" value="#f39c12">
+                                <i class="fas fa-caret-down"></i>
+                                <div class="memorized-border memorized-bg-border" style="background-color: #f39c12;"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="tb-group">
                         <button class="editor-btn" onclick="exec('justifyLeft')"><i class="fas fa-align-left"></i></button>
@@ -401,7 +471,7 @@
                         <button class="editor-btn" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
                         <button class="editor-btn" onclick="openGallery()" style="color:var(--info);" title="開啟圖庫"><i class="fas fa-image"></i></button>
                         <button class="editor-btn" onclick="openModal('table')" title="插入表格"><i class="fas fa-table"></i></button>
-                        <button class="editor-btn" onclick="openModal('divider')" title="插入分隔線/間距" style="color: #8e44ad; font-weight:bold;"><i class="fas fa-cut"></i> 分隔線</button>
+                        <button class="editor-btn" onclick="openModal('divider')" title="插入分隔線/間距" style="color: #8e44ad; font-size: 16px;"><i class="fas fa-grip-lines"></i></button>
                         <button class="editor-btn" id="btn-format-painter" onclick="toggleFormatPainter()" title="複製格式 (油漆刷)"><i class="fas fa-paint-roller"></i></button>
                         <button class="editor-btn" onclick="exec('removeFormat')" title="清除格式"><i class="fas fa-eraser"></i></button>
                         <button class="editor-btn" onclick="toggleSource()" style="background:#333; color:#fff; margin-left:10px;"><i class="fas fa-code"></i> HTML</button>
@@ -533,12 +603,19 @@
     }
 
     async function saveArticle(isAuto = false) {
+        // 🔥 儲存前除髒：強力剝除所有殘留的編輯器「藍/紅/綠色選取框」，絕對不存進資料庫！
+        document.querySelectorAll('#editor [class*="obj-selected-"]').forEach(el => {
+            el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
+            if (el.getAttribute('class') === '') el.removeAttribute('class');
+        });
+        // 🔥 儲存前除髒：把表格格子裡被強制加入的編輯權限拔掉，防止前台被點擊出現系統預設藍框
+        document.querySelectorAll('#editor td[contenteditable="true"], #editor th[contenteditable="true"]').forEach(cell => {
+            cell.removeAttribute('contenteditable');
+        });
+
         const editor = document.getElementById('editor');
         const sourceArea = document.getElementById('source-area');
-        if (sourceArea.style.display === 'block') {
-            const parser = new DOMParser(); const doc = parser.parseFromString(sourceArea.value, 'text/html');
-            const wrapper = doc.querySelector('.peiyu-article'); editor.innerHTML = wrapper ? wrapper.innerHTML : sourceArea.value;
-        }
+        // ... 原本的程式碼保持不變
         // 🔥 終極防呆：儲存前，強制掃描畫面上最新的頁籤標題，寫死進 HTML 屬性裡
         editor.querySelectorAll('.peiyu-tab-section').forEach(sec => {
             const titleSpan = sec.querySelector('.peiyu-tab-title-edit');
@@ -703,22 +780,21 @@
     document.addEventListener("DOMContentLoaded", () => {
         const editor = document.getElementById('editor');
         if (editor) { 
-            // 🔥 劫持預設右鍵，呼叫自訂選單
+            // 🔥 劫持預設右鍵，呼叫自訂選單 (加入手機邊界防撞)
             const contextMenu = document.getElementById('custom-context-menu');
             editor.addEventListener('contextmenu', function(e) {
                 e.preventDefault(); // 擋掉瀏覽器預設右鍵
                 contextMenu.style.display = 'block';
-                contextMenu.style.left = e.clientX + 'px';
+                
+                // 防撞牆運算：如果點擊位置太靠右，選單往左邊退
+                let xPos = e.clientX;
+                const menuWidth = 200; // 選單預設寬度
+                if (xPos + menuWidth > window.innerWidth) {
+                    xPos = window.innerWidth - menuWidth - 10;
+                }
+                
+                contextMenu.style.left = Math.max(10, xPos) + 'px';
                 contextMenu.style.top = e.clientY + 'px';
-            });
-            // 點擊旁邊空白處時，關閉右鍵選單
-            document.addEventListener('click', function(e) {
-                if (contextMenu && !contextMenu.contains(e.target)) contextMenu.style.display = 'none';
-            });
-        // 已經拔除打字自動儲存
-            editor.addEventListener('input', () => { 
-                clearTimeout(typingTimeout); 
-                typingTimeout = setTimeout(saveHistory, 500); 
             });
             
         }
@@ -843,22 +919,219 @@
         else { exec('formatBlock', 'DIV'); setTimeout(applyFirstLineIndent, 50); } 
     }
 
-    // 🌟 6. 修正螢光筆功能
-    function applyHighlighter(color) {
+    // 🌟 文字顏色與螢光筆雙引擎 (左雷達 + 右記憶 + 0延遲強制同步)
+    window.applyTextColor = function(val, isNewPick = false) {
+        restoreSelection();
+        const sel = window.getSelection();
+        if (!sel.toString()) return alert("⚠️ 請先反白選取要修改的文字喔！");
+        
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('foreColor', false, val);
+        document.getElementById('editor').focus({ preventScroll: true });
+        saveHistory();
+
+        // 1. 記憶魔法：更新右側箭頭的底線與記憶
+        if (isNewPick) {
+            document.querySelectorAll('.action-text-color').forEach(btn => btn.setAttribute('data-color', val));
+            document.querySelectorAll('.memorized-text-border').forEach(el => el.style.backgroundColor = val);
+            document.querySelectorAll('.picker-text-color').forEach(inp => inp.value = val);
+        }
+        
+        // 2. 🔥 暴力同步：不等雷達了，直接把左邊的 A 變成你剛選的顏色！
+        document.querySelectorAll('.action-text-color').forEach(btn => {
+            let icon = btn.querySelector('i');
+            if (icon) icon.style.color = val;
+            btn.style.color = val; 
+        });
+
+        setTimeout(updateToolbarState, 50); // 給雷達一點緩衝時間再掃一次
+    };
+
+    window.applyTextBg = function(val, isNewPick = false) {
         restoreSelection(); 
         const sel = window.getSelection(); 
         if (!sel.toString()) return alert("⚠️ 請先反白選取要畫螢光筆的文字喔！"); 
         
         document.execCommand('styleWithCSS', false, true); 
-        document.execCommand('hiliteColor', false, color); 
-        document.execCommand('backColor', false, color); 
+        document.execCommand('hiliteColor', false, val); 
+        document.execCommand('backColor', false, val); 
+        
         const blocks = document.getElementById('editor').querySelectorAll('p, div, li, ul, ol, td, th, tr, table, h2, h3');
         blocks.forEach(block => { if (sel.containsNode(block, true)) { block.style.backgroundColor = ''; } });
         let node = sel.focusNode; if (node && node.nodeType === 3) node = node.parentNode;
         while (node && node.id !== 'editor') { if (['P', 'DIV', 'LI', 'UL', 'OL', 'TD', 'TH'].includes(node.tagName)) { node.style.backgroundColor = ''; } node = node.parentNode; }
+        
         document.getElementById('editor').focus({ preventScroll: true }); 
         saveHistory();
+
+        // 1. 記憶魔法
+        if (isNewPick) {
+            document.querySelectorAll('.action-bg-color').forEach(btn => btn.setAttribute('data-color', val));
+            document.querySelectorAll('.memorized-bg-border').forEach(el => el.style.backgroundColor = val);
+            document.querySelectorAll('.picker-bg-color').forEach(inp => inp.value = val);
+        }
+        
+        // 2. 🔥 暴力同步：不等雷達了，直接把左邊的螢光筆圖示變色！
+        document.querySelectorAll('.action-bg-color').forEach(btn => {
+            let icon = btn.querySelector('i');
+            if (val === 'transparent' || val === '' || val === '#ffffff') {
+                btn.style.backgroundColor = 'transparent';
+                if (icon) icon.style.color = '#333333'; 
+            } else {
+                btn.style.backgroundColor = val;
+                if (icon) icon.style.color = '#ffffff';
+            }
+        });
+
+        setTimeout(updateToolbarState, 50); // 給雷達一點緩衝時間再掃一次
+    };
+
+    // 🌟 狀態雷達 (透視眼版 + Word級混雜偵測 + 白字防隱形保護)
+    function updateToolbarState() {
+        // 🔥 加入極短延遲，讓瀏覽器先完成點擊事件與反白，再來抓顏色
+        setTimeout(() => {
+            const editor = document.getElementById('editor');
+            const sel = window.getSelection();
+            if (!sel.rangeCount || !editor.contains(sel.anchorNode)) return;
+
+            // 1. 偵測粗體、斜體、底線，並點亮對應按鈕
+            ['bold', 'italic', 'underline'].forEach(cmd => {
+                const isActive = document.queryCommandState(cmd);
+                document.querySelectorAll(`button[onclick="exec('${cmd}')"]`).forEach(btn => {
+                    isActive ? btn.classList.add('active') : btn.classList.remove('active');
+                });
+            });
+
+            // 🔥 X光深層鑽探：精準定位真正被選取的文字標籤！
+            let range = sel.getRangeAt(0);
+            let node = range.startContainer;
+            
+            // 矯正邊界抓取：如果起點在文字末端，改抓終點
+            if (node.nodeType === 3 && range.startOffset === node.length && !sel.isCollapsed) {
+                node = range.endContainer; 
+            }
+
+            if (node.nodeType === 1 && node.childNodes.length > range.startOffset) {
+                node = node.childNodes[range.startOffset];
+            }
+            while (node && node.nodeType === 1 && node.childNodes.length > 0) {
+                let validChild = Array.from(node.childNodes).find(n => n.textContent.replace(/\u200B/g, '').trim() !== '');
+                if (validChild) node = validChild;
+                else break;
+            }
+            if (node && node.nodeType === 3) node = node.parentNode;
+            if (!node || node === editor) return;
+
+            const computed = window.getComputedStyle(node);
+            
+            // 2. 透視基準字體與大小
+            let fontStr = computed.fontFamily.toLowerCase();
+            let mappedFont = "sans-serif"; 
+            if (fontStr.includes('mono') || fontStr.includes('courier')) mappedFont = "monospace";
+            else if (fontStr.includes('noto serif tc') || fontStr.includes('ming') || fontStr.includes('song') || (fontStr.includes('serif') && !fontStr.includes('sans-serif'))) mappedFont = "'Noto Serif TC', serif";
+            
+            let sizePx = parseFloat(computed.fontSize) || 16;
+            let pt = sizePx * 0.75; 
+            const pts = [10, 12, 14, 18, 24, 36];
+            let mappedSize = pts.reduce((p, c) => Math.abs(c - pt) < Math.abs(p - pt) ? c : p).toString();
+
+            // 🔥 核心升級：偵測「選取範圍內」是否有混雜多種格式與顏色
+            let isMixedFont = false;
+            let isMixedSize = false;
+            let isMixedTextColor = false;
+            
+            if (!sel.isCollapsed) {
+                const container = range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer.parentNode : range.commonAncestorContainer;
+                if (container && container.querySelectorAll) {
+                    let elements = container.querySelectorAll('*');
+                    let firstTextColor = null;
+
+                    for (let el of elements) {
+                        if (sel.containsNode(el, true)) {
+                            let comp = window.getComputedStyle(el);
+                            
+                            // 檢查字體與大小
+                            let elFontStr = comp.fontFamily.toLowerCase();
+                            let elMappedFont = "sans-serif";
+                            if (elFontStr.includes('mono') || elFontStr.includes('courier')) elMappedFont = "monospace";
+                            else if (elFontStr.includes('noto serif tc') || elFontStr.includes('ming') || elFontStr.includes('song') || (elFontStr.includes('serif') && !elFontStr.includes('sans-serif'))) elMappedFont = "'Noto Serif TC', serif";
+                            if (elMappedFont !== mappedFont) isMixedFont = true;
+
+                            let elSizePx = parseFloat(comp.fontSize) || 16;
+                            let elPt = elSizePx * 0.75;
+                            let elMappedSize = pts.reduce((p, c) => Math.abs(c - elPt) < Math.abs(p - elPt) ? c : p).toString();
+                            if (elMappedSize !== mappedSize) isMixedSize = true;
+
+                            // 檢查文字顏色是否混雜
+                            let elColor = rgb2hex(comp.color);
+                            if (firstTextColor === null) firstTextColor = elColor;
+                            else if (firstTextColor !== elColor) isMixedTextColor = true;
+                        }
+                    }
+                }
+            }
+
+            if (isMixedFont) mappedFont = "";
+            if (isMixedSize) mappedSize = "";
+
+            document.querySelectorAll('.tb-select[onchange*="applyCustomFont"]').forEach(sel => sel.value = mappedFont);
+            document.querySelectorAll('.tb-select[onchange*="applyCustomSize"]').forEach(sel => sel.value = mappedSize);
+
+            // ==========================================
+            // 4. 透視文字顏色 
+            let textColor = computed.color;
+            // 如果選了一堆顏色不同的字，強制顯示預設的深灰色
+            let hexColor = isMixedTextColor ? '#333333' : (rgb2hex(textColor) || '#333333');
+            
+            document.querySelectorAll('.action-text-color').forEach(btn => {
+                let icon = btn.querySelector('i');
+                if (icon) {
+                    icon.style.color = hexColor;
+                    // 🔥 白字防護：如果字是白色，給圖示加上一點黑色陰影，防止隱形
+                    if (hexColor === '#ffffff' || hexColor === '#fff') {
+                        icon.style.textShadow = '0 0 3px rgba(0,0,0,0.8)';
+                    } else {
+                        icon.style.textShadow = 'none';
+                    }
+                }
+                btn.style.color = hexColor; 
+            });
+
+            // 5. 透視背景顏色
+            let bgNode = node;
+            let bgColor = '';
+            while (bgNode && bgNode !== editor) {
+                let bg = window.getComputedStyle(bgNode).backgroundColor;
+                let cleanBg = bg ? bg.replace(/\s+/g, '') : '';
+                if (cleanBg && cleanBg !== 'transparent' && cleanBg !== 'rgba(0,0,0,0)') {
+                    bgColor = bg;
+                    break;
+                }
+                bgNode = bgNode.parentNode;
+            }
+            // 如果文字顏色混雜，我們也順便把背景狀態歸零顯示
+            let hexBg = isMixedTextColor ? '' : (rgb2hex(bgColor) || ''); 
+            
+            document.querySelectorAll('.action-bg-color').forEach(btn => {
+                let icon = btn.querySelector('i');
+                // 白底防護：如果沒有背景，或是背景被設為純白，按鈕不變黑，只把圖示變深色
+                if (hexBg === '' || hexBg === '#ffffff' || hexBg === '#fff') {
+                    btn.style.backgroundColor = hexBg === '' ? 'transparent' : '#ffffff';
+                    if (icon) {
+                        icon.style.color = '#333333'; 
+                        icon.style.textShadow = 'none';
+                    }
+                } else {
+                    btn.style.backgroundColor = hexBg;
+                    if (icon) {
+                        icon.style.color = '#ffffff';
+                        icon.style.textShadow = '0 0 2px rgba(0,0,0,0.5)'; // 亮色背景時讓白色圖示更清楚
+                    }
+                }
+            });
+        }, 10); // 延遲 10 毫秒，避開所有衝突
     }
+    
 
     function insertLink() { const url = prompt("網址：", "https://"); if(url) exec('createLink', url); }
     // 🌟 強制 DOM 插入法：絕對保留所有樣式，拒絕瀏覽器雞婆刪除
@@ -1048,7 +1321,7 @@
         const confirmBtn = document.getElementById('m-confirm-btn'); 
         
         // 🔥 核心修復 1：每次打開面板，強制「顯示插入、隱藏修改」，絕不留殘影！
-        confirmBtn.style.display = 'block';
+        confirmBtn.style.display = 'flex';
         document.getElementById('m-update-btn').style.display = 'none';
 
         if (type === 'divider') {
@@ -1147,16 +1420,17 @@
         else if (type === 'custom-box') {
             document.getElementById('m-title-editor').innerText = '🔲 自訂文字外框';
             
-            // 🔥 樣式記憶引擎：讀取上次使用的設定，沒用過才給預設值
             let savedPrefs = localStorage.getItem('peiyu_box_prefs');
             let prefs = savedPrefs ? JSON.parse(savedPrefs) : {};
-            
             let bg = prefs.bg || '#fffcf5', borderCol = prefs.borderCol || '#c6a87c', textCol = prefs.color || '#1a2f23';
             let radius = prefs.radius || '50px', borderStyle = prefs.style || 'solid', borderWidth = prefs.width || '2px';
             let displayType = prefs.displayType || 'inline-block';
             let textValue = '';
 
-            if (currentTarget && currentTarget.classList.contains('peiyu-custom-box')) {
+            // 🔥 嚴格判定：只有真正選中 custom-box 才算是修改模式！
+            let isEditingBox = currentTarget && currentTarget.classList.contains('peiyu-custom-box');
+
+            if (isEditingBox) {
                 const comp = window.getComputedStyle(currentTarget);
                 bg = rgb2hex(comp.backgroundColor) || bg;
                 textCol = rgb2hex(comp.color) || textCol;
@@ -1168,14 +1442,14 @@
                 
                 confirmBtn.style.display = 'none';
                 const updateBtn = document.getElementById('m-update-btn');
-                updateBtn.style.display = 'block';
+                updateBtn.style.display = 'flex'; // 🔥 改成 flex
                 updateBtn.innerText = "✅ 確認修改外框";
                 updateBtn.setAttribute('onclick', 'updateCustomBox()');
                 textValue = "⚠️ 修改模式：請直接在編輯器內改字或插圖"; 
             } else {
                 const sel = window.getSelection();
                 textValue = sel.toString(); 
-                confirmBtn.style.display = 'block';
+                confirmBtn.style.display = 'flex'; // 🔥 改成 flex
                 document.getElementById('m-update-btn').style.display = 'none';
             }
 
@@ -1187,7 +1461,7 @@
                         <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器 (滿版寬度，按 Enter 可在框內換行/插圖)</option>
                     </select>
                 </div>
-                <div class="editor-form-group"><label>文字內容</label><input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="請輸入內容或先在編輯器反白文字" ${currentTarget ? 'disabled' : ''}></div>
+                <div class="editor-form-group"><label>文字內容</label><input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="請輸入內容或先在編輯器反白文字" ${isEditingBox ? 'disabled' : ''}></div>
                 <div style="display:flex; gap:10px;">
                     <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="cb-radius" class="editor-form-input">
                         <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
@@ -1214,7 +1488,7 @@
                 </div>
             `;
         }
-        document.getElementById('config-modal').style.display = 'flex';
+            document.getElementById('config-modal').style.display = 'flex';
     }
 
     function updateSpacingPreview() { 
@@ -1417,374 +1691,270 @@
         }
     }
 
-    // 🌟 變數拉到最外層，讓「框線設定面板」抓得到！
+    // 🌟 變數拉到最外層
     let currentTarget = null; 
     let currentTargetCell = null; 
+    let pendingTargetType = null;
+    let lastValidRange = null;
+    let editor, floatMenu, editBadge; // 🔥 終極修復：把這三個核心放到全域，選單才不會報錯卡死！
 
     document.addEventListener("DOMContentLoaded", () => {
-        const editor = document.getElementById('editor'); 
-        const floatMenu = document.getElementById('float-menu'); 
+        editor = document.getElementById('editor'); 
+        floatMenu = document.getElementById('float-menu'); 
+        editBadge = document.getElementById('edit-badge');
 
-        if (editor) {
-            // 打字時自動存檔
-            editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); });
-            
-            // 🔥 終極修復：強制接管鍵盤 Ctrl+Z，解決「上一步變貼上亂碼」的問題！
-            // 🔥 終極修復：強制接管鍵盤捷徑 (復原、重做、純文字貼上)
-            editor.addEventListener('keydown', function(e) {
-                // 攔截 Ctrl+Z / Cmd+Z (復原)
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-                    e.preventDefault(); 
-                    if (e.shiftKey) customRedo();
-                    else customUndo();
-                }
-                // 攔截 Ctrl+Y / Cmd+Y (重做)
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-                    e.preventDefault(); 
-                    customRedo();
-                }
-                
-                // 🚀 強制綁定 Cmd+Shift+V / Ctrl+Shift+V 為「純文字貼上」
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'v') {
-                    e.preventDefault(); // 擋掉瀏覽器的遲鈍反應
-                    
-                    // 強制讀取剪貼簿的純文字內容
-                    navigator.clipboard.readText().then(text => {
-                        // 將純文字插入游標位置
-                        document.execCommand('insertText', false, text);
-                        saveHistory();
-                    }).catch(err => {
-                        alert("⚠️ 您的瀏覽器安全層級較高，阻擋了快捷鍵貼上。\n請改用「滑鼠右鍵 ➔ 僅貼純文字」！");
-                    });
-                }
-            });
+        if (!editor) return;
 
-
-            // 🌟 嚴格交互 1：滑動編輯器時，隱藏選單與徽章
-            editor.addEventListener('scroll', function() {
-                document.querySelectorAll('.obj-selected').forEach(el => el.classList.remove('obj-selected')); 
-                floatMenu.style.display = 'none'; 
-                document.getElementById('edit-badge').style.display = 'none';
-            });
-
-            // 🌟 嚴格交互 2：精準點擊定位，支援圖片、表格與「純文字反白」
-            const editBadge = document.getElementById('edit-badge');
-            let pendingTargetType = null;
-
-            // 🔥 核心防護：點擊徽章或選單時，【絕對不可】取消文字的反白狀態
-            editBadge.addEventListener('mousedown', function(e) { e.preventDefault(); });
-            floatMenu.addEventListener('mousedown', function(e) {
-                // 放行 input (調色盤) 和 select (下拉選單)，否則點了會沒反應！
-                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
-                    e.preventDefault(); 
-                }
-            });
-
-            // 🌟 偵測純文字反白 (升級紅藍雙圖示相容版)
-            function checkTextSelection() {
-                const sel = window.getSelection();
-                if (sel.rangeCount > 0 && sel.toString().trim().length > 0) {
-                    const range = sel.getRangeAt(0);
-                    if (editor.contains(range.commonAncestorContainer)) {
-                        const rect = range.getBoundingClientRect();
-                        
-                        // 判斷反白的文字是不是在表格裡面
-                        let node = range.commonAncestorContainer;
-                        let parentTable = node.nodeType === 3 ? node.parentNode.closest('table') : node.closest('table');
-                        
-                        // 🔥 關鍵修復：明確告訴系統現在選中的是純文字！
-                        pendingTargetType = 'text'; 
-                        
-                        if (parentTable) {
-                            currentTarget = parentTable; // 偷偷把表格記下來，讓藍色按鈕點下去不會當機
-                            setBadgePosition(rect, 'text', true); // 呼叫徽章引擎：文字模式 + 顯示藍表格
-                        } else {
-                            currentTarget = null;
-                            setBadgePosition(rect, 'text', false); // 呼叫徽章引擎：純文字模式
-                        }
-
-                        return true;
-                    }
-                }
-                return false;
+        editor.addEventListener('input', () => { clearTimeout(typingTimeout); typingTimeout = setTimeout(saveHistory, 500); });
+        
+        editor.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault(); if (e.shiftKey) customRedo(); else customUndo();
             }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); customRedo(); }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'v') {
+                e.preventDefault(); 
+                navigator.clipboard.readText().then(text => { document.execCommand('insertText', false, text); saveHistory(); })
+                .catch(err => alert("請改用滑鼠右鍵 ➔ 僅貼純文字！"));
+            }
+        });
 
-            editor.addEventListener('click', function(e) { 
-                if (e.target.closest('#edit-badge') || e.target.closest('#float-menu')) return;
-                
-                // 清空所有顏色的外框
-                document.querySelectorAll('[class*="obj-selected-"]').forEach(el => {
-                    el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
-                });
-                floatMenu.style.display = 'none'; 
-                editBadge.style.display = 'none';
-                currentTarget = null; 
-                currentTargetCell = null;
-                pendingTargetType = null;
+        const hideAllUI = () => { 
+            if (editBadge) editBadge.style.display = 'none';
+            if (floatMenu) floatMenu.style.display = 'none';
+            if (window.innerWidth <= 1024) {
+                const editBtn = document.getElementById('m-context-edit-btn');
+                if (editBtn) editBtn.style.display = 'none';
+            }
+        };
 
-                // 🔥 獨立出一個計算徽章位置的智慧函數 (動態切換圖示與顏色)
-                function setBadgePosition(rect, targetType, isInsideTable) {
-                    editBadge.style.display = 'flex';
-                    let topPos = rect.top - 32; 
-                    if (topPos < 60) topPos = rect.top + 5; 
-                    
-                    editBadge.style.top = topPos + 'px';
-                    editBadge.style.left = (rect.left - 2) + 'px'; 
+        // 🔥 專屬滑動事件：滑動時只隱藏選單，絕對不隱藏「修改按鈕」！
+        const hideOnScroll = () => { 
+            if (editBadge) editBadge.style.display = 'none';
+            if (floatMenu) floatMenu.style.display = 'none';
+        };
+        window.addEventListener('scroll', hideOnScroll, true);
+        editor.addEventListener('scroll', hideOnScroll, true);
 
-                    const btnMain = document.getElementById('btn-badge-main');
-                    const btnTable = document.getElementById('btn-badge-table');
-
-                    // 先把原本的所有專屬顏色 class 拔掉，確保乾淨
-                    btnMain.classList.remove('badge-black', 'badge-green', 'badge-red', 'badge-blue');
-                    
-                    if (targetType === 'text') {
-                        btnMain.classList.add('badge-black'); 
-                        btnMain.innerHTML = '<i class="fas fa-pen"></i>';
-                        btnMain.style.display = 'flex';
-                    } else if (targetType === 'image') {
-                        btnMain.classList.add('badge-green');
-                        btnMain.innerHTML = '<i class="fas fa-image"></i>';
-                        btnMain.style.display = 'flex';
-                    } else if (targetType === 'block' || targetType === 'tabs') {
-                        btnMain.classList.add('badge-red');
-                        btnMain.innerHTML = '<i class="fas fa-cube"></i>'; 
-                        btnMain.style.display = 'flex';
-                    } else if (targetType === 'table') {
-                        btnMain.style.display = 'none'; 
-                    }
-                    // 顯示藍色表格圖示 (只要在表格內，它永遠排第一)
-                    btnTable.style.display = (targetType === 'table' || isInsideTable) ? 'flex' : 'none';
-                }
-
-                // 🌟 1. 霸王條款：文字反白擁有最高優先權！
+        window.addEventListener('resize', () => {
+            if (lastValidRange) {
                 const sel = window.getSelection();
-                if (sel.rangeCount > 0 && sel.toString().trim().length > 0 && editor.contains(sel.anchorNode)) {
-                    const rect = sel.getRangeAt(0).getBoundingClientRect();
-                    let node = sel.anchorNode;
-                    let parentTable = node.nodeType === 3 ? node.parentNode.closest('table') : node.closest('table');
-                    
-                    pendingTargetType = 'text'; 
-                    if (parentTable) {
-                        currentTarget = parentTable; 
-                        setBadgePosition(rect, 'text', true); 
-                    } else {
-                        currentTarget = null;
-                        setBadgePosition(rect, 'text', false); 
-                    }
-                    return; // 只要是文字反白，就到此為止，絕對不要再去抓積木！
+                if (sel.rangeCount === 0 || sel.isCollapsed) {
+                    editor.focus({ preventScroll: true });
+                    sel.removeAllRanges(); sel.addRange(lastValidRange);
+                    if (window.setBadgePosition) window.setBadgePosition(lastValidRange.getBoundingClientRect(), pendingTargetType || 'text', false);
                 }
+            }
+        });
 
-                // 🌟 2. 如果不是純文字反白，才開始抓物件
-                let targetImg = e.target.closest('img'); 
-                let targetCell = e.target.closest('td, th');
-                let targetTable = e.target.closest('table');
-                let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
-                let rawBlock = e.target.closest('.peiyu-block');
-                
-                // 標題轉積木防爆處理
-                if (!rawBlock) {
-                    let heading = e.target.closest('h2, h3');
-                    if (heading) {
-                        let parentDiv = heading.parentElement;
-                        if (parentDiv && parentDiv.tagName === 'DIV' && !parentDiv.classList.contains('peiyu-article') && parentDiv.id !== 'editor') {
-                            rawBlock = parentDiv;
-                        } else {
-                            rawBlock = heading;
-                        }
-                        rawBlock.classList.add('peiyu-block', 'peiyu-obj');
-                    }
-                }
-
-                let targetBlock = null;
-                if (rawBlock) {
-                    let parent = rawBlock.parentElement;
-                    if (parent && parent.tagName === 'DIV' && parent.style.textAlign === 'center' && parent.children.length === 1) {
-                        targetBlock = parent; 
-                    } else {
-                        targetBlock = rawBlock; 
-                    }
-                }
-
-                if (targetImg) { 
-                    let wrapper = targetImg.closest('.resizable-wrapper');
-                    if (!wrapper) {
-                        let oldW = targetImg.getAttribute('width') || targetImg.style.width || '100%';
-                        if (oldW && !oldW.includes('%') && !oldW.includes('px') && !oldW.includes('auto')) { oldW += 'px'; }
-                        wrapper = document.createElement('div'); wrapper.className = 'resizable-wrapper peiyu-obj';
-                        wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
-                        targetImg.style.width = '100%'; targetImg.style.height = 'auto'; targetImg.style.display = 'block'; targetImg.removeAttribute('width'); 
-                        targetImg.parentNode.insertBefore(wrapper, targetImg); wrapper.appendChild(targetImg);
-                    }
-                    currentTarget = wrapper; 
-                    pendingTargetType = 'image';
-                    currentTarget.classList.add('obj-selected-image');
-                    setBadgePosition(currentTarget.getBoundingClientRect(), 'image', currentTarget.closest('table') !== null);
-                } 
-                else if (targetBlock) { 
-                    currentTarget = targetBlock;
-                    pendingTargetType = 'block';
-                    currentTarget.classList.add('obj-selected-block');
-                    setBadgePosition(currentTarget.getBoundingClientRect(), 'block', currentTarget.closest('table') !== null);
-                }
-                else if (targetTabs) { 
-                    currentTarget = targetTabs;
-                    pendingTargetType = 'tabs';
-                    currentTarget.classList.add('obj-selected-block');
-                    setBadgePosition(currentTarget.getBoundingClientRect(), 'tabs', currentTarget.closest('table') !== null);
-                }
-                else if (targetCell && targetTable) { 
-                    targetTable.classList.add('peiyu-table', 'peiyu-obj');
-                    if(targetTable.style.display === 'block') targetTable.style.display = 'table';
-                    currentTarget = targetTable; 
-                    currentTargetCell = targetCell; 
-                    pendingTargetType = 'table';
-                    targetCell.classList.add('obj-selected-table'); 
-                    setBadgePosition(targetCell.getBoundingClientRect(), 'table', false); 
-                }
-            });
-
-            // 支援用鍵盤 (Shift+方向鍵) 反白文字也能跳出徽章
-            editor.addEventListener('keyup', function(e) {
-                if (e.key === 'Shift' || e.shiftKey || e.key.includes('Arrow')) {
-                    if (checkTextSelection()) {
-                        // 確保鍵盤反白出來的徽章也是黑色的！
-                        document.getElementById('btn-badge-main').classList.remove('badge-green', 'badge-red', 'badge-blue');
-                        document.getElementById('btn-badge-main').classList.add('badge-black');
-                        document.getElementById('btn-badge-main').innerHTML = '<i class="fas fa-pen"></i>';
-                    } else {
-                        editBadge.style.display = 'none';
-                        floatMenu.style.display = 'none';
-                    }
-                }
-            });
-
-            // 🌟 嚴格交互 3：分辨點擊的是紅筆還是藍表格
+        // 🔥 關鍵修復 1：為電腦版浮動按鈕綁定實體點擊事件，強制呼叫選單！
+        if (editBadge) {
+            // 防止點擊時編輯器失焦
+            editBadge.addEventListener('mousedown', e => e.preventDefault());
             editBadge.addEventListener('click', function(e) {
                 e.preventDefault(); e.stopPropagation();
-                const rect = editBadge.getBoundingClientRect();
-                
                 if (e.target.closest('#btn-badge-table')) {
-                    currentTarget = currentTarget.closest('table');
+                    currentTarget = currentTargetCell ? currentTargetCell.closest('table') : currentTarget;
                     pendingTargetType = 'table';
-                    
-                    // 把藍框轉移到外層表格上
-                    document.querySelectorAll('[class*="obj-selected-"]').forEach(el => {
-                        el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
-                    });
-                    currentTarget.classList.add('obj-selected-table');
-                    
-                    showFloatMenu(rect.left, rect.top + 35, 'table');
-                    editBadge.style.display = 'none';
                 }
-                else if (e.target.closest('#btn-badge-main')) {
-                    // 🔴 點擊紅色按鈕：正常編輯目前的物件
-                    if(pendingTargetType) {
-                        showFloatMenu(rect.left, rect.top + 35, pendingTargetType);
-                        editBadge.style.display = 'none';
-                    }
-                }
+                const rect = editBadge.getBoundingClientRect();
+                if (window.showFloatMenu) window.showFloatMenu(rect.left, rect.top + 35, pendingTargetType);
+                editBadge.style.display = 'none';
             });
-
         }
-        
-        window.showFloatMenu = function(x, y, type) { 
-            floatMenu.style.display = 'flex'; floatMenu.style.position = 'fixed'; 
-            
-            // 1. 垂直防撞 (防上方超界)
-            let topPos = y - 80; if(topPos < 50) topPos = y + 20; 
-            
-            // 2. 水平防撞 (防右側超界)
-            // 稍微加寬選單，以容納 5 顆按鈕
-            let menuW = type === 'text' ? 340 : (type === 'image' ? 320 : 260); 
-            let leftPos = x - 20;
-            if (leftPos + menuW > window.innerWidth) {
-                leftPos = window.innerWidth - menuW - 15; 
-            }
-            floatMenu.style.left = Math.max(10, leftPos) + 'px'; 
-            floatMenu.style.top = topPos + 'px';
 
-            // 🔥 完整 5 種對齊模式按鈕 (獨立置左/中/右 + 文繞圖左/右)
-            const alignBtns = `<div style="display:flex; gap:2px; align-items:center;">
-                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-left')" title="置左 (獨立行)"><i class="fas fa-align-left"></i></button>
-                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-center')" title="置中 (獨立行)"><i class="fas fa-align-center"></i></button>
-                <button class="editor-btn" style="padding:2px 6px;" onclick="setImgAlign('block-right')" title="置右 (獨立行)"><i class="fas fa-align-right"></i></button>
+        // 🔥 關鍵修復 2：放寬全域攔截，讓手機版右側按鈕與電腦版徽章不被誤殺！
+        editor.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('#edit-badge') && !e.target.closest('#float-menu') && !e.target.closest('.peiyu-obj') && !e.target.closest('.mobile-tool-stack') && !e.target.closest('#m-context-edit-btn')) {
+                lastValidRange = null; currentTarget = null; currentTargetCell = null; pendingTargetType = null; hideAllUI();
+                document.querySelectorAll('[class*="obj-selected-"]').forEach(el => el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block'));
+            }
+        });
+
+       window.setBadgePosition = function(rect, targetType, isInsideTable) {
+            if (window.innerWidth <= 1024) {
+                if (window.showContextEditButton) window.showContextEditButton();
+                return;
+            }
+            
+            // 🌟 拔除電腦版的文字黑筆，如果是 text 就直接隱藏！
+            if (!rect || !editBadge || targetType === 'text') {
+                if(editBadge) editBadge.style.display = 'none';
+                return;
+            }
+            
+            editBadge.style.display = 'flex';
+            let topPos = rect.top - 32; 
+            if (topPos < 10) topPos = rect.top + 5; 
+            editBadge.style.top = topPos + 'px';
+            editBadge.style.left = Math.max(10, rect.left - 2) + 'px'; 
+
+            const btnMain = document.getElementById('btn-badge-main');
+            const btnTable = document.getElementById('btn-badge-table');
+            if(btnMain) {
+                btnMain.className = 'badge-icon'; 
+                if (targetType === 'image') {
+                    btnMain.classList.add('badge-green'); btnMain.innerHTML = '<i class="fas fa-image"></i>';
+                } else if (targetType === 'block' || targetType === 'tabs') {
+                    btnMain.classList.add('badge-red'); btnMain.innerHTML = '<i class="fas fa-cube"></i>';
+                }
+                if (targetType === 'table') btnMain.style.display = 'none'; else btnMain.style.display = 'flex';
+            }
+            if(btnTable) {
+                btnTable.style.display = (targetType === 'table' || isInsideTable) ? 'flex' : 'none';
+            }
+        };
+
+        editor.addEventListener('click', function(e) { 
+            // 這裡也必須放寬攔截
+            if (e.target.closest('.mobile-tool-stack') || e.target.closest('#float-menu') || e.target.closest('#edit-badge') || e.target.closest('#m-context-edit-btn')) return;
+            
+            document.querySelectorAll('[class*="obj-selected-"]').forEach(el => el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block'));
+            currentTarget = null; currentTargetCell = null; pendingTargetType = null;
+            if(floatMenu) floatMenu.style.display = 'none'; 
+            
+            let targetImg = e.target.closest('img'); 
+            let targetCell = e.target.closest('td, th');
+            let targetTable = e.target.closest('table');
+            let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
+            let rawBlock = e.target.closest('.peiyu-block');
+            if (!rawBlock && e.target.closest('h2, h3')) { rawBlock = e.target.closest('h2, h3'); rawBlock.classList.add('peiyu-block', 'peiyu-obj'); }
+
+            if (targetImg) {
+                const sel = window.getSelection(); const range = document.createRange();
+                range.selectNode(targetImg); range.collapse(false); sel.removeAllRanges(); sel.addRange(range);
+                let wrapper = targetImg.closest('.resizable-wrapper');
+                if (!wrapper) {
+                    let oldW = targetImg.getAttribute('width') || targetImg.style.width || '100%';
+                    wrapper = document.createElement('div'); wrapper.className = 'resizable-wrapper peiyu-obj';
+                    wrapper.style.cssText = `display:block; width:${oldW}; max-width:100%; margin:15px auto; clear:both;`;
+                    targetImg.parentNode.insertBefore(wrapper, targetImg); wrapper.appendChild(targetImg);
+                }
+                currentTarget = wrapper; currentTargetCell = targetCell; pendingTargetType = 'image';
+                currentTarget.classList.add('obj-selected-image');
+                window.setBadgePosition(currentTarget.getBoundingClientRect(), 'image', targetTable !== null);
+                return;
+            }
+
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0 && !sel.isCollapsed && editor.contains(sel.anchorNode) && sel.toString().trim().length > 0) {
+                lastValidRange = sel.getRangeAt(0).cloneRange();
+                pendingTargetType = 'text'; currentTarget = null;
+                window.setBadgePosition(lastValidRange.getBoundingClientRect(), 'text', targetTable !== null);
+                if (typeof updateToolbarState === 'function') updateToolbarState(); return; 
+            }
+
+            if (rawBlock) {
+                currentTarget = rawBlock; currentTargetCell = targetCell; pendingTargetType = 'block';
+                currentTarget.classList.add('obj-selected-block');
+                window.setBadgePosition(currentTarget.getBoundingClientRect(), 'block', targetTable !== null);
+            } else if (targetTabs) {
+                currentTarget = targetTabs; currentTargetCell = targetCell; pendingTargetType = 'tabs';
+                currentTarget.classList.add('obj-selected-block');
+                window.setBadgePosition(currentTarget.getBoundingClientRect(), 'tabs', targetTable !== null);
+            } else if (targetCell && targetTable) {
+                targetTable.classList.add('peiyu-table', 'peiyu-obj');
+                if(targetTable.style.display === 'block') targetTable.style.display = 'table';
+                currentTarget = targetTable; currentTargetCell = targetCell; pendingTargetType = 'table';
+                targetCell.classList.add('obj-selected-table');
+                window.setBadgePosition(targetCell.getBoundingClientRect(), 'table', false);
+            }
+        });
+
+        document.addEventListener('selectionchange', () => {
+            if (!editor) return;
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0 && !sel.isCollapsed && editor.contains(sel.anchorNode) && sel.toString().trim().length > 0) {
+                lastValidRange = sel.getRangeAt(0).cloneRange();
+                pendingTargetType = 'text'; currentTarget = null;
+                window.setBadgePosition(lastValidRange.getBoundingClientRect(), 'text', false);
+            } else if (sel.isCollapsed && pendingTargetType === 'text') {
+                // 🔥 修復：取消反白時，不要立刻清空 pendingTargetType，否則會導致手機版修改按鈕消失
+                if(editBadge) editBadge.style.display = 'none';
+                if (window.showContextEditButton && window.innerWidth <= 1024) window.showContextEditButton();
+            }
+        });
+    });
+        
+       window.showFloatMenu = function(x, y, type) { 
+            // 🔥 重新設計：將對齊按鈕獨立成一列，自動平分寬度，絕對不擠壓！
+            const alignBtns = `<div style="display:flex; gap:2px; align-items:center; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee; width:100%; box-sizing:border-box;">
+                <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-left')" title="置左 (獨立行)"><i class="fas fa-align-left"></i></button>
+                <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-center')" title="置中 (獨立行)"><i class="fas fa-align-center"></i></button>
+                <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-right')" title="置右 (獨立行)"><i class="fas fa-align-right"></i></button>
                 <div style="width:1px; background:#ddd; height:15px; margin:0 2px;"></div>
-                <button class="editor-btn" style="padding:2px 6px; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-left')" title="文繞圖 (靠左)">繞左</button>
-                <button class="editor-btn" style="padding:2px 6px; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-right')" title="文繞圖 (靠右)">繞右</button>
+                <button class="editor-btn" style="flex:1.2; padding:4px 0; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-left')" title="文繞圖 (靠左)">繞左</button>
+                <button class="editor-btn" style="flex:1.2; padding:4px 0; color:#d35400; font-weight:bold; font-size:11px;" onclick="setImgAlign('wrap-right')" title="文繞圖 (靠右)">繞右</button>
             </div>`;
-                        
+
+            // 1. 🌟 先產生 HTML，才能讓系統精準測量高度
             if (type === 'table') { 
                 const currW = parseInt(currentTarget.style.width) || 100; 
                 let currColW = 0; if (currentTargetCell && currentTargetCell.style.width) { currColW = parseInt(currentTargetCell.style.width); }
                 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:230px;">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:6px; width:300px; max-width:90vw; padding:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        ${alignBtns} <div style="display:flex; gap:3px;">
+                        <div style="font-size:12px; font-weight:bold; color:var(--accent); padding-left:5px;">🔲 表格設定</div>
+                        <div style="display:flex; gap:3px;">
+                            <button class="editor-btn" style="padding:2px 8px; color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; font-weight:bold;" onclick="fixTable()" title="修復表格">🛠️</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下表格">✂️</button>
-                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除">🗑️</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modTable('delete')" title="刪除整張表格">🗑️</button>
                         </div>
                     </div>
-
+                    ${alignBtns} 
+                    <div style="display:flex; gap:2px; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee;">
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-row-up')" title="向上加一列">⬆️+列</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-row-down')" title="向下加一列">⬇️+列</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px; color:#c0392b;" onclick="modTable('del-row')" title="刪除此列">❌列</button>
+                        <div style="width:1px; background:#ddd; margin:0 2px;"></div>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-col-left')" title="向左加一行">⬅️+行</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-col-right')" title="向右加一行">➡️+行</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px; color:#c0392b;" onclick="modTable('del-col')" title="刪除此行">❌行</button>
+                    </div>
                     <div style="display:flex; gap:3px;">
-                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('add-row')">+列</button>
-                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('del-row')">-列</button>
-                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('add-col')">+行</button>
-                        <button class="editor-btn" style="padding:2px 8px; flex:1;" onclick="modTable('del-col')">-行</button>
-                        <button class="editor-btn" style="padding:2px 8px; flex:1; background:#f0f4f8; color:#2c3e50; font-weight:bold;" onclick="openTableConfigModal()">⚙️ 框線</button>
+                        <button class="editor-btn" style="flex:1; padding:4px 0; font-size:12px; background:#eef2f5;" onclick="modTable('merge-right')">合併⭢</button>
+                        <button class="editor-btn" style="flex:1; padding:4px 0; font-size:12px; background:#eef2f5;" onclick="modTable('merge-down')">合併⬇</button>
+                        <button class="editor-btn" style="flex:1; padding:4px 0; font-size:12px; background:#eef2f5;" onclick="modTable('split')">拆分</button>
+                        <button class="editor-btn" style="flex:1; padding:4px 0; font-size:12px; background:#e3f2fd; color:#2980b9; font-weight:bold;" onclick="openTableConfigModal()">⚙️ 框線</button>
                     </div>
-                    
-                    <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#555; background:#f9f9f9; padding:5px; border-radius:4px;">
-                        <span style="white-space:nowrap; font-weight:bold; width:35px;">總寬:</span>
-                        <input type="number" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; padding:2px 5px; border:1px solid #ccc; border-radius:4px; text-align:center;">
-                        <span style="font-weight:bold; width:15px;">%</span>
-                        <button class="editor-btn" style="padding:2px 6px; font-size:11px; background:#e2e6ea;" onclick="updateTableWidth(100); document.querySelector('input[oninput*=\\'updateTableWidth\\']').value=100; saveHistory();">滿版</button>
-                    </div>
-                    
-                    <div style="display:flex; align-items:center; gap:3px; font-size:12px; color:#2980b9; background:#f0f8ff; padding:5px; border-radius:4px;">
-                        <span style="white-space:nowrap; font-weight:bold; width:35px;">此欄:</span>
-                        <input type="number" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="width:40px; padding:2px 4px; border:1px solid #ccc; border-radius:4px; text-align:center;">
-                        <span style="font-weight:bold;">%</span>
-                        <button class="editor-btn" style="padding:2px 5px; font-size:11px; background:#e6f2ff;" onclick="updateColWidth(33); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=33; saveHistory();" title="三欄平分">33%</button>
-                        <button class="editor-btn" style="padding:2px 5px; font-size:11px; background:#dcebf7;" onclick="updateColWidth(50); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=50; saveHistory();" title="兩欄平分">50%</button>
+                    <div style="display:flex; gap:5px;">
+                        <div style="display:flex; align-items:center; gap:2px; flex:1; font-size:11px; color:#555; background:#f9f9f9; padding:4px; border-radius:4px; border:1px solid #eee;">
+                            <b>總寬:</b>
+                            <input type="number" min="10" max="100" value="${currW}" oninput="updateTableWidth(this.value)" onchange="saveHistory()" style="flex:1; width:30px; height:20px; padding:0 2px; text-align:center; font-size:11px; margin:0;">
+                            %
+                        </div>
+                        <div style="display:flex; align-items:center; gap:2px; flex:1.2; font-size:11px; color:#2980b9; background:#f0f8ff; padding:4px; border-radius:4px; border:1px solid #cce5ff;">
+                            <b>此欄:</b>
+                            <input type="number" min="5" max="100" value="${currColW || 33}" oninput="updateColWidth(this.value)" onchange="saveHistory()" style="flex:1; width:30px; height:20px; padding:0 2px; text-align:center; font-size:11px; margin:0;">
+                            %
+                            <button class="editor-btn" style="padding:0 3px; height:20px; font-size:10px; background:#dcebf7;" onclick="updateColWidth(50); document.querySelector('input[oninput*=\\'updateColWidth\\']').value=50; saveHistory();">平分</button>
+                        </div>
                     </div>
                 </div>`; 
             }
             else if (type === 'image') { 
                 const parentElement = currentTarget.parentElement;
-                
-                // 🔥 強化防呆：確保寬度計算絕對不會是 0
                 const editorW = document.getElementById('editor').clientWidth || (window.innerWidth - 60);
                 const parentW = (parentElement && parentElement.clientWidth > 0) ? parentElement.clientWidth : editorW;
-                
-                // 🔥 物理抓取：優先抓取目前網頁上真實渲染的像素寬度 (offsetWidth)
                 let currW_px = currentTarget.offsetWidth || parentW;
                 let currW_pct = Math.round((currW_px / parentW) * 100);
                 if (currW_pct > 100) currW_pct = 100;
-                
-                let currentUnit = '%'; // 預設單位
-                
+                let currentUnit = '%'; 
                 if (currentTarget.style.width) { 
-                    if (currentTarget.style.width.includes('%')) { 
-                        currentUnit = '%';
-                        currW_pct = parseInt(currentTarget.style.width) || currW_pct;
-                        currW_px = Math.round(parentW * (currW_pct / 100));
-                    } else if (currentTarget.style.width.includes('px')) { 
-                        currentUnit = 'px';
-                        currW_px = parseInt(currentTarget.style.width) || currW_px;
-                        currW_pct = Math.round((currW_px / parentW) * 100);
-                        if (currW_pct > 100) currW_pct = 100;
-                    } 
+                    if (currentTarget.style.width.includes('%')) { currentUnit = '%'; currW_pct = parseInt(currentTarget.style.width) || currW_pct; currW_px = Math.round(parentW * (currW_pct / 100)); } 
+                    else if (currentTarget.style.width.includes('px')) { currentUnit = 'px'; currW_px = parseInt(currentTarget.style.width) || currW_px; currW_pct = Math.round((currW_px / parentW) * 100); if (currW_pct > 100) currW_pct = 100; } 
                 }
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px;">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:280px; max-width:90vw; padding:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        ${alignBtns}
+                        <div style="font-size:12px; font-weight:bold; color:var(--accent); padding-left:5px;">🖼️ 圖片設定</div>
                         <div style="display:flex; gap:3px;">
                             <button class="editor-btn" style="padding:2px 8px; color:#8e44ad; background:#f4ecf7; border-color:#d7bde2;" onclick="modCopy()" title="複製">📋</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
                         </div>
                     </div>
+                    ${alignBtns}
                     <div style="display:flex; flex-direction:column; gap:6px; background:#f9f9f9; padding:10px; border-radius:6px; border:1px solid #eee;">
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:2px;">
                             <span style="font-weight:bold; color:#333;">目前模式：</span>
@@ -1806,7 +1976,7 @@
                 </div>`; 
             }
             else if (type === 'tabs') {
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:190px;">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:190px; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 頁籤群組物件</div>
                     <button class="editor-btn" style="background:#27ae60; color:#fff; font-weight:bold; padding:6px 0;" onclick="modTabsAdd()">➕ 新增頁籤區段</button>
                     <div style="display:flex; gap:5px;">
@@ -1817,39 +1987,30 @@
                 </div>`;
             }
             else if (type === 'text') {
-                // 🔥 專屬純文字懸浮工具列
-                floatMenu.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:3px; align-items:center; width: 330px;">
-                    <select class="tb-select" style="width:75px; padding:2px; height:28px; font-size:12px;" onchange="applyCustomFont(this.value); this.value='';">
-                        <option value="">字體</option>
-                        <option value="sans-serif">黑體</option>
-                        <option value="'Noto Serif TC', serif">明體</option>
-                        <option value="monospace">等寬</option>
+                floatMenu.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center; width: 330px; max-width:90vw;">
+                    <select class="tb-select" style="width:75px; padding:2px; height:30px; font-size:12px;" onchange="applyCustomFont(this.value); this.value='';">
+                        <option value="">字體</option><option value="sans-serif">黑體</option><option value="'Noto Serif TC', serif">明體</option><option value="monospace">等寬</option>
                     </select>
-                    <select class="tb-select" style="width:65px; padding:2px; height:28px; font-size:12px;" onchange="applyCustomSize(this.value); this.value='';">
-                        <option value="">大小</option>
-                        <option value="10">10pt</option>
-                        <option value="12">12pt</option>
-                        <option value="14">14pt</option>
-                        <option value="18">18pt</option>
-                        <option value="24">24pt</option>
-                        <option value="36">36pt</option>
+                    <select class="tb-select" style="width:65px; padding:2px; height:30px; font-size:12px;" onchange="applyCustomSize(this.value); this.value='';">
+                        <option value="">大小</option><option value="10">10pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="18">18pt</option><option value="24">24pt</option><option value="36">36pt</option>
                     </select>
                     <div style="width:1px; background:#ddd; height:20px; margin:0 2px;"></div>
-                    <button class="editor-btn" style="padding:4px 8px; font-weight:900; color:#2c3e50;" onclick="exec('bold')" title="粗體"><i class="fas fa-bold"></i></button>
-                    <button class="editor-btn" style="padding:4px 8px; font-style:italic; font-family:serif;" onclick="exec('italic')" title="斜體"><i class="fas fa-italic"></i></button>
-                    <button class="editor-btn" style="padding:4px 8px; text-decoration:underline;" onclick="exec('underline')" title="底線"><i class="fas fa-underline"></i></button>
+                    <button class="editor-btn" style="padding:4px 8px; font-weight:900; color:#2c3e50; height:30px;" onclick="exec('bold')" title="粗體"><i class="fas fa-bold"></i></button>
+                    <button class="editor-btn" style="padding:4px 8px; font-style:italic; font-family:serif; height:30px;" onclick="exec('italic')" title="斜體"><i class="fas fa-italic"></i></button>
+                    <button class="editor-btn" style="padding:4px 8px; text-decoration:underline; height:30px;" onclick="exec('underline')" title="底線"><i class="fas fa-underline"></i></button>
                     <div style="width:1px; background:#ddd; height:20px; margin:0 2px;"></div>
-                    <div class="color-picker-wrapper" title="文字顏色" style="border:none; width:26px; height:26px;">
-                        <input type="color" onchange="exec('foreColor', this.value)" value="#c0392b" style="width:30px; height:30px; padding:0;">
-                        <i class="fas fa-font" style="position:absolute; top:6px; left:7px; font-size:12px; pointer-events:none; color:#fff; mix-blend-mode:difference;"></i>
+                    
+                    <div class="color-split-btn" style="width: 55px;" title="文字顏色 (左:套用記憶 右:選新色)">
+                        <button class="btn-action action-text-color" onmousedown="saveSelection()" ontouchstart="saveSelection()" onclick="applyTextColor(this.dataset.color)" data-color="#c0392b"><i class="fas fa-font"></i></button>
+                        <div class="btn-picker-native" onmousedown="saveSelection()" ontouchstart="saveSelection()"><input type="color" class="picker-text-color" onchange="applyTextColor(this.value, true)" value="#c0392b"><i class="fas fa-caret-down"></i><div class="memorized-border memorized-text-border" style="background-color: #c0392b;"></div></div>
                     </div>
-                    <div class="color-picker-wrapper" title="螢光筆" style="border:none; width:26px; height:26px; margin-left:3px;" onmousedown="saveSelection()"> 
-                        <input type="color" onchange="applyHighlighter(this.value)" value="#f39c12" style="width:30px; height:30px; padding:0;">
-                        <i class="fas fa-highlighter" style="position:absolute; top:6px; left:7px; font-size:12px; pointer-events:none; color:#000;"></i>
+                    <div class="color-split-btn" style="width: 55px; margin-left: 2px;" title="螢光筆 (左:套用記憶 右:選新色)">
+                        <button class="btn-action action-bg-color" onmousedown="saveSelection()" ontouchstart="saveSelection()" onclick="applyTextBg(this.dataset.color)" data-color="#f39c12"><i class="fas fa-highlighter"></i></button>
+                        <div class="btn-picker-native" onmousedown="saveSelection()" ontouchstart="saveSelection()"><input type="color" class="picker-bg-color" onchange="applyTextBg(this.value, true)" value="#f39c12"><i class="fas fa-caret-down"></i><div class="memorized-border memorized-bg-border" style="background-color: #f39c12;"></div></div>
                     </div>
+                    
                     <div style="width:1px; background:#ddd; height:20px; margin:0 2px;"></div>
-                    <button class="editor-btn" id="float-format-painter" style="padding:4px 8px; color:var(--forest);" onclick="toggleFormatPainter()" title="複製格式"><i class="fas fa-paint-roller"></i></button>
-                    <button class="editor-btn" style="padding:4px 8px; color:#3498db;" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
+                    <button class="editor-btn" id="float-format-painter" style="padding:4px 8px; color:var(--forest); height:30px;" onclick="toggleFormatPainter()" title="複製格式"><i class="fas fa-paint-roller"></i></button>
                 </div>`;
                 setTimeout(updateToolbarState, 10); 
             }
@@ -1861,7 +2022,7 @@
                 if (isCustomBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
                 else if (isDivider) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider) ? '260px' : '200px'};">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider) ? '260px' : '200px'}; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
                     <div style="display:flex; gap:5px;">
                         ${editBtnHtml}
@@ -1871,7 +2032,65 @@
                     </div>
                 </div>`;
             }
-        }
+
+            // 2. 🌟 顯示選單 (有了 HTML 才能抓取真實高度)
+            floatMenu.style.display = 'flex'; 
+            floatMenu.style.position = 'fixed'; 
+
+            // 3. 🎯 動態避讓定位引擎：絕對不遮擋被選取的框線！
+            const menuRect = floatMenu.getBoundingClientRect();
+            const menuH = menuRect.height || 180;
+            let idealW = type === 'text' ? 340 : (type === 'image' ? 280 : (type === 'table' ? 300 : 260)); 
+            let menuW = Math.min(idealW, window.innerWidth - 20);
+
+            let targetRect;
+            if (currentTarget) {
+                targetRect = currentTarget.getBoundingClientRect();
+            } else {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) targetRect = sel.getRangeAt(0).getBoundingClientRect();
+                else targetRect = { top: y, bottom: y + 20, left: x, right: x + 100 };
+            }
+
+            // 🔥 終極修復：如果是手機版，直接放棄所有計算，交給防飛天引擎定位！
+            if (window.innerWidth <= 1024) {
+                floatMenu.style.left = '50%';
+                floatMenu.style.transform = 'translate(-50%, -50%)';
+                if (typeof window.updateMobileUIPosition === 'function') window.updateMobileUIPosition();
+                return;
+            }
+
+            // 以下是原來的電腦版定位邏輯 (保留不變)
+            // 水平定位：對齊目標左側，如果右邊超出螢幕，就往左退
+            let leftPos = targetRect.left;
+            if (leftPos + menuW > window.innerWidth) {
+                leftPos = window.innerWidth - menuW - 10; 
+            }
+            floatMenu.style.left = Math.max(10, leftPos) + 'px'; 
+
+            // 垂直定位：優先放在「框線正上方」20px 處
+            let topPos = targetRect.top - menuH - 20; 
+
+            // 如果上方被導覽列或螢幕邊緣擋住...
+            if (topPos < 60) { 
+                // 改放「框線正下方」20px 處
+                topPos = targetRect.bottom + 20;
+                
+                // 如果下方也超出版面 (代表這個物件/表格超大，佔滿整個螢幕)
+                if (topPos + menuH > window.innerHeight) { 
+                    // 沒辦法了，貼齊螢幕底部
+                    topPos = window.innerHeight - menuH - 15;
+                    // 同時把選單稍微往右移，避免完全遮住左側的文字內容
+                    leftPos = leftPos + 50; 
+                    if (leftPos + menuW > window.innerWidth) leftPos = window.innerWidth - menuW - 15;
+                    floatMenu.style.left = Math.max(10, leftPos) + 'px'; 
+                }
+            }
+            
+            floatMenu.style.top = topPos + 'px';
+            floatMenu.style.transform = 'none'; // 電腦版解除置中變形
+        };
+
         
         // 🔥 圖片與表格對齊引擎 (完整支援 5 種模式：獨立行左/中/右 + 文繞圖左/右)
         window.setImgAlign = function(mode) {
@@ -2148,7 +2367,7 @@
         };
 
         // 🌟 監聽編輯器內的按鈕點擊 (用來刪除「單一」區段)
-        editor.addEventListener('click', function(e) {
+        document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('kb-btn-del-tab')) {
                 e.preventDefault(); e.stopPropagation();
                 if (confirm("確定要刪除這整個頁籤區段嗎？")) {
@@ -2161,21 +2380,165 @@
             }
         });
 
-        window.modTable = function(a, val) { 
-            if(!currentTarget) return; const tbody = currentTarget.querySelector('tbody'); 
-            if(a === 'delete') { 
+        // 🌟 表格操作引擎 (支援精準插入、刪除單行單列、合併與拆分)
+        window.modTable = function(action) { 
+            if(!currentTarget || currentTarget.tagName !== 'TABLE') return; 
+            
+            // 全局刪除
+            if(action === 'delete') { 
                 nativeDeleteElement(currentTarget); 
                 floatMenu.style.display = 'none'; 
                 document.getElementById('edit-badge').style.display = 'none';
+                saveHistory(); 
+                return;
             } 
-            else if(a === 'border') { const bs = (val === '#ffffff') ? 'none' : `1px solid ${val}`; currentTarget.style.border = bs; currentTarget.querySelectorAll('th, td').forEach(c => c.style.border = bs); } 
-            else if(a === 'add-row') { const cols = tbody.rows[0].cells.length; const r = tbody.insertRow(); for(let i=0; i<cols; i++) { const c = r.insertCell(); c.innerText = "文字"; c.style.border = tbody.rows[0].cells[0].style.border; c.style.padding="8px 12px"; } } 
-            else if(a === 'del-row') { if(tbody.rows.length>1) tbody.deleteRow(-1); } 
-            else if(a === 'add-col') { Array.from(tbody.rows).forEach(r => { const c = r.insertCell(); c.innerText = "文字"; c.style.border = r.cells[0].style.border; c.style.padding="8px 12px"; }); } 
-            else if(a === 'del-col') { if(tbody.rows[0].cells.length>1) Array.from(tbody.rows).forEach(r => r.deleteCell(-1)); } 
+            
+            // 防呆：接下來的操作都需要確保有選中一個「特定的格子」
+            if (!currentTargetCell) return alert("請先點擊表格內的任一文字，再來進行操作！");
+
+            const table = currentTarget;
+            const cell = currentTargetCell;
+            const row = cell.parentElement;
+            const rIdx = row.rowIndex; // 目前在哪一列
+            const cIdx = cell.cellIndex; // 目前在哪一行
+
+            if (action === 'add-row-up') { 
+                const newRow = table.insertRow(rIdx); 
+                const cols = row.cells.length;
+                for (let i=0; i<cols; i++) { 
+                    const c = newRow.insertCell(); c.innerText = "文字"; c.style.cssText = cell.style.cssText; 
+                } 
+            } 
+            else if (action === 'add-row-down') { 
+                const newRow = table.insertRow(rIdx + (cell.rowSpan || 1)); 
+                const cols = row.cells.length;
+                for (let i=0; i<cols; i++) { 
+                    const c = newRow.insertCell(); c.innerText = "文字"; c.style.cssText = cell.style.cssText; 
+                } 
+            } 
+            else if (action === 'del-row') { 
+                if (table.rows.length > 1) table.deleteRow(rIdx); 
+                else nativeDeleteElement(table); // 剩最後一列就直接刪除表格
+            } 
+            else if (action === 'add-col-left') { 
+                Array.from(table.rows).forEach(r => { 
+                    let idx = Math.min(cIdx, r.cells.length);
+                    const c = r.insertCell(idx); 
+                    c.innerText = "文字"; c.style.cssText = cell.style.cssText; 
+                }); 
+            } 
+            else if (action === 'add-col-right') { 
+                Array.from(table.rows).forEach(r => { 
+                    let idx = Math.min(cIdx + (cell.colSpan || 1), r.cells.length);
+                    const c = r.insertCell(idx); 
+                    c.innerText = "文字"; c.style.cssText = cell.style.cssText; 
+                }); 
+            } 
+            else if (action === 'del-col') { 
+                if (row.cells.length > 1) {
+                    Array.from(table.rows).forEach(r => {
+                        if (r.cells.length > cIdx) r.deleteCell(cIdx);
+                    });
+                } else {
+                    nativeDeleteElement(table);
+                }
+            } 
+            else if (action === 'merge-right') {
+                const next = cell.nextElementSibling;
+                if (next) {
+                    cell.colSpan = (cell.colSpan || 1) + (next.colSpan || 1);
+                    if (next.innerHTML.trim() && next.innerHTML !== '文字' && next.innerHTML !== '<br>') {
+                        cell.innerHTML += '<br>' + next.innerHTML; // 把右邊格子的字接過來
+                    }
+                    next.remove();
+                } else {
+                    alert("右邊已經沒有格子可以合併了！");
+                }
+            }
+            else if (action === 'merge-down') {
+                const targetRowIdx = rIdx + (cell.rowSpan || 1);
+                if (targetRowIdx < table.rows.length) {
+                    const nextRow = table.rows[targetRowIdx];
+                    const nextCell = nextRow.cells[cIdx]; // 抓正下方的格子
+                    if (nextCell) {
+                        cell.rowSpan = (cell.rowSpan || 1) + (nextCell.rowSpan || 1);
+                        if (nextCell.innerHTML.trim() && nextCell.innerHTML !== '文字' && nextCell.innerHTML !== '<br>') {
+                            cell.innerHTML += '<br>' + nextCell.innerHTML;
+                        }
+                        nextCell.remove();
+                    } else {
+                        alert("下方的格子結構已被改變，無法直接合併！");
+                    }
+                } else {
+                    alert("下方已經沒有格子可以合併了！");
+                }
+            }
+            else if (action === 'split') {
+                let cSpan = cell.colSpan || 1;
+                let rSpan = cell.rowSpan || 1;
+                
+                if (cSpan > 1) {
+                    cell.colSpan = cSpan - 1;
+                    const newCell = row.insertCell(cIdx + 1);
+                    newCell.innerHTML = "文字";
+                    newCell.style.cssText = cell.style.cssText;
+                    newCell.colSpan = 1;
+                    newCell.rowSpan = rSpan;
+                } else if (rSpan > 1) {
+                    cell.rowSpan = rSpan - 1;
+                    const targetRowIdx = rIdx + rSpan - 1;
+                    if (table.rows[targetRowIdx]) {
+                        const newCell = table.rows[targetRowIdx].insertCell(cIdx);
+                        newCell.innerHTML = "文字";
+                        newCell.style.cssText = cell.style.cssText;
+                        newCell.colSpan = cSpan;
+                        newCell.rowSpan = 1;
+                    }
+                } else {
+                    alert("這個格子已經是最小單位，無法再拆分囉！");
+                }
+            }
+            
             saveHistory(); 
+            // 如果刪除後格子不見了，稍微重置一下選單狀態
+            if (action.includes('del') || action.includes('merge')) {
+                floatMenu.style.display = 'none';
+                document.getElementById('edit-badge').style.display = 'none';
+            }
         }
-    });
+        // 🌟 表格破版一鍵自救引擎
+        window.fixTable = function() {
+            if (!currentTarget || currentTarget.tagName !== 'TABLE') return;
+            let fixedCount = 0;
+            
+            // 掃描表格內所有的格子
+            currentTarget.querySelectorAll('td, th').forEach(cell => {
+                // 1. 如果格子裡卡了魔法積木，把它暴力踢出表格上方！
+                let blocks = cell.querySelectorAll('.peiyu-block');
+                blocks.forEach(block => {
+                    currentTarget.parentNode.insertBefore(block, currentTarget);
+                    // 為了美觀，在被踢出去的積木後面補個換行
+                    const br = document.createElement('p'); br.innerHTML = '<br>';
+                    currentTarget.parentNode.insertBefore(br, currentTarget);
+                    fixedCount++;
+                });
+
+                // 2. 如果格子裡面完全空了，強制補一個換行進去，讓它可以被點擊！
+                if (cell.innerHTML.trim() === '') {
+                    cell.innerHTML = '<br>';
+                    fixedCount++;
+                }
+                
+                // 3. 強制確保格子可以被編輯
+                cell.setAttribute('contenteditable', 'true');
+            });
+            
+            saveHistory();
+            document.getElementById('float-menu').style.display = 'none'; 
+            document.getElementById('edit-badge').style.display = 'none';
+            alert(`🛠️ 修復完成！\n已將 ${fixedCount} 個卡住的物件移出表格，或補回遺失的輸入空間。`);
+        };
+    
 
     async function delArticle(){ if(confirm("確定刪除？")) { await myDB.from('kb_articles').delete().eq('id',document.getElementById('kb-id').value); alert("已刪除"); resetKbForm(); fetchKbData(); } }
     
@@ -2216,67 +2579,365 @@
     async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
     async function toggleKbNote(cat, e) { e.stopPropagation(); if (!kbCatOrder.hide_note) kbCatOrder.hide_note = []; const idx = kbCatOrder.hide_note.indexOf(cat); if (idx > -1) kbCatOrder.hide_note.splice(idx, 1); else kbCatOrder.hide_note.push(cat); renderKbTree(); await saveKbOrderConfig(); }
 
+    // 🔥 3. 控制右側專屬修改按鈕
+    window.showContextEditButton = function() {
+        const editBtn = document.getElementById('m-context-edit-btn');
+        if (!editBtn) return;
+        
+        // 🔥 終極優化：只要是文字(text)或沒選東西，修改按鈕直接隱藏！不需要黑筆了！
+        if (!pendingTargetType || pendingTargetType === 'text') {
+            editBtn.style.display = 'none';
+            return;
+        }
+        
+        editBtn.style.display = 'flex';
+        editBtn.className = 'm-stack-btn'; 
+        
+        if (pendingTargetType === 'image') {
+            editBtn.classList.add('btn-green'); editBtn.innerHTML = '<i class="fas fa-image"></i>';
+        } else if (pendingTargetType === 'block' || pendingTargetType === 'tabs') {
+            editBtn.classList.add('btn-red'); editBtn.innerHTML = '<i class="fas fa-cube"></i>';
+        } else if (pendingTargetType === 'table') {
+            editBtn.classList.add('btn-blue'); editBtn.innerHTML = '<i class="fas fa-table"></i>';
+        }
+    };
+    
+    // 🔥 修復手機版修改按鈕：強制呼叫選單，絕不失焦
+    window.triggerContextEdit = function() {
+        let type = pendingTargetType;
+        if (!type && currentTarget) {
+            if (currentTarget.tagName === 'IMG' || currentTarget.querySelector('img')) type = 'image';
+            else if (currentTarget.tagName === 'TABLE') type = 'table';
+            else type = 'block';
+        }
+        if (!type && lastValidRange) type = 'text';
+
+        if (type && window.showFloatMenu) {
+            window.showFloatMenu(0, 0, type);
+            const floatMenu = document.getElementById('float-menu');
+            if (floatMenu) {
+                // 暴力置中並拉到最上層
+                floatMenu.style.setProperty('display', 'flex', 'important');
+                floatMenu.style.setProperty('z-index', '99999', 'important');
+            }
+        }
+    };
+
+    // 🔥 4. 建立手機版右側分類工具列
     function initMobileEditorTools() {
         document.querySelectorAll('.side-float-toggle').forEach(e => e.remove());
-        const fab = document.createElement('div'); fab.className = 'side-float-toggle'; fab.innerHTML = '<i class="fas fa-pen"></i>'; 
-        fab.style.cssText = `
+        document.querySelectorAll('.mobile-tool-stack').forEach(e => e.remove());
+        
+        const stack = document.createElement('div');
+        stack.className = 'mobile-tool-stack';
+        // 🔥 修復：降低層級為 5900，保證不會蓋住抽屜 (抽屜是 6000)
+        stack.style.cssText = `
             display: none; 
             position: fixed; 
-            top: 50%;                     /* 🌟 定位在 50% */
-            right: 15px; 
-            transform: translateY(-50%);  /* 🌟 垂直位置修正 */
-            width: 45px; height: 45px; 
-            background: var(--forest); 
-            color: white; 
-            border-radius: 50%; 
-            align-items: center; justify-content: center; 
-            z-index: 6001; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            border: 2px solid var(--accent); 
-            cursor: pointer; 
-            font-size: 18px; 
-            transition: 0.3s;
+            top: 150px; /* 🔥 絕對像素鎖死，鍵盤彈出絕對不准往上飛 */
+            right: 10px; 
+            flex-direction: column;
+            gap: 12px;
+            z-index: 5900; 
         `;
-        document.body.appendChild(fab);
+        
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @media (max-width: 1024px) {
+                .m-stack-btn {
+                    width: 42px; height: 42px; 
+                    background: white; color: var(--dark);
+                    border-radius: 10px; 
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+                    border: 1px solid #ddd;
+                    cursor: pointer; font-size: 16px; transition: 0.2s;
+                }
+                .m-stack-btn:hover { background: #f4f6f8; transform: scale(1.05); }
+                #m-context-edit-btn { border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; margin-bottom: 5px; }
+                .btn-green { background: #27ae60 !important; color: white !important; }
+                .btn-red { background: #e74c3c !important; color: white !important; }
+                .btn-blue { background: #3498db !important; color: white !important; }
+                .btn-black { background: #333 !important; color: white !important; }
+                
+                #float-menu {
+                    position: fixed !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    max-height: 75vh; overflow-y: auto; margin: 0 !important;
+                    z-index: 99999 !important;
+                }
+                #edit-badge { display: none !important; }
 
-        if (window.innerWidth <= 1024) fab.style.display = 'flex';
-        window.addEventListener('resize', () => { if (window.innerWidth <= 1024) fab.style.display = 'flex'; else fab.style.display = 'none'; });
-
-        const toolbarHeader = document.querySelector('.editor-sticky-header');
-        if(toolbarHeader) toolbarHeader.classList.remove('show-drawer');
-
-        // 🔥 關鍵防護 1：使用 mousedown / touchstart 攔截焦點轉移！
-        // 這樣點擊筆的時候，編輯器就不會失去焦點，反白也就不會消失！
-        fab.addEventListener('mousedown', function(e) {
-            e.preventDefault(); 
-        });
-        fab.addEventListener('touchstart', function(e) {
-            // 雖然是觸控，但也需要 preventDefault，避免觸發後續的失焦
-            // 但因為我們還需要它觸發 click，所以不能完全擋死，
-            // 只要把這個防護交給前面寫好的 saveSelection / restoreSelection 即可
-        }, {passive: false});
-
-        // 原本的點擊開關邏輯
-        fab.addEventListener('click', function(e) {
-            e.preventDefault(); 
-            if(!toolbarHeader) return; 
-            
-            // 🔥 關鍵防護 2：在打開工具列前，手動叫回剛剛存好的反白狀態！
-            restoreSelection();
-
-            toolbarHeader.classList.toggle('show-drawer');
-            if (toolbarHeader.classList.contains('show-drawer')) { 
-                fab.innerHTML = '<i class="fas fa-times"></i>'; 
-                fab.style.background = '#e74c3c'; 
-                fab.style.borderColor = '#c0392b'; 
-            } 
-            else { 
-                fab.innerHTML = '<i class="fas fa-pen"></i>'; 
-                fab.style.background = 'var(--forest)'; 
-                fab.style.borderColor = 'var(--accent)'; 
+                .editor-sticky-header .tb-group { display: none !important; }
+                .editor-sticky-header .tb-group:nth-child(1) { display: flex !important; }
             }
+        `;
+        document.head.appendChild(style);
+
+        stack.innerHTML = `
+            <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit()" ontouchstart="event.preventDefault(); window.triggerContextEdit()"></div>
+            
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('text')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('text')" title="文字"><i class="fas fa-font"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('para')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('para')" title="段落"><i class="fas fa-align-left"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('insert')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('insert')" title="插入圖表"><i class="fas fa-plus"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('magic')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('magic')" title="魔法積木"><i class="fas fa-cube"></i></div>
+        `;
+        document.body.appendChild(stack);
+
+        if (window.innerWidth <= 1024) stack.style.display = 'flex';
+        window.addEventListener('resize', () => { 
+            if (window.innerWidth <= 1024) stack.style.display = 'flex'; 
+            else stack.style.display = 'none'; 
         });
+
+        // ==========================================
+        // 🔥 蘋果 Safari & 手機鍵盤「防飛天」追蹤引擎
+        // ==========================================
+        function updateMobileUIPosition() {
+            if (window.innerWidth > 1024) return;
+            const mStack = document.querySelector('.mobile-tool-stack');
+            const mDrawer = document.querySelector('.editor-sticky-header');
+            
+            // 抓取目前畫面真正的頂端位置 (無視鍵盤推擠)
+            const offset = window.visualViewport ? window.visualViewport.offsetTop : 0;
+            
+            // 原本的 150px 加上真實的偏移量，保證永遠死死釘在螢幕相同位置！
+            if (mStack) mStack.style.setProperty('top', (150 + offset) + 'px', 'important');
+            if (mDrawer) mDrawer.style.setProperty('top', (150 + offset) + 'px', 'important');
+        }
+
+        if (window.visualViewport) {
+            // 當鍵盤彈出或手指滑動時，無縫追蹤位置
+            window.visualViewport.addEventListener('scroll', updateMobileUIPosition);
+            window.visualViewport.addEventListener('resize', updateMobileUIPosition);
+        }
+        setTimeout(updateMobileUIPosition, 100);
     }
+
+    // 🔥 5. 真正有效的分類切換引擎
+    window.toggleMobileToolbar = function(groupName) {
+        if(window.restoreSelection) window.restoreSelection();
+        const toolbarHeader = document.querySelector('.editor-sticky-header');
+        if (!toolbarHeader) return;
+
+        const allGroups = toolbarHeader.querySelectorAll('.tb-group');
+        
+        for(let i = 1; i < allGroups.length; i++) {
+            allGroups[i].style.setProperty('display', 'none', 'important');
+        }
+        
+        if (toolbarHeader.classList.contains('show-drawer') && toolbarHeader.dataset.activeGroup === groupName) {
+            toolbarHeader.classList.remove('show-drawer');
+            toolbarHeader.dataset.activeGroup = '';
+            return; 
+        }
+        
+        if (groupName === 'text') {
+            if(allGroups[1]) allGroups[1].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[2]) allGroups[2].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[3]) allGroups[3].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'para') {
+            if(allGroups[4]) allGroups[4].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[5]) allGroups[5].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[6]) allGroups[6].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'insert') {
+            if(allGroups[7]) allGroups[7].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'magic') {
+            if(allGroups[8]) allGroups[8].style.setProperty('display', 'flex', 'important'); 
+        }
+        
+        toolbarHeader.classList.add('show-drawer');
+        toolbarHeader.dataset.activeGroup = groupName;
+    };
+
+    // 🔥 3. 控制右側專屬修改按鈕
+    window.showContextEditButton = function() {
+        const editBtn = document.getElementById('m-context-edit-btn');
+        if (!editBtn) return;
+        
+        // 🌟 終極優化：只要是文字(text)或沒選東西，修改按鈕直接隱藏！徹底拔除黑筆！
+        if (!pendingTargetType || pendingTargetType === 'text') {
+            editBtn.style.display = 'none';
+            return;
+        }
+        
+        editBtn.style.display = 'flex';
+        editBtn.className = 'm-stack-btn'; 
+        
+        if (pendingTargetType === 'image') {
+            editBtn.classList.add('btn-green'); editBtn.innerHTML = '<i class="fas fa-image"></i>';
+        } else if (pendingTargetType === 'block' || pendingTargetType === 'tabs') {
+            editBtn.classList.add('btn-red'); editBtn.innerHTML = '<i class="fas fa-cube"></i>';
+        } else if (pendingTargetType === 'table') {
+            editBtn.classList.add('btn-blue'); editBtn.innerHTML = '<i class="fas fa-table"></i>';
+        }
+    };
+    
+    // 🔥 修復 1：點擊專屬修改按鈕時，霸王硬上弓強制打開選單！
+    window.triggerContextEdit = function() {
+        // 就算焦點跑掉，也要把目標強行抓回來
+        let targetType = pendingTargetType || (currentTarget ? (currentTarget.tagName === 'IMG' ? 'image' : 'block') : null);
+        if (!targetType && lastValidRange) targetType = 'text';
+
+        if (targetType) {
+            window.showFloatMenu(0, 0, targetType);
+            const floatMenu = document.getElementById('float-menu');
+            if (floatMenu) {
+                floatMenu.style.setProperty('display', 'flex', 'important');
+                floatMenu.style.setProperty('z-index', '99999', 'important'); // 絕對在最上層
+            }
+        }
+    };
+
+    // 🔥 4. 建立手機版右側分類工具列
+    function initMobileEditorTools() {
+        document.querySelectorAll('.side-float-toggle').forEach(e => e.remove());
+        document.querySelectorAll('.mobile-tool-stack').forEach(e => e.remove());
+        
+        const stack = document.createElement('div');
+        stack.className = 'mobile-tool-stack';
+        // 🔥 修復 2：層級降為 5900，保證抽屜 (6000) 展開時不會被按鈕擋住！
+        stack.style.cssText = `
+            display: none; 
+            position: fixed; 
+            top: 20vh; 
+            right: 10px; 
+            flex-direction: column;
+            gap: 12px;
+            z-index: 5900; 
+        `;
+        
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @media (max-width: 1024px) {
+                .m-stack-btn {
+                    width: 42px; height: 42px; 
+                    background: white; color: var(--dark);
+                    border-radius: 10px; 
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+                    border: 1px solid #ddd;
+                    cursor: pointer; font-size: 16px; transition: 0.2s;
+                }
+                .m-stack-btn:hover { background: #f4f6f8; transform: scale(1.05); }
+                #m-context-edit-btn { border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; margin-bottom: 5px; }
+                .btn-green { background: #27ae60 !important; color: white !important; }
+                .btn-red { background: #e74c3c !important; color: white !important; }
+                .btn-blue { background: #3498db !important; color: white !important; }
+                .btn-black { background: #333 !important; color: white !important; }
+                
+                #float-menu {
+                    position: fixed !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    max-height: 75vh; overflow-y: auto; margin: 0 !important;
+                }
+                #edit-badge { display: none !important; }
+
+                .editor-sticky-header .tb-group { display: none !important; }
+                .editor-sticky-header .tb-group:nth-child(1) { display: flex !important; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 🔥 關鍵防禦：加上 event.preventDefault() 絕對防止手機點擊時失去反白焦點！
+        stack.innerHTML = `
+            <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit()" ontouchstart="event.preventDefault(); window.triggerContextEdit()"></div>
+            
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('text')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('text')" title="文字"><i class="fas fa-font"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('para')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('para')" title="段落"><i class="fas fa-align-left"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('insert')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('insert')" title="插入圖表"><i class="fas fa-plus"></i></div>
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('magic')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('magic')" title="魔法積木"><i class="fas fa-cube"></i></div>
+        `;
+        document.body.appendChild(stack);
+
+        if (window.innerWidth <= 1024) stack.style.display = 'flex';
+        window.addEventListener('resize', () => { 
+            if (window.innerWidth <= 1024) stack.style.display = 'flex'; 
+            else stack.style.display = 'none'; 
+        });
+
+        // ==========================================
+        // 🔥 終極版：蘋果 Safari & 手機鍵盤「防飛天」視覺追蹤引擎
+        // ==========================================
+        window.updateMobileUIPosition = function() {
+            if (window.innerWidth > 1024) return;
+            const mStack = document.querySelector('.mobile-tool-stack');
+            const mDrawer = document.querySelector('.editor-sticky-header');
+            const fMenu = document.getElementById('float-menu');
+            
+            // 計算鍵盤彈出造成的視覺推擠偏移量 (Visual Viewport Offset)
+            // 平時為 0，鍵盤彈出時會精準抓出被推了幾 px
+            const offsetTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
+            
+            // 維持原來的 150px，加上偏移量來「抵銷」鍵盤的推擠，保證死死釘住！
+            const baseTop = 150; 
+            
+            if (mStack) mStack.style.setProperty('top', (baseTop + offsetTop) + 'px', 'important');
+            if (mDrawer) mDrawer.style.setProperty('top', (baseTop + offsetTop) + 'px', 'important');
+            
+            // 同步修正修改選單的置中位置
+            if (fMenu && fMenu.style.display === 'flex') {
+                const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                fMenu.style.setProperty('top', (offsetTop + (vh / 2)) + 'px', 'important');
+            }
+        };
+
+        // 綁定所有可能的縮放、鍵盤彈出、與滑動事件，確保無縫跟隨
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('scroll', window.updateMobileUIPosition);
+            window.visualViewport.addEventListener('resize', window.updateMobileUIPosition);
+        }
+        
+        // 當游標點擊打字時，主動校正位置
+        const editorNode = document.getElementById('editor');
+        if (editorNode) {
+            editorNode.addEventListener('focus', () => setTimeout(window.updateMobileUIPosition, 100));
+            editorNode.addEventListener('click', () => setTimeout(window.updateMobileUIPosition, 100));
+            editorNode.addEventListener('input', () => setTimeout(window.updateMobileUIPosition, 100));
+        }
+        setInterval(window.updateMobileUIPosition, 400); // 終極防線：定時自動對齊
+    }
+
+    // 🔥 5. 真正有效的分類切換引擎
+    window.toggleMobileToolbar = function(groupName) {
+        if(window.restoreSelection) window.restoreSelection();
+        const toolbarHeader = document.querySelector('.editor-sticky-header');
+        if (!toolbarHeader) return;
+
+        const allGroups = toolbarHeader.querySelectorAll('.tb-group');
+        
+        for(let i = 1; i < allGroups.length; i++) {
+            allGroups[i].style.setProperty('display', 'none', 'important');
+        }
+        
+        if (toolbarHeader.classList.contains('show-drawer') && toolbarHeader.dataset.activeGroup === groupName) {
+            toolbarHeader.classList.remove('show-drawer');
+            toolbarHeader.dataset.activeGroup = '';
+            return; 
+        }
+        
+        if (groupName === 'text') {
+            if(allGroups[1]) allGroups[1].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[2]) allGroups[2].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[3]) allGroups[3].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'para') {
+            if(allGroups[4]) allGroups[4].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[5]) allGroups[5].style.setProperty('display', 'flex', 'important'); 
+            if(allGroups[6]) allGroups[6].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'insert') {
+            if(allGroups[7]) allGroups[7].style.setProperty('display', 'flex', 'important'); 
+        } else if (groupName === 'magic') {
+            if(allGroups[8]) allGroups[8].style.setProperty('display', 'flex', 'important'); 
+        }
+        
+        toolbarHeader.classList.add('show-drawer');
+        toolbarHeader.dataset.activeGroup = groupName;
+    };
+
         // 🌟 處理自訂右鍵選單的剪貼動作
     async function contextAction(action) {
         const contextMenu = document.getElementById('custom-context-menu');
@@ -2308,119 +2969,21 @@
             saveHistory();
         } catch(e) { console.error(e); }
     }
-    // 🌟 RGB 轉 HEX (供油漆刷抓取顏色使用)
+    // 🌟 RGB 轉 HEX (供油漆刷抓取顏色使用，強化防呆版)
     function rgb2hex(rgb) {
-        if (!rgb || rgb === 'transparent' || rgb.includes('rgba(0, 0, 0, 0)') || rgb === 'inherit') return '';
-        if (rgb.startsWith('#')) return rgb;
-        let rgbArray = rgb.match(/\d+/g);
+        if (!rgb) return '';
+        // 抹除所有空白，統一判定標準
+        let cleanRgb = rgb.replace(/\s+/g, '');
+        if (cleanRgb === 'transparent' || cleanRgb === 'rgba(0,0,0,0)' || cleanRgb === 'inherit') return '';
+        if (cleanRgb.startsWith('#')) return cleanRgb;
+        
+        let rgbArray = cleanRgb.match(/\d+/g);
         if(!rgbArray || rgbArray.length < 3) return '';
         function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
         return "#" + hex(rgbArray[0]) + hex(rgbArray[1]) + hex(rgbArray[2]);
     }
 
-    // 🌟 狀態雷達 (透視眼版 + Word級混雜偵測)
-    function updateToolbarState() {
-        const editor = document.getElementById('editor');
-        const sel = window.getSelection();
-        if (!sel.rangeCount || !editor.contains(sel.anchorNode)) return;
-
-        // 1. 偵測粗體、斜體、底線，並點亮對應按鈕
-        ['bold', 'italic', 'underline'].forEach(cmd => {
-            const isActive = document.queryCommandState(cmd);
-            document.querySelectorAll(`button[onclick="exec('${cmd}')"]`).forEach(btn => {
-                isActive ? btn.classList.add('active') : btn.classList.remove('active');
-            });
-        });
-
-        // 🔥 X光深層鑽探：不管是不是全選，強迫往下挖到最深層的文字標籤！
-        let range = sel.getRangeAt(0);
-        let node = range.startContainer;
-        // 如果抓到的是外層區塊，我們根據偏移量往內找
-        if (node.nodeType === 1 && node.childNodes.length > range.startOffset) {
-            node = node.childNodes[range.startOffset];
-        }
-        // 不斷往最深層、有文字的節點鑽下去，避開空幽靈
-        while (node && node.nodeType === 1 && node.childNodes.length > 0) {
-            let validChild = Array.from(node.childNodes).find(n => n.textContent.replace(/\u200B/g, '').trim() !== '');
-            if (validChild) node = validChild;
-            else break;
-        }
-        if (node && node.nodeType === 3) node = node.parentNode;
-        if (!node || node === editor) return;
-
-        // 🔥 殺手鐧：使用 getComputedStyle 讀取「絕對真實」的螢幕渲染狀態
-
-        const computed = window.getComputedStyle(node);
-        
-        // 2. 透視基準字體
-        let fontStr = computed.fontFamily.toLowerCase();
-        let mappedFont = "sans-serif"; 
-        if (fontStr.includes('mono') || fontStr.includes('courier')) mappedFont = "monospace";
-        else if (fontStr.includes('noto serif tc') || fontStr.includes('ming') || fontStr.includes('song') || (fontStr.includes('serif') && !fontStr.includes('sans-serif'))) mappedFont = "'Noto Serif TC', serif";
-        
-        // 3. 透視基準大小
-        let sizePx = parseFloat(computed.fontSize) || 16;
-        let pt = sizePx * 0.75; 
-        const pts = [10, 12, 14, 18, 24, 36];
-        let mappedSize = pts.reduce((p, c) => Math.abs(c - pt) < Math.abs(p - pt) ? c : p).toString();
-
-        // 🔥 核心升級：偵測「選取範圍內」是否有混雜多種格式
-        let isMixedFont = false;
-        let isMixedSize = false;
-        
-        if (!sel.isCollapsed) {
-            const range = sel.getRangeAt(0);
-            const container = range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer.parentNode : range.commonAncestorContainer;
-            if (container && container.querySelectorAll) {
-                let elements = container.querySelectorAll('*');
-                for (let el of elements) {
-                    if (sel.containsNode(el, true)) {
-                        let comp = window.getComputedStyle(el);
-                        
-                        // 檢查字體是否不一致
-                        let elFontStr = comp.fontFamily.toLowerCase();
-                        let elMappedFont = "sans-serif";
-                        if (elFontStr.includes('mono') || elFontStr.includes('courier')) elMappedFont = "monospace";
-                        else if (elFontStr.includes('noto serif tc') || elFontStr.includes('ming') || elFontStr.includes('song') || (elFontStr.includes('serif') && !elFontStr.includes('sans-serif'))) elMappedFont = "'Noto Serif TC', serif";
-                        if (elMappedFont !== mappedFont) isMixedFont = true;
-
-                        // 檢查大小是否不一致
-                        let elSizePx = parseFloat(comp.fontSize) || 16;
-                        let elPt = elSizePx * 0.75;
-                        let elMappedSize = pts.reduce((p, c) => Math.abs(c - elPt) < Math.abs(p - elPt) ? c : p).toString();
-                        if (elMappedSize !== mappedSize) isMixedSize = true;
-                    }
-                }
-            }
-        }
-
-        // 像 Word 一樣，如果格式混雜，下拉選單直接顯示空白 (跳回預設文字)
-        if (isMixedFont) mappedFont = "";
-        if (isMixedSize) mappedSize = "";
-
-        document.querySelectorAll('.tb-select[onchange*="applyCustomFont"]').forEach(sel => sel.value = mappedFont);
-        document.querySelectorAll('.tb-select[onchange*="applyCustomSize"]').forEach(sel => sel.value = mappedSize);
-
-        // 4. 透視文字顏色
-        let textColor = computed.color;
-        let hexColor = rgb2hex(textColor) || '#2c3e50';
-        document.querySelectorAll('input[onchange*="foreColor"]').forEach(inp => inp.value = hexColor);
-
-        // 5. 透視背景顏色
-        let bgNode = node;
-        let bgColor = '';
-        while (bgNode && bgNode !== editor) {
-            let bg = window.getComputedStyle(bgNode).backgroundColor;
-            if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
-                bgColor = bg;
-                break;
-            }
-            bgNode = bgNode.parentNode;
-        }
-        let hexBg = rgb2hex(bgColor) || '#ffffff';
-        document.querySelectorAll('input[onchange*="applyHighlighter"]').forEach(inp => inp.value = hexBg);
-    }
-
+    
 
     // 綁定雷達監聽器
     document.addEventListener('selectionchange', updateToolbarState);
@@ -2935,9 +3498,9 @@
     // --- 啟動程序 ---
     document.addEventListener("DOMContentLoaded", () => {
         requireLogin();
-        
         const curtain = document.getElementById('security-curtain');
         if (curtain) curtain.remove();
+
         
         initMobileEditorTools();
         fetchKbData();

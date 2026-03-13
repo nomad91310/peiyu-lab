@@ -166,6 +166,15 @@
         .obj-selected-link { outline: 3px solid #9b59b6 !important; outline-offset: 2px; border-radius: 4px; }
         .badge-purple { background: #9b59b6; } .badge-purple:hover { background: #8e44ad; }
 
+        /* 📱 編輯器內的提示樣式：極簡藍框｜標記 (進化為行內元素) */
+        #editor .peiyu-rwd-br { display: inline; cursor: pointer; user-select: all; }
+        #editor .peiyu-rwd-br::before { content: "｜"; display: inline-block; padding: 0 1px; background: #e3f2fd; color: #2980b9; border: 1px solid #3498db; border-radius: 2px; font-size: 10px; margin: 0 1px; vertical-align: middle; line-height: 1; }
+
+        /* 🔥 神級所見即所得：只要是手機直式螢幕，自動在「｜」的後面折行！ */
+        @media (max-width: 768px) and (orientation: portrait) {
+            #editor .peiyu-rwd-br::after { content: '\A'; white-space: pre; }
+        }
+
         /* --- 4. 你的手機版終極優化 RWD (原封不動保留) --- */
         @media (max-width: 1024px) {
             body { 
@@ -653,13 +662,17 @@
             .peiyu-tab-container { background: transparent !important; padding: 0 !important; width: 100% !important; border: none !important; }
             .peiyu-tab-body { background: transparent !important; width: 100% !important; border: none !important; }
             
-            @media (max-width: 768px) and (orientation: portrait) {
-                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
-                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
+            .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
             .peiyu-article .peiyu-link-text:hover { color: #2980b9; }
             .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
             .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
+            .peiyu-article .peiyu-rwd-br { display: none; }
+
+            @media (max-width: 768px) and (orientation: portrait) {
+                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                .peiyu-article .peiyu-rwd-br { display: block; width: 100%; height: 0; margin: 0; overflow: hidden; }
+            }
         </style>
         <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
 
@@ -694,32 +707,36 @@
 
             // 🔥 2. 生成「去黃透明版」的匯出代碼
             const exportHTML = `<style class="peiyu-dynamic-config" data-cfg='${JSON.stringify(spacingCfg)}'>
-                .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
-                .peiyu-article * { -webkit-text-size-adjust: 100%; }
-                .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
-                .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
-                .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
-                .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
-                .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
-                .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
-                .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
-                .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
-                .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
-                .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
-                
-                .peiyu-tabs-wrapper { width: 100% !important; background: transparent !important; border: none !important; margin: 40px 0 !important; }
-                .peiyu-tab-group-header { background: transparent !important; display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 15px 5px; border: none !important; }
-                .peiyu-tab-container { background: transparent !important; padding: 0 !important; width: 100% !important; border: none !important; }
-                .peiyu-tab-body { background: transparent !important; width: 100% !important; border: none !important; }
+            .peiyu-article { line-height: ${spacingCfg.lh}; font-size: 16px; color: #2c3e50; font-family: -apple-system, "Microsoft JhengHei", sans-serif; -webkit-text-size-adjust: 100%; }
+            .peiyu-article * { -webkit-text-size-adjust: 100%; }
+            .peiyu-article p, .peiyu-article div:not([class]) { margin-top: 0; margin-bottom: ${spacingCfg.pmb}em; }
+            .peiyu-article h1, .peiyu-article h2, .peiyu-article h3, .peiyu-article h4, .peiyu-article h5, .peiyu-article h6 { margin-top: 1.2em; margin-bottom: 0.5em; line-height: 1.4; font-weight: bold; }
+            .peiyu-article h1+h1, .peiyu-article h2+h2, .peiyu-article h3+h3, .peiyu-article h4+h4, .peiyu-article h5+h5, .peiyu-article h6+h6 { margin-top: 0; }
+            .peiyu-article ul, .peiyu-article ol { margin-top: ${spacingCfg.lmtb}em; margin-bottom: ${spacingCfg.pmb}em; padding-left: 1.5em; }
+            .peiyu-article li { margin-bottom: ${spacingCfg.limb}em; }
+            .peiyu-article li > p, .peiyu-article li > div:not([class]) { margin-bottom: 0; display: inline; }
+            .peiyu-article table { border-collapse: collapse; width: 100%; max-width: 100% !important; box-sizing: border-box !important; table-layout: fixed !important; }
+            .peiyu-article table td, .peiyu-article table th { vertical-align: middle; padding: 8px 12px; word-wrap: break-word !important; overflow-wrap: break-word !important; max-width: 100% !important; box-sizing: border-box !important; }
+            .peiyu-article .resizable-wrapper { max-width: 100% !important; clear: both; box-sizing: border-box !important; }
+            .peiyu-article img { max-width: 100% !important; height: auto !important; box-sizing: border-box !important; }
+            
+            .peiyu-tabs-wrapper { width: 100% !important; background: transparent !important; border: none !important; margin: 40px 0 !important; }
+            .peiyu-tab-group-header { background: transparent !important; display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 15px 5px; border: none !important; }
+            .peiyu-tab-container { background: transparent !important; padding: 0 !important; width: 100% !important; border: none !important; }
+            .peiyu-tab-body { background: transparent !important; width: 100% !important; border: none !important; }
+            
+            .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
+            .peiyu-article .peiyu-link-text:hover { color: #2980b9; }
+            .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
+            .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
+            .peiyu-article .peiyu-rwd-br { display: none; }
 
-                @media (max-width: 768px) and (orientation: portrait) {
-                    .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
-                    .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                    .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
-                    .peiyu-article .peiyu-link-text:hover { color: #2980b9; }
-                    .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
-                    .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
-                </style>
+            @media (max-width: 768px) and (orientation: portrait) {
+                .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
+                .peiyu-article .peiyu-rwd-br { display: block; width: 100%; height: 0; margin: 0; overflow: hidden; }
+            }
+        </style>
         <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
@@ -1338,10 +1355,19 @@
         modalMode = type; 
         const body = document.getElementById('m-body-editor'); 
         const confirmBtn = document.getElementById('m-confirm-btn'); 
+        const updateBtn = document.getElementById('m-update-btn');
         
+        // 🔥 修復：只要打開任何設定視窗，強制先把礙眼的浮動選單關掉！
+        if(document.getElementById('float-menu')) document.getElementById('float-menu').style.display = 'none';
+        if(document.getElementById('edit-badge')) document.getElementById('edit-badge').style.display = 'none';
+
+        // 重置修改按鈕為預設深綠色
+        updateBtn.style.background = 'var(--forest)';
+        updateBtn.style.borderColor = 'var(--forest)';
+
         // 🔥 核心修復 1：每次打開面板，強制「顯示插入、隱藏修改」，絕不留殘影！
         confirmBtn.style.display = 'flex';
-        document.getElementById('m-update-btn').style.display = 'none';
+        updateBtn.style.display = 'none';
 
         if (type === 'divider') {
             document.getElementById('m-title-editor').innerText = '✂️ 設定分隔線 / 間距';
@@ -1407,6 +1433,7 @@
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; border:1px solid #ddd;" onclick="openModal('card')">💡 <br>資訊卡</button>
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; border:1px solid #ddd;" onclick="openModal('warn')">🚨 <br>警告框</button>
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; grid-column: span 2; border:1px solid #ddd;" onclick="openModal('tabs')">📑 <br>插入內文頁籤群組</button>
+                    <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; grid-column: span 2; background:#e3f2fd; color:#2980b9; border:1px dashed #3498db; font-weight:bold;" onclick="insertHtml('&nbsp;<span class=\\'peiyu-rwd-br peiyu-obj\\' contenteditable=\\'false\\'></span>&nbsp;'); document.getElementById('config-modal').style.display='none';">📱 <br>插入「手機專屬斷行點」</button>
                 </div>
             `;
         }
@@ -1423,9 +1450,11 @@
                 isNewTab = currentTarget.target === '_blank';
                 
                 confirmBtn.style.display = 'none';
-                const updateBtn = document.getElementById('m-update-btn');
                 updateBtn.style.display = 'flex';
                 updateBtn.innerText = "✅ 確認修改連結";
+                // 🔥 修復：變成超連結專屬的紫色按鈕
+                updateBtn.style.background = 'var(--purple)'; 
+                updateBtn.style.borderColor = 'var(--purple)';
                 updateBtn.setAttribute('onclick', 'updateLink()');
             } else {
                 const sel = window.getSelection();
@@ -1586,9 +1615,10 @@
             const txt = document.getElementById('inp-link-text').value || '超連結';
             const url = document.getElementById('inp-link-url').value || '#';
             const isBtn = document.getElementById('inp-link-style').value === 'button';
-            const newTab = document.getElementById('inp-link-tab').checked ? 'target="_blank"' : '';
+            // 🔥 修復：如果不開新分頁，強制使用 _top 衝破電視機 iframe！
+            const newTab = document.getElementById('inp-link-tab').checked ? 'target="_blank"' : 'target="_top"';
             const cls = isBtn ? 'peiyu-link-btn peiyu-obj' : 'peiyu-link-text peiyu-obj';
-            
+
             // 💡 核心修復：前後都加空白字元當作「防護緩衝區」，讓你滑鼠點得進去！
             html = `&nbsp;<a href="${url}" ${newTab} class="${cls}" contenteditable="false">${txt}</a>&nbsp;`;
             
@@ -2133,7 +2163,7 @@
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:260px; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--purple); border-bottom:1px solid #eee; padding-bottom:5px;">🔗 超連結設定</div>
                     <div style="font-size:11px; color:#666; background:#f4f6f8; padding:6px; border-radius:4px; word-break:break-all;">${currentTarget.href}</div>
-                    <div style="display:flex; gap:5px;">
+                    ${alignBtns} <div style="display:flex; gap:5px;">
                         <button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('link')">⚙️ 修改</button>
                         <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
                         <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
@@ -2340,10 +2370,11 @@
         window.setImgAlign = function(mode) {
             if(!currentTarget) return; 
             
-            // 1. 處理自訂外框與積木 (SPAN 文字外框, DIV 容器, H2, H3)
-            if (currentTarget.classList.contains('peiyu-custom-box') || currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3' || currentTarget.classList.contains('peiyu-block')) {
+            // 1. 處理自訂外框與積木 (SPAN 文字外框, DIV 容器, H2, H3, A 超連結)
+            if (currentTarget.classList.contains('peiyu-custom-box') || currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3' || currentTarget.classList.contains('peiyu-block') || currentTarget.tagName === 'A') {
                 
-                if (currentTarget.tagName === 'SPAN') {
+                // 🔥 修復：A 標籤 (超連結) 也要像文字外框一樣，去找它的外層 P 段落來對齊！
+                if (currentTarget.tagName === 'SPAN' || currentTarget.tagName === 'A') {
                     // 🔥 文字外框 (inline-block)：必須去找它外面包著的 P 段落，對段落設定 text-align
                     let parent = currentTarget.parentElement;
                     while (parent && parent.id !== 'editor' && !['P', 'DIV', 'TD', 'TH', 'LI'].includes(parent.tagName)) {
@@ -3015,12 +3046,16 @@
     async function saveKbOrderConfig(){const{data}=await myDB.from('site_content').select('id').eq('title','kb_category_order').single();if(data)await myDB.from('site_content').update({content:kbCatOrder}).eq('id',data.id);else await myDB.from('site_content').insert([{category:'system_config',title:'kb_category_order',content:kbCatOrder}]);}
     async function toggleKbNote(cat, e) { e.stopPropagation(); if (!kbCatOrder.hide_note) kbCatOrder.hide_note = []; const idx = kbCatOrder.hide_note.indexOf(cat); if (idx > -1) kbCatOrder.hide_note.splice(idx, 1); else kbCatOrder.hide_note.push(cat); renderKbTree(); await saveKbOrderConfig(); }
 
-    // 🔥 3. 控制右側專屬修改按鈕
+    // ==========================================
+    // 🔥 手機版專屬工具列與浮動按鈕引擎 (終極乾淨版)
+    // ==========================================
+
+    // 1. 控制右側專屬修改按鈕
     window.showContextEditButton = function() {
         const editBtn = document.getElementById('m-context-edit-btn');
         if (!editBtn) return;
         
-        // 🔥 終極優化：只要是文字(text)或沒選東西，修改按鈕直接隱藏！不需要黑筆了！
+        // 只要是文字(text)或沒選東西，修改按鈕直接隱藏
         if (!pendingTargetType || pendingTargetType === 'text') {
             editBtn.style.display = 'none';
             return;
@@ -3031,6 +3066,8 @@
         
         if (pendingTargetType === 'image') {
             editBtn.classList.add('btn-green'); editBtn.innerHTML = '<i class="fas fa-image"></i>';
+        } else if (pendingTargetType === 'link') {
+            editBtn.classList.add('btn-purple'); editBtn.innerHTML = '<i class="fas fa-link"></i>';
         } else if (pendingTargetType === 'block' || pendingTargetType === 'tabs') {
             editBtn.classList.add('btn-red'); editBtn.innerHTML = '<i class="fas fa-cube"></i>';
         } else if (pendingTargetType === 'table') {
@@ -3038,39 +3075,33 @@
         }
     };
     
-    // 🔥 修復手機版修改按鈕：強制呼叫選單，絕不失焦
+    // 2. 手機版修改按鈕：強制呼叫選單，絕不失焦
     window.triggerContextEdit = function() {
-        let type = pendingTargetType;
-        if (!type && currentTarget) {
-            if (currentTarget.tagName === 'IMG' || currentTarget.querySelector('img')) type = 'image';
-            else if (currentTarget.tagName === 'TABLE') type = 'table';
-            else type = 'block';
-        }
-        if (!type && lastValidRange) type = 'text';
+        let targetType = pendingTargetType || (currentTarget ? (currentTarget.tagName === 'IMG' ? 'image' : 'block') : null);
+        if (!targetType && lastValidRange) targetType = 'text';
 
-        if (type && window.showFloatMenu) {
-            window.showFloatMenu(0, 0, type);
+        if (targetType && window.showFloatMenu) {
+            window.showFloatMenu(0, 0, targetType);
             const floatMenu = document.getElementById('float-menu');
             if (floatMenu) {
-                // 暴力置中並拉到最上層
                 floatMenu.style.setProperty('display', 'flex', 'important');
-                floatMenu.style.setProperty('z-index', '99999', 'important');
+                floatMenu.style.setProperty('z-index', '99999', 'important'); // 絕對在最上層
             }
         }
     };
 
-    // 🔥 4. 建立手機版右側分類工具列
+    // 3. 建立手機版右側分類工具列
     function initMobileEditorTools() {
         document.querySelectorAll('.side-float-toggle').forEach(e => e.remove());
         document.querySelectorAll('.mobile-tool-stack').forEach(e => e.remove());
         
         const stack = document.createElement('div');
         stack.className = 'mobile-tool-stack';
-        // 🔥 修復：降低層級為 5900，保證不會蓋住抽屜 (抽屜是 6000)
+        // 層級降為 5900，保證抽屜 (6000) 展開時不會被按鈕擋住
         stack.style.cssText = `
             display: none; 
             position: fixed; 
-            top: 150px; /* 🔥 絕對像素鎖死，鍵盤彈出絕對不准往上飛 */
+            top: 150px; 
             right: 10px; 
             flex-direction: column;
             gap: 12px;
@@ -3095,6 +3126,7 @@
                 .btn-red { background: #e74c3c !important; color: white !important; }
                 .btn-blue { background: #3498db !important; color: white !important; }
                 .btn-black { background: #333 !important; color: white !important; }
+                .btn-purple { background: #9b59b6 !important; color: white !important; } /* 紫色按鈕就位 */
                 
                 #float-menu {
                     position: fixed !important;
@@ -3105,16 +3137,15 @@
                     z-index: 99999 !important;
                 }
                 #edit-badge { display: none !important; }
-
                 .editor-sticky-header .tb-group { display: none !important; }
                 .editor-sticky-header .tb-group:nth-child(1) { display: flex !important; }
             }
         `;
         document.head.appendChild(style);
 
+        // 防止點擊失去焦點
         stack.innerHTML = `
             <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit()" ontouchstart="event.preventDefault(); window.triggerContextEdit()"></div>
-            
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('text')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('text')" title="文字"><i class="fas fa-font"></i></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('para')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('para')" title="段落"><i class="fas fa-align-left"></i></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('insert')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('insert')" title="插入圖表"><i class="fas fa-plus"></i></div>
@@ -3128,217 +3159,40 @@
             else stack.style.display = 'none'; 
         });
 
-        // ==========================================
-        // 🔥 蘋果 Safari & 手機鍵盤「防飛天」追蹤引擎
-        // ==========================================
-        function updateMobileUIPosition() {
-            if (window.innerWidth > 1024) return;
-            const mStack = document.querySelector('.mobile-tool-stack');
-            const mDrawer = document.querySelector('.editor-sticky-header');
-            
-            // 抓取目前畫面真正的頂端位置 (無視鍵盤推擠)
-            const offset = window.visualViewport ? window.visualViewport.offsetTop : 0;
-            
-            // 原本的 150px 加上真實的偏移量，保證永遠死死釘在螢幕相同位置！
-            if (mStack) mStack.style.setProperty('top', (150 + offset) + 'px', 'important');
-            if (mDrawer) mDrawer.style.setProperty('top', (150 + offset) + 'px', 'important');
-        }
-
-        if (window.visualViewport) {
-            // 當鍵盤彈出或手指滑動時，無縫追蹤位置
-            window.visualViewport.addEventListener('scroll', updateMobileUIPosition);
-            window.visualViewport.addEventListener('resize', updateMobileUIPosition);
-        }
-        setTimeout(updateMobileUIPosition, 100);
-    }
-
-    // 🔥 5. 真正有效的分類切換引擎
-    window.toggleMobileToolbar = function(groupName) {
-        if(window.restoreSelection) window.restoreSelection();
-        const toolbarHeader = document.querySelector('.editor-sticky-header');
-        if (!toolbarHeader) return;
-
-        const allGroups = toolbarHeader.querySelectorAll('.tb-group');
-        
-        for(let i = 1; i < allGroups.length; i++) {
-            allGroups[i].style.setProperty('display', 'none', 'important');
-        }
-        
-        if (toolbarHeader.classList.contains('show-drawer') && toolbarHeader.dataset.activeGroup === groupName) {
-            toolbarHeader.classList.remove('show-drawer');
-            toolbarHeader.dataset.activeGroup = '';
-            return; 
-        }
-        
-        if (groupName === 'text') {
-            if(allGroups[1]) allGroups[1].style.setProperty('display', 'flex', 'important'); 
-            if(allGroups[2]) allGroups[2].style.setProperty('display', 'flex', 'important'); 
-            if(allGroups[3]) allGroups[3].style.setProperty('display', 'flex', 'important'); 
-        } else if (groupName === 'para') {
-            if(allGroups[4]) allGroups[4].style.setProperty('display', 'flex', 'important'); 
-            if(allGroups[5]) allGroups[5].style.setProperty('display', 'flex', 'important'); 
-            if(allGroups[6]) allGroups[6].style.setProperty('display', 'flex', 'important'); 
-        } else if (groupName === 'insert') {
-            if(allGroups[7]) allGroups[7].style.setProperty('display', 'flex', 'important'); 
-        } else if (groupName === 'magic') {
-            if(allGroups[8]) allGroups[8].style.setProperty('display', 'flex', 'important'); 
-        }
-        
-        toolbarHeader.classList.add('show-drawer');
-        toolbarHeader.dataset.activeGroup = groupName;
-    };
-
-    // 🔥 3. 控制右側專屬修改按鈕
-    window.showContextEditButton = function() {
-        const editBtn = document.getElementById('m-context-edit-btn');
-        if (!editBtn) return;
-        
-        // 🌟 終極優化：只要是文字(text)或沒選東西，修改按鈕直接隱藏！徹底拔除黑筆！
-        if (!pendingTargetType || pendingTargetType === 'text') {
-            editBtn.style.display = 'none';
-            return;
-        }
-        
-        editBtn.style.display = 'flex';
-        editBtn.className = 'm-stack-btn'; 
-        
-        if (pendingTargetType === 'image') {
-            editBtn.classList.add('btn-green'); editBtn.innerHTML = '<i class="fas fa-image"></i>';
-        } else if (pendingTargetType === 'block' || pendingTargetType === 'tabs') {
-            editBtn.classList.add('btn-red'); editBtn.innerHTML = '<i class="fas fa-cube"></i>';
-        } else if (pendingTargetType === 'table') {
-            editBtn.classList.add('btn-blue'); editBtn.innerHTML = '<i class="fas fa-table"></i>';
-        }
-    };
-    
-    // 🔥 修復 1：點擊專屬修改按鈕時，霸王硬上弓強制打開選單！
-    window.triggerContextEdit = function() {
-        // 就算焦點跑掉，也要把目標強行抓回來
-        let targetType = pendingTargetType || (currentTarget ? (currentTarget.tagName === 'IMG' ? 'image' : 'block') : null);
-        if (!targetType && lastValidRange) targetType = 'text';
-
-        if (targetType) {
-            window.showFloatMenu(0, 0, targetType);
-            const floatMenu = document.getElementById('float-menu');
-            if (floatMenu) {
-                floatMenu.style.setProperty('display', 'flex', 'important');
-                floatMenu.style.setProperty('z-index', '99999', 'important'); // 絕對在最上層
-            }
-        }
-    };
-
-    // 🔥 4. 建立手機版右側分類工具列
-    function initMobileEditorTools() {
-        document.querySelectorAll('.side-float-toggle').forEach(e => e.remove());
-        document.querySelectorAll('.mobile-tool-stack').forEach(e => e.remove());
-        
-        const stack = document.createElement('div');
-        stack.className = 'mobile-tool-stack';
-        // 🔥 修復 2：層級降為 5900，保證抽屜 (6000) 展開時不會被按鈕擋住！
-        stack.style.cssText = `
-            display: none; 
-            position: fixed; 
-            top: 20vh; 
-            right: 10px; 
-            flex-direction: column;
-            gap: 12px;
-            z-index: 5900; 
-        `;
-        
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @media (max-width: 1024px) {
-                .m-stack-btn {
-                    width: 42px; height: 42px; 
-                    background: white; color: var(--dark);
-                    border-radius: 10px; 
-                    display: flex; align-items: center; justify-content: center;
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
-                    border: 1px solid #ddd;
-                    cursor: pointer; font-size: 16px; transition: 0.2s;
-                }
-                .m-stack-btn:hover { background: #f4f6f8; transform: scale(1.05); }
-                #m-context-edit-btn { border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; margin-bottom: 5px; }
-                .btn-green { background: #27ae60 !important; color: white !important; }
-                .btn-red { background: #e74c3c !important; color: white !important; }
-                .btn-blue { background: #3498db !important; color: white !important; }
-                .btn-black { background: #333 !important; color: white !important; }
-                
-                #float-menu {
-                    position: fixed !important;
-                    top: 50% !important;
-                    left: 50% !important;
-                    transform: translate(-50%, -50%) !important;
-                    max-height: 75vh; overflow-y: auto; margin: 0 !important;
-                }
-                #edit-badge { display: none !important; }
-
-                .editor-sticky-header .tb-group { display: none !important; }
-                .editor-sticky-header .tb-group:nth-child(1) { display: flex !important; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // 🔥 關鍵防禦：加上 event.preventDefault() 絕對防止手機點擊時失去反白焦點！
-        stack.innerHTML = `
-            <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit()" ontouchstart="event.preventDefault(); window.triggerContextEdit()"></div>
-            
-            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('text')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('text')" title="文字"><i class="fas fa-font"></i></div>
-            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('para')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('para')" title="段落"><i class="fas fa-align-left"></i></div>
-            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('insert')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('insert')" title="插入圖表"><i class="fas fa-plus"></i></div>
-            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('magic')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('magic')" title="魔法積木"><i class="fas fa-cube"></i></div>
-        `;
-        document.body.appendChild(stack);
-
-        if (window.innerWidth <= 1024) stack.style.display = 'flex';
-        window.addEventListener('resize', () => { 
-            if (window.innerWidth <= 1024) stack.style.display = 'flex'; 
-            else stack.style.display = 'none'; 
-        });
-
-        // ==========================================
-        // 🔥 終極版：蘋果 Safari & 手機鍵盤「防飛天」視覺追蹤引擎
-        // ==========================================
+        // 蘋果 Safari & 手機鍵盤「防飛天」視覺追蹤引擎
         window.updateMobileUIPosition = function() {
             if (window.innerWidth > 1024) return;
             const mStack = document.querySelector('.mobile-tool-stack');
             const mDrawer = document.querySelector('.editor-sticky-header');
             const fMenu = document.getElementById('float-menu');
             
-            // 計算鍵盤彈出造成的視覺推擠偏移量 (Visual Viewport Offset)
-            // 平時為 0，鍵盤彈出時會精準抓出被推了幾 px
             const offsetTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
-            
-            // 維持原來的 150px，加上偏移量來「抵銷」鍵盤的推擠，保證死死釘住！
             const baseTop = 150; 
             
             if (mStack) mStack.style.setProperty('top', (baseTop + offsetTop) + 'px', 'important');
             if (mDrawer) mDrawer.style.setProperty('top', (baseTop + offsetTop) + 'px', 'important');
             
-            // 同步修正修改選單的置中位置
             if (fMenu && fMenu.style.display === 'flex') {
                 const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
                 fMenu.style.setProperty('top', (offsetTop + (vh / 2)) + 'px', 'important');
             }
         };
 
-        // 綁定所有可能的縮放、鍵盤彈出、與滑動事件，確保無縫跟隨
         if (window.visualViewport) {
             window.visualViewport.addEventListener('scroll', window.updateMobileUIPosition);
             window.visualViewport.addEventListener('resize', window.updateMobileUIPosition);
         }
         
-        // 當游標點擊打字時，主動校正位置
         const editorNode = document.getElementById('editor');
         if (editorNode) {
             editorNode.addEventListener('focus', () => setTimeout(window.updateMobileUIPosition, 100));
             editorNode.addEventListener('click', () => setTimeout(window.updateMobileUIPosition, 100));
             editorNode.addEventListener('input', () => setTimeout(window.updateMobileUIPosition, 100));
         }
-        setInterval(window.updateMobileUIPosition, 400); // 終極防線：定時自動對齊
+        setInterval(window.updateMobileUIPosition, 400);
     }
 
-    // 🔥 5. 真正有效的分類切換引擎
+    // 4. 真正有效的分類切換引擎
     window.toggleMobileToolbar = function(groupName) {
         if(window.restoreSelection) window.restoreSelection();
         const toolbarHeader = document.querySelector('.editor-sticky-header');
@@ -3884,13 +3738,15 @@
             }
         };
         // 🌟 更新超連結引擎
+    // 🌟 更新超連結引擎
     window.updateLink = function() {
         if (!currentTarget || currentTarget.tagName !== 'A') return;
         currentTarget.innerText = document.getElementById('inp-link-text').value || '超連結';
         currentTarget.href = document.getElementById('inp-link-url').value || '#';
         
+        // 🔥 修復：修改時也遵循 _top 邏輯
         if (document.getElementById('inp-link-tab').checked) currentTarget.target = "_blank";
-        else currentTarget.removeAttribute('target');
+        else currentTarget.target = "_top";
 
         if (document.getElementById('inp-link-style').value === 'button') {
             currentTarget.className = 'peiyu-link-btn peiyu-obj';

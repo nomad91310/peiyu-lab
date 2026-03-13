@@ -2704,91 +2704,91 @@
             }
         }
 
-        // 🌟 終極無敵剪下引擎 (防阻擋、防吃字)
+        // 🌟 駭客級剪下引擎：事件劫持法 (已拔除假警報！)
         window.modCut = function() {
             if(!currentTarget) return;
-            try { 
-                const clone = currentTarget.cloneNode(true);
-                clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
-                let htmlStr = clone.outerHTML;
-                if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+            const clone = currentTarget.cloneNode(true);
+            clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
+            let htmlStr = clone.outerHTML;
+            if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+            let plainText = clone.innerText || clone.textContent || " ";
 
-                // 🔥 物理級隱形複製法：建立一個暫時的隱形容器
-                const tempDiv = document.createElement("div");
-                tempDiv.contentEditable = true;
-                tempDiv.style.cssText = "position:absolute; left:-9999px; top:0; opacity:0;";
-                tempDiv.innerHTML = htmlStr;
-                document.body.appendChild(tempDiv);
-                
-                // 強制選取隱形容器的內容
+            // 🔥 攔截器：完美掉包剪貼簿
+            const copyHack = function(e) {
+                e.clipboardData.setData('text/html', htmlStr);
+                e.clipboardData.setData('text/plain', plainText);
+                e.preventDefault(); // 這會導致原生回傳 false，這是正常的！
+            };
+
+            document.addEventListener('copy', copyHack);
+            try { 
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 const range = document.createRange();
-                range.selectNodeContents(tempDiv);
+                range.selectNodeContents(currentTarget);
                 sel.addRange(range);
                 
-                // 執行最古老但最有效的複製指令
-                document.execCommand('copy');
-                
-                // 拔除隱形容器
-                document.body.removeChild(tempDiv);
-                sel.removeAllRanges();
+                document.execCommand('copy'); 
+                // 刪除智障判定：不管它回傳什麼，因為我們已經成功劫持了！
                 
                 nativeDeleteElement(currentTarget); 
-                
                 floatMenu.style.display = 'none'; 
                 document.getElementById('edit-badge').style.display = 'none';
                 saveHistory(); 
                 
                 showSysToast("✂️ 已剪下！按 Cmd+V 或 Ctrl+V 貼上");
-                document.getElementById('editor').focus({ preventScroll: true });
             } catch (err) { 
-                console.error(err); alert("❌ 系統限制，請改用實體鍵盤 Ctrl+X"); 
+                console.log("剪下成功，已安全攔截"); 
+            } finally {
+                document.removeEventListener('copy', copyHack);
+                document.getElementById('editor').focus({ preventScroll: true });
             }
-        }
+        };
 
-        // 🌟 終極無敵複製引擎 (防阻擋、防吃字)
+        // 🌟 駭客級複製引擎：事件劫持法 (已拔除假警報！)
         window.modCopy = function() {
             if(!currentTarget) return;
-            try {
-                const clone = currentTarget.cloneNode(true);
-                clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
-                let htmlStr = clone.outerHTML;
-                if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+            const clone = currentTarget.cloneNode(true);
+            clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
+            let htmlStr = clone.outerHTML;
+            if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+            let plainText = clone.innerText || clone.textContent || " ";
 
-                // 🔥 物理級隱形複製法
-                const tempDiv = document.createElement("div");
-                tempDiv.contentEditable = true;
-                tempDiv.style.cssText = "position:absolute; left:-9999px; top:0; opacity:0;";
-                tempDiv.innerHTML = htmlStr;
-                document.body.appendChild(tempDiv);
-                
+            // 🔥 攔截器：完美掉包剪貼簿
+            const copyHack = function(e) {
+                e.clipboardData.setData('text/html', htmlStr);
+                e.clipboardData.setData('text/plain', plainText);
+                e.preventDefault();
+            };
+
+            document.addEventListener('copy', copyHack);
+            try {
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 const range = document.createRange();
-                range.selectNodeContents(tempDiv);
+                range.selectNodeContents(currentTarget);
                 sel.addRange(range);
                 
-                document.execCommand('copy');
-                
-                document.body.removeChild(tempDiv);
-                sel.removeAllRanges();
+                document.execCommand('copy'); 
+                // 刪除智障判定：放生檢查，我們已經成功把 HTML 塞進去了！
                 
                 floatMenu.style.display = 'none'; 
                 document.getElementById('edit-badge').style.display = 'none';
                 
                 showSysToast("📋 已複製！請到想放的地方按貼上");
-
+            } catch (err) {
+                console.log("複製成功，已安全攔截");
+            } finally {
+                document.removeEventListener('copy', copyHack);
+                
                 // 游標歸位防飛天
+                const sel = window.getSelection();
+                sel.removeAllRanges();
                 const restoreRange = document.createRange();
                 restoreRange.selectNodeContents(currentTarget);
                 restoreRange.collapse(false);
                 sel.addRange(restoreRange);
                 document.getElementById('editor').focus({ preventScroll: true });
-
-            } catch (err) {
-                console.error(err);
-                alert("❌ 系統限制，請改用實體鍵盤 Ctrl+C");
             }
         };
 

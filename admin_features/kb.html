@@ -1433,6 +1433,7 @@
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; border:1px solid #ddd;" onclick="openModal('card')">💡 <br>資訊卡</button>
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; border:1px solid #ddd;" onclick="openModal('warn')">🚨 <br>警告框</button>
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; grid-column: span 2; border:1px solid #ddd;" onclick="openModal('tabs')">📑 <br>插入內文頁籤群組</button>
+                    <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; border:1px solid #ddd;" onclick="openModal('container-box')">🍱 <br>緊身容器框</button>
                     <button class="editor-btn" style="padding:15px; flex-direction:column; gap:5px; grid-column: span 2; background:#e3f2fd; color:#2980b9; border:1px dashed #3498db; font-weight:bold;" onclick="insertHtml('&nbsp;<span class=\\'peiyu-rwd-br peiyu-obj\\' contenteditable=\\'false\\'></span>&nbsp;'); document.getElementById('config-modal').style.display='none';">📱 <br>插入「手機專屬斷行點」</button>
                 </div>
             `;
@@ -1504,6 +1505,57 @@
                         <button class="editor-btn" style="width:100%; margin-top:8px; background:#fff5f5; border:1px solid #fadbd8; color:#c0392b; font-weight:bold; padding:10px;" onclick="executeClean('all')">🧨 全部強力除髒</button>
                     </div>
                 </div>
+            `;
+        }
+        else if (type === 'container-box') {
+            document.getElementById('m-title-editor').innerText = '🍱 設定緊身容器框';
+            
+            let bg = '#fffdf9', borderCol = '#e3e8ee';
+            let radius = '8px', borderStyle = 'solid', borderWidth = '1px';
+            let isEditing = currentTarget && currentTarget.classList.contains('peiyu-container-box');
+            
+            if (isEditing) {
+                const comp = window.getComputedStyle(currentTarget);
+                bg = rgb2hex(comp.backgroundColor) || bg;
+                borderCol = rgb2hex(comp.borderTopColor) || borderCol;
+                radius = comp.borderRadius;
+                borderStyle = comp.borderTopStyle;
+                borderWidth = comp.borderTopWidth;
+                
+                confirmBtn.style.display = 'none';
+                updateBtn.style.display = 'flex';
+                updateBtn.innerText = "✅ 確認修改容器";
+                updateBtn.style.background = 'var(--forest)'; 
+                updateBtn.style.borderColor = 'var(--forest)';
+                updateBtn.setAttribute('onclick', 'updateContainerBox()');
+            } else {
+                confirmBtn.style.display = 'flex';
+                updateBtn.style.display = 'none';
+            }
+
+            body.innerHTML = `
+                <div style="display:flex; gap:10px;">
+                    <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="ct-radius" class="editor-form-input">
+                        <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
+                        <option value="8px" ${radius==='8px'||radius==='6px'?'selected':''}>微圓角</option>
+                        <option value="20px" ${radius==='20px'?'selected':''}>大圓角</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1;"><label>框線</label><select id="ct-style" class="editor-form-input">
+                        <option value="none" ${borderStyle==='none'?'selected':''}>無框線</option>
+                        <option value="solid" ${borderStyle==='solid'?'selected':''}>實線</option>
+                        <option value="dashed" ${borderStyle==='dashed'?'selected':''}>虛線</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1;"><label>粗細</label><select id="ct-width" class="editor-form-input">
+                        <option value="1px" ${borderWidth==='1px'?'selected':''}>1px</option>
+                        <option value="2px" ${borderWidth==='2px'?'selected':''}>2px</option>
+                        <option value="4px" ${borderWidth==='4px'?'selected':''}>4px</option>
+                    </select></div>
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:0;">
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="ct-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;"></div>
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="ct-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;"></div>
+                </div>
+                ${!isEditing ? `<div class="editor-form-group" style="margin-top:15px;"><label>預設文字 (若有反白文字則會自動包裝進來)</label><input type="text" id="ct-text" class="editor-form-input" value="請在此輸入內容..." placeholder="會出現在框內的預設文字"></div>` : ''}
             `;
         }
         else if (type === 'custom-box') {
@@ -1626,6 +1678,31 @@
             insertHtml(html);
             document.getElementById('config-modal').style.display = 'none';
             return;
+        }
+        else if (modalMode === 'container-box') {
+            const radius = document.getElementById('ct-radius').value;
+            const style = document.getElementById('ct-style').value;
+            const width = document.getElementById('ct-width').value;
+            const bg = document.getElementById('ct-bg').value;
+            const borderCol = document.getElementById('ct-border-color').value;
+            const defaultText = document.getElementById('ct-text') ? document.getElementById('ct-text').value : '請在此輸入內容...';
+            const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
+            
+            restoreSelection();
+            const sel = window.getSelection();
+            let innerContent = defaultText;
+
+            // 🔥 智慧捕捉：如果你有反白文字，直接整包複製起來當內餡！
+            if (sel.rangeCount > 0 && !sel.isCollapsed) {
+                const range = sel.getRangeAt(0);
+                const tempDiv = document.createElement('div');
+                tempDiv.appendChild(range.cloneContents());
+                if(tempDiv.innerHTML.trim() !== '') {
+                    innerContent = tempDiv.innerHTML;
+                }
+            }
+
+            html = `<div class="peiyu-block peiyu-obj peiyu-container-box" style="width: fit-content; background-color: ${bg}; border: ${borderStr}; border-radius: ${radius}; padding: 15px 20px; margin: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">${innerContent}</div><p><br></p>`;
         }
         if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
         // 🌟 自適應換行版主標/副標 (解開 nowrap 鎖死，加入 max-width 防破版)
@@ -1895,7 +1972,7 @@
         });
 
         // ==========================================
-        // 🛡️ 貼上護盾引擎：防止外框與積木被大卸八塊！
+        // 🛡️ 極簡貼上護盾：只防護會卡死游標的「單行文字積木」！
         // ==========================================
         editor.addEventListener('paste', function(e) {
             const sel = window.getSelection();
@@ -1905,25 +1982,28 @@
             let currentContainer = node.nodeType === 3 ? node.parentNode : node;
             if (!currentContainer.closest) return; // 防呆
             
-            // 偵測游標是否在脆弱的積木裡面
-            let insideInlineBox = currentContainer.closest('span.peiyu-custom-box');
-            let insideBlockBox = currentContainer.closest('.peiyu-custom-box, h2, h3, .peiyu-tab-title-edit');
+            // 🔥 核心修正：只攔截「span.peiyu-custom-box」和「a 超連結」，
+            // 其他所有東西 (包含你的日常模樣 H3、緊身容器框 DIV) 全部放行，讓瀏覽器原生處理！
+            let insideInlineBox = currentContainer.closest('span.peiyu-custom-box, a.peiyu-obj, .peiyu-tab-title-edit');
 
-            if (insideInlineBox || insideBlockBox) {
-                e.preventDefault(); // 🛑 強制攔截瀏覽器的破壞性貼上！
-                
-                // 只抓取「純文字」，把那些會炸毀表格和外框的排版代碼全部丟掉
+            if (insideInlineBox) {
+                e.preventDefault(); 
                 let text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                
-                // 🔥 如果是「文字外框(span)」或「標題/頁籤名稱」，絕對不准有換行！把換行符號全部變成空白字元
-                if (insideInlineBox || currentContainer.closest('h2, h3, .peiyu-tab-title-edit')) {
-                    text = text.replace(/[\r\n]+/g, ' ');
-                }
-                
+                text = text.replace(/[\r\n]+/g, ' '); // 將換行符號抹平
                 document.execCommand('insertText', false, text);
                 saveHistory();
             }
+            // 其餘所有的貼上動作，完全不攔截，交給瀏覽器原生引擎！
         });
+
+        // 幫忙產生提示框的小工具
+        function showSysToast(msg) {
+            const toast = document.createElement('div');
+            toast.innerText = msg;
+            toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:50px; z-index:99999; font-size:14px; pointer-events:none; box-shadow:0 4px 15px rgba(0,0,0,0.2);";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
 
         const hideAllUI = () => { 
             if (editBadge) editBadge.style.display = 'none';
@@ -2260,11 +2340,13 @@
             }
             else if (type === 'block') { 
                 let isCustomBox = currentTarget.classList.contains('peiyu-custom-box');
+                let isContainerBox = currentTarget.classList.contains('peiyu-container-box');
                 let isDivider = currentTarget.tagName === 'HR' && currentTarget.classList.contains('peiyu-divider');
                 let isHeading = currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3';
                 
                 let editBtnHtml = '';
                 if (isCustomBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
+                else if (isContainerBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('container-box')">⚙️ 修改容器</button>`;
                 else if (isDivider) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
 
                 const blockAlignBtns = `<div style="display:flex; gap:2px; align-items:center; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee; width:100%; box-sizing:border-box;">
@@ -2273,9 +2355,9 @@
                     <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-right')" title="靠右"><i class="fas fa-align-right"></i> 靠右</button>
                 </div>`;
 
-                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isDivider || isHeading) ? '260px' : '200px'}; max-width:90vw;">
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isContainerBox || isDivider || isHeading) ? '260px' : '200px'}; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
-                    ${(isCustomBox || isHeading) ? blockAlignBtns : ''}
+                    ${(isCustomBox || isContainerBox || isHeading) ? blockAlignBtns : ''}
                     <div style="display:flex; gap:5px;">
                         ${editBtnHtml}
                         <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
@@ -2386,15 +2468,16 @@
                         else if (mode.includes('right')) parent.style.textAlign = 'right';
                     }
                 } else {
-                    // 🔥 段落容器或標題 (DIV / H2)：直接設定內文對齊，並搭配 margin 置中
+                    // 🔥 段落容器或標題 (DIV / H2)：設定對齊
                     if (mode.includes('left')) {
-                        currentTarget.style.textAlign = 'left';
+                        if (!currentTarget.classList.contains('peiyu-container-box')) currentTarget.style.textAlign = 'left';
                         currentTarget.style.margin = '15px auto 15px 0';
                     } else if (mode.includes('center')) {
-                        currentTarget.style.textAlign = 'center';
-                        currentTarget.style.margin = '15px auto'; // 確保外層區塊也置中
+                        // 緊身容器框只移動外殼，不改變裡面文字的對齊！
+                        if (!currentTarget.classList.contains('peiyu-container-box')) currentTarget.style.textAlign = 'center';
+                        currentTarget.style.margin = '15px auto'; 
                     } else if (mode.includes('right')) {
-                        currentTarget.style.textAlign = 'right';
+                        if (!currentTarget.classList.contains('peiyu-container-box')) currentTarget.style.textAlign = 'right';
                         currentTarget.style.margin = '15px 0 15px auto';
                     }
                 }
@@ -2621,86 +2704,91 @@
             }
         }
 
-        window.modCut = async function() {
+        // 🌟 終極無敵剪下引擎 (防阻擋、防吃字)
+        window.modCut = function() {
             if(!currentTarget) return;
             try { 
-                const html = currentTarget.outerHTML; 
-                const typeHtml = new Blob([html], { type: "text/html" }); 
-                const typeText = new Blob(["[物件]"], { type: "text/plain" }); 
-                await navigator.clipboard.write([ new ClipboardItem({ "text/html": typeHtml, "text/plain": typeText }) ]); 
+                const clone = currentTarget.cloneNode(true);
+                clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
+                let htmlStr = clone.outerHTML;
+                if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+
+                // 🔥 物理級隱形複製法：建立一個暫時的隱形容器
+                const tempDiv = document.createElement("div");
+                tempDiv.contentEditable = true;
+                tempDiv.style.cssText = "position:absolute; left:-9999px; top:0; opacity:0;";
+                tempDiv.innerHTML = htmlStr;
+                document.body.appendChild(tempDiv);
                 
-                nativeDeleteElement(currentTarget); // 取代暴力 remove()
+                // 強制選取隱形容器的內容
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                sel.addRange(range);
+                
+                // 執行最古老但最有效的複製指令
+                document.execCommand('copy');
+                
+                // 拔除隱形容器
+                document.body.removeChild(tempDiv);
+                sel.removeAllRanges();
+                
+                nativeDeleteElement(currentTarget); 
                 
                 floatMenu.style.display = 'none'; 
                 document.getElementById('edit-badge').style.display = 'none';
                 saveHistory(); 
                 
-                // 無干擾 Toast 提示，絕不搶走編輯器焦點
-                const toast = document.createElement('div');
-                toast.innerText = "✂️ 已剪下！按 Cmd+V 或 Ctrl+V 貼上";
-                toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:50px; z-index:9999; font-size:14px; pointer-events:none;";
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 2000);
-                
-                document.getElementById('editor').focus();
+                showSysToast("✂️ 已剪下！按 Cmd+V 或 Ctrl+V 貼上");
+                document.getElementById('editor').focus({ preventScroll: true });
             } catch (err) { 
-                console.error(err); alert("❌ 瀏覽器阻擋剪切，請改用滑鼠從外側反白後按 Ctrl+X"); 
+                console.error(err); alert("❌ 系統限制，請改用實體鍵盤 Ctrl+X"); 
             }
         }
 
-        // 🌟 真正的剪貼簿複製引擎 (拷貝後可到處貼上)
-        // 🌟 物理級神盾複製引擎：模擬人類反白複製，突破所有瀏覽器限制！
+        // 🌟 終極無敵複製引擎 (防阻擋、防吃字)
         window.modCopy = function() {
             if(!currentTarget) return;
-            
-            // 1. 建立一個看不見的神祕結界
-            const tempDiv = document.createElement("div");
-            tempDiv.contentEditable = true;
-            tempDiv.style.cssText = "position:absolute; left:-9999px; top:-9999px; opacity:0;";
-            
-            // 2. 把目標的完美分身塞進去
-            const clone = currentTarget.cloneNode(true);
-            
-            // 如果是文字外框 (span) 或超連結 (A)，要在前後加上空白，防止貼上後游標卡死
-            if (clone.tagName === 'SPAN' || clone.tagName === 'A') {
-                tempDiv.appendChild(document.createTextNode('\u00A0'));
-                tempDiv.appendChild(clone);
-                tempDiv.appendChild(document.createTextNode('\u00A0'));
-            } else {
-                tempDiv.appendChild(clone);
-            }
-            
-            document.body.appendChild(tempDiv);
-            
-            // 3. 模擬人類用滑鼠把它完美反白
-            const range = document.createRange();
-            range.selectNodeContents(tempDiv);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-            
-            // 4. 強制執行物理複製 (Ctrl+C)
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    floatMenu.style.display = 'none'; 
-                    document.getElementById('edit-badge').style.display = 'none';
-                    
-                    const toast = document.createElement('div');
-                    toast.innerText = "📋 已複製！請到想放的地方按貼上";
-                    toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:50px; z-index:9999; font-size:14px; pointer-events:none; box-shadow:0 4px 15px rgba(0,0,0,0.2);";
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 2000);
-                } else {
-                    throw new Error('Copy failed');
-                }
-            } catch (err) {
-                alert("❌ 瀏覽器阻擋了按鈕複製，請改用實體鍵盤 Ctrl+C");
-            } finally {
-                // 5. 毀屍滅跡，把神祕結界拆掉
+                const clone = currentTarget.cloneNode(true);
+                clone.classList.remove('obj-selected-block', 'obj-selected-image', 'obj-selected-link', 'obj-selected-table');
+                let htmlStr = clone.outerHTML;
+                if (clone.tagName === 'SPAN' || clone.tagName === 'A') htmlStr = '&nbsp;' + htmlStr + '&nbsp;';
+
+                // 🔥 物理級隱形複製法
+                const tempDiv = document.createElement("div");
+                tempDiv.contentEditable = true;
+                tempDiv.style.cssText = "position:absolute; left:-9999px; top:0; opacity:0;";
+                tempDiv.innerHTML = htmlStr;
+                document.body.appendChild(tempDiv);
+                
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                sel.addRange(range);
+                
+                document.execCommand('copy');
+                
                 document.body.removeChild(tempDiv);
                 sel.removeAllRanges();
-                document.getElementById('editor').focus();
+                
+                floatMenu.style.display = 'none'; 
+                document.getElementById('edit-badge').style.display = 'none';
+                
+                showSysToast("📋 已複製！請到想放的地方按貼上");
+
+                // 游標歸位防飛天
+                const restoreRange = document.createRange();
+                restoreRange.selectNodeContents(currentTarget);
+                restoreRange.collapse(false);
+                sel.addRange(restoreRange);
+                document.getElementById('editor').focus({ preventScroll: true });
+
+            } catch (err) {
+                console.error(err);
+                alert("❌ 系統限制，請改用實體鍵盤 Ctrl+C");
             }
         };
 
@@ -3758,8 +3846,28 @@
         document.getElementById('config-modal').style.display = 'none';
         document.getElementById('float-menu').style.display = 'none';
     };
+    // 🌟 緊身容器修改引擎
+    window.updateContainerBox = function() {
+        if (!currentTarget || !currentTarget.classList.contains('peiyu-container-box')) return;
+        
+        currentTarget.style.borderRadius = document.getElementById('ct-radius').value;
+        currentTarget.style.backgroundColor = document.getElementById('ct-bg').value;
 
-        // 🌟 修改自訂外框引擎 (自帶自動除髒功能)
+        const style = document.getElementById('ct-style').value;
+        const width = document.getElementById('ct-width').value;
+        const color = document.getElementById('ct-border-color').value;
+
+        // 🔥 核心修復：強制使用 shorthand (縮寫) 寫法，防止瀏覽器複製貼上時弄丟邊框！
+        if (style === 'none') {
+            currentTarget.style.border = 'none';
+        } else {
+            currentTarget.style.border = `${width} ${style} ${color}`;
+        }
+
+        saveHistory();
+        document.getElementById('config-modal').style.display = 'none';
+    };
+        // 🌟 修改自訂外框引擎 (自帶自動除髒與複製防護)
     window.updateCustomBox = function() {
         if (!currentTarget || !currentTarget.classList.contains('peiyu-custom-box')) return;
         
@@ -3770,7 +3878,7 @@
             currentTarget.style.textAlign = 'justify';
             currentTarget.style.textJustify = 'inter-ideograph';
             
-            // 🔥 自動除髒：確保修改後，裡面的字不被舊的對齊屬性干擾
+            // 自動除髒：確保修改後，裡面的字不被舊的對齊屬性干擾
             currentTarget.querySelectorAll('div, p, span').forEach(el => {
                 el.style.textAlign = '';
             });
@@ -3779,13 +3887,19 @@
         }
         
         currentTarget.style.borderRadius = document.getElementById('cb-radius').value;
-        currentTarget.style.borderStyle = document.getElementById('cb-style').value;
-        currentTarget.style.borderWidth = document.getElementById('cb-width').value;
         currentTarget.style.color = document.getElementById('cb-color').value;
         currentTarget.style.backgroundColor = document.getElementById('cb-bg').value;
-        currentTarget.style.borderColor = document.getElementById('cb-border-color').value;
+        
+        const style = document.getElementById('cb-style').value;
+        const width = document.getElementById('cb-width').value;
+        const color = document.getElementById('cb-border-color').value;
 
-        if (document.getElementById('cb-style').value === 'none') currentTarget.style.border = 'none';
+        // 🔥 核心修復：強制使用 shorthand (縮寫) 寫法
+        if (style === 'none') {
+            currentTarget.style.border = 'none';
+        } else {
+            currentTarget.style.border = `${width} ${style} ${color}`;
+        }
 
         const prefs = {
             bg: document.getElementById('cb-bg').value,

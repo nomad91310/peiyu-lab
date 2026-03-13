@@ -158,6 +158,14 @@
         .context-menu-item:hover { background: #f4f7f6; color: var(--forest); font-weight: bold; }
         .context-shortcut { color: #aaa; font-size: 11px; font-family: monospace; font-weight: normal; }
 
+        /* 🔗 超連結與按鈕專屬樣式 */
+        .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
+        .peiyu-link-text:hover { color: #2980b9; }
+        .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: var(--forest); color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
+        .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
+        .obj-selected-link { outline: 3px solid #9b59b6 !important; outline-offset: 2px; border-radius: 4px; }
+        .badge-purple { background: #9b59b6; } .badge-purple:hover { background: #8e44ad; }
+
         /* --- 4. 你的手機版終極優化 RWD (原封不動保留) --- */
         @media (max-width: 1024px) {
             body { 
@@ -468,7 +476,7 @@
                     </div>
                     
                     <div class="tb-group">
-                        <button class="editor-btn" onclick="insertLink()" title="插入連結"><i class="fas fa-link"></i></button>
+                        <button class="editor-btn" onclick="openModal('link')" title="插入超連結/按鈕"><i class="fas fa-link"></i></button>
                         <button class="editor-btn" onclick="openGallery()" style="color:var(--info);" title="開啟圖庫"><i class="fas fa-image"></i></button>
                         <button class="editor-btn" onclick="openModal('table')" title="插入表格"><i class="fas fa-table"></i></button>
                         <button class="editor-btn" onclick="openModal('divider')" title="插入分隔線/間距" style="color: #8e44ad; font-size: 16px;"><i class="fas fa-grip-lines"></i></button>
@@ -648,7 +656,10 @@
             @media (max-width: 768px) and (orientation: portrait) {
                 .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
                 .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-            }
+                .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
+            .peiyu-article .peiyu-link-text:hover { color: #2980b9; }
+            .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
+            .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
         </style>
         <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
 
@@ -704,8 +715,12 @@
                 @media (max-width: 768px) and (orientation: portrait) {
                     .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
                     .peiyu-article .resizable-wrapper, .peiyu-article img { margin-left: 0 !important; margin-right: 0 !important; }
-                }
-            </style><div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
+                    .peiyu-article .peiyu-link-text { color: #3498db; text-decoration: underline; cursor: pointer; display: inline-block; padding: 0 2px; }
+                    .peiyu-article .peiyu-link-text:hover { color: #2980b9; }
+                    .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
+                    .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
+                </style>
+        <div class="peiyu-article">\n${editor.innerHTML}\n</div>`;
             
             s.value = exportHTML; s.style.display = 'block'; s.style.flex = '1'; s.style.height = ''; editor.style.display = 'none'; 
         } else { 
@@ -1395,6 +1410,46 @@
                 </div>
             `;
         }
+        else if (type === 'link') {
+            document.getElementById('m-title-editor').innerText = '🔗 插入超連結 / 按鈕';
+            
+            let linkUrl = 'https://', linkText = '', linkStyle = 'text', isNewTab = true;
+            let isEditing = currentTarget && currentTarget.tagName === 'A';
+
+            if (isEditing) {
+                linkUrl = currentTarget.href || 'https://';
+                linkText = currentTarget.innerText;
+                linkStyle = currentTarget.classList.contains('peiyu-link-btn') ? 'button' : 'text';
+                isNewTab = currentTarget.target === '_blank';
+                
+                confirmBtn.style.display = 'none';
+                const updateBtn = document.getElementById('m-update-btn');
+                updateBtn.style.display = 'flex';
+                updateBtn.innerText = "✅ 確認修改連結";
+                updateBtn.setAttribute('onclick', 'updateLink()');
+            } else {
+                const sel = window.getSelection();
+                linkText = sel.toString().trim(); // 如果有反白文字，自動抓進來
+                confirmBtn.style.display = 'flex';
+                document.getElementById('m-update-btn').style.display = 'none';
+            }
+
+            body.innerHTML = `
+                <div class="editor-form-group"><label>顯示文字</label><input type="text" id="inp-link-text" class="editor-form-input" value="${linkText}" placeholder="例如：點擊前往首頁"></div>
+                <div class="editor-form-group"><label>目標網址 (URL)</label><input type="text" id="inp-link-url" class="editor-form-input" value="${linkUrl}"></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="editor-form-group" style="flex:1;"><label>顯示樣式</label><select id="inp-link-style" class="editor-form-input">
+                        <option value="text" ${linkStyle==='text'?'selected':''}>📝 一般文字超連結</option>
+                        <option value="button" ${linkStyle==='button'?'selected':''}>🔘 圓角按鈕樣式</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1; display:flex; align-items:flex-end;">
+                        <label style="display:flex; align-items:center; gap:5px; height:38px; margin:0; cursor:pointer;">
+                            <input type="checkbox" id="inp-link-tab" ${isNewTab ? 'checked' : ''} style="width:18px; height:18px; margin:0;"> 另開新分頁
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
         else if (type === 'maintenance') {
             document.getElementById('m-title-editor').innerText = '🛠️ 文章格式大整理';
             confirmBtn.style.display = 'none'; 
@@ -1527,6 +1582,21 @@
 
     function confirmInsert() {
         restoreSelection(); let html = '';
+        if(modalMode === 'link') {
+            const txt = document.getElementById('inp-link-text').value || '超連結';
+            const url = document.getElementById('inp-link-url').value || '#';
+            const isBtn = document.getElementById('inp-link-style').value === 'button';
+            const newTab = document.getElementById('inp-link-tab').checked ? 'target="_blank"' : '';
+            const cls = isBtn ? 'peiyu-link-btn peiyu-obj' : 'peiyu-link-text peiyu-obj';
+            
+            // 💡 核心修復：前後都加空白字元當作「防護緩衝區」，讓你滑鼠點得進去！
+            html = `&nbsp;<a href="${url}" ${newTab} class="${cls}" contenteditable="false">${txt}</a>&nbsp;`;
+            
+            // 🔥 直接呼叫原地插入引擎，然後強制結束！絕對不進入下方的段落換行引擎！
+            insertHtml(html);
+            document.getElementById('config-modal').style.display = 'none';
+            return;
+        }
         if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
         // 🌟 自適應換行版主標/副標 (解開 nowrap 鎖死，加入 max-width 防破版)
         // 🌟 主標/副標 (加上 peiyu-block 讓雷達追蹤)
@@ -1901,6 +1971,8 @@
                 btnMain.className = 'badge-icon'; 
                 if (targetType === 'image') {
                     btnMain.classList.add('badge-green'); btnMain.innerHTML = '<i class="fas fa-image"></i>';
+                } else if (targetType === 'link') {
+                    btnMain.classList.add('badge-purple'); btnMain.innerHTML = '<i class="fas fa-link"></i>';
                 } else if (targetType === 'block' || targetType === 'tabs') {
                     btnMain.classList.add('badge-red'); btnMain.innerHTML = '<i class="fas fa-cube"></i>';
                 }
@@ -1915,13 +1987,20 @@
             // 這裡也必須放寬攔截
             if (e.target.closest('.mobile-tool-stack') || e.target.closest('#float-menu') || e.target.closest('#edit-badge') || e.target.closest('#m-context-edit-btn')) return;
             
-            document.querySelectorAll('[class*="obj-selected-"]').forEach(el => el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block'));
+            // 🔥 終極護盾：只要是在編輯器裡面點到「超連結」，絕對沒收它的跳轉能力！
+            if (e.target.closest('a')) {
+                e.preventDefault();
+            }
+            
+            // 將所有殘留的藍/綠/紅/紫色選取框一次洗掉
+            document.querySelectorAll('[class*="obj-selected-"]').forEach(el => el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block', 'obj-selected-link'));
             currentTarget = null; currentTargetCell = null; pendingTargetType = null;
-            if(floatMenu) floatMenu.style.display = 'none'; 
+            if(floatMenu) floatMenu.style.display = 'none';
             
             let targetImg = e.target.closest('img'); 
             let targetCell = e.target.closest('td, th');
             let targetTable = e.target.closest('table');
+            let targetLink = e.target.closest('a.peiyu-obj');
             let targetTabs = (e.target.closest('.peiyu-tab-label-row') || e.target.closest('.peiyu-tab-group-header') || e.target.classList.contains('peiyu-tabs-wrapper')) ? e.target.closest('.peiyu-tabs-wrapper') : null;
             let rawBlock = e.target.closest('.peiyu-block');
             if (!rawBlock && e.target.closest('h2, h3')) { rawBlock = e.target.closest('h2, h3'); rawBlock.classList.add('peiyu-block', 'peiyu-obj'); }
@@ -1949,8 +2028,11 @@
                 window.setBadgePosition(lastValidRange.getBoundingClientRect(), 'text', targetTable !== null);
                 if (typeof updateToolbarState === 'function') updateToolbarState(); return; 
             }
-
-            if (rawBlock) {
+            if (targetLink) {
+                currentTarget = targetLink; currentTargetCell = null; pendingTargetType = 'link';
+                currentTarget.classList.add('obj-selected-link');
+                window.setBadgePosition(currentTarget.getBoundingClientRect(), 'link', targetTable !== null);
+            } else if (rawBlock) {
                 currentTarget = rawBlock; currentTargetCell = targetCell; pendingTargetType = 'block';
                 currentTarget.classList.add('obj-selected-block');
                 window.setBadgePosition(currentTarget.getBoundingClientRect(), 'block', targetTable !== null);
@@ -2046,6 +2128,21 @@
                     </div>
                     ${breakoutBtn}
                 </div>`; 
+            }
+            else if (type === 'link') {
+                floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:260px; max-width:90vw;">
+                    <div style="font-size:12px; font-weight:bold; color:var(--purple); border-bottom:1px solid #eee; padding-bottom:5px;">🔗 超連結設定</div>
+                    <div style="font-size:11px; color:#666; background:#f4f6f8; padding:6px; border-radius:4px; word-break:break-all;">${currentTarget.href}</div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('link')">⚙️ 修改</button>
+                        <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
+                        <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="editor-btn" style="color:#3498db; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="window.open(currentTarget.href, '_blank')">🌐 測試開啟</button>
+                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; padding:6px 15px;" onclick="modBlockDelete()">🗑️ 刪除</button>
+                    </div>
+                </div>`;
             }
             else if (type === 'image') { 
                 const parentElement = currentTarget.parentElement;
@@ -2533,8 +2630,8 @@
             // 2. 把目標的完美分身塞進去
             const clone = currentTarget.cloneNode(true);
             
-            // 如果是文字外框 (span)，要在前後加上空白，防止貼上後游標卡死
-            if (clone.tagName === 'SPAN') {
+            // 如果是文字外框 (span) 或超連結 (A)，要在前後加上空白，防止貼上後游標卡死
+            if (clone.tagName === 'SPAN' || clone.tagName === 'A') {
                 tempDiv.appendChild(document.createTextNode('\u00A0'));
                 tempDiv.appendChild(clone);
                 tempDiv.appendChild(document.createTextNode('\u00A0'));
@@ -3786,6 +3883,25 @@
                 previewBox.style.textJustify = 'inter-ideograph'; // 🔥 針對中文字的最佳化平齊
             }
         };
+        // 🌟 更新超連結引擎
+    window.updateLink = function() {
+        if (!currentTarget || currentTarget.tagName !== 'A') return;
+        currentTarget.innerText = document.getElementById('inp-link-text').value || '超連結';
+        currentTarget.href = document.getElementById('inp-link-url').value || '#';
+        
+        if (document.getElementById('inp-link-tab').checked) currentTarget.target = "_blank";
+        else currentTarget.removeAttribute('target');
+
+        if (document.getElementById('inp-link-style').value === 'button') {
+            currentTarget.className = 'peiyu-link-btn peiyu-obj';
+        } else {
+            currentTarget.className = 'peiyu-link-text peiyu-obj';
+        }
+        
+        saveHistory();
+        document.getElementById('config-modal').style.display = 'none';
+        document.getElementById('float-menu').style.display = 'none';
+    };
 
         // 🌟 修改自訂外框引擎 (自帶自動除髒功能)
     window.updateCustomBox = function() {

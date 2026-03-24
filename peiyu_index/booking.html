@@ -9,112 +9,175 @@
     
 <style>
     :root { 
-        --forest: #1a2f23; --forest-light: #2a4032; --cream: #f9f7f2; --white: #ffffff;
+        --forest: #1a2f23; --forest-light: #2a4032; --cream: #fdfbf7; --white: #ffffff;
         --accent: #c6a87c; --text-main: #2c3e50; --error: #d32f2f; --success: #2e7d32;
+        --bg-gray: #f4f6f8;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background-color: transparent; color: var(--text-main); line-height: 1.7; overflow-x: hidden; }
+    body { margin: 0; font-family: -apple-system, "Microsoft JhengHei", sans-serif; background-color: var(--cream); color: var(--text-main); line-height: 1.7; overflow-x: hidden; }
     h1, h2, h3, h4 { font-family: 'Noto Serif TC', serif; }
     
-    .booking-step { display: none; padding: 20px 20px 80px 20px; max-width: 1100px; margin: 0 auto; animation: fadeSlideUp 0.5s ease-out; }
+    .booking-step { display: none; padding: 30px 20px 80px 20px; max-width: 900px; margin: 0 auto; animation: fadeSlideUp 0.5s ease-out; }
     .booking-step.active { display: block; }
-    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     .btn-primary, .btn-secondary, .btn-back-capsule, .close-modal-btn, #sub-btn {
-        height: 40px; padding: 0 22px; font-size: 14px; font-weight: bold; border-radius: 50px;
+        height: 48px; padding: 0 28px; font-size: 15px; font-weight: bold; border-radius: 50px;
         display: inline-flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s;
-        background-color: var(--forest); border: 1px solid var(--accent); color: var(--accent); box-shadow: 0 4px 10px rgba(26, 47, 35, 0.2);
+        background-color: var(--forest); border: 1px solid var(--accent); color: var(--accent); box-shadow: 0 4px 15px rgba(26, 47, 35, 0.15);
+        white-space: nowrap; flex-shrink: 0;
     }
-    .btn-primary i, .btn-back-capsule i { color: var(--accent); transition: all 0.3s; margin-right: 6px;}
+    .btn-primary i, .btn-back-capsule i { color: var(--accent); transition: all 0.3s; margin-right: 8px;}
     .btn-primary:hover, .btn-secondary:hover, .btn-back-capsule:hover, .close-modal-btn:hover, #sub-btn:not(:disabled):hover {
-        background-color: var(--accent); border-color: var(--accent); color: #ffffff; transform: translateY(-2px);
+        background-color: var(--accent); border-color: var(--accent); color: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(198, 168, 124, 0.3);
     }
     .btn-primary:hover i, .btn-back-capsule:hover i { color: #ffffff; }
-    .btn-primary:disabled, #sub-btn:disabled { background: #ccc; border-color: #ccc; color: #fff; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-primary:disabled, #sub-btn:disabled { background: #e0e0e0; border-color: #e0e0e0; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    .card { background: var(--white); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(26,47,35,0.08); border: 1px solid #eee; margin-bottom: 30px; }
-    .form-group { margin-bottom: 25px; }
-    label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--forest); font-size: 1.05rem; }
+    .card { background: var(--white); padding: 35px; border-radius: 24px; box-shadow: 0 10px 30px rgba(26,47,35,0.05); border: 1px solid rgba(0,0,0,0.04); margin-bottom: 30px; }
+    .form-section { background: var(--white); padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; margin-bottom: 25px; }
+    .form-section-title { font-size: 1.15rem; color: var(--forest); font-weight: 900; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f4f6f8; padding-bottom: 10px; }
+    .form-section-title i { color: var(--accent); }
+
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #444; font-size: 0.95rem; }
     label.required::after { content: " *"; color: var(--error); }
     
-    /* 🔥 修正：強制統一下拉選單與輸入框的高度與 Padding，解決高低差問題 */
+    /* 🔥 修復手機版破窗：防止「日期」與「下拉選單」撐爆畫面 */
+    input[type="date"], select {
+        max-width: 100%; min-width: 0;
+    }
+    #birth-time-group div[style*="display:flex"] select { flex: 1; }
+    
     input:not([type="checkbox"]):not([type="radio"]), select { 
-        width: 100%; 
-        height: 50px; /* 鎖死高度 */
-        padding: 0 18px; /* 上下不留內距，靠 height 撐開 */
-        border: 1px solid #ddd; 
-        border-radius: 10px; 
-        font-size: 16px; 
-        font-family: inherit;
-        outline: none; 
-        transition: 0.3s; 
-        background: #fafafa; 
-        box-sizing: border-box;
+        width: 100%; height: 52px; padding: 0 18px; border: 1.5px solid #e0e5e9; border-radius: 12px; font-size: 16px; font-family: inherit; outline: none; transition: 0.3s; background: #fdfdfd; color: #333; box-sizing: border-box;
     }
-    /* Textarea 多行文字框另外設定，讓它可以被拉長 */
     textarea {
-        width: 100%;
-        padding: 14px 18px; 
-        border: 1px solid #ddd; 
-        border-radius: 10px; 
-        font-size: 16px; 
-        font-family: inherit;
-        outline: none; 
-        transition: 0.3s; 
-        background: #fafafa; 
-        box-sizing: border-box;
+        width: 100%; padding: 16px 18px; border: 1.5px solid #e0e5e9; border-radius: 12px; font-size: 16px; font-family: inherit; outline: none; transition: 0.3s; background: #fdfdfd; color: #333; box-sizing: border-box; resize: vertical; min-height: 100px;
     }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 4px rgba(198, 168, 124, 0.15); }
+    input:disabled { background: #f0f4f8; cursor: not-allowed; color: #999; border-color: #eee; }
 
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px rgba(198, 168, 124, 0.2); }
-    input:disabled { background: #eee; cursor: not-allowed; color: #999; }
-
-    .brand-section-header { text-align: center; margin-bottom: 45px; padding-top: 15px; }
+    .brand-section-header { text-align: center; margin-bottom: 40px; padding-top: 10px; }
     .brand-h3-zh { display: inline-block; font-family: 'Noto Serif TC', serif; font-size: 2.2rem; color: var(--forest); margin: 0; font-weight: 900; letter-spacing: 5px; }
     .brand-h2-en { display: inline-block; font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--forest); margin-left: 15px; font-weight: 700; letter-spacing: 1.5px; opacity: 0.4; }
-    .brand-capsule { display: table; margin: 10px auto 0 auto; font-family: 'Noto Serif TC', serif; font-size: 0.85rem; color: #777; background: #fffdf9; padding: 4px 22px; border-radius: 50px; border: 1px solid rgba(198, 168, 124, 0.4); }
-    .brand-capsule::before, .brand-capsule::after { content: '✦'; color: var(--accent); margin: 0 10px; font-size: 0.8rem; }
-
-    .cat-card { border: 1px solid rgba(0,0,0,0.05); padding: 22px 30px; border-radius: 16px; margin-bottom: 15px; cursor: pointer; background: var(--white); transition: all 0.3s; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(26, 47, 35, 0.03); }
-    .cat-card:hover { border-color: var(--accent); background: #fffdf9; transform: translateX(8px); box-shadow: 0 10px 25px rgba(198, 168, 124, 0.15); }
-    .cat-card h3 { margin: 0; font-size: 1.25rem; color: var(--forest); font-weight: bold; }
+    .brand-capsule { display: table; margin: 15px auto 0 auto; font-family: 'Noto Serif TC', serif; font-size: 0.85rem; color: #777; background: #fffdf9; padding: 6px 25px; border-radius: 50px; border: 1px solid rgba(198, 168, 124, 0.4); font-weight: bold; }
     
-    .service-card { background: #ffffff; border: 1px solid #f0f0f0; padding: 20px; border-radius: 15px; margin-bottom: 15px; transition: all 0.2s ease; }
-    .service-card:hover { border-color: var(--accent); box-shadow: 0 8px 20px rgba(26, 47, 35, 0.05); }
-    .service-card.disabled-card { opacity: 0.4; filter: grayscale(1); }
-    .service-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .service-info { display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; color: var(--forest); }
-    .service-info input { width: 22px; height: 22px; cursor: pointer; accent-color: var(--forest); }
-    .price-badge { background: var(--forest); color: var(--accent); padding: 4px 14px; border-radius: 8px; font-size: 14px; font-weight: 900; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-    .service-desc { font-size: 0.95rem; color: #888; margin-left: 38px; padding-top: 5px; line-height: 1.5; }
+    .step-indicator { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; font-family: 'Cinzel', serif; font-weight: 900; color: #ccc; font-size: 0.9rem; }
+    .step-indicator .step { padding: 5px 15px; border-radius: 20px; border: 2px solid #eee; transition: 0.3s; }
+    .step-indicator .step.active { color: var(--forest); border-color: var(--accent); background: #fffcf5; }
+    .step-indicator .line { width: 40px; height: 2px; background: #eee; }
+
+    #category-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .cat-card { background: var(--white); border: 2px solid #f0f0f0; padding: 25px 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .cat-card:hover { border-color: var(--accent); background: #fffcf5; transform: translateY(-5px); box-shadow: 0 12px 25px rgba(198, 168, 124, 0.15); }
+    .cat-icon-box { width: 50px; height: 50px; border-radius: 12px; background: #fdfaf1; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px; }
+    .cat-card h3 { margin: 0 0 5px 0; font-size: 1.2rem; color: var(--forest); font-weight: 900; }
+    .cat-card p { margin: 0; font-size: 0.85rem; color: #888; }
+    .cat-arrow { margin-left: auto; font-size: 1.2rem; color: #ccc; transition: 0.3s; }
+    .cat-card:hover .cat-arrow { color: var(--forest); transform: translateX(5px); }
     
-    .sub-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; padding: 18px; background: rgba(26, 47, 35, 0.04); border-radius: 12px; border: 1px solid rgba(26, 47, 35, 0.05); }
-    .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--forest-light); font-weight: 500; }
-    .sub-opt-label input { width: 18px; height: 18px; accent-color: var(--accent); }
+    /* 🔥 奶油底色 + 左右排列架構 */
+    .product-showcase { 
+        display: flex; gap: 30px; align-items: flex-start; 
+        background: #fffcf5; padding: 35px 30px; border-radius: 24px; 
+        box-shadow: 0 12px 35px rgba(198, 168, 124, 0.15); 
+        border: 2px solid rgba(198, 168, 124, 0.25); margin-bottom: 35px; 
+    }
+    
+    /* 🔥 左側相片與說明區的外部容器 */
+    .gallery-wrapper { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    
+    /* 🔥 圖片白底相框 (維持完美 1:1 正方形) */
+    .product-gallery { 
+        width: 100%; border-radius: 16px; overflow: hidden; position: relative; 
+        background: #ffffff; display: flex; align-items: center; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05); aspect-ratio: 1 / 1; 
+    }
+    .carousel-track { 
+        display: flex; width: 100%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); align-items: center; 
+    }
+    
+    /* 移除多餘的 padding，讓圖片完美置中不被擠壓 */
+    .carousel-slide { 
+        min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; 
+    }
+    .carousel-slide img { 
+        width: 100%; height: 100%; object-fit: contain; border-radius: 8px; 
+    }
+    
+    /* 🔥 獨立的小字說明 (純文字無底色，視覺更乾淨) */
+    .dynamic-caption {
+        margin-top: 12px; 
+        text-align: center; 
+        color: #777; /* 質感深灰色 */
+        font-size: 13.5px; 
+        font-weight: bold; 
+        letter-spacing: 0.5px; /* 加一點字距讓文字更有呼吸感 */
+    }
+    /* 右側文字區 */
+    .product-text-content { flex: 1.2; display: flex; flex-direction: column; }
+    .product-desc { font-size: 0.95rem; color: #555; line-height: 1.8; text-align: justify; }
+    
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: flex; justify-content: center; align-items: center; transition: 0.2s; color: var(--forest); z-index: 10; }
+    .carousel-btn:hover { background: var(--forest); color: #fff; }
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+    .carousel-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; z-index: 10; }
+    .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.6); cursor: pointer; transition: 0.3s; }
+    .carousel-dot.active { background: #fff; transform: scale(1.2); }
 
-    .service-setting-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: end; background: #fffcf5; padding: 20px; border-radius: 12px; border: 1px solid #fae1c3; margin: 25px 0; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr; gap: 20px; margin-bottom: 20px; align-items: start; }
+    .service-card { background: var(--white); border: 2px solid #f0f4f8; padding: 20px; border-radius: 16px; margin-bottom: 15px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
+    .service-card:hover { border-color: #dce3e9; }
+    .service-card.selected { border-color: var(--accent); background: #fffdf9; box-shadow: 0 8px 25px rgba(198,168,124,0.12); }
+    .service-card.selected::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--accent); }
+    
+    .service-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+    .service-info { display: flex; align-items: flex-start; gap: 12px; flex: 1; }
+    
+    .custom-checkbox { position: relative; width: 22px; height: 22px; margin-top: 2px; }
+    .custom-checkbox input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+    .checkmark { position: absolute; top: 0; left: 0; height: 22px; width: 22px; background-color: #eee; border-radius: 6px; transition: 0.2s; }
+    .service-card:hover input ~ .checkmark { background-color: #ddd; }
+    .custom-checkbox input:checked ~ .checkmark { background-color: var(--accent); }
+    .checkmark:after { content: ""; position: absolute; display: none; left: 8px; top: 4px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .custom-checkbox input:checked ~ .checkmark:after { display: block; }
 
-    .checkout-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #eee; margin-top: 30px; padding-top: 20px; }
-    .checkout-footer .coupon-box { flex: 0 0 320px; background: #fffdf9; padding: 15px 20px; border-radius: 12px; border: 1px solid rgba(198, 168, 124, 0.4); display: flex; flex-direction: column; gap: 10px; }
-    .checkout-footer .total-box { text-align: right; font-size: 2rem; font-weight: 900; color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px; }
+    .svc-title-text { font-weight: 900; font-size: 1.1rem; color: var(--forest); line-height: 1.3; }
+    .price-badge { background: var(--forest); color: #fff; padding: 4px 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 900; font-family: 'Cinzel', serif; letter-spacing: 1px; box-shadow: 0 3px 8px rgba(26,47,35,0.2); }
+    .service-desc { font-size: 0.9rem; color: #666; margin-left: 34px; margin-top: 5px; line-height: 1.6; }
+    
+    .sub-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 15px; margin-left: 34px; padding: 15px; background: rgba(198, 168, 124, 0.05); border-radius: 12px; border: 1px solid rgba(198, 168, 124, 0.2); }
+    .sub-opt-label { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--forest); font-weight: bold; }
+    .sub-opt-label input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 20px; align-items: start; }
+    .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .checkout-footer { background: var(--white); padding: 25px 35px; border-radius: 20px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); border: 1px solid #eee; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .checkout-footer .coupon-box { flex: 1; min-width: 280px; max-width: 400px; background: #fdfdfd; padding: 15px; border-radius: 12px; border: 1px solid #e0e5e9; }
+    .checkout-footer .total-box { text-align: right; min-width: 200px; }
+    .total-price-display { font-size: 2.2rem; font-weight: 900; color: var(--forest); font-family: 'Cinzel', serif; letter-spacing: 1px; }
     .coupon-msg { font-size: 13px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
-    
-    .step-header-wrapper { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; }
-    .step-header-wrapper .btn-back-capsule { align-self: flex-start; }
-    .step-title-fancy { text-align: center; font-size: 1.4rem; font-family: 'Noto Serif TC', serif; font-weight: 900; color: var(--forest); letter-spacing: 2px; border-bottom: 3px solid var(--accent); padding-bottom: 5px; width: 100%; margin: 0;}
 
-    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.9); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); }
+    .result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 47, 35, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); padding: 20px; }
     .result-overlay.active { display: flex; }
-    .text-modal-card { width: 90%; max-width: 500px; max-height: 85vh; background: #fff; border-radius: 16px; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .text-modal-card { width: 100%; max-width: 500px; max-height: 90vh; background: #fff; border-radius: 20px; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
 
     @media (max-width: 768px) {
-        .booking-step { padding: 20px 15px 60px 15px !important; }
-        .card { padding: 20px 15px !important; border-radius: 12px !important; }
+        .booking-step { padding: 15px 15px 60px 15px !important; }
+        .card, .form-section, .checkout-footer { padding: 20px 15px !important; border-radius: 16px !important; }
         .brand-h3-zh, .brand-h2-en { display: block; width: 100%; margin-left: 0; text-align: center; }
-        .info-grid, .service-setting-grid, .checkout-footer, #birth-geo-group, #birth-time-group { display: block !important; }
-        .service-setting-grid { padding: 15px; }
-        .checkout-footer .coupon-box { max-width: 100%; margin-bottom: 15px; }
-        .checkout-footer .total-box { text-align: right; }
+        .info-grid, .two-col-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+        .checkout-footer { flex-direction: column; align-items: stretch; }
+        .checkout-footer .total-box { text-align: center; border-top: 1px dashed #eee; padding-top: 15px; }
+        .step-indicator { font-size: 0.8rem; gap: 10px; }
+        .step-indicator .line { width: 20px; }
+        
+        /* 🔥 手機版排版與防擠壓 */
+        .product-showcase { flex-direction: column !important; padding: 25px 15px !important; gap: 20px; }
+        .gallery-wrapper, .product-text-content { width: 100%; flex: none; }
+        .sub-check-grid { margin-left: 0; grid-template-columns: 1fr; gap: 8px; padding: 12px; }
     }
 </style>
 </head>
@@ -122,104 +185,147 @@
 
 <div id="booking-step-1" class="booking-step active">
     <div class="brand-section-header">
-        <div class="brand-h3-zh">服務預約</div>
+        <div class="brand-h3-zh">服務項目/預約</div>
         <div class="brand-h2-en">SERVICE BOOKING</div>       
-        <div class="brand-capsule">請選擇您需要的服務領域</div>
+        <div class="brand-capsule">請選擇您需要的服務</div>
     </div>
-    <div class="card">
-        <div id="category-list">載入資料中...</div>
+    
+    <div class="step-indicator">
+        <div class="step active">STEP 1. 選擇類別</div>
+        <div class="line"></div>
+        <div class="step">STEP 2. 服務說明</div>
     </div>
+
+    <div id="category-list">載入資料中...</div>
 </div>
 
 <div id="booking-step-2" class="booking-step">
-    <div class="card">
-        <div class="step-header-wrapper">
-            <button class="btn-back-capsule" onclick="showBookingStep('booking-step-1')">
-                <i class="fa-solid fa-arrow-left"></i> 返回重選
+    <div class="brand-section-header" style="margin-bottom: 20px;">
+        <h2 id="active-cat-name" style="font-size: 1.8rem; color: var(--forest); margin: 0; font-weight: 900;">服務詳情</h2>
+        <div class="step-indicator" style="margin-top: 15px; margin-bottom: 0;">
+            <div class="step" style="cursor:pointer;" onclick="showBookingStep('booking-step-1')">STEP 1. 選擇類別</div>
+            <div class="line" style="background:var(--accent);"></div>
+            <div class="step active" id="step-dynamic-text">STEP 2. 服務說明</div>
+        </div>
+    </div>
+
+    <div id="desc-view" style="animation: fadeSlideUp 0.5s ease;">
+        <div style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
+            <button class="btn-primary" style="height: 36px; padding: 0 15px; font-size: 13px;" onclick="showBookingStep('booking-step-1')">
+                <i class="fa-solid fa-arrow-left"></i> 返回
             </button>
-            <h2 id="active-cat-name" class="step-title-fancy">服務詳情</h2>
         </div>
         
-        <div id="entry-gate" style="max-width:600px; margin:20px auto; padding:10px; text-align:center;">
-            <p style="color:#666; margin-bottom:25px;">請問您的預約類型？</p>
+        <div id="product-info-area"></div>
+        
+        <div style="text-align:center; margin-top:20px; margin-bottom:40px;">
+            <button class="btn-primary" style="width:100%; max-width:400px; height:56px; font-size:1.2rem; border-radius:16px;" onclick="showGateView()">
+                前往預約 <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="gate-view" style="display:none; max-width:700px; margin:0 auto 30px auto; animation: fadeSlideUp 0.5s ease;">
+        <div class="form-section" style="padding: 30px 25px;">
+            <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f4f6f8; padding-bottom: 15px; gap: 10px;">
+                <button class="btn-primary" style="height: 36px; padding: 0 15px; font-size: 13px; margin: 0;" onclick="backToDesc()">
+                    <i class="fa-solid fa-arrow-left"></i> 返回
+                </button>
+                <h3 style="margin: 0; color: var(--forest); font-size: 1.25rem; font-weight: 900; text-align: center;">請問您的預約身分？</h3>
+                <div style="width: 100px;"></div> </div>
+            
+            <p style="color:#666; margin-bottom:25px; font-size:0.95rem; text-align: center;">請根據您目前的付款狀態，選擇對應的入口進入表單。</p>
             <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
-                <div onclick="openTermModal()" style="flex:1; min-width:240px; cursor:pointer; background:#fff; padding:30px 20px; border-radius:16px; box-shadow:0 5px 15px rgba(0,0,0,0.08); border:2px solid transparent; transition:all 0.3s;" onmouseover="this.style.borderColor='var(--forest)'" onmouseout="this.style.borderColor='transparent'">
-                    <div style="background:#e8f5e9; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto;">
-                        <i class="fa-regular fa-calendar-check" style="font-size:1.8rem; color:var(--forest);"></i>
+                <div onclick="openTermModal()" style="flex:1; min-width:240px; cursor:pointer; background:#fff; padding:30px 20px; border-radius:16px; border:2px solid #eee; transition:all 0.3s;" onmouseover="this.style.borderColor='var(--forest)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='#eee'; this.style.transform='none';">
+                    <div style="background:#e8f5e9; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto;">
+                        <i class="fa-regular fa-calendar-check" style="font-size:2rem; color:var(--success);"></i>
                     </div>
-                    <h3 style="margin:0 0 8px 0; color:#333; font-size:1.1rem;">一般預約</h3>
-                    <p style="color:#888; font-size:0.9rem; margin:0; line-height:1.4;">尚未付款<br>先填寫預約單</p>
+                    <h3 style="margin:0 0 8px 0; color:#333; font-size:1.15rem; text-align:center;">一般預約 (尚未付款)</h3>
+                    <p style="color:#888; font-size:0.9rem; margin:0; line-height:1.5; text-align:center;">先填寫預約需求單<br>確認後再提供付款連結</p>
                 </div>
-                <div onclick="selectBookingType('ota')" style="flex:1; min-width:240px; cursor:pointer; background:#fff; padding:30px 20px; border-radius:16px; box-shadow:0 5px 15px rgba(0,0,0,0.08); border:2px solid transparent; transition:all 0.3s;" onmouseover="this.style.borderColor='#e67e22'" onmouseout="this.style.borderColor='transparent'">
-                    <div style="background:#fff3e0; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto;">
-                        <i class="fa-solid fa-ticket" style="font-size:1.8rem; color:#e67e22;"></i>
+                <div onclick="selectBookingType('ota')" style="flex:1; min-width:240px; cursor:pointer; background:#fff; padding:30px 20px; border-radius:16px; border:2px solid #eee; transition:all 0.3s;" onmouseover="this.style.borderColor='#e67e22'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='#eee'; this.style.transform='none';">
+                    <div style="background:#fff3e0; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto;">
+                        <i class="fa-solid fa-ticket" style="font-size:2rem; color:#e67e22;"></i>
                     </div>
-                    <h3 style="margin:0 0 8px 0; color:#333; font-size:1.1rem;">持有平台憑證</h3>
-                    <p style="color:#888; font-size:0.9rem; margin:0; line-height:1.4;">Pinkoi、蝦皮<br>或其他平台通路</p>
+                    <h3 style="margin:0 0 8px 0; color:#333; font-size:1.15rem; text-align:center;">持有平台憑證 (已付款)</h3>
+                    <p style="color:#888; font-size:0.9rem; margin:0; line-height:1.5; text-align:center;">已於 Pinkoi、蝦皮<br>或其他通路完成結帳</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-container" style="display:none; animation: fadeSlideUp 0.5s ease;">
+        
+        <div style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
+            <button class="btn-primary" style="height: 36px; padding: 0 15px; font-size: 13px;" onclick="backToGate()">
+                <i class="fa-solid fa-arrow-left"></i> 返回
+            </button>
+        </div>
+
+        <input type="hidden" id="pay-status" value="">
+
+        <div id="ota-area" class="form-section" style="display:none; background:#fffbf5; border-color:#fae1c3; border-left:6px solid #e67e22;">
+            <h4 class="form-section-title" style="color:#d35400; margin-bottom:15px;"><i class="fa-solid fa-ticket"></i> 外部平台訂單資訊</h4>
+            <div class="two-col-grid">
+                <div class="form-group" style="margin:0;">
+                    <label>付款平台</label>
+                    <select id="ota-source-select" style="background:#fff;"></select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>訂單編號</label>
+                    <input type="text" id="ota-order-id" placeholder="請貼上完整的訂單編號" style="background:#fff;">
                 </div>
             </div>
         </div>
 
-        <div id="main-container" style="display:none; animation: fadeSlideUp 0.5s ease;">
-            <input type="hidden" id="pay-status" value="">
-
-            <div id="ota-area" style="display:none; background:#fffcf5; padding:20px; border-radius:12px; margin-bottom:25px; border:1px solid #fae1c3; border-left:5px solid #e67e22;">
-                <div style="font-weight:bold; color:#d35400; margin-bottom:15px; font-size:0.95rem;">
-                    <i class="fa-solid fa-ticket"></i> 請填寫平台訂單資訊
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px;">
-                    <div class="form-group" style="margin:0;">
-                        <label style="font-size:13px; color:#888;">付款平台</label>
-                        <select id="ota-source-select" style="background:#fff; border:1px solid #ddd;"></select>
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                        <label style="font-size:13px; color:#888;">訂單編號</label>
-                        <input type="text" id="ota-order-id" placeholder="請貼上編號" style="background:#fff; border:1px solid #ddd;">
-                    </div>
-                </div>
-            </div>
-
+        <div class="form-section">
+            <h4 class="form-section-title"><i class="fa-regular fa-address-card"></i> 聯絡資訊</h4>
             <div class="info-grid">
-                <div class="form-group"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="請填寫真實姓名"></div>
-                <div class="form-group">
+                <div class="form-group" style="margin:0;"><label class="required">您的姓名</label><input type="text" id="c-name" placeholder="請填寫真實姓名"></div>
+                <div class="form-group" style="margin:0;">
                     <label class="required">手機號碼</label>
                     <input type="tel" id="c-phone" onblur="checkPhoneMembership()" placeholder="09xxxxxxxx">
-                    <small id="phone-status" style="display:block; margin-top:5px; font-weight:bold;"></small>
+                    <small id="phone-status" style="display:block; margin-top:5px; font-weight:bold; font-size:12px;"></small>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin:0;">
                     <label class="required">E-mail</label>
-                    <input type="email" id="c-email" onblur="checkEmailFormat()" placeholder="example@mail.com">
-                    <small id="email-status" style="display:block; margin-top:5px; font-weight:bold;"></small>
+                    <input type="email" id="c-email" onblur="checkEmailFormat()" placeholder="接收通知與報告用">
+                    <small id="email-status" style="display:block; margin-top:5px; font-weight:bold; font-size:12px;"></small>
                 </div>
             </div>
-                    
-            <label style="font-size:1.2rem; color:var(--forest); font-weight:900; margin-bottom:15px; display:block;">選擇服務項目</label>
-            <div id="items-area" style="margin-bottom:10px;"></div>
+        </div>
+                
+        <div class="form-section" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+            <div id="items-area"></div>
+        </div>
+        
+        <div class="form-section">
+            <h4 class="form-section-title"><i class="fa-solid fa-clipboard-user"></i> 需求與資料</h4>
             
-            <div class="service-setting-grid">
-                <div id="conditional-question" style="background:#fcf8f2; padding:15px; border-radius:10px; border:1px solid #eee; margin:0;"></div>
-                <div class="form-group" id="data-flow-wrapper" style="margin:0; background:#f4f7f6; padding:15px; border-radius:10px; border:1px solid #eee;">
-                    <label style="font-weight:bold;">🔶 請選擇資料提供方式</label>
-                    <select id="data-flow" onchange="toggleFlow()" style="background:white;"></select>
+            <div class="two-col-grid">
+                <div id="conditional-question" class="form-group" style="margin:0;"></div>
+                <div class="form-group" id="data-flow-wrapper" style="margin:0;">
+                    <label class="required">資料提供方式</label>
+                    <select id="data-flow" onchange="toggleFlow()"></select>
                 </div>
             </div>
 
-            <div id="flow-data" style="background:#fdfdfd; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="birth-time-group">
-                    <div class="form-group"><label class="required">出生日期</label><input type="date" id="b-date"></div>
-                    <div class="form-group">
+            <div id="flow-data" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed #eee;">
+                <div class="two-col-grid" id="birth-time-group" style="margin-bottom: 20px;">
+                    <div class="form-group" style="margin:0;"><label class="required">出生日期</label><input type="date" id="b-date"></div>
+                    <div class="form-group" style="margin:0;">
                         <label class="required">出生時間 (24小時制)</label>
-                        <div style="display:flex; gap:8px; align-items:center;">
+                        <div style="display:flex; gap:10px; align-items:center;">
                             <select id="b-hour"><option value="" disabled selected>時</option></select>
                             <span style="font-weight:bold; color:#888;">:</span>
                             <select id="b-minute"><option value="" disabled selected>分</option></select>
                         </div>
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;" id="birth-geo-group">
-                    <div class="form-group"><label class="required">出生地區/城市</label><input type="text" id="b-place" placeholder="例：台北"></div>
-                    <div class="form-group">
-                        <label>當地時區</label>
+                <div class="two-col-grid" id="birth-geo-group">
+                    <div class="form-group" style="margin:0;"><label class="required">出生地區/城市</label><input type="text" id="b-place" placeholder="例：台北市"></div>
+                    <div class="form-group" style="margin:0;">
+                        <label class="required">當地時區</label>
                         <select id="b-timezone">
                             <option value="+8">GMT+8 (台/港/新馬)</option>
                             <option value="+9">GMT+9 (日本/韓國)</option>
@@ -229,71 +335,83 @@
                             <option value="+1">GMT+1 (德/法/義/瑞/西)</option>
                             <option value="-5">GMT-5 (美東-紐約/波士頓)</option>
                             <option value="-8">GMT-8 (美西-洛杉磯/溫哥華)</option>
-                            <option value="other">其他 (請於故事說明)</option>
+                            <option value="other">其他 (請於下方故事說明)</option>
                         </select>
                     </div>
                 </div>
             </div>
             
-            <div id="flow-upload" style="display:none; background:#f9f9f9; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
-                <div style="margin-bottom: 15px; border-left: 4px solid var(--accent); padding-left: 15px;">
-                    <p style="margin:0; font-weight:bold; color:var(--forest);">第一步：取得圖檔</p>
-                    <p style="margin:5px 0 0 0; font-size:0.9rem;">前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:var(--shopee); text-decoration:underline;">亞洲人類圖學院</a></p>
-                </div>
-                <label style="font-weight:bold; color:var(--forest); display:block; margin-bottom:10px;">📸 第二步：上傳圖檔</label>
-                <input type="file" id="c-file" accept="image/*" style="background:#fff; border:1px solid #ccc; width:100%; padding:10px; border-radius:8px;">
-            </div>
-
-            <div class="form-group" style="margin-top: 25px;">
-                <label>📖 寫下您的故事 / 現況 (選填)</label>
-                <textarea id="c-story" placeholder="可以簡單分享想調整的原因、最近遇到的困難..." style="height: 100px; line-height: 1.6;"></textarea>
-            </div>
-
-            <div class="card" style="background:#fffcf5; border-top:none; padding:20px; margin-bottom:0; border:1px solid #fae1c3;">
-                <label>📜 服務規範</label>
-                <div id="terms-box" style="height:auto; min-height:100px; border:1px solid #e0e0e0; padding:15px; font-size:13px; background:#fff; border-radius:8px; margin:10px 0; line-height: 1.6;"></div>                
-                <label style="margin-top:15px; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;">
-                    <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)" style="width:18px; height:18px;">
-                    <span>我已詳細閱讀並同意</span>
-                </label>
-            </div>
-            
-            <div class="checkout-footer">
-                <div class="coupon-box">
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="coupon-code" placeholder="優惠代碼" style="flex:1; margin:0; border:1px solid #ccc;">
-                        <button class="btn-secondary" onclick="verifyCoupon()" style="margin:0; padding:10px 15px;">套用</button>
-                    </div>
-                    <div id="coupon-msg" class="coupon-msg"></div>
-                </div>
-
-               <div class="total-box">
-                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                        <div class="price-row">
-                            <span id="original-price-row" style="font-size:0.9rem; color:#999; text-decoration:line-through; display:none;">原價 $<span id="original-price">0</span></span>
-                            <span id="label-text" style="font-size:1rem; font-weight:bold; color:#444;">應付總額：</span>
-                            <span style="color:#d35400; font-size:1.8rem; font-weight:900;">$<span id="total-price">0</span></span>
-                        </div>
-                        <div id="ota-reminder" style="display:none; color:#c0392b; font-size:0.85rem; font-weight:bold; margin-top:5px; line-height:1.4;">
-                            請選擇與平台訂單相同的總額<br>若經核對金額有誤，後續會向您補收差額唷！
-                        </div>
+            <div id="flow-upload" style="display:none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #eee;">
+                <div style="background:#f4f6f8; padding:15px; border-radius:10px; margin-bottom: 15px; border-left: 4px solid var(--accent);">
+                    <p style="margin:0; font-weight:bold; color:var(--forest); font-size: 0.95rem;">不知道去哪裡生圖？</p>
+                    <p style="margin:5px 0 10px 0; font-size:0.9rem;">推薦前往 <a href="https://humandesignasia.org/get-your-chart/" target="_blank" style="color:#d35400; text-decoration:underline; font-weight:bold;">亞洲人類圖學院</a> 獲取免費命盤，再截圖上傳。</p>
+                    
+                    <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; text-align:center;">
+                        <span style="display:block; font-size:12px; color:#888; margin-bottom:10px; font-weight:bold;">👇 截圖範例 (需包含完整圖案與右側數據)</span>
+                        <img src="https://geyrpowhaqfhnxghpokr.supabase.co/storage/v1/object/public/site-assets/my_hd_chart.png" alt="人類圖範例" style="width:100%; max-width:250px; height:auto; display:block; margin:0 auto; border-radius:6px; border:1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     </div>
                 </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="required">📸 上傳人類圖截圖</label>
+                    <input type="file" id="c-file" accept="image/*" style="padding: 10px; height: auto;">
+                </div>
             </div>
 
-            <div style="text-align:center; margin-top:25px;">
-                <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled style="width:100%; max-width:450px; font-size:1.2rem; padding:15px 0;">➔ 送出預約</button>
+            <div class="form-group" style="margin-top: 20px;">
+                <label>📖 寫下您的故事 / 現狀 (選填)</label>
+                <textarea id="c-story" placeholder="您可以簡單分享想來預約的原因、最近遇到的困難，或是任何想讓分析師提前知道的背景資訊..."></textarea>
             </div>
+        </div>
+
+        <div class="form-section" style="background:#fffdf9; border-color:#fae1c3;">
+            <h4 class="form-section-title" style="color:var(--accent);"><i class="fa-solid fa-scroll"></i> 服務規範與同意事項</h4>
+            <div id="terms-box" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; font-size: 13.5px; line-height: 1.8; color: #555; max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>                
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold; font-size:1.05rem; padding: 10px 0;">
+                <input type="checkbox" id="agree-check" onchange="toggleSubmitBtn(this.checked)" style="width:20px; height:20px; accent-color: var(--forest); cursor: pointer;">
+                <span style="user-select: none;">我已詳細閱讀並同意以上條款</span>
+            </label>
+        </div>
+        
+        <div class="checkout-footer">
+            <div class="coupon-box" style="display: flex; flex-direction: column; width: 100%;">
+                <label style="display: block; margin: 0 0 8px 0; font-size: 14px; color: #888; font-weight: bold;">🎟️ 優惠代碼</label>
+                <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                    <input type="text" id="coupon-code" placeholder="請輸入代碼" style="margin: 0; flex: 1; min-width: 0; text-transform: uppercase; height: 48px;">
+                    <button class="btn-secondary" onclick="verifyCoupon()" style="margin: 0; flex-shrink: 0; white-space: nowrap; height: 48px; border-radius: 12px; padding: 0 24px;">套用</button>
+                </div>
+                <div id="coupon-msg" class="coupon-msg" style="display: block; margin-top: 8px; line-height: 1.5; word-break: break-all;"></div>
+            </div>
+
+           <div class="total-box">
+                <div style="font-size:0.9rem; color:#888; font-weight:bold; margin-bottom: 5px;">應付總額</div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                    <div class="price-row" style="display:flex; align-items:baseline; gap:10px;">
+                        <span id="original-price-row" style="font-size:1rem; color:#999; text-decoration:line-through; display:none;">$<span id="original-price">0</span></span>
+                        <div class="total-price-display">$<span id="total-price">0</span></div>
+                    </div>
+                    <div id="ota-reminder" style="display:none; color:#c0392b; font-size:0.85rem; font-weight:bold; margin-top:5px; line-height:1.4; background:#fff5f5; padding:5px 10px; border-radius:6px;">
+                        請確保與平台付款金額一致
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:30px;">
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;"><i class="fa-solid fa-clock"></i> 預計將於 3 個工作天內與您聯繫確認排程</p>
+            <button id="sub-btn" class="btn-primary" onclick="doSubmit()" disabled style="width:100%; max-width:500px; height:56px; font-size:1.2rem; border-radius:16px;">
+                確認送出預約單 <i class="fa-solid fa-paper-plane" style="margin-left:8px; margin-right:0;"></i>
+            </button>
         </div>
     </div>
 </div>
 
-<div id="term-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(26, 47, 35, 0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(8px);">
-    <div style="background:#fff; width:100%; max-width:450px; border-radius:16px; overflow:hidden; animation:fadeSlideUp 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
-        <div style="background:var(--forest); padding:20px; text-align:center; border-bottom: 4px solid var(--accent);">
-            <h3 style="margin:0; color:#fff; font-size:1.3rem; display:flex; align-items:center; justify-content:center; letter-spacing: 1px;">
-                <i class="fa-solid fa-shield-halved" style="margin-right:10px; color:var(--accent); font-size:1.5rem;"></i> 預約前請確認
+<div id="term-modal" class="result-overlay">
+    <div class="text-modal-card" style="padding: 0;">
+        <div style="background:var(--forest); padding:20px; text-align:center; border-bottom: 4px solid var(--accent); position: relative;">
+            <h3 style="margin:0; color:#fff; font-size:1.3rem; letter-spacing: 1px;">
+                <i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i> 預約前請確認
             </h3>
+            <button onclick="closeTermModal()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1.8rem; cursor: pointer; padding: 5px 15px;">✕</button>
         </div>
         <div style="padding:30px 25px;">
             <ul style="padding-left:20px; color:#555; line-height:1.8; margin-bottom:25px; font-size:0.95rem;">
@@ -302,13 +420,12 @@
                 <li style="margin-bottom:8px;">我們會確認時段與內容，<b>確認無誤後才會傳送付款碼給您</b>。</li>
                 <li style="color:#c0392b; font-weight:bold; background:#fff5f5; padding:10px 15px; border-radius:8px; margin-top:15px; list-style:none; margin-left:-20px; border: 1px dashed #f5b7b1;">⚠️ 防詐騙提醒：我們絕不會要求您解除分期付款或操作 ATM。</li>
             </ul>
-            <label style="display:flex; align-items:center; cursor:pointer; background:#f9f9f9; padding:12px 15px; border-radius:10px; border:1px solid #eee; transition:0.2s;" onmouseover="this.style.borderColor='var(--forest)'" onmouseout="this.style.borderColor='#eee'">
-                <input type="checkbox" id="term-agree-check" style="transform:scale(1.3); margin-right:12px; accent-color:var(--forest);">
-                <span style="font-size:1rem; font-weight:bold; color:#333;">我已閱讀並同意上述事項</span>
+            <label style="display:flex; align-items:center; cursor:pointer; background:#f9f9f9; padding:15px; border-radius:12px; border:1px solid #eee; transition:0.2s;" onmouseover="this.style.borderColor='var(--forest)'" onmouseout="this.style.borderColor='#eee'">
+                <input type="checkbox" id="term-agree-check" style="width:20px; height:20px; margin-right:12px; accent-color:var(--forest);">
+                <span style="font-size:1rem; font-weight:bold; color:#333; user-select: none;">我已閱讀並清楚了解</span>
             </label>
             <div style="display:flex; gap:12px; margin-top:25px;">
-                 <button onclick="closeTermModal()" style="flex:1; height:45px; border:1px solid #ddd; background:#fff; color:#666; border-radius:50px; font-weight:bold; cursor:pointer; font-size:1rem; transition:0.3s;" onmouseover="this.style.background='#f4f4f4'" onmouseout="this.style.background='#fff'">再想想</button>
-                 <button onclick="confirmTerm()" id="term-btn" class="btn-primary" disabled style="flex:2; height:45px; font-size:1.1rem; padding: 0;">開始填寫</button>
+                 <button onclick="confirmTerm()" id="term-btn" class="btn-primary" disabled style="flex:1; height:50px; font-size:1.1rem; border-radius:12px;">開始填寫表單</button>
             </div>
         </div>
     </div>
@@ -317,23 +434,23 @@
 <div id="success-overlay" class="result-overlay">
     <div class="text-modal-card" style="padding:0; text-align:center;">
         <div style="background:var(--forest); padding:20px; border-bottom:4px solid var(--accent);">
-            <h3 style="margin:0; color:#fff;">🎉 預約成功！</h3>
+            <h3 style="margin:0; color:#fff; letter-spacing: 2px;">🎉 預約申請成功</h3>
         </div>
         <div style="padding:40px 30px;">
-            <p style="color:#666; margin-bottom:20px;">請記下您的訂單編號：</p>
-            <div id="success-order-id" style="background:#fffcf5; color:var(--forest); padding:15px; border-radius:12px; font-weight:900; font-size:1.5rem; margin-bottom:30px; border:2px dashed var(--accent); cursor: pointer;" title="點擊複製完整預約訊息">OD123</div>
+            <p style="color:#666; margin-bottom:20px; font-size:1.1rem;">請記下您的專屬單號：</p>
+            <div id="success-order-id" style="background:#fffcf5; color:var(--forest); padding:15px; border-radius:12px; font-weight:900; font-size:1.8rem; margin-bottom:30px; border:2px dashed var(--accent); cursor: pointer; transition: 0.3s;" title="點擊複製" onmouseover="this.style.background='#fdfaf1'" onmouseout="this.style.background='#fffcf5'">OD123</div>
             
-            <div style="color:#c0392b; font-weight:bold; margin-bottom:25px; background:#fff5f5; padding:12px; border-radius:8px;">
-                請務必點擊下方按鈕<br>傳送編號給我確認，才算完成喔！
+            <div style="color:#c0392b; font-weight:bold; margin-bottom:25px; background:#fff5f5; padding:15px; border-radius:12px; line-height: 1.5;">
+                ⚠️ 最後一步！<br>請點擊下方按鈕傳送單號給我，才算正式完成預約喔！
             </div>
             
-            <a id="line-super-btn" href="#" class="btn-primary" style="background:#06c755 !important; border-color:#06c755 !important; color:#fff !important; width:100%; height:50px; font-size:1.1rem; display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
-                <i class="fa-brands fa-line" style="font-size:1.4rem;"></i> 點我傳送編號 (LINE)
+            <a id="line-super-btn" href="#" class="btn-primary" style="background:#06c755 !important; border-color:#06c755 !important; color:#fff !important; width:100%; height:56px; font-size:1.2rem; border-radius:16px; display:flex; justify-content:center; align-items:center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(6, 199, 85, 0.3);">
+                <i class="fa-brands fa-line" style="font-size:1.6rem; margin-right: 10px;"></i> 傳送單號至 LINE
             </a>
 
             <div id="success-action-btns" style="display:none; gap:12px;">
-                <button onclick="handleSuccessExit('sent')" class="btn-secondary" style="flex:1; height:45px; font-size:0.95rem;">我已傳送</button>
-                <button onclick="handleSuccessExit('later')" class="btn-secondary" style="flex:1; height:45px; font-size:0.95rem; background:#f4f4f4; color:#666; border-color:#ddd;">稍後再傳</button>
+                <button onclick="handleSuccessExit('sent')" class="btn-secondary" style="flex:1; border-radius: 12px;">已傳送，回首頁</button>
+                <button onclick="handleSuccessExit('later')" class="btn-secondary" style="flex:1; background:#f4f6f8; color:#666; border-color:#ddd; border-radius: 12px;">稍後再傳</button>
             </div>
         </div>
     </div>
@@ -342,15 +459,23 @@
 <script src="../js/config.js"></script>
 
 <script>
-
     let cats = [], items = [], activeCat = null, otas = [], servicesData = {};    
     let currentCoupon = null; let currentUser = null; let isMemberBlocked = false;
+    window.currentSlide = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
         initBookingData();
         initTimeSelects();
         checkSession();
     });
+
+    function formatHTML(str) {
+        if (!str) return "";
+        if (str.includes('<div') || str.includes('<span') || str.includes('<ul') || str.includes('<li') || str.includes('<b') || str.includes('<p')) {
+            return str; 
+        }
+        return str.replace(/\n/g, '<br>'); 
+    }
 
     function showBookingStep(stepId) {
         document.querySelectorAll('.booking-step').forEach(s => s.classList.remove('active'));
@@ -372,9 +497,17 @@
         const otaSelect = document.getElementById('ota-source-select');
         if(otaSelect) otaSelect.innerHTML = otas.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
 
-        document.getElementById('category-list').innerHTML = cats.map(c => `
+        const icons = ['fa-wand-magic-sparkles', 'fa-compass', 'fa-star', 'fa-moon', 'fa-sun', 'fa-gem'];
+        document.getElementById('category-list').innerHTML = cats.map((c, idx) => `
             <div class="cat-card" onclick="selectCat('${c.id}')">
-                <h3>${c.name}</h3><span style="font-size:1.5rem; color:var(--accent);">➔</span>
+                <div style="display:flex; align-items:center;">
+                    <div class="cat-icon-box"><i class="fa-solid ${icons[idx % icons.length]}"></i></div>
+                    <div>
+                        <h3>${c.name}</h3>
+                        <p>點擊查看服務詳情</p>
+                    </div>
+                </div>
+                <span class="cat-arrow">➔</span>
             </div>`).join('');
     }
 
@@ -382,15 +515,103 @@
         activeCat = servicesData[id]; 
         document.getElementById('active-cat-name').innerText = activeCat.name;
         
-        document.getElementById('entry-gate').style.display = 'block';   
-        document.getElementById('main-container').style.display = 'none'; 
+        // --- 視圖控制切換 (四步動線核心) ---
         closeTermModal();     
         const check = document.getElementById('term-agree-check'); if(check) check.checked = false;
         const btn = document.getElementById('term-btn'); if(btn) { btn.disabled=true; }
         
-        document.getElementById('terms-box').innerText = activeCat.terms || "請遵守規範。";
+        document.getElementById('terms-box').innerHTML = formatHTML(activeCat.terms || "請遵守規範。");
         document.getElementById('agree-check').checked = false; toggleSubmitBtn(false);
         document.getElementById('coupon-code').value = ""; document.getElementById('coupon-msg').innerText = ""; currentCoupon = null;
+
+        const infoArea = document.getElementById('product-info-area');
+        const hasDesc = activeCat.description || (activeCat.image_urls && activeCat.image_urls !== '[]');
+
+        if (hasDesc) {
+            document.getElementById('desc-view').style.display = 'block';   
+            document.getElementById('gate-view').style.display = 'none'; 
+            document.getElementById('main-container').style.display = 'none'; 
+            document.getElementById('step-dynamic-text').innerText = 'STEP 2. 服務說明';
+
+            // 🔥 相容舊版純網址與新版帶說明的物件格式
+            let imgUrls = [];
+            if (activeCat.image_urls) { 
+                try { 
+                    let parsed = JSON.parse(activeCat.image_urls); 
+                    if (parsed.length > 0) {
+                        imgUrls = parsed.map(img => typeof img === 'string' ? { url: img, caption: '' } : img);
+                    }
+                } catch(e) { } 
+            }
+            
+            // 將 caption 存入全域，讓輪播切換時可以抓取
+            window.currentCaptions = imgUrls.map(img => img.caption || ''); 
+            
+            let galleryHtml = '';
+            if(imgUrls.length > 0) {
+                // 這裡只放圖片，不再放 caption
+                const slides = imgUrls.map(img => `<div class="carousel-slide"><img src="${img.url}"></div>`).join('');
+                const dots = imgUrls.map((_, i) => `<div class="carousel-dot ${i===0?'active':''}" onclick="goToSlide(${i}, ${imgUrls.length})"></div>`).join('');
+                
+                let navBtns = '';
+                if(imgUrls.length > 1) {
+                    navBtns = `
+                        <button class="carousel-btn prev" onclick="moveSlide(-1, ${imgUrls.length})"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="carousel-btn next" onclick="moveSlide(1, ${imgUrls.length})"><i class="fa-solid fa-chevron-right"></i></button>
+                        <div class="carousel-dots">${dots}</div>
+                    `;
+                }
+                
+                // 🔥 獨立的小字說明區塊 (預設顯示第一張的說明，沒有就隱藏)
+                const initialCaption = window.currentCaptions[0];
+                // 🔥 加上金色的向上小箭頭，並用 span 包住文字方便動態替換
+                const captionHtml = `<div id="dynamic-caption" class="dynamic-caption" style="display: ${initialCaption ? 'block' : 'none'};"><i class="fa-solid fa-caret-up" style="color: var(--accent); margin-right: 6px;"></i><span id="dynamic-caption-text">${initialCaption}</span></div>`;
+
+                // 把白底相框跟小字區塊一起包進 gallery-wrapper
+                galleryHtml = `
+                    <div class="gallery-wrapper">
+                        <div class="product-gallery">
+                            <div class="carousel-track" id="carousel-track">${slides}</div>
+                            ${navBtns}
+                        </div>
+                        ${captionHtml}
+                    </div>
+                `;
+            }
+
+            // 🔥 HTML 渲染說明與自訂標題 (奶油底色、左圖右文、右標題置中)
+            const descTitleText = activeCat.desc_title || '服務簡介';
+            const titleHtml = `
+                <div style="margin-bottom: 20px; text-align: center;">
+                    <span style="background: var(--forest); color: #fff; padding: 6px 22px; border-radius: 50px; font-size: 1.05rem; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 1px; border: 1.5px solid var(--accent); box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15);">
+                        <i class="fa-solid fa-circle-info" style="color: var(--accent);"></i> ${descTitleText}
+                    </span>
+                </div>
+            `;
+            const descHtml = activeCat.description ? `
+                <div class="product-desc">
+                    ${formatHTML(activeCat.description)}
+                </div>` : '';
+
+            infoArea.innerHTML = `
+                <div class="product-showcase">
+                    ${galleryHtml}
+                    <div class="product-text-content">
+                        ${titleHtml}
+                        ${descHtml}
+                    </div>
+                </div>
+            `;
+            infoArea.style.display = 'block';
+            window.currentSlide = 0;
+        } else {
+            document.getElementById('desc-view').style.display = 'none';   
+            document.getElementById('gate-view').style.display = 'block'; 
+            document.getElementById('main-container').style.display = 'none'; 
+            document.getElementById('step-dynamic-text').innerText = 'STEP 2. 預約身分';
+            infoArea.style.display = 'none';
+            infoArea.innerHTML = '';
+        }
 
         const sub = items.filter(x => x.category_id === id);
         const mainItems = sub.filter(x => x.is_main);
@@ -400,26 +621,112 @@
         const renderCard = (i) => {
             let checkAttr = "";
             if (i.is_main && !hasCheckedMain) { checkAttr = "checked"; hasCheckedMain = true; }
-            let subHtml = i.sub_options ? `<div class="sub-check-grid">${i.sub_options.split(/[,，]/).map(o=>`<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${o.trim()}" onchange="handleSubCheck(this)"> ${o.trim()}</label>`).join('')}</div>` : '';
-            return `<div class="service-card" id="card-${i.id}"><div class="service-header"><label class="service-info"><input type="checkbox" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" data-is-main="${i.is_main}" ${checkAttr} onchange="handleServiceCheck(this)"> <span>${i.title}</span></label><span class="price-badge">$${i.price}</span></div><div class="service-desc">${i.description || ''}</div>${subHtml}</div>`;
+            let subHtml = i.sub_options ? `<div class="sub-check-grid" onclick="event.stopPropagation()">${i.sub_options.split(/[,，]/).map(o=>`<label class="sub-opt-label"><input type="checkbox" class="sub-opt-item" data-parent-id="${i.id}" value="${o.trim()}" onchange="handleSubCheck(this)"> <span>${o.trim()}</span></label>`).join('')}</div>` : '';
+            return `
+            <div class="service-card ${checkAttr ? 'selected' : ''}" id="card-${i.id}" onclick="toggleCardCheck('${i.id}')">
+                <div class="service-header">
+                    <div class="service-info">
+                        <label class="custom-checkbox" onclick="event.stopPropagation()">
+                            <input type="checkbox" id="chk-${i.id}" name="svc" value="${i.id}" data-price="${i.price}" data-title="${i.title}" data-is-main="${i.is_main}" ${checkAttr} onchange="handleServiceCheck(this)"> 
+                            <span class="checkmark"></span>
+                        </label>
+                        <span class="svc-title-text">${i.title}</span>
+                    </div>
+                    <span class="price-badge">$${i.price}</span>
+                </div>
+                ${i.description ? `<div class="service-desc">${i.description}</div>` : ''}
+                ${subHtml}
+            </div>`;
         };
 
-        if (mainItems.length > 0) html += `<div style="margin-bottom:20px;"><label style="font-size:1.1rem; color:var(--forest);">請選擇主要服務項目</label>${mainItems.map(i => renderCard(i)).join('')}</div>`;
-        if (addItems.length > 0) html += `<div style="margin-top:30px;"><label style="font-size:1.1rem; color:var(--forest);">加購項目</label>${addItems.map(i => renderCard(i)).join('')}</div>`;
+        if (mainItems.length > 0) html += `<div class="form-section" style="background:#fffcf5; border-color:#fae1c3;"><h4 class="form-section-title" style="color:var(--accent);"><i class="fa-solid fa-star"></i> 主要服務項目 (必選)</h4>${mainItems.map(i => renderCard(i)).join('')}</div>`;
+        if (addItems.length > 0) html += `<div class="form-section"><h4 class="form-section-title"><i class="fa-solid fa-plus"></i> 加購項目 (選填)</h4>${addItems.map(i => renderCard(i)).join('')}</div>`;
 
         document.getElementById('items-area').innerHTML = html;
-        document.getElementById('conditional-question').innerHTML = activeCat.question_type === 'sleep' ? `<label class="required">🌙 睡眠時間</label><input type="text" id="q-val" placeholder="例如：23:30 ~ 07:00">` : `<label class="required">📅 希望諮詢時間</label><input type="text" id="q-val" placeholder="例如：平日晚上">`;
+        document.getElementById('conditional-question').innerHTML = activeCat.question_type === 'sleep' ? `<label class="required">🌙 您的作息時間</label><input type="text" id="q-val" placeholder="例：晚上 11:30 睡，早上 7:00 起床">` : `<label class="required">📅 方便諮詢的時段</label><input type="text" id="q-val" placeholder="例：平日晚上 8 點後，假日全天皆可">`;
 
         const reqStr = activeCat.data_requirement || 'birth'; 
         const flowSelect = document.getElementById('data-flow');
         const flowWrapper = document.getElementById('data-flow-wrapper');
         flowSelect.innerHTML = '';
-        if (reqStr.includes('birth')) flowSelect.add(new Option('📅 提供出生日期時間', 'data'));
-        if (reqStr.includes('image')) flowSelect.add(new Option('📸 直接上傳人類圖截圖', 'upload'));
+        if (reqStr.includes('birth')) flowSelect.add(new Option('📅 我要填寫出生資料', 'data'));
+        if (reqStr.includes('image')) flowSelect.add(new Option('📸 我直接上傳人類圖截圖', 'upload'));
         flowWrapper.style.display = (reqStr.includes('birth') && reqStr.includes('image')) ? 'block' : 'none';
         
         toggleFlow(); calcTotal(); 
         showBookingStep('booking-step-2');
+    }
+
+    // --- 漏斗動線切換函數 ---
+    function showGateView() {
+        document.getElementById('desc-view').style.display = 'none';
+        document.getElementById('gate-view').style.display = 'block';
+        document.getElementById('step-dynamic-text').innerText = 'STEP 3. 預約身分';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function backToDesc() {
+        const hasDesc = activeCat && (activeCat.description || (activeCat.image_urls && activeCat.image_urls !== '[]'));
+        if (hasDesc) {
+            document.getElementById('gate-view').style.display = 'none';
+            document.getElementById('desc-view').style.display = 'block';
+            document.getElementById('step-dynamic-text').innerText = 'STEP 2. 服務說明';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            showBookingStep('booking-step-1');
+        }
+    }
+
+    function selectBookingType(type) {
+        document.getElementById('gate-view').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        const hasDesc = activeCat && (activeCat.description || (activeCat.image_urls && activeCat.image_urls !== '[]'));
+        document.getElementById('step-dynamic-text').innerText = hasDesc ? 'STEP 4. 填寫資料' : 'STEP 3. 填寫資料';
+        document.getElementById('pay-status').value = type;
+        toggleOTA();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function backToGate() {
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('gate-view').style.display = 'block';
+        const hasDesc = activeCat && (activeCat.description || (activeCat.image_urls && activeCat.image_urls !== '[]'));
+        document.getElementById('step-dynamic-text').innerText = hasDesc ? 'STEP 3. 預約身分' : 'STEP 2. 預約身分';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.moveSlide = function(dir, total) {
+        window.currentSlide = (window.currentSlide + dir + total) % total;
+        updateCarousel();
+    };
+    window.goToSlide = function(idx, total) {
+        window.currentSlide = idx;
+        updateCarousel();
+    };
+    window.updateCarousel = function() {
+        const track = document.getElementById('carousel-track');
+        if(track) track.style.transform = `translateX(-${window.currentSlide * 100}%)`;
+        document.querySelectorAll('.carousel-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === window.currentSlide);
+        });
+        
+        // 🔥 動態切換說明文字，並保留前方的小箭頭
+        const capBox = document.getElementById('dynamic-caption');
+        const capTextSpan = document.getElementById('dynamic-caption-text');
+        if (capBox && window.currentCaptions) {
+            const capText = window.currentCaptions[window.currentSlide];
+            if (capText) {
+                capBox.style.display = 'block';
+                if (capTextSpan) capTextSpan.innerText = capText; // 只替換文字，不蓋掉箭頭圖案
+            } else {
+                capBox.style.display = 'none'; // 這張圖片沒說明就隱藏
+            }
+        }
+    };
+
+    window.toggleCardCheck = function(id) {
+        const chk = document.getElementById(`chk-${id}`);
+        if(chk) { chk.checked = !chk.checked; handleServiceCheck(chk); }
     }
 
     function openTermModal() { document.getElementById('term-modal').style.display = 'flex'; document.getElementById('term-modal').classList.add('active'); }
@@ -431,25 +738,32 @@
 
     function confirmTerm() { closeTermModal(); selectBookingType('unpaid'); }
 
-    function selectBookingType(type) {
-        document.getElementById('entry-gate').style.display = 'none';
-        document.getElementById('main-container').style.display = 'block';
-        document.getElementById('pay-status').value = type;
-        toggleOTA();
-    }
-
     function handleServiceCheck(el) {
+        const card = document.getElementById(`card-${el.value}`);
+        if(el.checked) card.classList.add('selected'); else card.classList.remove('selected');
+
         if (el.dataset.isMain === 'true') {
             if (!el.checked && document.querySelectorAll('input[name="svc"][data-is-main="true"]:checked').length === 0) {
-                el.checked = true; alert("必須至少選擇一項主要服務！"); return;
+                el.checked = true; card.classList.add('selected'); alert("必須至少選擇一項主要服務！"); return;
             }
-            if (el.checked) { document.querySelectorAll('input[name="svc"][data-is-main="true"]').forEach(i => { if (i !== el) i.checked = false; }); }
+            if (el.checked) { 
+                document.querySelectorAll('input[name="svc"][data-is-main="true"]').forEach(i => { 
+                    if (i !== el) {
+                        i.checked = false; 
+                        document.getElementById(`card-${i.value}`).classList.remove('selected');
+                    }
+                }); 
+            }
         }
         calcTotal();
     }
+    
     function handleSubCheck(el) {
         const parent = document.querySelector(`input[name="svc"][value="${el.dataset.parentId}"]`);
-        if (el.checked && parent) parent.checked = true;
+        if (el.checked && parent) {
+            parent.checked = true;
+            document.getElementById(`card-${parent.value}`).classList.add('selected');
+        }
         calcTotal(); 
     }
 
@@ -470,7 +784,6 @@
         return finalPrice;
     }
 
-    // 🔥 優惠券邏輯 100% 回歸
     async function verifyCoupon() {
         const code = document.getElementById('coupon-code').value.trim().toUpperCase();
         const msgEl = document.getElementById('coupon-msg');
@@ -484,10 +797,10 @@
         const { data: coupon, error } = await myDB.from('coupons').select('*').eq('code', code).single();
 
         if (error || !coupon) {
-            msgEl.style.color = "red"; msgEl.innerText = "❌ 無效的優惠代碼"; currentCoupon = null;
+            msgEl.style.color = "var(--error)"; msgEl.innerText = "❌ 無效的優惠代碼"; currentCoupon = null;
         } else {
             if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) { 
-                msgEl.style.color = "red"; msgEl.innerText = "⚠️ 此代碼已過期"; currentCoupon = null; 
+                msgEl.style.color = "var(--error)"; msgEl.innerText = "⚠️ 此代碼已過期"; currentCoupon = null; 
             } else {
                 let isMember = !!currentUser;
                 let searchUserId = currentUser ? currentUser.id : null;
@@ -497,17 +810,17 @@
                     if (profile) { isMember = true; searchUserId = profile.id; }
                 }
 
-                if (isMember && !coupon.allow_member) { msgEl.style.color = "red"; msgEl.innerText = "❌ 此優惠券僅限【新朋友】使用"; currentCoupon = null; calcTotal(); return; } 
-                else if (!isMember && !coupon.allow_guest) { msgEl.style.color = "red"; msgEl.innerText = "❌ 此優惠券僅限【會員】使用，請先登入"; currentCoupon = null; calcTotal(); return; }
+                if (isMember && !coupon.allow_member) { msgEl.style.color = "var(--error)"; msgEl.innerText = "❌ 此優惠券僅限【新朋友】使用"; currentCoupon = null; calcTotal(); return; } 
+                else if (!isMember && !coupon.allow_guest) { msgEl.style.color = "var(--error)"; msgEl.innerText = "❌ 此優惠券僅限【會員】使用，請先登入"; currentCoupon = null; calcTotal(); return; }
 
                 if (searchUserId) {
                     const { data: history } = await myDB.from('bookings').select('id').eq('user_id', searchUserId).ilike('coupon_info', `%Code:${code}%`).limit(1);
-                    if (history && history.length > 0) { msgEl.style.color = "red"; msgEl.innerText = "❌ 您已使用過此優惠券囉！"; currentCoupon = null; calcTotal(); return; }
+                    if (history && history.length > 0) { msgEl.style.color = "var(--error)"; msgEl.innerText = "❌ 您已使用過此優惠券囉！"; currentCoupon = null; calcTotal(); return; }
                 }
 
                 currentCoupon = coupon;
                 let desc = coupon.discount_type === 'percentage' ? `打 ${coupon.discount_value < 10 ? coupon.discount_value*10 : coupon.discount_value} 折` : `折抵 $${coupon.discount_value}`;
-                msgEl.style.color = "green"; msgEl.innerText = `✅ 套用成功：${coupon.name} (${desc})`;
+                msgEl.style.color = "var(--success)"; msgEl.innerText = `✅ 套用成功：${coupon.name} (${desc})`;
             }
         }
         calcTotal(); 
@@ -516,7 +829,6 @@
     async function doSubmit() {
         if (isMemberBlocked) return alert("⚠️ 系統偵測您已是會員，請先前往「會員專區」登入！");
         
-        // 1. 檢查加購項目
         const selectedSvcs = document.querySelectorAll('input[name="svc"]:checked');
         for (let svc of selectedSvcs) {
             const subBoxes = document.querySelectorAll(`.sub-opt-item[data-parent-id="${svc.value}"]`);
@@ -524,13 +836,12 @@
                 const checkedSubs = document.querySelectorAll(`.sub-opt-item[data-parent-id="${svc.value}"]:checked`);
                 if (checkedSubs.length === 0) {
                     alert(`❌ 您勾選了「${svc.dataset.title}」，請記得選擇具體的加購內容唷！`);
-                    svc.scrollIntoView({ behavior: 'smooth' }); 
+                    document.getElementById(`card-${svc.value}`).scrollIntoView({ behavior: 'smooth', block: 'center' }); 
                     return; 
                 }
             }
         }
 
-        // 2. 收集所有欄位值
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const email = document.getElementById('c-email').value.trim();
@@ -541,18 +852,16 @@
         const otaOrderId = document.getElementById('ota-order-id').value.trim();
         const flow = document.getElementById('data-flow').value;
 
-        // 🔥 3. 建立錯誤清單 (把所有沒填的一次抓出來)
         let errorList = [];
 
         if (!name) errorList.push("您的真實姓名");
         if (!phone || !/^09\d{8}$/.test(phone)) errorList.push("正確的手機號碼 (10碼)");
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errorList.push("正確的 E-mail 信箱格式");
-        if (!qVal) errorList.push("睡眠 / 希望諮詢時間");
+        if (!qVal) errorList.push("必填問題 (作息/時段)");
         
         if (finalPrice === 0 && selectedSvcs.length === 0) errorList.push("請至少選擇一項主要服務");
         if (payStatus === 'ota' && !otaOrderId) errorList.push("平台訂單編號");
 
-        // 出生資料或截圖驗證
         if (flow === 'upload') {
             const fileInput = document.getElementById('c-file');
             if (!fileInput.files || fileInput.files.length === 0) errorList.push("人類圖截圖 (請上傳圖檔)");
@@ -564,7 +873,6 @@
             if (!bDate || !bHour || !bMinute || !bPlace) errorList.push("完整的出生資料 (日期、時間與地區)");
         }
 
-        // 🔥 4. 如果清單有東西，一次性彈出警告並阻擋！
         if (errorList.length > 0) {
             alert("❌ 預約無法送出，請確認以下資料是否填寫完整：\n\n🔸 " + errorList.join("\n🔸 "));
             return; 
@@ -573,16 +881,11 @@
         const btn = document.getElementById('sub-btn'); 
         btn.disabled = true; btn.innerText = "資料處理中...";
 
-
-
         try {
             let finalDataInfo = "未提供";
-            const flow = document.getElementById('data-flow').value;
 
-            // 🔥 嚴格的出生資料與截圖防漏驗證 100% 回歸
             if (flow === 'upload') {
                 const fileInput = document.getElementById('c-file');
-                if (!fileInput.files || fileInput.files.length === 0) throw new Error("❌ 請上傳人類圖截圖！");
                 let fileToUpload = fileInput.files[0];
                 if (fileToUpload.size > 1024 * 1024) fileToUpload = await compressImage(fileToUpload);
                 const fName = `HD_${phone}_${Date.now()}.jpg`;
@@ -594,21 +897,13 @@
                 const bDate = document.getElementById('b-date').value;
                 const h = document.getElementById('b-hour').value;
                 const m = document.getElementById('b-minute').value;
-                if (!h || !m) {
-                    btn.disabled = false; btn.innerText = "➔ 送出預約";
-                    return alert("❌ 請完整選擇出生時間 (幾點 : 幾分)");
-                }
                 const bTime = `${h}:${m}`;
                 const bPlace = document.getElementById('b-place').value.trim();
-                
-                if (!bDate || !bTime || !bPlace) throw new Error("❌ 請完整填寫出生資料");
-                
                 finalDataInfo = `出生: ${bDate} ${bTime} ${bPlace}`;
             }
 
-            const checkedInputs = document.querySelectorAll('input[name="svc"]:checked');
             let details = []; let specificMainService = "";
-            checkedInputs.forEach(el => {
+            document.querySelectorAll('input[name="svc"]:checked').forEach(el => {
                 let txt = `${el.dataset.title} ($${el.dataset.price})`;
                 let subs = Array.from(document.querySelectorAll(`.sub-opt-item[data-parent-id="${el.value}"]:checked`)).map(s=>s.value);
                 if(subs.length) txt += ` [${subs.join('、')}]`;
@@ -626,14 +921,14 @@
             const { error } = await myDB.from('bookings').insert([{
                 booking_id: myBookingId, temp_phone: phone, status: 'pending', price: finalPrice,
                 service_item: activeCat.name, main_service: specificMainService, service_detail: details.join(' | '), 
-                ota_source: payStatus === 'ota' ? otaSource : null, ota_order_id: payStatus === 'ota' ? otaOrderId : null,
+                ota_source: payStatus === 'ota' ? document.getElementById('ota-source-select').value : null, 
+                ota_order_id: payStatus === 'ota' ? otaOrderId : null,
                 payment_method: payStatus, sleep_time: qVal, case_story: story,
                 wish_detail: `姓名:${name} | Email:${email} | 數據:${finalDataInfo}`,
                 coupon_info: couponInfoText, user_id: currentUser ? currentUser.id : null
             }]);
 
             if(!error) { 
-                // 🔥 LINE Webhook 通知 100% 回歸
                 try { await myDB.functions.invoke('line-notify', { body: { name: name,  phone: phone, service: activeCat.name, note: `金額:$${finalPrice} ${couponInfoText ? '(含優惠)' : ''}`  } });} catch (e) {}
 
                 const shortId = '#' + myBookingId.slice(-6);
@@ -650,25 +945,19 @@
 
                 const idBox = document.getElementById('success-order-id');
                 idBox.innerText = shortId;
-                idBox.style.cursor = "pointer";
-                idBox.title = "點擊複製完整預約訊息";
                 idBox.onclick = function() { fallbackCopyText(lineMsgText, () => alert("預約訊息已複製！")); };
 
-                // 🔥 LINE 連結按鈕邏輯：智慧判斷裝置
                 const lineUrl = `https://line.me/R/oaMessage/@927ctmwa/?${encodeURIComponent(lineMsgText)}`;
                 const lineBtn = document.getElementById('line-super-btn');
                 lineBtn.href = "#"; 
 
-
-               // 🔥 在 doSubmit 函數內的 LINE 按鈕邏輯部分
                 lineBtn.onclick = function(e) {
                     e.preventDefault(); 
                     fallbackCopyText(lineMsgText, () => {
-                        lineBtn.innerHTML = `<i class="fa-solid fa-check"></i> <b>訊息已複製！</b>`;
-                        lineBtn.style.background = "#27ae60"; 
-                        lineBtn.style.borderColor = "#27ae60";
+                        lineBtn.innerHTML = `<i class="fa-solid fa-check" style="font-size:1.6rem; margin-right:10px;"></i> 訊息已複製！`;
+                        lineBtn.style.background = "var(--success)"; 
+                        lineBtn.style.borderColor = "var(--success)";
                         
-                        // 點完 LINE 按鈕後，顯示下面兩顆按鈕
                         document.getElementById('success-action-btns').style.display = 'flex';
                         
                         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -680,34 +969,25 @@
                     });
                 };
 
-                document.getElementById('sub-btn').disabled = false;
-                document.getElementById('sub-btn').innerText = "送出預約";
+                btn.disabled = false; btn.innerHTML = `確認送出預約單 <i class="fa-solid fa-paper-plane" style="margin-left:8px;"></i>`;
                 document.getElementById('success-overlay').classList.add('active');
             } else throw error;
         } catch (err) { 
             console.error(err);
             alert(err.message || "發生錯誤"); 
             btn.disabled = false; 
-            btn.innerText = "送出預約"; 
+            btn.innerHTML = `確認送出預約單 <i class="fa-solid fa-paper-plane" style="margin-left:8px;"></i>`;
         }
     }
-    // 🔥 新增：處理最後按鈕點擊的提醒視窗
-    function handleSuccessExit(type) {
-        let reminderMsg = "";
-        
-        if (type === 'sent') {
-            reminderMsg = "收到！我們會盡快核對您的 LINE 訊息。\n\n⚠️ 提醒您：若沒收到編號訊息，預約單將無法進入審核流程唷！";
-        } else {
-            reminderMsg = "好的，請務必記得回到 LINE 貼上訊息！\n\n⚠️ 注意：若遲遲未收到您的編號訊息，系統將自動取消此筆預約單，請多加留意。";
-        }
 
-        // 跳出提醒
+    function handleSuccessExit(type) {
+        let reminderMsg = type === 'sent' 
+            ? "收到！我們會盡快核對您的 LINE 訊息。\n\n⚠️ 提醒您：若沒收到編號訊息，預約單將無法進入審核流程唷！"
+            : "好的，請務必記得回到 LINE 貼上訊息！\n\n⚠️ 注意：若遲遲未收到您的編號訊息，系統將自動取消此筆預約單，請多加留意。";
         alert(reminderMsg);
-        
-        // 關閉視窗並回首頁
         closeSuccessModal();
     }
-    // 複製文字工具 (支援所有裝置)
+
     function fallbackCopyText(text, callback) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(callback).catch(() => tryOldSchoolCopy(text, callback)); 
@@ -735,6 +1015,7 @@
         const isOTA = (document.getElementById('pay-status').value === 'ota');
         document.getElementById('ota-area').style.display = isOTA ? 'block' : 'none'; 
         document.querySelector('.checkout-footer .coupon-box').style.display = isOTA ? 'none' : 'flex';
+        document.getElementById('ota-reminder').style.display = isOTA ? 'block' : 'none';
     }
     
     function toggleFlow() { 
@@ -744,7 +1025,7 @@
     }
     
     function toggleSubmitBtn(c) { 
-        if(!isMemberBlocked) { document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerText = c ? "送出預約" : "請同意規範"; }
+        if(!isMemberBlocked) { document.getElementById('sub-btn').disabled = !c; document.getElementById('sub-btn').innerHTML = c ? `確認送出預約單 <i class="fa-solid fa-paper-plane" style="margin-left:8px;"></i>` : `請同意規範`; }
     }
 
     async function checkSession() {
@@ -756,56 +1037,52 @@
                 if (user) {
                     currentUser = user;
                     document.getElementById('c-name').value = user.full_name; document.getElementById('c-phone').value = user.phone; document.getElementById('c-email').value = user.email || "";
-                    document.getElementById('c-phone').disabled = true; document.getElementById('c-name').style.backgroundColor = "#e8f5e9";
+                    document.getElementById('c-phone').disabled = true; document.getElementById('c-name').style.backgroundColor = "#f4f6f8"; document.getElementById('c-email').style.backgroundColor = "#f4f6f8";
                 }
             } catch (e) {}
         }
     }
 
     async function checkPhoneMembership() {
-    const phone = document.getElementById('c-phone').value.trim();
-    const statusEl = document.getElementById('phone-status');
-    const submitBtn = document.getElementById('sub-btn');
-    
-    if (!phone && !currentUser) { statusEl.innerHTML = ""; return; }
-    
-    // 🔥 1. 沒滿 10 碼或不是 09 開頭直接擋掉，並鎖死按鈕
-    if (!/^09\d{8}$/.test(phone)) { 
-        statusEl.innerHTML = "❌ 手機格式錯誤 (需 09 開頭共 10 碼)"; 
-        statusEl.style.color = "red"; 
-        submitBtn.disabled = true; 
-        return; 
+        const phone = document.getElementById('c-phone').value.trim();
+        const statusEl = document.getElementById('phone-status');
+        const submitBtn = document.getElementById('sub-btn');
+        
+        if (!phone && !currentUser) { statusEl.innerHTML = ""; return; }
+        
+        if (!/^09\d{8}$/.test(phone)) { 
+            statusEl.innerHTML = "❌ 手機格式錯誤 (需 09 開頭共 10 碼)"; 
+            statusEl.style.color = "var(--error)"; 
+            submitBtn.disabled = true; 
+            return; 
+        }
+
+        statusEl.innerHTML = "🔍 檢查中..."; statusEl.style.color = "#666";
+        const { data } = await myDB.from('profiles').select('id').eq('phone', phone).single();
+        if (data) { 
+            isMemberBlocked = true; 
+            statusEl.innerHTML = "⚠️ 此號碼已註冊！請先前往會員中心登入"; 
+            statusEl.style.color = "var(--error)";
+            submitBtn.disabled = true; 
+        } else { 
+            isMemberBlocked = false; 
+            statusEl.innerHTML = "✅ 新朋友歡迎你"; 
+            statusEl.style.color = "var(--success)";
+            toggleSubmitBtn(document.getElementById('agree-check').checked);
+        }
     }
 
-    statusEl.innerHTML = "🔍 檢查中..."; statusEl.style.color = "#666";
-    const { data } = await myDB.from('profiles').select('id').eq('phone', phone).single();
-    if (data) { 
-        isMemberBlocked = true; 
-        statusEl.innerHTML = "⚠️ 此號碼已註冊！請先前往會員中心登入"; 
-        statusEl.style.color = "red";
-        submitBtn.disabled = true; 
-    } else { 
-        isMemberBlocked = false; 
-        statusEl.innerHTML = "✅ 新朋友歡迎你"; 
-        statusEl.style.color = "green";
-        // 檢查如果有打勾條款，把按鈕解鎖
-        toggleSubmitBtn(document.getElementById('agree-check').checked);
-    }
-}
-
-    // Email 即時檢查
     function checkEmailFormat() {
         const email = document.getElementById('c-email').value.trim();
         const statusEl = document.getElementById('email-status');
         if (!email) { statusEl.innerHTML = ""; return; }
         
-        // 檢查是否有 @ 跟 .
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             statusEl.innerHTML = "❌ Email 格式不正確"; 
-            statusEl.style.color = "red";
+            statusEl.style.color = "var(--error)";
         } else {
             statusEl.innerHTML = "✅ 格式正確"; 
-            statusEl.style.color = "green";
+            statusEl.style.color = "var(--success)";
         }
     }
 

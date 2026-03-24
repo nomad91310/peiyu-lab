@@ -247,7 +247,12 @@
 
     // --- 3. 啟動函數 ---
     document.addEventListener("DOMContentLoaded", () => {
-        requireLogin();
+        requireLogin(); // 確認是否登入
+        
+        // 🔥 就是少這兩行啦！脫下遮羞布
+        const curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
+
         renderTimeGrid();
         fetchScheduleData(); // 載入資料庫
     });

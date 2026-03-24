@@ -3997,6 +3997,22 @@
         saveHistory();
         document.getElementById('spacer-menu').style.display = 'none'; 
     };
+    // 🔥 RWD 視窗縮放修復引擎：回到電腦版大視窗時，強制洗掉手機版的隱藏設定
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            const drawer = document.querySelector('.editor-sticky-header');
+            if (drawer) {
+                drawer.classList.remove('show-drawer');
+                drawer.dataset.activeGroup = '';
+                drawer.querySelectorAll('.tb-group').forEach(group => {
+                    group.style.removeProperty('display'); // 撕掉強制隱藏/顯示的標籤
+                });
+            }
+            // 同時確保手機版的浮動修改按鈕在電腦版會乖乖隱藏
+            const mEditBtn = document.getElementById('m-context-edit-btn');
+            if (mEditBtn) mEditBtn.style.display = 'none';
+        }
+    });
 
     // --- 啟動程序 ---
     document.addEventListener("DOMContentLoaded", () => {

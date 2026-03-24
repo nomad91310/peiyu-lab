@@ -9,17 +9,11 @@
         body { visibility: hidden !important; opacity: 0 !important; }
     </style>
     <style>
-        /* --- 基礎樣式 --- */
         :root { --forest: #1a2f23; --accent: #c6a87c; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 20px; color: #333; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--accent); overflow-x: auto; }
-        
-        /* 表單與按鈕 */
         input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; font-family: inherit; }
-        
-        /* 🔥 修復按鈕對齊：移除 margin，改用 flex 完美置中 */
         .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-flex; align-items: center; justify-content: center; margin: 0; white-space: nowrap; }
         .btn:hover { opacity: 0.8; transform: translateY(-1px); }
         .btn-forest { background: var(--forest); color: white; }
@@ -28,27 +22,44 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-outline { background: white; border: 1px solid #ccc; color: #666; }
+        .tpl-btn { background: #fffcf5; border: 1px solid var(--accent); color: var(--forest); font-size: 12px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .tpl-btn:hover { background: var(--accent); color: #fff; }
+        
+        /* 🔥 新增：編輯器預覽卡片樣式 */
+        .editor-preview-box { border: 2px dashed #ddd; background: #fafafa; padding: 15px 20px; border-radius: 8px; cursor: pointer; color: #999; text-align: center; transition: 0.2s; min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .editor-preview-box:hover { border-color: var(--accent); background: #fffcf5; color: var(--forest); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(198,168,124,0.15); }
 
-        /* 表格與列表 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
         tr:hover { background: #fdfaf1; }
-        
-        /* 🔥 修復細項列表的手機排版：允許換行，防止擠壓 */
         .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; flex-wrap: wrap; }
         .admin-row:hover { background: #f0f7ff; }
-
-        /* 提示框 */
         .sql-hint-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px; color: #856404; position: relative; }
         .sql-code-area { background: #eee; padding: 10px; margin-top: 5px; border-radius: 4px; font-family: monospace; word-break: break-all; }
         .btn-copy-sql { position: absolute; right: 10px; top: 10px; font-size: 11px; padding: 2px 6px; }
-
-        /* RWD */
         .card-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
         @media (max-width: 1024px) { 
             .card-layout { grid-template-columns: 1fr; } 
             body { padding: 10px; }
             .card { padding: 15px; }
+        }
+        /* 🔥 永遠固定在第二行：夾在標題列與打字工具列中間 */
+        #ue-custom-tools-wrapper {
+            width: 100%;
+            background: #fffdf9; /* 淺米色區分 */
+            border-bottom: 1px solid #ddd;
+            padding: 12px 15px;
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .tool-section { flex: 1; min-width: 200px; }
+
+        /* 統一內距，不再區分螢幕大小 */
+        @media (max-width: 768px) {
+            #ue-custom-tools-wrapper { padding: 10px; gap: 10px; }
         }
     </style>
 </head>
@@ -57,9 +68,26 @@
 <div class="card-layout">
     <div class="card" id="card-cat">
         <h3 style="margin-top:0; color:var(--forest);">📂 大類管理</h3>
-        <input type="hidden" id="cat-id-edit">
-        <input type="text" id="cat-name" placeholder="大類名稱 (例: 人類圖解讀)" style="margin-bottom:10px;">
         
+        <div class="sql-hint-box" style="background: #e8f5e9; border-color: #c8e6c9; color: #155724;">
+            <strong>💡 圖文與標題功能 SQL 補丁：</strong>
+            <button class="btn btn-outline btn-copy-sql" onclick="copyNewSqlCode()">📋 複製代碼</button>
+            <div class="sql-code-area" id="sql-new-code-block">ALTER TABLE service_categories ADD COLUMN IF NOT EXISTS description TEXT, ADD COLUMN IF NOT EXISTS image_urls TEXT, ADD COLUMN IF NOT EXISTS desc_title TEXT;</div>
+        </div>
+
+        <input type="hidden" id="cat-id-edit">
+        <input type="text" id="cat-name" placeholder="大類名稱 (例: 人類圖解讀)" style="margin-bottom:10px; font-weight: bold; border-color: var(--forest);">
+        
+       <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px;">
+            <label style="font-weight:bold; font-size:13px; color:var(--forest); display:block; margin-bottom:5px;">📖 服務說明設定</label>
+            <input type="text" id="cat-desc-title" placeholder="自訂說明標題 (未填則預設為「服務簡介」)" style="margin-bottom:10px;">
+            
+            <input type="hidden" id="cat-desc">
+            <div id="cat-desc-preview" class="editor-preview-box" onclick="openEditorWithSimulator('cat-desc', '編輯服務詳細說明')">
+                <div><i class="fa-solid fa-pen-to-square"></i> 點擊開啟全螢幕編輯器</div>
+            </div>
+        </div>
+
         <select id="cat-type" style="margin-bottom:10px;">
             <option value="sleep">詢問睡眠 (調頻類)</option>
             <option value="consult">詢問日期 (諮詢類)</option>
@@ -68,18 +96,21 @@
         <div style="background:#e3f2fd; padding:12px; border-radius:6px; margin-bottom:10px; border:1px solid #bbdefb;">
             <label style="font-size:12px; color:#1565c0; font-weight:bold; display:block; margin-bottom:8px;">客人可提供資料方式 (可複選)：</label>
             <div style="display:flex; gap:15px; flex-wrap: wrap;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
-                    <input type="checkbox" id="req-birth" value="birth" style="width:18px; height:18px;" checked> 📅 出生年月日
-                </label>
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
-                    <input type="checkbox" id="req-image" value="image" style="width:18px; height:18px;"> 📸 上傳截圖
-                </label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;"><input type="checkbox" id="req-birth" value="birth" style="width:18px; height:18px;" checked> 📅 出生年月日</label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;"><input type="checkbox" id="req-image" value="image" style="width:18px; height:18px;"> 📸 上傳截圖</label>
             </div>
         </div>
 
-        <textarea id="cat-terms" placeholder="服務規範條款" style="height:80px; margin-bottom:10px;"></textarea>
+        <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px;">
+            <label style="font-weight:bold; font-size:13px; color:var(--danger); display:block; margin-bottom:8px;">📜 規範與同意事項</label>
+            
+            <input type="hidden" id="cat-terms">
+            <div id="cat-terms-preview" class="editor-preview-box" onclick="openEditorWithSimulator('cat-terms', '編輯規範與同意事項')">
+                <div><i class="fa-solid fa-pen-to-square"></i> 點擊開啟全螢幕編輯器</div>
+            </div>
+        </div>
         
-        <div style="display:flex; gap:8px; flex-wrap: wrap;">
+        <div style="display:flex; gap:8px; flex-wrap: wrap; margin-top: 15px;">
             <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增大類</button>
             <button class="btn btn-outline" id="btn-cat-cancel" onclick="cancelEdit('cat')" style="display:none;">取消</button>
         </div>
@@ -95,9 +126,7 @@
         </div>
 
         <input type="hidden" id="svc-id-edit">
-        <select id="svc-cat-filter" style="margin-bottom:10px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()">
-            <option value="">載入中...</option>
-        </select>
+        <select id="svc-cat-filter" style="margin-bottom:10px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()"><option value="">載入中...</option></select>
         
         <div style="display:flex; gap:10px; flex-wrap: wrap;">
             <input type="text" id="i-name" placeholder="項目名" style="flex:2; min-width: 150px;">
@@ -131,10 +160,43 @@
 
 <script src="../js/config.js"></script>
 
+<script src="../js/shared_editor.js"></script>
+
 <script>
     let cache = { cats: [], svcs: [] };
+    let currentCatImages = []; 
 
-    // --- 1. 讀取資料 ---
+    // --- 0. 更新 UI 預覽引擎 ---
+    function updatePreview(id) {
+        const val = document.getElementById(id).value;
+        const box = document.getElementById(id + '-preview');
+        if (!val || val === '<p><br></p>' || val.trim() === '') {
+            box.innerHTML = `<div><i class="fa-solid fa-pen-to-square"></i> 點擊開啟全螢幕編輯器</div>`;
+            box.style.borderColor = '#ddd'; box.style.background = '#fafafa'; box.style.color = '#999';
+        } else {
+            // 解析出純文字摘要
+            let tmp = document.createElement('div'); tmp.innerHTML = val;
+            let text = tmp.innerText || tmp.textContent || '';
+            let shortText = text.substring(0, 45).replace(/\n/g, ' ') + (text.length > 45 ? '...' : '');
+            if(!shortText.trim()) shortText = "(包含圖片或特殊排版)";
+            
+            box.innerHTML = `
+                <div style="width:100%; text-align:left;">
+                    <div style="color:var(--success); font-weight:bold; margin-bottom:5px; font-size:14px;">
+                        <i class="fa-solid fa-circle-check"></i> 已編輯內容，點擊可修改
+                    </div>
+                    <div style="font-size:13px; color:#666; font-weight:normal; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        ${shortText}
+                    </div>
+                </div>
+            `;
+            box.style.borderColor = 'var(--success)'; box.style.background = '#f2fcf5'; box.style.color = 'var(--forest)';
+        }
+    }
+
+    
+
+    // --- 2. 讀取資料 ---
     async function fetchMenuData() {
         try {
             const [c, s] = await Promise.all([
@@ -145,26 +207,69 @@
             cache.svcs = s.data || [];
             
             renderConfigTables();
-            if (document.getElementById('svc-cat-filter').value) {
-                filterServiceList();
-            }
+            if (document.getElementById('svc-cat-filter').value) filterServiceList();
         } catch(e) { console.error("讀取失敗:", e); }
     }
 
-    // --- 2. 大類管理邏輯 ---
+    // --- 3. 大類圖文處理引擎 ---
+    async function uploadCatImages(input) {
+        const files = input.files; if(!files.length) return;
+        const btn = document.querySelector('button[onclick*="cat-img-upload"]');
+        const ogText = btn.innerText; btn.innerText = "⏳ 壓縮上傳中..."; btn.disabled = true;
+
+        for(let file of files) {
+            try {
+                const compressedBlob = await compressImageFile(file, 800);
+                const fName = `svc_${Date.now()}_${Math.random().toString(36).substr(2,5)}.jpg`;
+                const { error } = await myDB.storage.from('site-assets').upload(fName, compressedBlob, { contentType: 'image/jpeg' });
+                if(error) throw error;
+                const { data } = myDB.storage.from('site-assets').getPublicUrl(fName);
+                currentCatImages.push(data.publicUrl);
+            } catch(e) { alert("圖片上傳失敗: " + e.message); }
+        }
+        btn.innerText = ogText; btn.disabled = false; input.value = '';
+        renderCatImgPreview();
+    }
+
+    function renderCatImgPreview() {
+        document.getElementById('cat-img-preview').innerHTML = currentCatImages.map((url, i) => `
+            <div style="position:relative; width:80px; height:80px; border-radius:6px; overflow:hidden; border:1px solid #ddd; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <img src="${url}" style="width:100%; height:100%; object-fit:cover;">
+                <button onclick="removeCatImg(${i})" style="position:absolute; top:2px; right:2px; background:rgba(231,76,60,0.9); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+            </div>`).join('');
+    }
+
+    function removeCatImg(index) { currentCatImages.splice(index, 1); renderCatImgPreview(); }
+
+    function compressImageFile(file, maxSize) {
+        return new Promise((resolve) => {
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if(w > maxSize || h > maxSize) {
+                        if(w > h) { h *= maxSize/w; w = maxSize; } else { w *= maxSize/h; h = maxSize; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0,0,w,h);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+                };
+            };
+        });
+    }
+
+    // --- 4. 大類管理邏輯 ---
     function renderConfigTables() {
-        // 更新細項的下拉選單
         const s = document.getElementById('svc-cat-filter'); 
         const activeCats = cache.cats.filter(c => c.is_active !== false); 
-        
-        // 記住原本選的值，避免重整後跳掉
         const currentSelected = s.value;
         s.innerHTML = '<option value="">請選大類</option>' + activeCats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        if (currentSelected && activeCats.find(c => c.id === currentSelected)) {
-            s.value = currentSelected;
-        }
+        if (currentSelected && activeCats.find(c => c.id === currentSelected)) s.value = currentSelected;
 
-       // 渲染大類列表
         document.getElementById('cat-list').innerHTML = cache.cats.map(c => {
             const isActive = c.is_active !== false; 
             const rowStyle = isActive ? '' : 'background:#eee; color:#999;'; 
@@ -176,7 +281,9 @@
             <tr style="${rowStyle}">
                 <td>
                     <b>${c.name}</b> ${statusLabel}
-                    <div style="font-size:12px; color:#aaa; margin-top: 4px;">${c.terms ? '✅ 已設定規範' : '❌ 未設定規範'}</div>
+                    <div style="font-size:12px; color:#aaa; margin-top: 4px;">
+                        ${c.terms ? '✅ 已設規範' : '❌ 無規範'} | ${c.description ? '✅ 已設說明' : '❌ 無說明'}
+                    </div>
                 </td>
                 <td style="text-align:right; white-space: nowrap; width: 1%;">
                     <div style="display: flex; gap: 4px; justify-content: flex-end; flex-wrap: nowrap;">
@@ -189,11 +296,286 @@
         }).join('');
     }
 
+    let currentSimulatorTarget = '';
+
+    function openEditorWithSimulator(targetId, title) {
+    UnivEditor.open(targetId, title); // 1. 先開啟編輯器
+    currentSimulatorTarget = targetId;
+
+    // 2. 稍微等一下下，確保 shared_editor.js 已經把綠色標題列畫出來了
+    setTimeout(() => {
+        const wrapper = document.getElementById('peiyu-universal-editor-wrapper');
+        if (!wrapper) return;
+
+        // 🚀 關鍵位置：找到綠色標題列
+        const greenHeader = wrapper.querySelector('.editor-sticky-header');
+        
+        let customArea = document.getElementById('ue-custom-tools-wrapper');
+        if (!customArea) {
+            customArea = document.createElement('div');
+            customArea.id = 'ue-custom-tools-wrapper';
+        }
+
+        // 🚀 關鍵動作：強迫塞在綠色標題列的正下方
+        if (greenHeader) {
+            greenHeader.after(customArea);
+        }
+
+        // 3. 根據是「說明」還是「規範」來顯示對應內容
+        if (targetId === 'cat-desc') {
+            customArea.innerHTML = `
+                <div class="tool-section">
+                    <span style="font-size:12px; color:var(--forest); font-weight:bold; display:block; margin-bottom:5px;">✨ 快速插入範本：</span>
+                    <button class="tpl-btn" onclick="injectTemplateToEditor('desc', 1)">✨ 特色</button>
+                    <button class="tpl-btn" onclick="injectTemplateToEditor('desc', 2)">💡 痛點</button>
+                    <button class="tpl-btn" onclick="injectTemplateToEditor('desc', 3)">📍 流程</button>
+                </div>
+                <div class="tool-section" style="background:#fff; padding:10px; border-radius:6px; border: 1px dashed var(--accent);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <label style="font-size:12px; color:var(--forest); font-weight:bold;">📸 輪播圖片管理</label>
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 8px;" onclick="document.getElementById('cat-img-upload-inner').click()">選擇圖片上傳</button>
+                    </div>
+                    <div id="cat-img-preview-inner" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+                    <input type="file" id="cat-img-upload-inner" accept="image/*" multiple style="display:none;" onchange="uploadCatImages(this)">
+                </div>
+            `;
+            renderCatImgPreview();
+        } else if (targetId === 'cat-terms') {
+            customArea.innerHTML = `
+                <div class="tool-section">
+                    <span style="font-size:12px; color:var(--danger); font-weight:bold; display:block; margin-bottom:5px;">📜 規範專用範本：</span>
+                    <button class="tpl-btn" onclick="injectTemplateToEditor('terms', 1)">📌 標準規範</button>
+                </div>
+            `;
+        }
+    }, 100);
+
+    // 4. 維持你原本的模擬器開啟邏輯 (如果你還想要右邊的預覽窗)
+    setupLiveSimulator();
+}
+
+
+    // --- 2. 所見即所得插入邏輯 (直接安插在游標處) ---
+    function injectTemplateToEditor(type, num) {
+        let tpl = "";
+        if (type === 'desc') {
+            if (num === 1) tpl = `<div class="peiyu-block peiyu-obj" style="border-left: 4px solid #c6a87c; padding-left: 12px; margin: 15px 0;"><div style="color: #1a2f23; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">✨ 服務特色</div><ul style="margin: 0; padding-left: 20px; color: #555;"><li>深入解析你的原廠設定</li><li>找出最適合你的決策方式</li><li>隨附 30 頁精美專屬報告</li></ul></div><p><br></p>`;
+            if (num === 2) tpl = `<div class="peiyu-block peiyu-obj" style="background: #fdfaf1; border: 1px solid #fae1c3; border-radius: 12px; padding: 15px; margin: 15px 0;"><span style="background: #1a2f23; color: #c6a87c; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">適合對象</span><p style="margin: 10px 0 0 0; color: #444; line-height: 1.6;">常常覺得在關係中迷失自我？<br>總是不知道下一份工作該怎麼選？<br>這項服務將帶你找回內在權威！</p></div><p><br></p>`;
+            if (num === 3) tpl = `<div class="peiyu-block peiyu-obj" style="margin: 15px 0;"><div style="color: #1a2f23; font-weight: bold; margin-bottom: 8px;">📍 諮詢流程</div><div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;"><span style="background: #c6a87c; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;">1</span> <span style="color: #555;">預約並提供出生資訊</span></div><div style="display: flex; gap: 10px; align-items: center;"><span style="background: #c6a87c; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;">2</span> <span style="color: #555;">靜候 3-5 天獲取報告</span></div></div><p><br></p>`;
+        } else {
+            if (num === 1) tpl = `<ul class="peiyu-block peiyu-obj" style="color: #555; line-height: 1.8; margin: 15px 0; padding-left: 20px;"><li>請確認出生時間準確至 <b style="color: #1a2f23;">分鐘</b>。</li><li>預約成功後，請於 <b style="color: #d32f2f;">24 小時內</b> 完成付款。</li><li>本服務為客製化內容，<span style="background: #fff5f5; color: #c0392b; padding: 2px 6px; border-radius: 4px;">付款後恕不接受退款</span>。</li></ul><p><br></p>`;
+            if (num === 2) tpl = `<div class="peiyu-block peiyu-obj" style="background: #f4f6f8; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; color: #444; margin: 15px 0;"><b style="color: #1a2f23;">🕒 關於改期：</b><br>若需更改諮詢時間，請務必於原訂時間的 <b style="color: #d32f2f;">3 天前</b> 告知。<br><span style="font-size: 12px; color: #888;">※ 臨時取消將扣除 30% 手續費。</span></div><p><br></p>`;
+            if (num === 3) tpl = `<div class="peiyu-block peiyu-obj" style="border: 1px dashed #ccc; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;"><i class="fa-solid fa-lock" style="font-size: 20px; color: #27ae60; margin-bottom: 8px;"></i><div style="font-weight: bold; color: #1a2f23;">嚴格的隱私保密承諾</div><p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">您的出生數據與諮詢內容將受到最高層級的保密，僅供本次解讀使用，絕不外流。</p></div><p><br></p>`;
+        }
+        if (window.insertHtml) window.insertHtml(tpl);
+    }
+
+    // --- 3. 更新圖片預覽 (對準編輯器內部的 div) ---
+    function renderCatImgPreview() {
+        const container = document.getElementById('cat-img-preview-inner');
+        if(!container) return;
+        container.innerHTML = currentCatImages.map((url, i) => `
+            <div style="position:relative; width:60px; height:60px; border-radius:6px; overflow:hidden; border:1px solid #ddd; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <img src="${url}" style="width:100%; height:100%; object-fit:cover;">
+                <button onclick="removeCatImg(${i})" style="position:absolute; top:2px; right:2px; background:rgba(231,76,60,0.9); color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+            </div>`).join('');
+    }
+
+    // 用來記錄上次渲染的圖片，避免打字時輪播器一直被重置
+    let lastImagesJSON = "";
+
+    // --- 4. 建立編輯器內的雙開預覽畫面 (套用 booking.html 真實色系) ---
+    function setupLiveSimulator() {
+        const iframeContainer = document.getElementById('peiyu-editor-iframe').parentNode;
+        let flexBox = document.getElementById('editor-workspace-flex');
+        
+        if (!flexBox) {
+            flexBox = document.createElement('div');
+            flexBox.id = 'editor-workspace-flex';
+            flexBox.style.display = 'flex';
+            flexBox.style.flexDirection = window.innerWidth > 768 ? 'row' : 'column';
+            flexBox.style.flex = '1';
+            flexBox.style.overflow = 'hidden';
+            flexBox.style.background = '#e9ecef';
+            
+            iframeContainer.style.flex = '1';
+            iframeContainer.style.borderRight = window.innerWidth > 768 ? '2px solid #ccc' : 'none';
+            iframeContainer.style.borderBottom = window.innerWidth <= 768 ? '2px solid #ccc' : 'none';
+            iframeContainer.parentNode.insertBefore(flexBox, iframeContainer);
+            flexBox.appendChild(iframeContainer);
+            
+            const previewPanel = document.createElement('div');
+            previewPanel.id = 'live-preview-panel';
+            previewPanel.style.flex = '1';
+            previewPanel.style.display = 'flex';
+            previewPanel.style.flexDirection = 'column';
+            previewPanel.style.minHeight = window.innerWidth <= 768 ? '40vh' : 'auto'; 
+            
+            // 🔥 在這裡注入 booking.html 的真實 CSS 變數與字體設定
+            previewPanel.innerHTML = `
+                <div style="background:#2c3e50; padding:10px 15px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:white; font-size:13px; font-weight:bold;"><i class="fa-solid fa-mobile-screen"></i> 100% 前台真實擬真預覽</span>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="setSimulatorMode('desktop')" style="font-size:12px; padding:4px 10px; cursor:pointer; border-radius:4px; border:none; background:#fff; font-weight:bold;">💻 電腦版排版</button>
+                        <button onclick="setSimulatorMode('mobile')" style="font-size:12px; padding:4px 10px; cursor:pointer; border-radius:4px; border:none; background:#ccc; font-weight:bold;">📱 手機版排版</button>
+                    </div>
+                </div>
+                <div style="flex:1; overflow-y:auto; display:flex; justify-content:center; padding:20px; background:#e9ecef;">
+                    <div id="simulator-screen" style="
+                        --forest: #1a2f23; --forest-light: #2a4032; --cream: #fdfbf7; --white: #ffffff;
+                        --accent: #c6a87c; --text-main: #2c3e50; --error: #d32f2f; --success: #2e7d32;
+                        width:100%; max-width:800px; background:var(--cream); min-height:100%; 
+                        box-shadow:0 15px 35px rgba(0,0,0,0.15); border-radius:12px; padding:30px; 
+                        font-family:-apple-system, 'Microsoft JhengHei', sans-serif; line-height:1.7; 
+                        color:var(--text-main); transition:0.3s ease; overflow-x:hidden;">
+                        
+                        <div id="simulator-images" style="margin-bottom:20px;"></div>
+                        <div id="simulator-content"></div>
+                        
+                    </div>
+                </div>
+            `;
+            flexBox.appendChild(previewPanel);
+
+            window.addEventListener('resize', () => {
+                if(flexBox) {
+                    flexBox.style.flexDirection = window.innerWidth > 768 ? 'row' : 'column';
+                    iframeContainer.style.borderRight = window.innerWidth > 768 ? '2px solid #ccc' : 'none';
+                    iframeContainer.style.borderBottom = window.innerWidth <= 768 ? '2px solid #ccc' : 'none';
+                    previewPanel.style.minHeight = window.innerWidth <= 768 ? '40vh' : 'auto'; 
+                }
+            });
+
+            // 每 0.5 秒同步打字內容
+            setInterval(updateSimulator, 500);
+        }
+    }
+
+    // --- 5. 切換模擬器裝置寬度 (測試 RWD 破版專用) ---
+    function setSimulatorMode(mode) {
+        const screen = document.getElementById('simulator-screen');
+        const btns = document.getElementById('live-preview-panel').querySelectorAll('button');
+        if (mode === 'mobile') {
+            screen.style.maxWidth = '375px'; // 真實 iPhone 寬度
+            screen.style.padding = '15px';
+            btns[0].style.background = '#ccc'; btns[1].style.background = '#fff';
+        } else {
+            screen.style.maxWidth = '800px'; // 電腦版閱讀寬度
+            screen.style.padding = '30px';
+            btns[0].style.background = '#fff'; btns[1].style.background = '#ccc';
+        }
+    }
+
+    // --- 6. 核心同步引擎 (文字與動態輪播器) ---
+    function updateSimulator() {
+        const iframe = document.getElementById('peiyu-editor-iframe');
+        const simContent = document.getElementById('simulator-content');
+        
+        // 【第一部分：同步文字與 CSS 樣式】
+        if (iframe && iframe.contentWindow && simContent) {
+            const html = iframe.contentWindow.document.body?.innerHTML || '<p style="color:#aaa; text-align:center; margin-top:50px;">請在左側輸入內容...</p>';
+
+            if (currentSimulatorTarget === 'cat-terms') {
+                // 完全還原 booking.html 裡面的「規範警告框」真實樣式
+                simContent.innerHTML = `<div style="font-size: 14px; color: var(--text-main); background: #fff5f5; padding: 20px; border-radius: 8px; border-left: 4px solid var(--error); line-height: 1.8;">${html}</div>`;
+            } else {
+                // 還原服務說明的真實排版
+                simContent.innerHTML = `<div style="font-size: 15px; color: var(--text-main); line-height: 1.8;">${html}</div>`;
+            }
+        }
+
+        // 【第二部分：渲染真實可互動的圖片輪播器 (Carousel)】
+        // 為了不讓打字時輪播器一直閃爍重置，只有在圖片陣列改變時才重新渲染
+        const currentImagesJSON = JSON.stringify(currentCatImages);
+        if (lastImagesJSON !== currentImagesJSON && currentSimulatorTarget === 'cat-desc') {
+            lastImagesJSON = currentImagesJSON;
+            renderRealCarousel();
+        } else if (currentSimulatorTarget === 'cat-terms') {
+            document.getElementById('simulator-images').innerHTML = '';
+            lastImagesJSON = "";
+        }
+    }
+
+    // --- 7. 生成真實前台的滑動輪播器 ---
+    function renderRealCarousel() {
+        const simImages = document.getElementById('simulator-images');
+        if (!currentCatImages || currentCatImages.length === 0) {
+            simImages.innerHTML = ''; return;
+        }
+
+        // 產生下方的點點
+        let dots = currentCatImages.map((_, i) => `<div class="sim-dot" onclick="simGoToSlide(${i})" style="width:8px; height:8px; border-radius:50%; background:${i===0?'var(--accent)':'rgba(255,255,255,0.6)'}; cursor:pointer; transition:0.3s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>`).join('');
+        
+        // 產生圖片 (第一張顯示，其他隱藏)
+        let slides = currentCatImages.map((url, i) => `<img src="${url}" class="sim-slide" style="display:${i===0?'block':'none'}; width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; border-radius:12px;">`).join('');
+
+        // 產生左右切換按鈕 (大於 1 張才顯示)
+        let arrows = currentCatImages.length > 1 ? `
+            <button onclick="simChangeSlide(-1)" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:rgba(26,47,35,0.7); color:white; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="simChangeSlide(1)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(26,47,35,0.7); color:white; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-chevron-right"></i></button>
+        ` : '';
+
+        // 組合進容器，固定長寬比 (padding-top: 60%)
+        simImages.innerHTML = `
+            <div style="position:relative; width:100%; padding-top:60%; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); background:#eee;">
+                ${slides}
+                ${arrows}
+                <div style="position:absolute; bottom:15px; left:0; width:100%; display:flex; justify-content:center; gap:8px; z-index:10;">
+                    ${dots}
+                </div>
+            </div>
+        `;
+        window.simCurrentSlide = 0; // 重置到第一張
+    }
+
+    // --- 全域輪播器控制邏輯 ---
+    window.simChangeSlide = function(dir) {
+        if (!currentCatImages.length) return;
+        window.simCurrentSlide = (window.simCurrentSlide + dir + currentCatImages.length) % currentCatImages.length;
+        simUpdateSlideDisplay();
+    };
+    window.simGoToSlide = function(idx) {
+        window.simCurrentSlide = idx;
+        simUpdateSlideDisplay();
+    };
+    window.simUpdateSlideDisplay = function() {
+        document.querySelectorAll('.sim-slide').forEach((s, i) => s.style.display = i === window.simCurrentSlide ? 'block' : 'none');
+        document.querySelectorAll('.sim-dot').forEach((d, i) => d.style.background = i === window.simCurrentSlide ? 'var(--accent)' : 'rgba(255,255,255,0.6)');
+    };
+    function updateSimulator() {
+        const iframe = document.getElementById('peiyu-editor-iframe');
+        const simContent = document.getElementById('simulator-content');
+        const simImages = document.getElementById('simulator-images');
+        
+        if (iframe && iframe.contentWindow && simContent) {
+            const html = iframe.contentWindow.document.body?.innerHTML || '<p style="color:#aaa; text-align:center; margin-top:50px;">請在左側輸入內容...</p>';
+
+            if (currentSimulatorTarget === 'cat-terms') {
+                simContent.innerHTML = `<div style="font-size: 14px; color: #555; background: #fff5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #d32f2f;">${html}</div>`;
+                simImages.innerHTML = ''; 
+            } else {
+                simContent.innerHTML = `<div style="font-size: 15px; color: #444;">${html}</div>`;
+                if (currentCatImages && currentCatImages.length > 0) {
+                    simImages.innerHTML = `
+                        <div style="position:relative; width:100%; padding-top:56.25%; border-radius:8px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                            <img src="${currentCatImages[0]}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
+                            <div style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; font-size:11px; padding:4px 8px; border-radius:12px;">1 / ${currentCatImages.length} 預覽</div>
+                        </div>
+                    `;
+                } else {
+                    simImages.innerHTML = '';
+                }
+            }
+        }
+    }
     async function saveCategory() {
         const id = document.getElementById('cat-id-edit').value; 
         const name = document.getElementById('cat-name').value.trim(); 
         const type = document.getElementById('cat-type').value; 
-        const terms = document.getElementById('cat-terms').value; 
+        const terms = document.getElementById('cat-terms').value.trim(); 
+        const desc = document.getElementById('cat-desc').value.trim(); 
+        const descTitle = document.getElementById('cat-desc-title').value.trim(); 
+        
         if (!name) return alert("❌ 大類名稱為必填！");
         
         let reqs = []; 
@@ -201,22 +583,19 @@
         if (document.getElementById('req-image').checked) reqs.push('image'); 
         const dataReqStr = reqs.length > 0 ? reqs.join(',') : 'birth';
         
-        const payload = { name: name, question_type: type, data_requirement: dataReqStr, terms: terms };
+        const payload = { 
+            name: name, question_type: type, data_requirement: dataReqStr, terms: terms,
+            description: desc, desc_title: descTitle, image_urls: JSON.stringify(currentCatImages)
+        };
         let error = null; 
         
         const btn = document.getElementById('btn-cat-save');
-        const originalText = btn.innerText;
-        btn.innerText = "⏳ 儲存中...";
-        btn.disabled = true;
+        const originalText = btn.innerText; btn.innerText = "⏳ 儲存中..."; btn.disabled = true;
 
-        if (id) { 
-            const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; 
-        } else { 
-            const res = await myDB.from('service_categories').insert([payload]); error = res.error; 
-        }
+        if (id) { const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; } 
+        else { const res = await myDB.from('service_categories').insert([payload]); error = res.error; }
         
-        btn.innerText = originalText;
-        btn.disabled = false;
+        btn.innerText = originalText; btn.disabled = false;
 
         if (error) alert("儲存失敗: " + error.message); 
         else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('cat'); fetchMenuData(); }
@@ -227,8 +606,19 @@
         document.getElementById('cat-id-edit').value = c.id; 
         document.getElementById('cat-name').value = c.name; 
         document.getElementById('cat-type').value = c.question_type || 'sleep'; 
-        document.getElementById('cat-terms').value = c.terms || '';
         
+        document.getElementById('cat-terms').value = c.terms || '';
+        document.getElementById('cat-desc').value = c.description || '';
+        document.getElementById('cat-desc-title').value = c.desc_title || ''; 
+        
+        // 更新美美的預覽卡片
+        updatePreview('cat-desc');
+        updatePreview('cat-terms');
+        
+        currentCatImages = [];
+        if (c.image_urls) { try { currentCatImages = JSON.parse(c.image_urls); } catch(e) { } }
+        renderCatImgPreview();
+
         const reqStr = c.data_requirement || 'birth'; 
         document.getElementById('req-birth').checked = reqStr.includes('birth'); 
         document.getElementById('req-image').checked = reqStr.includes('image');
@@ -250,13 +640,10 @@
         if (error) alert("刪除失敗 (可能有關聯資料): " + error.message); else { alert("✅ 已刪除"); fetchMenuData(); } 
     }
 
-    // --- 3. 細項管理邏輯 ---
+    // --- 5. 細項管理邏輯 ---
     function filterServiceList() { 
         const c = document.getElementById('svc-cat-filter').value; 
-        if (!c) {
-            document.getElementById('svc-list-container').innerHTML = '<p style="padding:10px; color:#999;">請先選擇上方的大類...</p>';
-            return;
-        }
+        if (!c) { document.getElementById('svc-list-container').innerHTML = '<p style="padding:10px; color:#999;">請先選擇上方的大類...</p>'; return; }
         document.getElementById('svc-list-container').innerHTML = cache.svcs.filter(s => s.category_id === c).map((s) => `
             <div class="admin-row">
                 <div style="display:flex; flex-direction:column; gap:4px; flex-shrink:0;">
@@ -280,126 +667,82 @@
         const list = cache.svcs.filter(s => s.category_id === c); 
         const idx = list.findIndex(s => s.id === id); 
         if (idx === -1 || idx + dir < 0 || idx + dir >= list.length) return;
-        
-        const target = list[idx + dir]; 
-        const temp = list[idx].sort_order; 
-        list[idx].sort_order = target.sort_order; 
-        target.sort_order = temp;
-        
-        await Promise.all([ 
-            myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id), 
-            myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id) 
-        ]); 
+        const target = list[idx + dir]; const temp = list[idx].sort_order; list[idx].sort_order = target.sort_order; target.sort_order = temp;
+        await Promise.all([ myDB.from('services').update({sort_order: list[idx].sort_order}).eq('id', list[idx].id), myDB.from('services').update({sort_order: target.sort_order}).eq('id', target.id) ]); 
         fetchMenuData();
     }
 
     async function saveItem() {
-        const id = document.getElementById('svc-id-edit').value; 
-        const catId = document.getElementById('svc-cat-filter').value; 
-        const title = document.getElementById('i-name').value.trim(); 
-        const price = document.getElementById('i-price').value; 
-        const isMain = document.getElementById('i-is-main').checked; 
-        const reportTpl = document.getElementById('i-report-tpl').value.trim(); 
+        const id = document.getElementById('svc-id-edit').value; const catId = document.getElementById('svc-cat-filter').value; 
+        const title = document.getElementById('i-name').value.trim(); const price = document.getElementById('i-price').value; 
+        const isMain = document.getElementById('i-is-main').checked; const reportTpl = document.getElementById('i-report-tpl').value.trim(); 
         const subOpts = document.getElementById('i-sub-opts').value.trim();
         
-        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！"); 
-        if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
+        if (!catId) return alert("❌ 請先在下拉選單中選擇「所屬大類」！"); if (!title || !price) return alert("❌ 項目名稱與價格為必填！");
         
         const payload = { category_id: catId, title: title, price: parseInt(price), is_main: isMain, report_template: reportTpl, sub_options: subOpts };
         let error = null; 
         
-        const btn = document.getElementById('btn-svc-save');
-        const originalText = btn.innerText;
-        btn.innerText = "⏳ 儲存中...";
-        btn.disabled = true;
+        const btn = document.getElementById('btn-svc-save'); const originalText = btn.innerText; btn.innerText = "⏳ 儲存中..."; btn.disabled = true;
 
-        if (id) { 
-            const res = await myDB.from('services').update(payload).eq('id', id); error = res.error; 
-        } else { 
-            // 🔥 修復：新增項目時，排序只去抓「目前這個大類底下」的總數
-            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }).eq('category_id', catId); 
-            payload.sort_order = count ? count + 1 : 1; 
-            const res = await myDB.from('services').insert([payload]); error = res.error; 
-        }
+        if (id) { const res = await myDB.from('services').update(payload).eq('id', id); error = res.error; } 
+        else { const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }).eq('category_id', catId); payload.sort_order = count ? count + 1 : 1; const res = await myDB.from('services').insert([payload]); error = res.error; }
         
-        btn.innerText = originalText;
-        btn.disabled = false;
-
-        if (error) alert("儲存失敗: " + error.message); 
-        else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('svc'); fetchMenuData(); }
+        btn.innerText = originalText; btn.disabled = false;
+        if (error) alert("儲存失敗: " + error.message); else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('svc'); fetchMenuData(); }
     }
 
     function editSvc(id) {
         const s = cache.svcs.find(x => x.id === id); if (!s) return;
         document.getElementById('svc-cat-filter').value = s.category_id; filterServiceList();
         
-        document.getElementById('svc-id-edit').value = s.id; 
-        document.getElementById('i-name').value = s.title; 
-        document.getElementById('i-price').value = s.price; 
-        document.getElementById('i-is-main').checked = s.is_main; 
-        document.getElementById('i-report-tpl').value = s.report_template || ''; 
-        document.getElementById('i-sub-opts').value = s.sub_options || '';
+        document.getElementById('svc-id-edit').value = s.id; document.getElementById('i-name').value = s.title; 
+        document.getElementById('i-price').value = s.price; document.getElementById('i-is-main').checked = s.is_main; 
+        document.getElementById('i-report-tpl').value = s.report_template || ''; document.getElementById('i-sub-opts').value = s.sub_options || '';
         
         toggleSubOptionInput(); 
-        document.getElementById('btn-svc-save').innerText = "💾 儲存修改"; 
-        document.getElementById('btn-svc-save').className = "btn btn-warning"; 
-        document.getElementById('btn-svc-cancel').style.display = 'inline-flex'; 
-        document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('btn-svc-save').innerText = "💾 儲存修改"; document.getElementById('btn-svc-save').className = "btn btn-warning"; 
+        document.getElementById('btn-svc-cancel').style.display = 'inline-flex'; document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
     }
     
-    async function deleteService(id) {
-        if(confirm("確定刪除此服務項目？")) {
-            await myDB.from('services').delete().eq('id', id);
-            fetchMenuData();
-        }
-    }
-
-    function toggleSubOptionInput() { 
-        const isMain = document.getElementById('i-is-main').checked; 
-        document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none'; 
-        document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block'; 
-    }
+    async function deleteService(id) { if(confirm("確定刪除此服務項目？")) { await myDB.from('services').delete().eq('id', id); fetchMenuData(); } }
+    function toggleSubOptionInput() { const isMain = document.getElementById('i-is-main').checked; document.getElementById('main-opt-wrapper').style.display = isMain ? 'block' : 'none'; document.getElementById('sub-opt-wrapper').style.display = isMain ? 'none' : 'block'; }
     
     function cancelEdit(type) {
         if (type === 'cat') { 
-            document.getElementById('cat-id-edit').value = ''; 
-            document.getElementById('cat-name').value = ''; 
+            document.getElementById('cat-id-edit').value = ''; document.getElementById('cat-name').value = ''; 
+            
             document.getElementById('cat-terms').value = ''; 
-            document.getElementById('cat-type').value = 'sleep'; 
-            document.getElementById('req-birth').checked = true; 
-            document.getElementById('req-image').checked = false; 
-            document.getElementById('btn-cat-save').innerText = "＋ 新增大類"; 
-            document.getElementById('btn-cat-save').className = "btn btn-forest"; 
-            document.getElementById('btn-cat-cancel').style.display = "none"; 
-        } 
-        else if (type === 'svc') { 
-            document.getElementById('svc-id-edit').value = ''; 
-            document.getElementById('i-name').value = ''; 
-            document.getElementById('i-price').value = ''; 
-            document.getElementById('i-sub-opts').value = ''; 
-            document.getElementById('i-report-tpl').value = ''; 
-            document.getElementById('i-is-main').checked = false; 
-            toggleSubOptionInput(); 
-            document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; 
-            document.getElementById('btn-svc-save').className = "btn btn-forest"; 
-            document.getElementById('btn-svc-cancel').style.display = 'none'; 
+            document.getElementById('cat-desc').value = ''; 
+            document.getElementById('cat-desc-title').value = ''; 
+            updatePreview('cat-desc'); updatePreview('cat-terms');
+            
+            currentCatImages = []; renderCatImgPreview();
+            document.getElementById('cat-type').value = 'sleep'; document.getElementById('req-birth').checked = true; document.getElementById('req-image').checked = false; 
+            document.getElementById('btn-cat-save').innerText = "＋ 新增大類"; document.getElementById('btn-cat-save').className = "btn btn-forest"; document.getElementById('btn-cat-cancel').style.display = "none"; 
+        } else if (type === 'svc') { 
+            document.getElementById('svc-id-edit').value = ''; document.getElementById('i-name').value = ''; document.getElementById('i-price').value = ''; 
+            document.getElementById('i-sub-opts').value = ''; document.getElementById('i-report-tpl').value = ''; document.getElementById('i-is-main').checked = false; 
+            toggleSubOptionInput(); document.getElementById('btn-svc-save').innerText = "＋ 新增項目"; document.getElementById('btn-svc-save').className = "btn btn-forest"; document.getElementById('btn-svc-cancel').style.display = 'none'; 
         }
     }
 
-    function copySqlCode() { 
-        const code = document.getElementById('sql-code-block').innerText; 
-        navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！")); 
-    }
+    function copySqlCode() { const code = document.getElementById('sql-code-block').innerText; navigator.clipboard.writeText(code).then(() => alert("SQL 指令已複製！")); }
+    function copyNewSqlCode() { const code = document.getElementById('sql-new-code-block').innerText; navigator.clipboard.writeText(code).then(() => alert("圖文功能 SQL 指令已複製！請至 Database 執行。")); }
 
-    // --- 啟動 ---
-    document.addEventListener("DOMContentLoaded", () => {
-         // 1. 呼叫 config.js 裡的門神查水表
-        requireLogin();
+    document.addEventListener("DOMContentLoaded", () => { 
+        requireLogin(); 
+        const curtain = document.getElementById('security-curtain'); 
+        if (curtain) curtain.remove(); 
+        fetchMenuData(); 
+
+        // 🔥 監聽編輯器儲存事件，自動更新預覽卡片
+        document.getElementById('cat-desc').addEventListener('change', () => updatePreview('cat-desc'));
+        document.getElementById('cat-terms').addEventListener('change', () => updatePreview('cat-terms'));
         
-        // 2. 驗證通過，脫下黑布讓畫面顯示
-        const curtain = document.getElementById('security-curtain');
-        if (curtain) curtain.remove();
-        fetchMenuData();
+        // 初始設定為空白狀態
+        updatePreview('cat-desc');
+        updatePreview('cat-terms');
     });
 </script>
 </body>

@@ -10,7 +10,7 @@
     </style>
     <style>
         /* --- 基礎樣式 --- */
-        :root { --forest: #1a2f23; --accent: #c6a87c; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --purple: #9b59b6; }
+        :root { --forest: #1a2f23; --accent: #c6a87c; --danger: #e74c3c; --info: #3498db; --success: #27ae60; --warning: #f39c12; --purple: #9b59b6; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: transparent; margin: 0; padding: 20px; color: #333; }
         
@@ -18,7 +18,9 @@
         
         /* 表單與按鈕 */
         input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; margin-bottom: 5px; font-family: inherit; }
-        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-block; margin-right: 5px; }
+        
+        /* 🔥 修復按鈕對齊：移除 margin，改用 flex 完美置中 */
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition:0.2s; display: inline-flex; align-items: center; justify-content: center; margin: 0; white-space: nowrap; }
         .btn:hover { opacity: 0.8; transform: translateY(-1px); }
         .btn-forest { background: var(--forest); color: white; }
         .btn-info { background: var(--info); color: white; }
@@ -29,10 +31,11 @@
 
         /* 表格與列表 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
+        td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; color: #444; }
         tr:hover { background: #fdfaf1; }
         
-        .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; }
+        /* 🔥 修復細項列表的手機排版：允許換行，防止擠壓 */
+        .admin-row { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fff; transition: 0.2s; flex-wrap: wrap; }
         .admin-row:hover { background: #f0f7ff; }
 
         /* 提示框 */
@@ -42,7 +45,11 @@
 
         /* RWD */
         .card-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
-        @media (max-width: 1024px) { .card-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { 
+            .card-layout { grid-template-columns: 1fr; } 
+            body { padding: 10px; }
+            .card { padding: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -60,7 +67,7 @@
 
         <div style="background:#e3f2fd; padding:12px; border-radius:6px; margin-bottom:10px; border:1px solid #bbdefb;">
             <label style="font-size:12px; color:#1565c0; font-weight:bold; display:block; margin-bottom:8px;">客人可提供資料方式 (可複選)：</label>
-            <div style="display:flex; gap:15px;">
+            <div style="display:flex; gap:15px; flex-wrap: wrap;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px; color:#333;">
                     <input type="checkbox" id="req-birth" value="birth" style="width:18px; height:18px;" checked> 📅 出生年月日
                 </label>
@@ -72,11 +79,11 @@
 
         <textarea id="cat-terms" placeholder="服務規範條款" style="height:80px; margin-bottom:10px;"></textarea>
         
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增</button>
+        <div style="display:flex; gap:8px; flex-wrap: wrap;">
+            <button class="btn btn-forest" id="btn-cat-save" onclick="saveCategory()">＋ 新增大類</button>
             <button class="btn btn-outline" id="btn-cat-cancel" onclick="cancelEdit('cat')" style="display:none;">取消</button>
         </div>
-        <table id="cat-list" style="margin-top:15px;"></table>
+        <table id="cat-list"></table>
     </div>
     
     <div class="card" id="card-svc">
@@ -91,28 +98,32 @@
         <select id="svc-cat-filter" style="margin-bottom:10px; border:2px solid var(--info); background:#f0f8ff;" onchange="filterServiceList()">
             <option value="">載入中...</option>
         </select>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="i-name" placeholder="項目名" style="flex:2;">
-            <input type="number" id="i-price" placeholder="價格" style="flex:1;">
+        
+        <div style="display:flex; gap:10px; flex-wrap: wrap;">
+            <input type="text" id="i-name" placeholder="項目名" style="flex:2; min-width: 150px;">
+            <input type="number" id="i-price" placeholder="價格" style="flex:1; min-width: 100px;">
         </div>
+        
         <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin:10px 0;">
             <label style="display:flex; align-items:center; gap:5px; margin-bottom:10px; color:var(--danger); font-weight:bold; cursor:pointer;">
                 <input type="checkbox" id="i-is-main" style="width:18px; height:18px;" onchange="toggleSubOptionInput()"> 設為主項目 (單選互斥，無子選項)
             </label>
             <div id="main-opt-wrapper" style="display:none;">
                 <input type="text" id="i-report-tpl" placeholder="對應報告檔案 (例: srt_report.html)">
-                <small style="color:var(--purple);">💡 若為主項目，請填寫此欄以連結報表。</small>
+                <small style="color:var(--purple); display:block; line-height:1.4;">💡 若為主項目，請填寫此欄以連結報表。</small>
             </div>
             <div id="sub-opt-wrapper">
                 <input type="text" id="i-sub-opts" placeholder="子選項 (逗號隔開)">
-                <small style="color:#666;">💡 加購項目才需要</small>
+                <small style="color:#666; display:block; line-height:1.4;">💡 加購項目才需要填寫子選項</small>
             </div>
         </div>
-        <div style="display:flex; gap:10px; justify-content: flex-end;">
+        
+        <div style="display:flex; gap:8px; justify-content: flex-end; flex-wrap: wrap;">
             <button class="btn btn-outline" id="btn-svc-cancel" onclick="cancelEdit('svc')" style="display:none;">取消</button>
             <button class="btn btn-forest" id="btn-svc-save" onclick="saveItem()">＋ 新增項目</button>
         </div>
-        <div style="max-height:400px; overflow-y:auto; margin-top:15px; border-top:1px solid #eee;" id="svc-list-container">
+        
+        <div style="max-height:450px; overflow-y:auto; margin-top:15px; border-top:1px solid #eee;" id="svc-list-container">
             <p style="padding:10px; color:#999;">請先選擇上方的大類...</p>
         </div>
     </div>
@@ -153,7 +164,7 @@
             s.value = currentSelected;
         }
 
-        // 渲染大類列表
+       // 渲染大類列表
         document.getElementById('cat-list').innerHTML = cache.cats.map(c => {
             const isActive = c.is_active !== false; 
             const rowStyle = isActive ? '' : 'background:#eee; color:#999;'; 
@@ -165,12 +176,14 @@
             <tr style="${rowStyle}">
                 <td>
                     <b>${c.name}</b> ${statusLabel}
-                    <div style="font-size:12px; color:#aaa;">${c.terms ? '(含規範)' : ''}</div>
+                    <div style="font-size:12px; color:#aaa; margin-top: 4px;">${c.terms ? '✅ 已設定規範' : '❌ 未設定規範'}</div>
                 </td>
-                <td style="text-align:right;">
-                    <button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯">✏️</button>
-                    <button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="font-size:12px;">${toggleBtnText}</button>
-                    <button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除">🗑️</button>
+                <td style="text-align:right; white-space: nowrap; width: 1%;">
+                    <div style="display: flex; gap: 4px; justify-content: flex-end; flex-wrap: nowrap;">
+                        <button class="btn btn-outline" onclick="editCat('${c.id}')" title="編輯" style="padding: 6px 8px;">✏️</button>
+                        <button class="btn ${toggleBtnClass}" onclick="toggleCatStatus('${c.id}', ${!isActive})" style="padding: 6px 8px;">${toggleBtnText}</button>
+                        <button class="btn btn-danger" onclick="deleteCat('${c.id}')" title="刪除" style="padding: 6px 8px;">🗑️</button>
+                    </div>
                 </td>
             </tr>`;
         }).join('');
@@ -190,9 +203,21 @@
         
         const payload = { name: name, question_type: type, data_requirement: dataReqStr, terms: terms };
         let error = null; 
-        if (id) { const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; } 
-        else { const res = await myDB.from('service_categories').insert([payload]); error = res.error; }
         
+        const btn = document.getElementById('btn-cat-save');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ 儲存中...";
+        btn.disabled = true;
+
+        if (id) { 
+            const res = await myDB.from('service_categories').update(payload).eq('id', id); error = res.error; 
+        } else { 
+            const res = await myDB.from('service_categories').insert([payload]); error = res.error; 
+        }
+        
+        btn.innerText = originalText;
+        btn.disabled = false;
+
         if (error) alert("儲存失敗: " + error.message); 
         else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('cat'); fetchMenuData(); }
     }
@@ -210,7 +235,7 @@
         
         document.getElementById('btn-cat-save').innerText = "💾 儲存修改"; 
         document.getElementById('btn-cat-save').className = "btn btn-warning"; 
-        document.getElementById('btn-cat-cancel').style.display = "inline-block"; 
+        document.getElementById('btn-cat-cancel').style.display = "inline-flex"; 
         document.getElementById('card-cat').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -220,7 +245,7 @@
     }
     
     async function deleteCat(id) { 
-        if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？")) return; 
+        if (!confirm("⚠️ 警告：確定要刪除這個大類嗎？刪除後無法復原！")) return; 
         const { error } = await myDB.from('service_categories').delete().eq('id', id); 
         if (error) alert("刪除失敗 (可能有關聯資料): " + error.message); else { alert("✅ 已刪除"); fetchMenuData(); } 
     }
@@ -234,17 +259,19 @@
         }
         document.getElementById('svc-list-container').innerHTML = cache.svcs.filter(s => s.category_id === c).map((s) => `
             <div class="admin-row">
-                <div style="display:flex; flex-direction:column; margin-right:10px;">
-                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',-1)">▲</button>
-                    <button class="btn btn-outline" style="padding:0 5px;" onclick="moveSvc('${s.id}',1)">▼</button>
+                <div style="display:flex; flex-direction:column; gap:4px; flex-shrink:0;">
+                    <button class="btn btn-outline" style="padding:2px 8px; font-size:10px;" onclick="moveSvc('${s.id}',-1)">▲</button>
+                    <button class="btn btn-outline" style="padding:2px 8px; font-size:10px;" onclick="moveSvc('${s.id}',1)">▼</button>
                 </div>
-                <div style="flex:1">
-                    <b>${s.title}</b> <span style="color:#d35400; font-weight:bold;">$${s.price}</span> 
-                    ${s.is_main ? '<span class="tag tag-main" style="background:#e74c3c;">主項目</span>' : ''}
-                    ${s.sub_options ? `<div style="font-size:12px; color:#666; margin-top:4px;">└ ${s.sub_options}</div>` : ''}
+                <div style="flex:1; min-width: 120px;">
+                    <b style="font-size:15px;">${s.title}</b> <span style="color:#d35400; font-weight:bold; margin-left:5px;">$${s.price}</span> 
+                    ${s.is_main ? '<span style="background:#e74c3c; color:#fff; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:5px; vertical-align:middle;">主項目</span>' : ''}
+                    ${s.sub_options ? `<div style="font-size:12px; color:#666; margin-top:4px; line-height:1.4;">└ ${s.sub_options}</div>` : ''}
                 </div>
-                <button class="btn btn-info" onclick="editSvc('${s.id}')">修</button>
-                <button class="btn btn-danger" onclick="deleteService('${s.id}')">刪</button>
+                <div style="display:flex; gap:6px; flex-shrink:0;">
+                    <button class="btn btn-info" onclick="editSvc('${s.id}')">修</button>
+                    <button class="btn btn-danger" onclick="deleteService('${s.id}')">刪</button>
+                </div>
             </div>`).join(''); 
     }
 
@@ -280,14 +307,24 @@
         
         const payload = { category_id: catId, title: title, price: parseInt(price), is_main: isMain, report_template: reportTpl, sub_options: subOpts };
         let error = null; 
+        
+        const btn = document.getElementById('btn-svc-save');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ 儲存中...";
+        btn.disabled = true;
+
         if (id) { 
             const res = await myDB.from('services').update(payload).eq('id', id); error = res.error; 
         } else { 
-            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }); 
+            // 🔥 修復：新增項目時，排序只去抓「目前這個大類底下」的總數
+            const { count } = await myDB.from('services').select('*', { count: 'exact', head: true }).eq('category_id', catId); 
             payload.sort_order = count ? count + 1 : 1; 
             const res = await myDB.from('services').insert([payload]); error = res.error; 
         }
         
+        btn.innerText = originalText;
+        btn.disabled = false;
+
         if (error) alert("儲存失敗: " + error.message); 
         else { alert(id ? "✅ 修改成功！" : "✅ 新增成功！"); cancelEdit('svc'); fetchMenuData(); }
     }
@@ -306,7 +343,7 @@
         toggleSubOptionInput(); 
         document.getElementById('btn-svc-save').innerText = "💾 儲存修改"; 
         document.getElementById('btn-svc-save').className = "btn btn-warning"; 
-        document.getElementById('btn-svc-cancel').style.display = 'inline-block'; 
+        document.getElementById('btn-svc-cancel').style.display = 'inline-flex'; 
         document.getElementById('card-svc').scrollIntoView({ behavior: 'smooth' });
     }
     
@@ -331,7 +368,7 @@
             document.getElementById('cat-type').value = 'sleep'; 
             document.getElementById('req-birth').checked = true; 
             document.getElementById('req-image').checked = false; 
-            document.getElementById('btn-cat-save').innerText = "＋ 新增"; 
+            document.getElementById('btn-cat-save').innerText = "＋ 新增大類"; 
             document.getElementById('btn-cat-save').className = "btn btn-forest"; 
             document.getElementById('btn-cat-cancel').style.display = "none"; 
         } 

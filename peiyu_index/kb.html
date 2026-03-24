@@ -122,13 +122,11 @@
     }
     #kb-article-list-area { animation: fadeSlideUp 0.3s ease-out; }
 
+    /* 搜尋區塊專屬 CSS 統一化 */
+    .kb-search-result-box { margin-bottom: 30px; }
     .kb-search-group { display: flex !important; flex-direction: column !important; gap: 8px !important; margin-bottom: 15px !important; background: #f9f9f9; padding: 15px 40px 15px 15px !important; border-radius: 10px; border: 1px solid #eee; position: relative !important; animation: fadeSlideUp 0.3s ease-out; }
     .kb-search-title-input, .kb-search-key-input { width: 100% !important; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; box-sizing: border-box; flex: none !important; font-size: 16px !important; }
     .kb-group-remove-btn { position: absolute !important; top: 12px !important; right: 8px !important; background: #ffebee; color: #d32f2f; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-    .kb-result-section-title { display: flex; align-items: center; justify-content: center; margin: 40px 0 20px 0; color: #555; font-weight: bold; font-size: 1.1rem; }
-    .kb-result-section-title::before, .kb-result-section-title::after { content: ''; height: 2px; background: #e0e0e0; flex: 1; margin: 0 20px; }
-    .kb-result-section-badge { background: #fff; color: var(--forest); padding: 5px 20px; border: 2px solid var(--forest); border-radius: 50px; }
-    .kb-search-mid-header { display: inline-block; background: var(--forest); color: var(--accent); padding: 6px 25px; border-radius: 50px; font-size: 1rem; font-weight: 900; font-family: 'Noto Serif TC', serif; margin-bottom: 15px; margin-left: 5px; box-shadow: 0 4px 10px rgba(26, 47, 35, 0.15); }
 
     .kb-article-view { background: #ffffff !important; padding: 50px 40px !important; border-radius: 24px; margin: 0 auto !important; max-width: 100% !important; position: relative !important; box-shadow: 0 10px 40px rgba(26, 47, 35, 0.08) !important; border: 1px solid #eee; }
     .kb-cat-header { text-align: center; margin-bottom: 40px; }
@@ -246,6 +244,9 @@
         .kb-cat-view.is-category { padding: 30px 18px 20px 18px !important; }
         .kb-list-container { gap: 10px !important; }
         
+        /* 🔥 修復搜尋結果在手機版破框的問題 */
+        .kb-search-result-box { padding: 10px 0 !important; margin-bottom: 20px; }
+
         .kb-article-card { padding: 5px 10px !important; min-height: 45px !important; margin-bottom: 3px !important; }
         .kb-card-num { flex: 0 0 70px !important; width: 70px !important; }
         .kb-card-num.star-only { flex: 0 0 25px !important; width: 25px !important; }
@@ -260,7 +261,7 @@
 
         .kb-tiny-note { 
             position: absolute !important; 
-            top: 10px !important; /* 👈 這裡修改 */
+            top: 10px !important; 
             right: -5px !important; 
             width: fit-content; 
             max-width: 55% !important; 
@@ -319,7 +320,7 @@
     let kbArticlesFlat = []; 
 
     document.addEventListener("DOMContentLoaded", async () => {
-        const params = new URLSearchParams(window.parent.location.search); // 🔥 修正：從外層網址抓參數
+        const params = new URLSearchParams(window.parent.location.search); // 🔥 從外層網址抓參數
         const targetArticle = params.get('article');
         const targetQ = params.get('q'); 
 
@@ -377,7 +378,7 @@
     function renderKbHome() {
         kbState.level = 0; kbState.activeBig = null; kbState.activeMid = null; kbState.searchQuery = null; 
         
-        // 🔥 修正：使用 window.parent 改變外層網址，徹底清乾淨
+        // 🔥 使用 window.parent 改變外層網址，徹底清乾淨
         const cleanUrl = window.parent.location.pathname + "?view=knowledge";
         window.parent.history.pushState({ path: cleanUrl }, '', cleanUrl);
 
@@ -514,6 +515,7 @@
             window.scrollTo(0, 0);
         }
     }    
+
     async function readArt(idOrSlug) {
         kbState.lastClickedId = idOrSlug; 
         const isUUID = idOrSlug.length > 20; 
@@ -526,10 +528,11 @@
 
         kbState.activeBig = data.big_category; 
         kbState.activeMid = data.mid_category;
-        kbState.level = 2;
+        kbState.level = 2; // 進入文章層級
 
         const displayId = data.slug ? data.slug : data.id;
         
+        // 點擊文章時，把文章 ID 寫入網址
         const newUrl = `${window.parent.location.pathname}?view=knowledge&article=${displayId}`;
         window.parent.history.pushState({ path: newUrl }, '', newUrl);
 
@@ -555,8 +558,6 @@
         window.scrollTo(0, 0); 
         initArticleTabs();
     }
-
-
 
     function openSearchPanel(existingData = null) {
         const area = document.getElementById('modal-search-groups-area');
@@ -617,11 +618,11 @@
         window.scrollTo(0, 0); closeModal('search-overlay'); showLoading();
         
         setTimeout(() => {
-            kbState.level = 3; 
-            kbState.searchQuery = searchData;
+            kbState.level = 3; // 狀態 3：代表現在正在「搜尋結果」頁面
+            kbState.searchQuery = searchData; // 記下這組搜尋條件
+            
             if (!isBack) { 
                 const base64Str = safeB64Encode(JSON.stringify(searchData));
-                // 🔥 修正：使用 window.parent 改變外層網址
                 const newUrl = `${window.parent.location.pathname}?view=knowledge&q=${base64Str}`;
                 window.parent.history.pushState({ path: newUrl }, '', newUrl);
             }
@@ -701,8 +702,9 @@
                     </div>`;
             }
             
+            // 🔥 統一：拔除白底與多餘的邊框內距，讓搜尋卡片跟首頁的樣式一致！
             finalHtml += `
-                <div style="background: #ffffff; padding: 30px 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(26,47,35,0.03); border: 1px solid #eee;">
+                <div class="kb-search-result-box">
                     ${titleCapsuleHtml}
                     ${contentHtml}
                 </div>`;
@@ -764,29 +766,35 @@
         });
     }
     
+    // 🔥 完美修復上一頁返回的網址跳轉邏輯
     function kbGoBack() {
         document.title = "培癒試驗室";
         document.getElementById('knowledge').classList.remove('kb-reading-mode');
         
         if (kbState.level === 2) { 
+            // 從文章退回，檢查上一層是什麼
             if (kbState.searchQuery) {
+                // 退回搜尋結果，強制將網址改回 ?q=... 的搜尋狀態！
+                const base64Str = safeB64Encode(JSON.stringify(kbState.searchQuery));
+                const newUrl = `${window.parent.location.pathname}?view=knowledge&q=${base64Str}`;
+                window.parent.history.pushState({ path: newUrl }, '', newUrl);
                 doKbSearch(kbState.searchQuery, true); 
             }
             else if (kbState.activeBig) {
-                // 🔥 修正：使用 window.parent 改變外層網址，徹底清乾淨
+                // 退回分類目錄
                 const cleanUrl = window.parent.location.pathname + "?view=knowledge";
                 window.parent.history.pushState({ path: cleanUrl }, '', cleanUrl);
                 enterKb(kbState.activeBig, true); 
             } 
             else {
-                // 🔥 修正：使用 window.parent 改變外層網址，徹底清乾淨
+                // 其他情況退回首頁
                 const cleanUrl = window.parent.location.pathname + "?view=knowledge";
                 window.parent.history.pushState({ path: cleanUrl }, '', cleanUrl);
                 renderKbHome();
             }
         } 
         else {
-            // 🔥 修正：使用 window.parent 改變外層網址，徹底清乾淨
+            // 從其他地方退回首頁
             const cleanUrl = window.parent.location.pathname + "?view=knowledge";
             window.parent.history.pushState({ path: cleanUrl }, '', cleanUrl);
             renderKbHome();

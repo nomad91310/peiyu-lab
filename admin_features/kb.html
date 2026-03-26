@@ -1534,6 +1534,13 @@
             }
 
             body.innerHTML = `
+                <div class="editor-form-group" style="margin-bottom:10px;">
+                    <label>容器寬度</label>
+                    <select id="ct-display-width" class="editor-form-input">
+                        <option value="fit-content">緊身容器 (依照最長字數給予框)</option>
+                        <option value="100%">全段容器 (滿版寬度)</option>
+                    </select>
+                </div>
                 <div style="display:flex; gap:10px;">
                     <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="ct-radius" class="editor-form-input">
                         <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
@@ -1555,7 +1562,7 @@
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="ct-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;"></div>
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="ct-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;"></div>
                 </div>
-                ${!isEditing ? `<div class="editor-form-group" style="margin-top:15px;"><label>預設文字 (若有反白文字則會自動包裝進來)</label><input type="text" id="ct-text" class="editor-form-input" value="請在此輸入內容..." placeholder="會出現在框內的預設文字"></div>` : ''}
+                ${!isEditing ? `<div style="margin-top:15px; font-size:12px; color:#666; background:#f4f6f8; padding:10px; border-radius:6px; border:1px dashed #ccc;">💡 提示：此容器會自動將您目前<b>「反白選取」</b>的所有內容包裝起來。<br>若沒有選取任何內容，將會產生一個空的容器供您後續輸入。</div>` : ''}
             `;
         }
         else if (type === 'custom-box') {
@@ -1566,12 +1573,14 @@
             let bg = prefs.bg || '#fffcf5', borderCol = prefs.borderCol || '#c6a87c', textCol = prefs.color || '#1a2f23';
             let radius = prefs.radius || '50px', borderStyle = prefs.style || 'solid', borderWidth = prefs.width || '2px';
             let displayType = prefs.displayType || 'inline-block';
+            let fontOverride = prefs.fontOverride || 'inherit'; 
             let textValue = '';
 
-            // 🔥 嚴格判定：只有真正選中 custom-box 才算是修改模式！
+            // 🔥 嚴格判定：是否為修改模式
             let isEditingBox = currentTarget && currentTarget.classList.contains('peiyu-custom-box');
 
             if (isEditingBox) {
+                // 【修改模式】：抓取現有屬性
                 const comp = window.getComputedStyle(currentTarget);
                 bg = rgb2hex(comp.backgroundColor) || bg;
                 textCol = rgb2hex(comp.color) || textCol;
@@ -1583,20 +1592,36 @@
                 
                 confirmBtn.style.display = 'none';
                 const updateBtn = document.getElementById('m-update-btn');
-                updateBtn.style.display = 'flex'; // 🔥 改成 flex
+                updateBtn.style.display = 'flex'; 
                 updateBtn.innerText = "✅ 確認修改外框";
                 updateBtn.setAttribute('onclick', 'updateCustomBox()');
-                textValue = "⚠️ 修改模式：請直接在編輯器內改字或插圖"; 
+                textValue = ""; // 修改模式不顯示文字在輸入框
+
+                // 🔥 修改模式邏輯：強制保持原有
+                fontOverride = 'inherit';
             } else {
+                // 【新插入模式】：抓取反白文字
                 const sel = window.getSelection();
                 textValue = sel.toString(); 
-                confirmBtn.style.display = 'flex'; // 🔥 改成 flex
+                confirmBtn.style.display = 'flex';
                 document.getElementById('m-update-btn').style.display = 'none';
+
+                // 🔥 新插入模式邏輯：若沒選字，強制預設
+                if (textValue.trim() === "") {
+                    fontOverride = 'default';
+                }
             }
 
-            // 🔥 初始化預覽框的字與邊框
-            const previewText = isEditingBox ? '[文字預覽]' : (textValue || '[文字預覽]');
+            // 計算預覽內容與框線
+            const previewText = isEditingBox ? '[修改模式預覽]' : (textValue || '[文字預覽]');
             const initBorderStr = borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderCol}`;
+
+            // 🔥 核心：判定選項是否該反灰
+            const isNoSelection = !isEditingBox && textValue.trim() === "";
+            const inheritAttr = isNoSelection ? 'disabled' : '';
+            const defaultAttr = isEditingBox ? 'disabled' : '';
+            const inheritStyle = isNoSelection ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            const defaultStyle = isEditingBox ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
 
             body.innerHTML = `
                 <div style="margin-bottom: 15px; padding: 15px; background: #f0f4f8; border-radius: 8px; text-align: center; border: 1px dashed #ccc; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
@@ -1609,8 +1634,6 @@
                             border-radius: ${radius}; 
                             background-color: ${bg}; 
                             color: ${textCol}; 
-                            font-family: 'Noto Serif TC', serif; 
-                            font-size: ${displayType === 'inline-block' ? '1.05rem' : '1.1rem'}; 
                             font-weight: bold;
                             width: ${displayType === 'block' ? '100%' : 'auto'};
                             box-sizing: border-box;
@@ -1621,13 +1644,30 @@
                 <div class="editor-form-group">
                     <label>外框類型 (決定換行行為)</label>
                     <select id="cb-display" class="editor-form-input" onchange="updateCustomBoxPreview()">
-                        <option value="inline-block" ${displayType==='inline-block'?'selected':''}>🏷️ 文字外框 (隨字寬度，適合當標題/標籤)</option>
-                        <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器 (滿版寬度，按 Enter 可換行)</option>
+                        <option value="inline-block" ${displayType==='inline-block'?'selected':''}>🏷️ 文字外框</option>
+                        <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器</option>
                     </select>
                 </div>
-                <div class="editor-form-group"><label>文字內容</label>
-                    <input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="請輸入內容或先在編輯器反白文字" ${isEditingBox ? 'disabled' : ''} oninput="document.getElementById('cb-preview-box').innerText = this.value || '[文字預覽]';">
+
+                <div style="margin: 15px 0; padding: 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:#666; font-size:13px;">字體設定</label>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${inheritStyle}">
+                            <input type="radio" name="cb-font-override" value="inherit" ${fontOverride === 'inherit' ? 'checked' : ''} ${inheritAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
+                            保持原字型 / 字體大小
+                        </label>
+                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${defaultStyle}">
+                            <input type="radio" name="cb-font-override" value="default" ${fontOverride === 'default' ? 'checked' : ''} ${defaultAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
+                            預設字型 (標準黑體) / 14pt
+                        </label>
+                    </div>
+                    ${isNoSelection ? '<small style="color:#e74c3c; margin-top:5px; display:block;">⚠️ 沒選取文字時無法「保持原字型」</small>' : ''}
                 </div>
+
+                <div class="editor-form-group"><label>文字內容</label>
+                    <input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="${isEditingBox ? '修改模式請直接在頁面編輯' : '請輸入內容...'}" ${isEditingBox ? 'disabled' : ''} oninput="document.getElementById('cb-preview-box').innerText = this.value || '[文字預覽]';">
+                </div>
+
                 <div style="display:flex; gap:10px;">
                     <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="cb-radius" class="editor-form-input" onchange="updateCustomBoxPreview()">
                         <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
@@ -1647,12 +1687,17 @@
                         <option value="8px" ${borderWidth==='8px'?'selected':''}>8px</option>
                     </select></div>
                 </div>
+
                 <div style="display:flex; gap:10px; margin-bottom:0;">
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>字體色</label><input type="color" id="cb-color" class="editor-form-input" value="${textCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="cb-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
                     <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="cb-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
                 </div>
             `;
+            
+            // 立即執行一次預覽更新，讓預覽框字體正確
+            setTimeout(updateCustomBoxPreview, 10);
+        
         }
             document.getElementById('config-modal').style.display = 'flex';
     }
@@ -1679,30 +1724,123 @@
             document.getElementById('config-modal').style.display = 'none';
             return;
         }
-        else if (modalMode === 'container-box') {
-            const radius = document.getElementById('ct-radius').value;
-            const style = document.getElementById('ct-style').value;
-            const width = document.getElementById('ct-width').value;
-            const bg = document.getElementById('ct-bg').value;
-            const borderCol = document.getElementById('ct-border-color').value;
-            const defaultText = document.getElementById('ct-text') ? document.getElementById('ct-text').value : '請在此輸入內容...';
-            const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
+        else if (modalMode === 'container-box' || modalMode === 'custom-box') {
+            const isCustom = modalMode === 'custom-box';
             
-            restoreSelection();
-            const sel = window.getSelection();
-            let innerContent = defaultText;
+            let bg, color, borderCol, radius, style, width, displayType, fontOverride, containerWidth;
+            let innerContent = '<p><br></p>';
+            let typedText = '';
 
-            // 🔥 智慧捕捉：如果你有反白文字，直接整包複製起來當內餡！
-            if (sel.rangeCount > 0 && !sel.isCollapsed) {
-                const range = sel.getRangeAt(0);
-                const tempDiv = document.createElement('div');
-                tempDiv.appendChild(range.cloneContents());
-                if(tempDiv.innerHTML.trim() !== '') {
-                    innerContent = tempDiv.innerHTML;
-                }
+            // 取得對應面板的設定值
+            if (isCustom) {
+                typedText = document.getElementById('cb-text').value;
+                radius = document.getElementById('cb-radius').value;
+                style = document.getElementById('cb-style').value;
+                width = document.getElementById('cb-width').value;
+                color = document.getElementById('cb-color').value;
+                bg = document.getElementById('cb-bg').value;
+                borderCol = document.getElementById('cb-border-color').value;
+                displayType = document.getElementById('cb-display').value;
+                const fontRadio = document.querySelector('input[name="cb-font-override"]:checked');
+                fontOverride = fontRadio ? fontRadio.value : 'inherit';
+                
+                const prefs = { bg, color, borderCol, radius, style, width, displayType, fontOverride };
+                localStorage.setItem('peiyu_box_prefs', JSON.stringify(prefs));
+            } else {
+                radius = document.getElementById('ct-radius').value;
+                style = document.getElementById('ct-style').value;
+                width = document.getElementById('ct-width').value;
+                bg = document.getElementById('ct-bg').value;
+                borderCol = document.getElementById('ct-border-color').value;
+                // 🔥 讀取新加入的寬度選項
+                containerWidth = document.getElementById('ct-display-width') ? document.getElementById('ct-display-width').value : 'fit-content';
+                displayType = 'block'; 
+                fontOverride = 'inherit'; 
+                color = 'inherit'; 
             }
 
-            html = `<div class="peiyu-block peiyu-obj peiyu-container-box" style="width: fit-content; background-color: ${bg}; border: ${borderStr}; border-radius: ${radius}; padding: 15px 20px; margin: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">${innerContent}</div><p><br></p>`;
+            const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
+            const fontStyleStr = fontOverride === 'default' 
+                ? "font-family: 'Microsoft JhengHei', -apple-system, sans-serif !important; font-size: 14pt;" 
+                : "";
+
+            restoreSelection();
+            const sel = window.getSelection();
+
+            // 🔥 模式分流：行內標籤(inline-block) vs 區塊容器(block)
+            if (displayType === 'inline-block') {
+                // 【行內文字標籤模式】(僅自訂外框有此模式)
+                innerContent = typedText || '自訂文字';
+                if (sel.rangeCount > 0 && !sel.isCollapsed) {
+                    const range = sel.getRangeAt(0);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.appendChild(range.cloneContents());
+                    if (typedText === sel.toString() && tempDiv.innerHTML.trim() !== '') {
+                        innerContent = tempDiv.innerHTML;
+                    }
+                }
+                html = `<span class="peiyu-block peiyu-obj peiyu-custom-box" style="display: inline-block; padding: 2px 14px; margin: 0 4px; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; vertical-align: baseline; box-sizing: border-box; ${fontStyleStr}">${innerContent}</span>&nbsp;`;
+                
+                insertHtml(html);
+                document.getElementById('config-modal').style.display = 'none';
+                return;
+            } 
+            else {
+                // 【區塊打包模式】(緊身容器、全段容器、段落型自訂外框)
+                let insertMarker = null;
+                if (sel.rangeCount > 0 && !sel.isCollapsed) {
+                    const range = sel.getRangeAt(0);
+                    
+                    // 1. 尋找安全的頂層邊界 (通常是 .peiyu-article 或 td)
+                    let boundary = range.commonAncestorContainer;
+                    if (boundary.nodeType === 3) boundary = boundary.parentNode;
+                    while (boundary && boundary.id !== 'editor' && !['TD', 'TH'].includes(boundary.tagName) && (!boundary.classList || !boundary.classList.contains('peiyu-article'))) {
+                        boundary = boundary.parentNode;
+                    }
+                    if (!boundary) boundary = document.getElementById('editor');
+
+                    // 2. 找出有交集的所有頂層區塊 (完整包含 h3, ul, p 等)
+                    let selectedNodes = [];
+                    Array.from(boundary.childNodes).forEach(child => {
+                        if (sel.containsNode(child, true)) selectedNodes.push(child);
+                    });
+
+                    // 3. 將它們「連根拔起」，移入暫存區 (100% 完美保留排版、顏色與字體)
+                    if (selectedNodes.length > 0) {
+                        insertMarker = document.createElement('div');
+                        insertMarker.style.display = 'none';
+                        boundary.insertBefore(insertMarker, selectedNodes[0]);
+
+                        const tempDiv = document.createElement('div');
+                        selectedNodes.forEach(node => tempDiv.appendChild(node));
+
+                        if (isCustom && typedText !== '' && typedText !== sel.toString()) {
+                            innerContent = `<div>${typedText}</div>`; // 手動打新字，覆蓋舊文
+                        } else {
+                            if (tempDiv.innerHTML.trim() !== '') innerContent = tempDiv.innerHTML;
+                        }
+                    }
+                } else if (isCustom && typedText !== '') {
+                    innerContent = `<div>${typedText}</div>`;
+                }
+
+                // 產生 HTML
+                if (isCustom) {
+                    html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; text-align: justify; text-justify: inter-ideograph; ${fontStyleStr}">${innerContent}</div><p><br></p>`;
+                } else {
+                    html = `<div class="peiyu-block peiyu-obj peiyu-container-box" style="width: ${containerWidth}; max-width: 100%; box-sizing: border-box; background-color: ${bg}; border: ${borderStr}; border-radius: ${radius}; padding: 15px 20px; margin: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">${innerContent}</div><p><br></p>`;
+                }
+
+                // 精準安插回剛才拔出的位置
+                if (insertMarker) {
+                    insertMarker.insertAdjacentHTML('afterend', html);
+                    insertMarker.remove();
+                    saveHistory();
+                    document.getElementById('config-modal').style.display = 'none';
+                    return; // 成功打包，直接結束！
+                } 
+                // 若沒有抓到區塊(沒反白)，放給底下的原版統一引擎，它會在游標處新增空框框
+            }
         }
         if(modalMode === 'table') { const r=document.getElementById('inp-rows').value, c=document.getElementById('inp-cols').value, b=document.getElementById('inp-border').value; const bs = b==='#ffffff'?'none':`1px solid ${b}`; let h = ''; for(let i=0;i<r;i++){ let ch=''; for(let j=0;j<c;j++) ch+=`<td style="border:${bs};padding:8px 12px;">文字</td>`; h+=`<tr>${ch}</tr>`; } html = `<table class="peiyu-table peiyu-obj" style="border:${bs};width:100%;">${h}</table><p><br></p>`; }
         // 🌟 自適應換行版主標/副標 (解開 nowrap 鎖死，加入 max-width 防破版)
@@ -1747,34 +1885,138 @@
                 </div>
             </div><p><br></p>`; 
         }
-        else if (modalMode === 'custom-box') {
-            const text = document.getElementById('cb-text').value || '自訂文字';
-            const radius = document.getElementById('cb-radius').value;
-            const style = document.getElementById('cb-style').value;
-            const width = document.getElementById('cb-width').value;
-            const color = document.getElementById('cb-color').value;
-            const bg = document.getElementById('cb-bg').value;
-            const borderCol = document.getElementById('cb-border-color').value;
-            const displayType = document.getElementById('cb-display').value; // 抓取使用者的選擇
-            // 寫入記憶大腦
-            const prefs = { bg, color, borderCol, radius, style, width, displayType };
-            localStorage.setItem('peiyu_box_prefs', JSON.stringify(prefs));
-            const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
+        else if (type === 'custom-box') {
+            document.getElementById('m-title-editor').innerText = '🔲 自訂文字外框';
             
-            if (displayType === 'inline-block') {
-                // 🔥 模式 1：文字外框 
-                html = `<span class="peiyu-block peiyu-obj peiyu-custom-box" style="display: inline-block; padding: 2px 14px; margin: 0 4px; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.05rem; vertical-align: baseline; box-sizing: border-box; font-weight: bold;">${text}</span>&nbsp;`;
+            let savedPrefs = localStorage.getItem('peiyu_box_prefs');
+            let prefs = savedPrefs ? JSON.parse(savedPrefs) : {};
+            let bg = prefs.bg || '#fffcf5', borderCol = prefs.borderCol || '#c6a87c', textCol = prefs.color || '#1a2f23';
+            let radius = prefs.radius || '50px', borderStyle = prefs.style || 'solid', borderWidth = prefs.width || '2px';
+            let displayType = prefs.displayType || 'inline-block';
+            let fontOverride = prefs.fontOverride || 'inherit'; 
+            let textValue = '';
+
+            // 🔥 嚴格判定：是否為修改模式
+            let isEditingBox = currentTarget && currentTarget.classList.contains('peiyu-custom-box');
+
+            if (isEditingBox) {
+                // 【修改模式】：抓取現有屬性
+                const comp = window.getComputedStyle(currentTarget);
+                bg = rgb2hex(comp.backgroundColor) || bg;
+                textCol = rgb2hex(comp.color) || textCol;
+                borderCol = rgb2hex(comp.borderTopColor) || borderCol;
+                radius = comp.borderRadius;
+                borderStyle = comp.borderTopStyle;
+                borderWidth = comp.borderTopWidth;
+                displayType = comp.display === 'block' ? 'block' : 'inline-block';
                 
-                // 🔥 關鍵修復：如果是「文字外框」，直接呼叫原生插入法原地替換反白的文字！
-                // 並且用 return 強制結束，絕對不進入下方的「強制另起新行引擎」！
-                insertHtml(html);
-                document.getElementById('config-modal').style.display = 'none';
-                return; 
+                confirmBtn.style.display = 'none';
+                const updateBtn = document.getElementById('m-update-btn');
+                updateBtn.style.display = 'flex'; 
+                updateBtn.innerText = "✅ 確認修改外框";
+                updateBtn.setAttribute('onclick', 'updateCustomBox()');
+                textValue = ""; // 修改模式不顯示文字在輸入框
+
+                // 🔥 修改模式邏輯：強制保持原有
+                fontOverride = 'inherit';
             } else {
-                // 🔥 模式 2：段落容器
-                // 維持 <div> 標籤與強制換行，適合做成獨立的重點區塊
-                html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; font-family: 'Noto Serif TC', serif; font-size: 1.1rem; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; font-weight: bold; text-align: justify; text-justify: inter-ideograph;"><div>${text}</div></div><p><br></p>`;
+                // 【新插入模式】：抓取反白文字
+                const sel = window.getSelection();
+                textValue = sel.toString(); 
+                confirmBtn.style.display = 'flex';
+                document.getElementById('m-update-btn').style.display = 'none';
+
+                // 🔥 新插入模式邏輯：若沒選字，強制預設
+                if (textValue.trim() === "") {
+                    fontOverride = 'default';
+                }
             }
+
+            // 計算預覽內容與框線
+            const previewText = isEditingBox ? '[修改模式預覽]' : (textValue || '[文字預覽]');
+            const initBorderStr = borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderCol}`;
+
+            // 🔥 核心：判定選項是否該反灰
+            const isNoSelection = !isEditingBox && textValue.trim() === "";
+            const inheritAttr = isNoSelection ? 'disabled' : '';
+            const defaultAttr = isEditingBox ? 'disabled' : '';
+            const inheritStyle = isNoSelection ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            const defaultStyle = isEditingBox ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+
+            body.innerHTML = `
+                <div style="margin-bottom: 15px; padding: 15px; background: #f0f4f8; border-radius: 8px; text-align: center; border: 1px dashed #ccc; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                    <span style="font-size: 12px; color: #888; margin-bottom: 8px; font-weight: bold;">👀 即時預覽</span>
+                    <div style="width: 100%;">
+                        <div id="cb-preview-box" style="
+                            display: ${displayType === 'inline-block' ? 'inline-block' : 'block'}; 
+                            padding: ${displayType === 'inline-block' ? '2px 14px' : '15px 20px'}; 
+                            border: ${initBorderStr}; 
+                            border-radius: ${radius}; 
+                            background-color: ${bg}; 
+                            color: ${textCol}; 
+                            font-weight: bold;
+                            width: ${displayType === 'block' ? '100%' : 'auto'};
+                            box-sizing: border-box;
+                        ">${previewText}</div>
+                    </div>
+                </div>
+
+                <div class="editor-form-group">
+                    <label>外框類型 (決定換行行為)</label>
+                    <select id="cb-display" class="editor-form-input" onchange="updateCustomBoxPreview()">
+                        <option value="inline-block" ${displayType==='inline-block'?'selected':''}>🏷️ 文字外框</option>
+                        <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器</option>
+                    </select>
+                </div>
+
+                <div style="margin: 15px 0; padding: 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:#666; font-size:13px;">字體設定</label>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${inheritStyle}">
+                            <input type="radio" name="cb-font-override" value="inherit" ${fontOverride === 'inherit' ? 'checked' : ''} ${inheritAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
+                            保持原字型 / 字體大小
+                        </label>
+                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${defaultStyle}">
+                            <input type="radio" name="cb-font-override" value="default" ${fontOverride === 'default' ? 'checked' : ''} ${defaultAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
+                            預設字型 (標準黑體) / 14pt
+                        </label>
+                    </div>
+                    ${isNoSelection ? '<small style="color:#e74c3c; margin-top:5px; display:block;">⚠️ 沒選取文字時無法「保持原字型」</small>' : ''}
+                </div>
+
+                <div class="editor-form-group"><label>文字內容</label>
+                    <input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="${isEditingBox ? '修改模式請直接在頁面編輯' : '請輸入內容...'}" ${isEditingBox ? 'disabled' : ''} oninput="document.getElementById('cb-preview-box').innerText = this.value || '[文字預覽]';">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="cb-radius" class="editor-form-input" onchange="updateCustomBoxPreview()">
+                        <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
+                        <option value="6px" ${radius==='6px'?'selected':''}>微圓角</option>
+                        <option value="50px" ${radius==='50px'||radius.includes('50')?'selected':''}>膠囊狀</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1;"><label>框線</label><select id="cb-style" class="editor-form-input" onchange="updateCustomBoxPreview()">
+                        <option value="none" ${borderStyle==='none'?'selected':''}>無框線</option>
+                        <option value="solid" ${borderStyle==='solid'?'selected':''}>實線</option>
+                        <option value="dashed" ${borderStyle==='dashed'?'selected':''}>虛線</option>
+                        <option value="dotted" ${borderStyle==='dotted'?'selected':''}>點線</option>
+                    </select></div>
+                    <div class="editor-form-group" style="flex:1;"><label>粗細</label><select id="cb-width" class="editor-form-input" onchange="updateCustomBoxPreview()">
+                        <option value="1px" ${borderWidth==='1px'?'selected':''}>1px</option>
+                        <option value="2px" ${borderWidth==='2px'?'selected':''}>2px</option>
+                        <option value="4px" ${borderWidth==='4px'?'selected':''}>4px</option>
+                        <option value="8px" ${borderWidth==='8px'?'selected':''}>8px</option>
+                    </select></div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:0;">
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>字體色</label><input type="color" id="cb-color" class="editor-form-input" value="${textCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="cb-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
+                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="cb-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
+                </div>
+            `;
+            
+            // 立即執行一次預覽更新，讓預覽框字體正確
+            setTimeout(updateCustomBoxPreview, 10);
         }
         else if (modalMode === 'divider') {
             const style = document.getElementById('div-style').value;
@@ -1968,6 +2210,21 @@
                 e.preventDefault(); 
                 navigator.clipboard.readText().then(text => { document.execCommand('insertText', false, text); saveHistory(); })
                 .catch(err => alert("請改用滑鼠右鍵 ➔ 僅貼純文字！"));
+            }
+            
+            // 🔥 1. 新增：修復自訂外框按 Enter 會分裂的 Bug
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    const node = sel.anchorNode;
+                    const customBox = node.nodeType === 3 ? node.parentNode.closest('.peiyu-custom-box') : node.closest('.peiyu-custom-box');
+                    // 如果游標在「段落型」的外框內，強制用 Shift+Enter 的行為 (插入 <br>)
+                    if (customBox && window.getComputedStyle(customBox).display === 'block') {
+                        e.preventDefault();
+                        document.execCommand('insertLineBreak');
+                        saveHistory();
+                    }
+                }
             }
         });
 
@@ -3790,41 +4047,53 @@
         triggerAutoSave(true); // 自動存檔
     };
     // 🌟 自訂外框即時預覽引擎
-        window.updateCustomBoxPreview = function() {
-            const previewBox = document.getElementById('cb-preview-box');
-            if (!previewBox) return;
+        // 🌟 自訂外框即時預覽引擎 (升級字體連動版)
+    window.updateCustomBoxPreview = function() {
+        const previewBox = document.getElementById('cb-preview-box');
+        if (!previewBox) return;
 
-            const displayType = document.getElementById('cb-display').value;
-            const radius = document.getElementById('cb-radius').value;
-            const style = document.getElementById('cb-style').value;
-            const width = document.getElementById('cb-width').value;
-            const color = document.getElementById('cb-color').value;
-            const bg = document.getElementById('cb-bg').value;
-            const borderCol = document.getElementById('cb-border-color').value;
+        const displayType = document.getElementById('cb-display').value;
+        const radius = document.getElementById('cb-radius').value;
+        const style = document.getElementById('cb-style').value;
+        const width = document.getElementById('cb-width').value;
+        const color = document.getElementById('cb-color').value;
+        const bg = document.getElementById('cb-bg').value;
+        const borderCol = document.getElementById('cb-border-color').value;
+        
+        // 🔥 讀取你選了哪個字體圈圈
+        const fontRadio = document.querySelector('input[name="cb-font-override"]:checked');
+        const fontOverride = fontRadio ? fontRadio.value : 'inherit';
 
-            const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
+        const borderStr = style === 'none' ? 'none' : `${width} ${style} ${borderCol}`;
 
-            // 即時替換 CSS 樣式
-            previewBox.style.border = borderStr;
-            previewBox.style.borderRadius = radius;
-            previewBox.style.color = color;
-            previewBox.style.backgroundColor = bg;
-            
-            if (displayType === 'inline-block') {
-                previewBox.style.display = 'inline-block';
-                previewBox.style.padding = '2px 14px';
-                previewBox.style.width = 'auto';
-                previewBox.style.fontSize = '1.05rem';
-                previewBox.style.textAlign = 'left'; // 標籤維持靠左即可
-            } else {
-                previewBox.style.display = 'block';
-                previewBox.style.padding = '15px 20px';
-                previewBox.style.width = '100%';
-                previewBox.style.fontSize = '1.1rem';
-                previewBox.style.textAlign = 'justify'; // 🔥 強迫左右完美對齊
-                previewBox.style.textJustify = 'inter-ideograph'; // 🔥 針對中文字的最佳化平齊
-            }
-        };
+        // 即時替換基本 CSS 樣式
+        previewBox.style.border = borderStr;
+        previewBox.style.borderRadius = radius;
+        previewBox.style.color = color;
+        previewBox.style.backgroundColor = bg;
+        
+        // 🔥 即時替換字體樣式！
+        if (fontOverride === 'default') {
+            previewBox.style.fontFamily = "'Microsoft JhengHei', -apple-system, sans-serif";
+            previewBox.style.fontSize = "14pt";
+        } else {
+            previewBox.style.fontFamily = "'Noto Serif TC', serif"; // 模擬編輯器預設的明體
+            previewBox.style.fontSize = displayType === 'inline-block' ? '1.05rem' : '1.1rem';
+        }
+
+        if (displayType === 'inline-block') {
+            previewBox.style.display = 'inline-block';
+            previewBox.style.padding = '2px 14px';
+            previewBox.style.width = 'auto';
+            previewBox.style.textAlign = 'left'; 
+        } else {
+            previewBox.style.display = 'block';
+            previewBox.style.padding = '15px 20px';
+            previewBox.style.width = '100%';
+            previewBox.style.textAlign = 'justify'; 
+            previewBox.style.textJustify = 'inter-ideograph'; 
+        }
+    };
         // 🌟 更新超連結引擎
     // 🌟 更新超連結引擎
     window.updateLink = function() {

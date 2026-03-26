@@ -125,22 +125,20 @@ function openBooking(id) {
     const mainService = (cache.svcs || []).find(s => s.is_main && (b.main_service === s.title || (b.service_detail||'').includes(s.title)));
     
     let btnLabel = "📄 生成服務報告", btnClass = "btn-forest";
-    
-    // 如果資料庫(services資料表)裡面有設定 report_template (例如：tarot_report.html)，就用那個
-    // 如果沒有，就預設使用 srt_report.html
     let templateName = (mainService && mainService.report_template) ? mainService.report_template : "srt_report.html";
-    
-    // 確保路徑指向 report/ 資料夾
     let reportTemplatePath = `report/${templateName}`;
 
     // 檢查訂單中是否已經有生成過報告的紀錄
     const reportMatch = rawDetail.match(/\[報告已生成 ID:(.*?)\]/);
     const existingReportId = reportMatch ? reportMatch[1] : null;
     
-    // 組合最終的開啟網址
+    // 🔥 關鍵修復：從後台抓取通行證，直接當作參數送過去
+    const adminToken = localStorage.getItem('sys_cfg_v1') || 'YmFjb24zMTA=';
+
+    // 組合最終的開啟網址 (夾帶 token)
     let reportUrl = existingReportId 
-        ? `${reportTemplatePath}?id=${existingReportId}` 
-        : `${reportTemplatePath}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}&email=${encodeURIComponent(extractEmail)}`;        
+        ? `${reportTemplatePath}?id=${existingReportId}&token=${adminToken}` 
+        : `${reportTemplatePath}?bid=${b.id}&name=${encodeURIComponent(extractName)}&phone=${b.temp_phone}&email=${encodeURIComponent(extractEmail)}&token=${adminToken}`;        
     
     if(existingReportId) { 
         btnLabel = "📄 查看/修改報告"; 
@@ -155,7 +153,7 @@ function openBooking(id) {
         scheduleBox = `<div style="background:#fff3e0; padding:12px; border-left:4px solid #f39c12; border-radius:4px; margin-top:15px;"><strong style="color:#e67e22;">⏳ 等待排程</strong><div style="display:flex; gap:10px; margin-top:5px;"><input type="date" id="book-date" onchange="loadSlotsForBooking(this.value)"><select id="book-slot"><option>先選日期</option></select></div><button class="btn btn-purple" style="width:100%; margin-top:5px;" onclick="confirmSchedule('${b.id}')">確認鎖定時段</button></div>`; 
     }
 
-    const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
+    const reportArea = (b.status === 'awaiting_service' || b.status === 'completed') ? `<div style="margin-top:20px; padding-top:10px; border-top:1px dashed #eee;"><a href="${reportUrl}" target="_blank" rel="opener" class="btn ${btnClass}" style="display:block; width:100%; text-align:center;">${btnLabel}</a></div>` : '';
     const couponBadge = b.coupon_info ? `<div style="display:inline-block; background:#fce4ec; color:#c2185b; font-size:12px; padding:2px 8px; border-radius:10px; margin-top:5px;">🎟️ ${b.coupon_info}</div>` : '';
 
     document.getElementById('m-title').innerHTML = `訂單詳情 <span style="font-size:12px; color:#999;">${b.booking_id}</span>`;

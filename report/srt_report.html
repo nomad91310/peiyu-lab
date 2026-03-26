@@ -399,7 +399,6 @@
 
     <script>
 
-        let myDB = null; 
         let currentBookingId = null;
         let currentReportId = null;
         let detectedAddons = []; 
@@ -439,84 +438,98 @@
         if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
         }
-        // 🔥 請用這整段取代原本的 window.onload
-window.onload = async function() {
-    
-    // --- 1. 先抓網址參數 ---
-    const params = new URLSearchParams(window.location.search);
-    const pId = params.get('id'); 
-    const pMode = params.get('mode'); 
-    
-    // --- 2. 🔥 嚴格檢查哨 (偽裝版) ---
-    const curtain = document.getElementById('security-curtain'); // 抓取防護罩
-    
-    const _k = "YmFjb24zMTA="; 
-
-    if (pMode === 'view') {
-        if(curtain) curtain.remove(); 
-    } 
-    else {
-        const _local = localStorage.getItem('sys_cfg_v1');
-
-        if (_local === _k) {
-            if(curtain) curtain.remove(); 
-        } else {
-            const input = prompt("🔒 System Security Check Required:");
-            
-            if (input && btoa(input) === _k) {
-                localStorage.setItem('sys_cfg_v1', _k);
-                if(curtain) curtain.remove();
-            } else {
-                alert("❌ Access Denied.");
-                window.history.back(); 
-                return; // 強制停止執行
+       // 🔥 1. 跨視窗密碼繼承橋樑：從後台(母視窗)把登入狀態「偷渡」到新視窗
+        try {
+            if (window.opener && window.opener.sessionStorage.getItem('peiyu_session')) {
+                sessionStorage.setItem('peiyu_session', window.opener.sessionStorage.getItem('peiyu_session'));
             }
-        }
-    }
+        } catch(e) {}
 
-    // --- 3. 驗證通過後，才執行原本的初始化 ---
-    
-    document.getElementById('info-date').valueAsDate = new Date();
-    if(typeof renderInputs === 'function') renderInputs(); 
+        document.addEventListener("DOMContentLoaded", async () => {
+            
+            // 1. 抓取網址參數
+            const params = new URLSearchParams(window.location.search);
+            const pId = params.get('id'); 
+            const pMode = params.get('mode'); 
+            const curtain = document.getElementById('security-curtain');
 
-    try {
-        myDB = window.supabase.createClient(SB_URL, SB_KEY);
-        console.log("✅ DB Connected");
-    } catch(e) { console.error("DB Error:", e); }
+            // 2. 🔥 終極母視窗驗證邏輯
+            if (pMode === 'view') {
+                // 【客人觀看模式】：不需要防護，直接脫白布
+                if (curtain) curtain.remove();
+            } else {
+                // 【後台編輯模式】：偵測是「點擊進來」還是「貼網址進來」
+                let isAuthorized = false;
 
-    // --- 4. 根據模式載入資料 ---
-    if (pMode === 'view') {
-        isViewMode = true;
-        document.body.classList.add('view-mode');
-       document.getElementById('btn-submit-feedback').style.display = 'inline-block';
-        
-        if(pId) {
-            currentReportId = pId; // 🔥🔥🔥 補上這一行：讓客人模式也把報表 ID 記起來！
-            await loadReportData(pId);
-        }
-    } else if (pId) {
-        currentReportId = pId;
-        const saveBtn = document.getElementById('btn-real-save');
-        if(saveBtn) saveBtn.innerText = "💾 更新儲存";
-        await loadReportData(pId); 
-    } else {
-        const pName = params.get('name');
-        const pPhone = params.get('phone');
-        const pBid = params.get('bid');
-        const pEmail = params.get('email'); // 這裡保留你剛剛修好的 Email 功能
+                // 情況 A：剛從 shared_modal.js 的按鈕點擊打開 (會自帶 window.opener)
+                if (window.opener) {
+                    isAuthorized = true;
+                    // 在這個分頁發一張專屬的暫時通行證，防止你按 F5 重新整理時被踢出去
+                    sessionStorage.setItem('tab_authorized', 'yes');
+                } 
+                // 情況 B：你自己合法的分頁，按 F5 重新整理 (雖然失去 opener，但有暫時通行證)
+                else if (sessionStorage.getItem('tab_authorized') === 'yes') {
+                    isAuthorized = true;
+                }
 
-        if (pEmail) {
-            const emailInput = document.getElementById('info-email');
-            if(emailInput) emailInput.value = pEmail;
-        }
-        if (pName) document.getElementById('info-name').value = pName;
-        if (pPhone) document.getElementById('info-phone').value = pPhone;
-        if (pBid) {
-            currentBookingId = pBid;
-            fetchBookingService(pBid); 
-        }
-    }
-};       
+                // 判決時刻
+                if (isAuthorized) {
+                    if (curtain) curtain.remove(); // 驗證合法，脫下白布！
+                } else {
+                    // 🚨 抓到直接複製貼上網址的！(沒有 opener 也沒有通行證)
+                    alert("❌ 安全警告：禁止直接輸入網址！請從後台點擊按鈕進入。");
+                    window.location.href = '../index.html'; // 把他踢回首頁
+                    return; // 程式強制終止，白布絕對不會脫下來
+                }
+            }
+
+            // --- 3. 下面執行原本的資料載入與初始化 ---
+            const dateInput = document.getElementById('info-date');
+            if (dateInput) dateInput.valueAsDate = new Date();
+            
+            if (typeof renderInputs === 'function') renderInputs();
+
+           
+            // 根據模式載入資料
+            if (pMode === 'view') {
+                isViewMode = true;
+                document.body.classList.add('view-mode');
+                const fbBtn = document.getElementById('btn-submit-feedback');
+                if (fbBtn) fbBtn.style.display = 'inline-block';
+                
+                if (pId) {
+                    currentReportId = pId; 
+                    await loadReportData(pId);
+                }
+            } else if (pId) {
+                currentReportId = pId;
+                const saveBtn = document.getElementById('btn-real-save');
+                if (saveBtn) saveBtn.innerText = "💾 更新儲存";
+                await loadReportData(pId); 
+            } else {
+                const pName = params.get('name');
+                const pPhone = params.get('phone');
+                const pBid = params.get('bid');
+                const pEmail = params.get('email'); 
+
+                if (pEmail) {
+                    const emailInput = document.getElementById('info-email');
+                    if (emailInput) emailInput.value = pEmail;
+                }
+                if (pName) {
+                    const nameInput = document.getElementById('info-name');
+                    if (nameInput) nameInput.value = pName;
+                }
+                if (pPhone) {
+                    const phoneInput = document.getElementById('info-phone');
+                    if (phoneInput) phoneInput.value = pPhone;
+                }
+                if (pBid) {
+                    currentBookingId = pBid;
+                    fetchBookingService(pBid); 
+                }
+            }
+        });
 
 
         async function fetchBookingService(bid) {
@@ -929,7 +942,7 @@ window.onload = async function() {
                 const canvasWidth = 2600; const headerHeight = 250;
 
                 const logoImg = await new Promise((res) => {
-                    const img = new Image(); img.src = 'logo.png';
+                    const img = new Image(); img.src = '../assets/images/logo.png';
                     img.onload = () => res(img); img.onerror = () => res(null);
                 });
 

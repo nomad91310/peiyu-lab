@@ -2217,17 +2217,117 @@
                 .catch(err => alert("請改用滑鼠右鍵 ➔ 僅貼純文字！"));
             }
             
-            // 🔥 1. 新增：修復自訂外框按 Enter 會分裂的 Bug
+            // 🔥 1. 新增：修復自訂外框按 Enter 會分裂的 Bug (升級雙模版)
             if (e.key === 'Enter' && !e.shiftKey) {
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
-                    const node = sel.anchorNode;
-                    const customBox = node.nodeType === 3 ? node.parentNode.closest('.peiyu-custom-box') : node.closest('.peiyu-custom-box');
-                    // 如果游標在「段落型」的外框內，強制用 Shift+Enter 的行為 (插入 <br>)
-                    if (customBox && window.getComputedStyle(customBox).display === 'block') {
-                        e.preventDefault();
-                        document.execCommand('insertLineBreak');
-                        saveHistory();
+                    let node = sel.anchorNode;
+                    let customBox = node.nodeType === 3 ? node.parentNode.closest('.peiyu-custom-box') : node.closest('.peiyu-custom-box');
+                    
+                    if (customBox) {
+                        const displayStyle = window.getComputedStyle(customBox).display;
+                        if (displayStyle === 'block') {
+                            // 📦 段落型 (Block)：按 Enter 留在框內換行 (插入 <br>)
+                            e.preventDefault();
+                            document.execCommand('insertLineBreak');
+                            saveHistory();
+                        } else if (displayStyle.includes('inline')) {
+                            // 🏷️ 文字型 (Inline)：按 Enter 啟動「完美逃脫術」！
+                            e.preventDefault();
+                            const range = document.createRange();
+                            
+                            // 往上找，直到逃出可能包住它的 <b> 或 <font> 或 <span> 標籤
+                            let topNode = customBox;
+                            while (topNode.parentNode && topNode.parentNode.id !== 'editor' && ['B','I','U','FONT','SPAN'].includes(topNode.parentNode.tagName)) {
+                                topNode = topNode.parentNode;
+                            }
+                            
+                            // 將游標設定在這些外層外套的正下方
+                            range.setStartAfter(topNode);
+                            range.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                            
+                            // 插入乾淨的新段落，並洗掉殘留格式
+                            document.execCommand('insertParagraph');
+                            document.execCommand('removeFormat'); 
+                            saveHistory();
+                        }
+                    }
+                }
+            }
+            // 🔥 2. 新增：右方向鍵 (ArrowRight) 完美逃脫術 (解決刪除後游標卡死在框內的 Bug)
+            if (e.key === 'ArrowRight' && !e.shiftKey) {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0 && sel.isCollapsed) {
+                    let node = sel.anchorNode;
+                    let customBox = node.nodeType === 3 ? node.parentNode.closest('.peiyu-custom-box') : node.closest('.peiyu-custom-box');
+                    
+                    if (customBox && window.getComputedStyle(customBox).display.includes('inline')) {
+                        const range = sel.getRangeAt(0);
+                        const testRange = range.cloneRange();
+                        testRange.selectNodeContents(customBox);
+                        testRange.setStart(range.endContainer, range.endOffset);
+                        
+                        // 如果游標到外框結尾之間，已經沒有任何純文字了 (代表卡在最尾端黑洞)
+                        if (testRange.toString().length === 0) {
+                            e.preventDefault();
+                            
+                            // 往上找，直到逃出所有可能包住它的外套 (例如粗體、斜體)
+                            let topNode = customBox;
+                            while (topNode.parentNode && topNode.parentNode.id !== 'editor' && ['B','I','U','FONT','SPAN'].includes(topNode.parentNode.tagName)) {
+                                topNode = topNode.parentNode;
+                            }
+
+                            // 魔法：塞入一個「零寬空白 (Zero-width space)」，人類看不見，但游標可以踩！
+                            const zws = document.createTextNode('\u200B');
+                            topNode.parentNode.insertBefore(zws, topNode.nextSibling);
+                            
+                            // 強制將游標移到這個安全的墊腳石上
+                            const newRange = document.createRange();
+                            newRange.setStartAfter(zws);
+                            newRange.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(newRange);
+                        }
+                    }
+                }
+            }
+            // 🔥 3. 新增：左方向鍵 (ArrowLeft) 完美逃脫術 (解決游標卡死在外框最前面的 Bug)
+            if (e.key === 'ArrowLeft' && !e.shiftKey) {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0 && sel.isCollapsed) {
+                    let node = sel.anchorNode;
+                    let customBox = node.nodeType === 3 ? node.parentNode.closest('.peiyu-custom-box') : node.closest('.peiyu-custom-box');
+                    
+                    if (customBox && window.getComputedStyle(customBox).display.includes('inline')) {
+                        const range = sel.getRangeAt(0);
+                        const testRange = range.cloneRange();
+                        testRange.selectNodeContents(customBox);
+                        // 這次是從外框最前面，量到目前游標的位置
+                        testRange.setEnd(range.startContainer, range.startOffset);
+                        
+                        // 如果游標到外框開頭之間，已經沒有任何純文字了 (代表卡在最前端黑洞)
+                        if (testRange.toString().length === 0) {
+                            e.preventDefault();
+                            
+                            // 往上找，直到逃出所有可能包住它的外套 (例如粗體、斜體)
+                            let topNode = customBox;
+                            while (topNode.parentNode && topNode.parentNode.id !== 'editor' && ['B','I','U','FONT','SPAN'].includes(topNode.parentNode.tagName)) {
+                                topNode = topNode.parentNode;
+                            }
+
+                            // 魔法：塞入一個「零寬空白」，插在外框的「正前方」！
+                            const zws = document.createTextNode('\u200B');
+                            topNode.parentNode.insertBefore(zws, topNode);
+                            
+                            // 強制將游標移到這個安全的墊腳石上 (在零寬空白的後面，框框的前面)
+                            const newRange = document.createRange();
+                            newRange.setStartAfter(zws);
+                            newRange.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(newRange);
+                        }
                     }
                 }
             }

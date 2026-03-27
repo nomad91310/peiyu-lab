@@ -1512,6 +1512,7 @@
             
             let bg = '#fffdf9', borderCol = '#e3e8ee';
             let radius = '8px', borderStyle = 'solid', borderWidth = '1px';
+            let containerWidth = 'fit-content'; // 🔥 新增：預設寬度
             let isEditing = currentTarget && currentTarget.classList.contains('peiyu-container-box');
             
             if (isEditing) {
@@ -1522,7 +1523,11 @@
                 borderStyle = comp.borderTopStyle;
                 borderWidth = comp.borderTopWidth;
                 
+                // 🔥 讀取目前容器到底是哪種寬度
+                containerWidth = currentTarget.style.width === '100%' ? '100%' : 'fit-content';
+                
                 confirmBtn.style.display = 'none';
+                const updateBtn = document.getElementById('m-update-btn');
                 updateBtn.style.display = 'flex';
                 updateBtn.innerText = "✅ 確認修改容器";
                 updateBtn.style.background = 'var(--forest)'; 
@@ -1530,15 +1535,15 @@
                 updateBtn.setAttribute('onclick', 'updateContainerBox()');
             } else {
                 confirmBtn.style.display = 'flex';
-                updateBtn.style.display = 'none';
+                document.getElementById('m-update-btn').style.display = 'none';
             }
 
             body.innerHTML = `
                 <div class="editor-form-group" style="margin-bottom:10px;">
                     <label>容器寬度</label>
                     <select id="ct-display-width" class="editor-form-input">
-                        <option value="fit-content">緊身容器 (依照最長字數給予框)</option>
-                        <option value="100%">全段容器 (滿版寬度)</option>
+                        <option value="fit-content" ${containerWidth === 'fit-content' ? 'selected' : ''}>緊身容器 (依照最長字數給予框)</option>
+                        <option value="100%" ${containerWidth === '100%' ? 'selected' : ''}>全段容器 (滿版寬度)</option>
                     </select>
                 </div>
                 <div style="display:flex; gap:10px;">
@@ -2217,8 +2222,8 @@
                 .catch(err => alert("請改用滑鼠右鍵 ➔ 僅貼純文字！"));
             }
             
-            // 🔥 1. 新增：修復自訂外框按 Enter 會分裂的 Bug (升級雙模版)
-            if (e.key === 'Enter' && !e.shiftKey) {
+            // 🔥 1. 新增：修復自訂外框按 Enter 會分裂的 Bug (升級雙模版 + 終極選字防護)
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
                     let node = sel.anchorNode;
@@ -2708,9 +2713,19 @@
                 let isHeading = currentTarget.tagName === 'H2' || currentTarget.tagName === 'H3';
                 
                 let editBtnHtml = '';
-                if (isCustomBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
-                else if (isContainerBox) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('container-box')">⚙️ 修改容器</button>`;
-                else if (isDivider) editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
+                let unwrapBtnHtml = ''; // 🔥 預備脫衣服按鈕
+                
+                if (isCustomBox) {
+                    editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('custom-box')">⚙️ 修改</button>`;
+                    unwrapBtnHtml = `<button class="editor-btn" style="color:#d35400; background:#fdf2e9; border-color:#fad7a1; flex:1; font-weight:bold; padding:6px 0;" onclick="modUnwrapBlock()">🔓 脫掉外框</button>`;
+                }
+                else if (isContainerBox) {
+                    editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('container-box')">⚙️ 修改</button>`;
+                    unwrapBtnHtml = `<button class="editor-btn" style="color:#d35400; background:#fdf2e9; border-color:#fad7a1; flex:1; font-weight:bold; padding:6px 0;" onclick="modUnwrapBlock()">🔓 脫掉外框</button>`;
+                }
+                else if (isDivider) {
+                    editBtnHtml = `<button class="editor-btn" style="color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; flex:1; font-weight:bold; padding:6px 0;" onclick="openModal('divider')">⚙️ 修改線條</button>`;
+                }
 
                 const blockAlignBtns = `<div style="display:flex; gap:2px; align-items:center; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee; width:100%; box-sizing:border-box;">
                     <button class="editor-btn" style="flex:1; padding:4px 0;" onclick="setImgAlign('block-left')" title="靠左"><i class="fas fa-align-left"></i> 靠左</button>
@@ -2721,11 +2736,13 @@
                 floatMenu.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px; width:${(isCustomBox || isContainerBox || isDivider || isHeading) ? '260px' : '200px'}; max-width:90vw;">
                     <div style="font-size:12px; font-weight:bold; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:5px;">📦 魔法積木</div>
                     ${(isCustomBox || isContainerBox || isHeading) ? blockAlignBtns : ''}
+                    
+                    ${(isCustomBox || isContainerBox) ? `<div style="display:flex; gap:5px;">${editBtnHtml}${unwrapBtnHtml}</div>` : (editBtnHtml ? `<div style="display:flex; gap:5px;">${editBtnHtml}</div>` : '')}
+                    
                     <div style="display:flex; gap:5px;">
-                        ${editBtnHtml}
                         <button class="editor-btn" style="color:#8e44ad; background:#f4ecf7; border-color:#d7bde2; flex:1; font-weight:bold; padding:6px 0;" onclick="modCopy()">📋 複製</button>
                         <button class="editor-btn" style="color:#2980b9; background:#e3f2fd; border-color:#bbdefb; flex:1; font-weight:bold; padding:6px 0;" onclick="modCut()">✂️ 剪下</button>
-                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; font-weight:bold; padding:6px 12px;" onclick="modBlockDelete()">🗑️</button>
+                        <button class="editor-btn" style="color:#e74c3c; background:#fff5f5; border-color:#fadbd8; font-weight:bold; padding:6px 0;" onclick="modBlockDelete()">🗑️ 刪除</button>
                     </div>
                     ${breakoutBtn}
                 </div>`;
@@ -3235,6 +3252,22 @@
                 document.getElementById('edit-badge').style.display = 'none';
                 saveHistory();
             }
+        };
+        // 🌟 脫掉外框引擎：把框框刪掉，但裡面的字跟圖完好無缺留下來！
+        window.modUnwrapBlock = function() {
+            if (!currentTarget) return;
+            
+            // 核心魔法：把框框裡面的所有東西，一個一個搬到框框的「外面（前面）」
+            while (currentTarget.firstChild) {
+                currentTarget.parentNode.insertBefore(currentTarget.firstChild, currentTarget);
+            }
+            
+            // 東西都搬光了，就可以把這個空殼框框刪掉了！
+            currentTarget.remove();
+            
+            document.getElementById('float-menu').style.display = 'none';
+            document.getElementById('edit-badge').style.display = 'none';
+            saveHistory();
         };
         // 🌟 終極克隆引擎：一鍵複製物件並插入到旁邊
         window.modClone = function() {
@@ -4262,8 +4295,11 @@
         const style = document.getElementById('ct-style').value;
         const width = document.getElementById('ct-width').value;
         const color = document.getElementById('ct-border-color').value;
+        
+        // 🔥 讀取面板上的寬度，並立刻套用
+        const containerWidth = document.getElementById('ct-display-width') ? document.getElementById('ct-display-width').value : 'fit-content';
+        currentTarget.style.width = containerWidth;
 
-        // 🔥 核心修復：強制使用 shorthand (縮寫) 寫法，防止瀏覽器複製貼上時弄丟邊框！
         if (style === 'none') {
             currentTarget.style.border = 'none';
         } else {

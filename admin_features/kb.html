@@ -2151,8 +2151,13 @@
         } catch (err) { alert("❌ 刪除失敗：" + err.message); }
     }
     
-    function insertGalleryImage(url) { const html = `<div class="resizable-wrapper peiyu-obj" style="margin-left:auto; margin-right:auto; width:100%;"><img src="${url}"></div><p><br></p>`; insertHtml(html); closeGallery(); }
-    
+    // 🌟 乾淨版圖片插入 (拔除多餘的換行)
+    function insertGalleryImage(url) { 
+        // 移除原本最後面的 <p><br></p>，只保留圖片外殼
+        const html = `<div class="resizable-wrapper peiyu-obj" style="margin: 15px auto; width: 100%; max-width: 100%;"><img src="${url}" style="width: 100%; height: auto; display: block;"></div>`; 
+        insertHtml(html); 
+        closeGallery(); 
+    }    
     async function uploadToDB(input){ 
         const file = input.files[0]; if(!file) return; 
         const btn = document.querySelector('.editor-gallery-header button[onclick*="upload-input"]');
@@ -2531,6 +2536,7 @@
                             <button class="editor-btn" style="padding:2px 8px; color:#8e44ad; background:#f4ecf7; border-color:#d7bde2;" onclick="modCopy()" title="複製">📋</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#2980b9; background:#e3f2fd; border-color:#bbdefb;" onclick="modCut()" title="剪下">✂️</button>
                             <button class="editor-btn" style="padding:2px 8px; color:#e74c3c; background:#fff5f5; border-color:#fadbd8;" onclick="modImg('delete')" title="刪除">🗑️</button>
+                            <button class="editor-btn" style="padding:2px 8px; color:#27ae60; background:#e9f7ef; border-color:#a3e4d7; font-weight:bold;" onclick="modImgAddCaption()">➕ 圖說</button>
                         </div>
                     </div>
                     ${alignBtns}
@@ -3057,6 +3063,37 @@
                 saveHistory(); 
             } 
         }
+        // 🌟 圖片說明生成引擎 (讓文字緊貼圖片)
+        window.modImgAddCaption = function() {
+            if (!currentTarget || !currentTarget.classList.contains('resizable-wrapper')) return;
+            
+            // 檢查是否已經有圖說了，避免重複加
+            if (currentTarget.querySelector('.peiyu-img-caption')) return alert("這張圖片已經有說明文字囉！");
+
+            const caption = document.createElement('div');
+            caption.className = 'peiyu-img-caption';
+            // 🔥 核心：設定 contenteditable="true" 讓你可以直接在裡面打字
+            caption.setAttribute('contenteditable', 'true');
+            caption.style.cssText = `
+                text-align: center; 
+                font-size: 13px; 
+                color: #666; 
+                margin-top: 5px; 
+                line-height: 1.4; 
+                padding: 0 5px;
+                font-weight: normal;
+                border-top: 1px dashed #eee; /* 加一條淡淡的線，視覺上更精緻 */
+                padding-top: 5px;
+            `;
+            caption.innerText = "請在此輸入圖片說明...";
+            
+            // 把圖說塞進圖片的同一個 wrapper 裡
+            currentTarget.appendChild(caption);
+            
+            // 關閉選單並自動選中文字方便修改
+            document.getElementById('float-menu').style.display = 'none';
+            saveHistory();
+        };
 
         // 👇 從這裡開始貼上 👇
 

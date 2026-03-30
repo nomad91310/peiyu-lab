@@ -625,9 +625,14 @@
             el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block');
             if (el.getAttribute('class') === '') el.removeAttribute('class');
         });
-        // 🔥 儲存前除髒：把表格格子裡被強制加入的編輯權限拔掉，防止前台被點擊出現系統預設藍框
-        document.querySelectorAll('#editor td[contenteditable="true"], #editor th[contenteditable="true"]').forEach(cell => {
-            cell.removeAttribute('contenteditable');
+        
+        // 🔥 終極封印術：無差別拔除所有物件的 contenteditable="true" (包含表格、頁籤、圖說、自訂外框)
+        // 這樣存進資料庫後，前台訪客就絕對無法編輯任何一個字！
+        document.querySelectorAll('#editor [contenteditable="true"]').forEach(el => {
+            // 除了編輯器最外層的 #editor 本身不能拔以外，其他通通拔掉！
+            if (el.id !== 'editor') {
+                el.removeAttribute('contenteditable');
+            }
         });
 
         const editor = document.getElementById('editor');
@@ -667,6 +672,8 @@
             .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
             .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
             .peiyu-article .peiyu-rwd-br { display: none; }
+
+            .peiyu-article .peiyu-container-box > *:last-child, .peiyu-article .peiyu-custom-box[style*="display: block"] > *:last-child { margin-bottom: 0 !important; }
 
             @media (max-width: 768px) and (orientation: portrait) {
                 .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
@@ -730,6 +737,8 @@
             .peiyu-article .peiyu-link-btn { display: inline-block; padding: 8px 20px; background: #1a2f23; color: #fff !important; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; cursor: pointer; }
             .peiyu-article .peiyu-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); background: #111f17; }
             .peiyu-article .peiyu-rwd-br { display: none; }
+
+            .peiyu-article .peiyu-container-box > *:last-child, .peiyu-article .peiyu-custom-box[style*="display: block"] > *:last-child { margin-bottom: 0 !important; }
 
             @media (max-width: 768px) and (orientation: portrait) {
                 .peiyu-article table { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
@@ -867,13 +876,42 @@
     }
 
     function exec(command, value = null) { 
-        // 🔥 放棄霸道攔截，回歸原生！讓瀏覽器自然處理「文字」的對齊。
-        // 如果你要對齊「裡面的字」，請用上方工具列。
-        // 如果你要對齊「整個外框」，請用點擊外框後彈出的 📦 專屬選單！
-        document.execCommand(command, false, value); 
+        // 攔截對齊指令，改用自製的「溫和對齊引擎」
+        if (['justifyLeft', 'justifyCenter', 'justifyRight'].includes(command)) {
+            customAlign(command);
+            return;
+        }
         
-        // 🔥 核心修復：拔除 editor.focus()！這就是害你游標亂跳到最上面的元凶！
+        document.execCommand(command, false, value); 
         saveHistory(); 
+    }
+
+    // 🌟 自製溫和對齊引擎：絕對不打碎結構，只修改 CSS
+    function customAlign(command) {
+        restoreSelection();
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        let alignValue = 'left';
+        if (command === 'justifyCenter') alignValue = 'center';
+        if (command === 'justifyRight') alignValue = 'right';
+
+        let node = sel.anchorNode;
+        // 往上找，找到可以設定 text-align 的區塊元素
+        while (node && node.id !== 'editor' && !['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH'].includes(node.tagName)) {
+            node = node.parentNode;
+        }
+
+        if (node && node.id !== 'editor') {
+            node.style.textAlign = alignValue;
+            
+            // 如果是在自訂外框(段落型)裡面，順便把 textJustify 清掉，避免衝突
+            if (node.classList && node.classList.contains('peiyu-custom-box') && window.getComputedStyle(node).display === 'block') {
+                 node.style.textJustify = '';
+            }
+            
+            saveHistory();
+        }
     }
     
     // 🌟 2. 終極字體引擎：原地修改，絕對不破壞反藍選取
@@ -1796,10 +1834,15 @@
                 if (sel.rangeCount > 0 && !sel.isCollapsed) {
                     const range = sel.getRangeAt(0);
                     
-                    // 1. 尋找安全的頂層邊界 (通常是 .peiyu-article 或 td)
+                    // 1. 尋找安全的頂層邊界 (遇到 editor、表格、頁籤內容區、最外層，都要停下來！)
                     let boundary = range.commonAncestorContainer;
                     if (boundary.nodeType === 3) boundary = boundary.parentNode;
-                    while (boundary && boundary.id !== 'editor' && !['TD', 'TH'].includes(boundary.tagName) && (!boundary.classList || !boundary.classList.contains('peiyu-article'))) {
+                    while (
+                        boundary && 
+                        boundary.id !== 'editor' && 
+                        !['TD', 'TH'].includes(boundary.tagName) && 
+                        (!boundary.classList || (!boundary.classList.contains('peiyu-article') && !boundary.classList.contains('peiyu-tab-body'))) 
+                    ) {
                         boundary = boundary.parentNode;
                     }
                     if (!boundary) boundary = document.getElementById('editor');
@@ -1830,10 +1873,13 @@
                 }
 
                 // 產生 HTML
+                const uniqueId = 'cb_' + Date.now(); // 🔥 產生獨一無二的 ID
+                const magicStyle = `<style>.${uniqueId} > *:last-child { margin-bottom: 0 !important; }</style>`; // 🔥 專屬去縫隙魔法
+
                 if (isCustom) {
-                    html = `<div class="peiyu-block peiyu-obj peiyu-custom-box" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; text-align: justify; text-justify: inter-ideograph; ${fontStyleStr}">${innerContent}</div><p><br></p>`;
+                    html = `${magicStyle}<div class="peiyu-block peiyu-obj peiyu-custom-box ${uniqueId}" style="display: block; padding: 15px 20px; margin: 15px 0; border: ${borderStr}; border-radius: ${radius}; background-color: ${bg}; color: ${color}; line-height: 1.6; word-break: break-word; white-space: normal; max-width: 100%; box-sizing: border-box; text-align: justify; text-justify: inter-ideograph; ${fontStyleStr}">${innerContent}</div><p><br></p>`;
                 } else {
-                    html = `<div class="peiyu-block peiyu-obj peiyu-container-box" style="width: ${containerWidth}; max-width: 100%; box-sizing: border-box; background-color: ${bg}; border: ${borderStr}; border-radius: ${radius}; padding: 15px 20px; margin: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">${innerContent}</div><p><br></p>`;
+                    html = `${magicStyle}<div class="peiyu-block peiyu-obj peiyu-container-box ${uniqueId}" style="width: ${containerWidth}; max-width: 100%; box-sizing: border-box; background-color: ${bg}; border: ${borderStr}; border-radius: ${radius}; padding: 15px 20px; margin: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">${innerContent}</div><p><br></p>`;
                 }
 
                 // 精準安插回剛才拔出的位置
@@ -1889,139 +1935,6 @@
                     ${sectionsHtml}
                 </div>
             </div><p><br></p>`; 
-        }
-        else if (type === 'custom-box') {
-            document.getElementById('m-title-editor').innerText = '🔲 自訂文字外框';
-            
-            let savedPrefs = localStorage.getItem('peiyu_box_prefs');
-            let prefs = savedPrefs ? JSON.parse(savedPrefs) : {};
-            let bg = prefs.bg || '#fffcf5', borderCol = prefs.borderCol || '#c6a87c', textCol = prefs.color || '#1a2f23';
-            let radius = prefs.radius || '50px', borderStyle = prefs.style || 'solid', borderWidth = prefs.width || '2px';
-            let displayType = prefs.displayType || 'inline-block';
-            let fontOverride = prefs.fontOverride || 'inherit'; 
-            let textValue = '';
-
-            // 🔥 嚴格判定：是否為修改模式
-            let isEditingBox = currentTarget && currentTarget.classList.contains('peiyu-custom-box');
-
-            if (isEditingBox) {
-                // 【修改模式】：抓取現有屬性
-                const comp = window.getComputedStyle(currentTarget);
-                bg = rgb2hex(comp.backgroundColor) || bg;
-                textCol = rgb2hex(comp.color) || textCol;
-                borderCol = rgb2hex(comp.borderTopColor) || borderCol;
-                radius = comp.borderRadius;
-                borderStyle = comp.borderTopStyle;
-                borderWidth = comp.borderTopWidth;
-                displayType = comp.display === 'block' ? 'block' : 'inline-block';
-                
-                confirmBtn.style.display = 'none';
-                const updateBtn = document.getElementById('m-update-btn');
-                updateBtn.style.display = 'flex'; 
-                updateBtn.innerText = "✅ 確認修改外框";
-                updateBtn.setAttribute('onclick', 'updateCustomBox()');
-                textValue = ""; // 修改模式不顯示文字在輸入框
-
-                // 🔥 修改模式邏輯：強制保持原有
-                fontOverride = 'inherit';
-            } else {
-                // 【新插入模式】：抓取反白文字
-                const sel = window.getSelection();
-                textValue = sel.toString(); 
-                confirmBtn.style.display = 'flex';
-                document.getElementById('m-update-btn').style.display = 'none';
-
-                // 🔥 新插入模式邏輯：若沒選字，強制預設
-                if (textValue.trim() === "") {
-                    fontOverride = 'default';
-                }
-            }
-
-            // 計算預覽內容與框線
-            const previewText = isEditingBox ? '[修改模式預覽]' : (textValue || '[文字預覽]');
-            const initBorderStr = borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderCol}`;
-
-            // 🔥 核心：判定選項是否該反灰
-            const isNoSelection = !isEditingBox && textValue.trim() === "";
-            const inheritAttr = isNoSelection ? 'disabled' : '';
-            const defaultAttr = isEditingBox ? 'disabled' : '';
-            const inheritStyle = isNoSelection ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
-            const defaultStyle = isEditingBox ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
-
-            body.innerHTML = `
-                <div style="margin-bottom: 15px; padding: 15px; background: #f0f4f8; border-radius: 8px; text-align: center; border: 1px dashed #ccc; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    <span style="font-size: 12px; color: #888; margin-bottom: 8px; font-weight: bold;">👀 即時預覽</span>
-                    <div style="width: 100%;">
-                        <div id="cb-preview-box" style="
-                            display: ${displayType === 'inline-block' ? 'inline-block' : 'block'}; 
-                            padding: ${displayType === 'inline-block' ? '2px 14px' : '15px 20px'}; 
-                            border: ${initBorderStr}; 
-                            border-radius: ${radius}; 
-                            background-color: ${bg}; 
-                            color: ${textCol}; 
-                            font-weight: bold;
-                            width: ${displayType === 'block' ? '100%' : 'auto'};
-                            box-sizing: border-box;
-                        ">${previewText}</div>
-                    </div>
-                </div>
-
-                <div class="editor-form-group">
-                    <label>外框類型 (決定換行行為)</label>
-                    <select id="cb-display" class="editor-form-input" onchange="updateCustomBoxPreview()">
-                        <option value="inline-block" ${displayType==='inline-block'?'selected':''}>🏷️ 文字外框</option>
-                        <option value="block" ${displayType==='block'?'selected':''}>📦 段落容器</option>
-                    </select>
-                </div>
-
-                <div style="margin: 15px 0; padding: 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:#666; font-size:13px;">字體設定</label>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${inheritStyle}">
-                            <input type="radio" name="cb-font-override" value="inherit" ${fontOverride === 'inherit' ? 'checked' : ''} ${inheritAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
-                            保持原字型 / 字體大小
-                        </label>
-                        <label style="display:flex; align-items:center; font-size:14px; color:#333; ${defaultStyle}">
-                            <input type="radio" name="cb-font-override" value="default" ${fontOverride === 'default' ? 'checked' : ''} ${defaultAttr} onchange="updateCustomBoxPreview()" style="width:auto; margin:0 8px 0 0;"> 
-                            預設字型 (標準黑體) / 14pt
-                        </label>
-                    </div>
-                    ${isNoSelection ? '<small style="color:#e74c3c; margin-top:5px; display:block;">⚠️ 沒選取文字時無法「保持原字型」</small>' : ''}
-                </div>
-
-                <div class="editor-form-group"><label>文字內容</label>
-                    <input type="text" id="cb-text" class="editor-form-input" value="${textValue}" placeholder="${isEditingBox ? '修改模式請直接在頁面編輯' : '請輸入內容...'}" ${isEditingBox ? 'disabled' : ''} oninput="document.getElementById('cb-preview-box').innerText = this.value || '[文字預覽]';">
-                </div>
-
-                <div style="display:flex; gap:10px;">
-                    <div class="editor-form-group" style="flex:1;"><label>形狀</label><select id="cb-radius" class="editor-form-input" onchange="updateCustomBoxPreview()">
-                        <option value="0px" ${radius==='0px'?'selected':''}>直角</option>
-                        <option value="6px" ${radius==='6px'?'selected':''}>微圓角</option>
-                        <option value="50px" ${radius==='50px'||radius.includes('50')?'selected':''}>膠囊狀</option>
-                    </select></div>
-                    <div class="editor-form-group" style="flex:1;"><label>框線</label><select id="cb-style" class="editor-form-input" onchange="updateCustomBoxPreview()">
-                        <option value="none" ${borderStyle==='none'?'selected':''}>無框線</option>
-                        <option value="solid" ${borderStyle==='solid'?'selected':''}>實線</option>
-                        <option value="dashed" ${borderStyle==='dashed'?'selected':''}>虛線</option>
-                        <option value="dotted" ${borderStyle==='dotted'?'selected':''}>點線</option>
-                    </select></div>
-                    <div class="editor-form-group" style="flex:1;"><label>粗細</label><select id="cb-width" class="editor-form-input" onchange="updateCustomBoxPreview()">
-                        <option value="1px" ${borderWidth==='1px'?'selected':''}>1px</option>
-                        <option value="2px" ${borderWidth==='2px'?'selected':''}>2px</option>
-                        <option value="4px" ${borderWidth==='4px'?'selected':''}>4px</option>
-                        <option value="8px" ${borderWidth==='8px'?'selected':''}>8px</option>
-                    </select></div>
-                </div>
-
-                <div style="display:flex; gap:10px; margin-bottom:0;">
-                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>字體色</label><input type="color" id="cb-color" class="editor-form-input" value="${textCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
-                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>背景色</label><input type="color" id="cb-bg" class="editor-form-input" value="${bg}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
-                    <div class="editor-form-group" style="flex:1; margin-bottom:0;"><label>框線色</label><input type="color" id="cb-border-color" class="editor-form-input" value="${borderCol}" style="height:40px; padding:2px;" oninput="updateCustomBoxPreview()"></div>
-                </div>
-            `;
-            
-            // 立即執行一次預覽更新，讓預覽框字體正確
-            setTimeout(updateCustomBoxPreview, 10);
         }
         else if (modalMode === 'divider') {
             const style = document.getElementById('div-style').value;
@@ -2339,7 +2252,7 @@
         });
 
         // ==========================================
-        // 🛡️ 極簡貼上護盾：只防護會卡死游標的「單行文字積木」！
+        // 🛡️ 貼上護盾：全面升級防禦版！(解決手機版破框與複製變形)
         // ==========================================
         editor.addEventListener('paste', function(e) {
             const sel = window.getSelection();
@@ -2349,8 +2262,7 @@
             let currentContainer = node.nodeType === 3 ? node.parentNode : node;
             if (!currentContainer.closest) return; // 防呆
             
-            // 🔥 核心修正：只攔截「span.peiyu-custom-box」和「a 超連結」，
-            // 其他所有東西 (包含你的日常模樣 H3、緊身容器框 DIV) 全部放行，讓瀏覽器原生處理！
+            // 1. 單行文字標籤防護 (防止游標卡死在框內)
             let insideInlineBox = currentContainer.closest('span.peiyu-custom-box, a.peiyu-obj, .peiyu-tab-title-edit');
 
             if (insideInlineBox) {
@@ -2359,8 +2271,39 @@
                 text = text.replace(/[\r\n]+/g, ' '); // 將換行符號抹平
                 document.execCommand('insertText', false, text);
                 saveHistory();
+                return; // 處理完直接結束
             }
-            // 其餘所有的貼上動作，完全不攔截，交給瀏覽器原生引擎！
+            
+            // 2. 🔥 魔法積木 / 表格 / 頁籤 完美貼上防護
+            let htmlData = (e.clipboardData || window.clipboardData).getData('text/html');
+            // 如果剪貼簿的內容包含我們的大型區塊 (避免攔截到純文字或其他一般網頁的內容)
+            if (htmlData && (htmlData.includes('peiyu-table') || htmlData.includes('peiyu-container-box') || htmlData.includes('peiyu-tabs-wrapper'))) {
+                e.preventDefault(); // 攔截瀏覽器的智障原生貼上
+                
+                // 提取乾淨的 HTML (去掉 <html><body> 等外殼)
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlData;
+                const bodyContent = tempDiv.querySelector('body') ? tempDiv.querySelector('body').innerHTML : htmlData;
+                
+                // 判斷當前游標是不是在一個「空段落 <p>」裡
+                let pNode = currentContainer.closest('p');
+                let isEmptyP = pNode && pNode.textContent.trim() === '' && pNode.querySelectorAll('img, table, iframe').length === 0;
+
+                if (isEmptyP) {
+                    // 如果是空行，用我們貼上的積木「直接取代」這個空行，避免 HTML 巢狀結構壞掉！
+                    pNode.insertAdjacentHTML('afterend', bodyContent);
+                    pNode.remove();
+                } else if (pNode) {
+                    // 如果段落裡面有字，把積木插在這個段落的「正下方」避免打架
+                    pNode.insertAdjacentHTML('afterend', bodyContent);
+                } else {
+                    // 備用方案 (直接原地安插)
+                    insertHtml(bodyContent);
+                }
+                
+                saveHistory();
+            }
+            // 其餘的純文字或其他貼上動作，完全不攔截，交給瀏覽器原生引擎處理
         });
 
         // 幫忙產生提示框的小工具
@@ -2378,6 +2321,8 @@
             if (window.innerWidth <= 1024) {
                 const editBtn = document.getElementById('m-context-edit-btn');
                 if (editBtn) editBtn.style.display = 'none';
+                const tableBtn = document.getElementById('m-context-table-btn');
+                if (tableBtn) tableBtn.style.display = 'none';
             }
         };
 
@@ -2418,7 +2363,8 @@
 
         // 🔥 關鍵修復 2：放寬全域攔截，讓手機版右側按鈕與電腦版徽章不被誤殺！
         editor.addEventListener('mousedown', (e) => {
-            if (!e.target.closest('#edit-badge') && !e.target.closest('#float-menu') && !e.target.closest('.peiyu-obj') && !e.target.closest('.mobile-tool-stack') && !e.target.closest('#m-context-edit-btn')) {
+            // ✨ 把 #m-context-table-btn 也加進放行名單
+            if (!e.target.closest('#edit-badge') && !e.target.closest('#float-menu') && !e.target.closest('.peiyu-obj') && !e.target.closest('.mobile-tool-stack') && !e.target.closest('#m-context-edit-btn') && !e.target.closest('#m-context-table-btn')) {
                 lastValidRange = null; currentTarget = null; currentTargetCell = null; pendingTargetType = null; hideAllUI();
                 document.querySelectorAll('[class*="obj-selected-"]').forEach(el => el.classList.remove('obj-selected-table', 'obj-selected-image', 'obj-selected-block'));
             }
@@ -2437,9 +2383,23 @@
             }
             
             editBadge.style.display = 'flex';
+            
+            // 🔥 智慧定位引擎：動態判斷上下邊界
             let topPos = rect.top - 32; 
-            if (topPos < 10) topPos = rect.top + 5; 
+            
+            // 如果頂邊被切掉 (跑到畫面太上面，低於 60px 安全區)
+            if (topPos < 60) {
+                // 如果底邊還在畫面內，就把按鈕移到物件「左下角」
+                if (rect.bottom > 60 && rect.bottom + 40 < window.innerHeight) {
+                    topPos = rect.bottom + 5;
+                } else {
+                    // 如果物件超級巨大，上下都超出畫面，強制把它懸浮在畫面上方「安全區」
+                    topPos = 80;
+                }
+            }
+            
             editBadge.style.top = topPos + 'px';
+            // 左側也加上防撞牆，確保不會跑出視窗外
             editBadge.style.left = Math.max(10, rect.left - 2) + 'px'; 
 
             const btnMain = document.getElementById('btn-badge-main');
@@ -2575,6 +2535,14 @@
                         </div>
                     </div>
                     ${alignBtns} 
+                    
+                    <div style="display:flex; gap:2px; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee; align-items:center;">
+                        <span style="font-size:11px; color:#555; padding:0 4px; font-weight:bold; white-space:nowrap;">整欄對齊:</span>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:12px;" onclick="setCellVAlign('top')" title="靠上對齊">⬆️ 上</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:12px;" onclick="setCellVAlign('middle')" title="垂直置中">🀄 中</button>
+                        <button class="editor-btn" style="flex:1; padding:2px 0; font-size:12px;" onclick="setCellVAlign('bottom')" title="靠下對齊">⬇️ 下</button>
+                    </div>
+
                     <div style="display:flex; gap:2px; background:#f4f6f8; padding:4px; border-radius:4px; border:1px solid #eee;">
                         <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-row-up')" title="向上加一列">⬆️+列</button>
                         <button class="editor-btn" style="flex:1; padding:2px 0; font-size:11px;" onclick="modTable('add-row-down')" title="向下加一列">⬇️+列</button>
@@ -2941,7 +2909,22 @@
             const img = currentTarget.querySelector('img'); 
             if(img) { img.style.width = "100%"; img.style.height = "auto"; } 
         }
-        
+        // 🌟 儲存格垂直對齊引擎 (整欄套用版)
+        window.setCellVAlign = function(valign) {
+            if (!currentTargetCell || !currentTarget || currentTarget.tagName !== 'TABLE') return;
+            
+            // 取得你點擊的是第幾欄 (Column Index)
+            const cellIndex = currentTargetCell.cellIndex;
+            
+            // 掃描表格的所有橫列，把同一個直排(欄)的格子全部一起對齊！
+            Array.from(currentTarget.rows).forEach(row => {
+                if (row.cells[cellIndex]) {
+                    row.cells[cellIndex].style.setProperty('vertical-align', valign, 'important');
+                }
+            });
+            
+            saveHistory();
+        };
        // 🌟 調整表格總寬引擎 (完美契合欄位數量的 Step 邏輯)
         window.updateTableWidth = function(val) { 
             if(!currentTarget || currentTarget.tagName !== 'TABLE') return; 
@@ -3488,37 +3471,49 @@
                 document.getElementById('edit-badge').style.display = 'none';
             }
         }
-        // 🌟 表格破版一鍵自救引擎
+        // 🌟 表格破版一鍵自救引擎 (升級解開隱形相框封印版)
         window.fixTable = function() {
             if (!currentTarget || currentTarget.tagName !== 'TABLE') return;
             let fixedCount = 0;
             
+            // 🔥 1. 殺掉包錯文字的隱形圖片外框 (解開 300px 寬度封印)
+            // 只要這個 wrapper 裡面沒有圖片或影片，就把它拆掉，把裡面的文字釋放出來！
+            currentTarget.querySelectorAll('.resizable-wrapper').forEach(wrapper => {
+                if (wrapper.querySelectorAll('img, iframe').length === 0) {
+                    while (wrapper.firstChild) {
+                        wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+                    }
+                    wrapper.remove();
+                    fixedCount++;
+                }
+            });
+
             // 掃描表格內所有的格子
             currentTarget.querySelectorAll('td, th').forEach(cell => {
-                // 1. 如果格子裡卡了魔法積木，把它暴力踢出表格上方！
-                let blocks = cell.querySelectorAll('.peiyu-block');
+                // 🔥 2. 精準踢出：只有「大型緊身容器」才踢出表格！
+                // 允許「文字外框 (例如你的 64 閘門標籤)」乖乖留在表格裡，絕對不誤踢！
+                let blocks = cell.querySelectorAll('.peiyu-container-box');
                 blocks.forEach(block => {
                     currentTarget.parentNode.insertBefore(block, currentTarget);
-                    // 為了美觀，在被踢出去的積木後面補個換行
                     const br = document.createElement('p'); br.innerHTML = '<br>';
                     currentTarget.parentNode.insertBefore(br, currentTarget);
                     fixedCount++;
                 });
 
-                // 2. 如果格子裡面完全空了，強制補一個換行進去，讓它可以被點擊！
+                // 3. 如果格子裡面完全空了，強制補一個換行進去，讓它可以被點擊！
                 if (cell.innerHTML.trim() === '') {
                     cell.innerHTML = '<br>';
                     fixedCount++;
                 }
                 
-                // 3. 強制確保格子可以被編輯
+                // 4. 強制確保格子可以被編輯
                 cell.setAttribute('contenteditable', 'true');
             });
             
             saveHistory();
             document.getElementById('float-menu').style.display = 'none'; 
             document.getElementById('edit-badge').style.display = 'none';
-            alert(`🛠️ 修復完成！\n已將 ${fixedCount} 個卡住的物件移出表格，或補回遺失的輸入空間。`);
+            alert(`🛠️ 修復完成！\n已成功解開 ${fixedCount} 個卡住的結構封印！\n現在您的文字可以正常置中與靠右了。`);
         };
     
 
@@ -3565,13 +3560,27 @@
     // 🔥 手機版專屬工具列與浮動按鈕引擎 (終極乾淨版)
     // ==========================================
 
-    // 1. 控制右側專屬修改按鈕
+    // 1. 控制右側專屬修改按鈕 (雙軌並行版)
     window.showContextEditButton = function() {
         const editBtn = document.getElementById('m-context-edit-btn');
-        if (!editBtn) return;
+        const tableBtn = document.getElementById('m-context-table-btn');
+        if (!editBtn || !tableBtn) return;
+
+        // 🔥 處理藍色表格按鈕：只要你在表格格子內，就無條件顯示！
+        if (currentTargetCell || pendingTargetType === 'table') {
+            tableBtn.style.display = 'flex';
+        } else {
+            tableBtn.style.display = 'none';
+        }
         
-        // 只要是文字(text)或沒選東西，修改按鈕直接隱藏
+        // 🔥 處理主修改按鈕：圖片、積木、超連結
         if (!pendingTargetType || pendingTargetType === 'text') {
+            editBtn.style.display = 'none';
+            return;
+        }
+
+        if (pendingTargetType === 'table') {
+            // 如果單純只點到表格，主按鈕就隱藏，避免出現兩顆藍按鈕
             editBtn.style.display = 'none';
             return;
         }
@@ -3585,22 +3594,32 @@
             editBtn.classList.add('btn-purple'); editBtn.innerHTML = '<i class="fas fa-link"></i>';
         } else if (pendingTargetType === 'block' || pendingTargetType === 'tabs') {
             editBtn.classList.add('btn-red'); editBtn.innerHTML = '<i class="fas fa-cube"></i>';
-        } else if (pendingTargetType === 'table') {
-            editBtn.classList.add('btn-blue'); editBtn.innerHTML = '<i class="fas fa-table"></i>';
         }
     };
     
-    // 2. 手機版修改按鈕：強制呼叫選單，絕不失焦
-    window.triggerContextEdit = function() {
-        let targetType = pendingTargetType || (currentTarget ? (currentTarget.tagName === 'IMG' ? 'image' : 'block') : null);
-        if (!targetType && lastValidRange) targetType = 'text';
+    // 2. 手機版修改按鈕：強制呼叫選單，絕不失焦 (智慧切換目標版)
+    window.triggerContextEdit = function(forceType) {
+        let targetType;
+
+        if (forceType === 'table') {
+            // 🔥 如果點擊的是藍色按鈕，強制把系統目標切換到「外層表格」
+            if (currentTargetCell) {
+                currentTarget = currentTargetCell.closest('table');
+                pendingTargetType = 'table';
+            }
+            targetType = 'table';
+        } else {
+            // 否則處理主要物件(圖片、積木等)
+            targetType = pendingTargetType || (currentTarget ? (currentTarget.tagName === 'IMG' ? 'image' : 'block') : null);
+            if (!targetType && lastValidRange) targetType = 'text';
+        }
 
         if (targetType && window.showFloatMenu) {
             window.showFloatMenu(0, 0, targetType);
             const floatMenu = document.getElementById('float-menu');
             if (floatMenu) {
                 floatMenu.style.setProperty('display', 'flex', 'important');
-                floatMenu.style.setProperty('z-index', '99999', 'important'); // 絕對在最上層
+                floatMenu.style.setProperty('z-index', '99999', 'important'); 
             }
         }
     };
@@ -3660,11 +3679,14 @@
 
         // 防止點擊失去焦點
         stack.innerHTML = `
-            <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit()" ontouchstart="event.preventDefault(); window.triggerContextEdit()"></div>
+            <div id="m-context-table-btn" class="m-stack-btn btn-blue" style="display: none; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; margin-bottom: 5px;" onmousedown="event.preventDefault(); window.triggerContextEdit('table')" ontouchstart="event.preventDefault(); window.triggerContextEdit('table')" title="編輯外層表格"><i class="fas fa-table"></i></div>
+            <div id="m-context-edit-btn" style="display: none;" onmousedown="event.preventDefault(); window.triggerContextEdit('main')" ontouchstart="event.preventDefault(); window.triggerContextEdit('main')"></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('text')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('text')" title="文字"><i class="fas fa-font"></i></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('para')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('para')" title="段落"><i class="fas fa-align-left"></i></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('insert')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('insert')" title="插入圖表"><i class="fas fa-plus"></i></div>
             <div class="m-stack-btn" onmousedown="event.preventDefault(); window.toggleMobileToolbar('magic')" ontouchstart="event.preventDefault(); window.toggleMobileToolbar('magic')" title="魔法積木"><i class="fas fa-cube"></i></div>
+            
+            <div class="m-stack-btn" onmousedown="event.preventDefault(); window.mobilePastePlain()" ontouchstart="event.preventDefault(); window.mobilePastePlain()" title="純文字貼上" style="color: #0056b3; background: #e6f2ff; border-color: #b8daff;"><i class="fas fa-paste"></i></div>
         `;
         document.body.appendChild(stack);
 
@@ -3672,6 +3694,8 @@
         window.addEventListener('resize', () => { 
             if (window.innerWidth <= 1024) stack.style.display = 'flex'; 
             else stack.style.display = 'none'; 
+            const mTableBtn = document.getElementById('m-context-table-btn');
+            if (mTableBtn) mTableBtn.style.display = 'none';
         });
 
         // 蘋果 Safari & 手機鍵盤「防飛天」視覺追蹤引擎
@@ -3706,6 +3730,30 @@
         }
         setInterval(window.updateMobileUIPosition, 400);
     }
+    // 🌟 手機版專屬：一鍵純文字貼上引擎
+    window.mobilePastePlain = async function() {
+        restoreSelection();
+        const editor = document.getElementById('editor');
+        editor.focus({ preventScroll: true });
+
+        try {
+            // 呼叫手機瀏覽器的剪貼簿 API 讀取「純文字」
+            const text = await navigator.clipboard.readText();
+            if (!text) {
+                if (window.showSysToast) showSysToast("⚠️ 剪貼簿是空的喔！");
+                return;
+            }
+            
+            // 執行純文字貼上
+            document.execCommand('insertText', false, text);
+            saveHistory();
+            
+            if (window.showSysToast) showSysToast("📄 已成功貼上純文字！");
+        } catch (err) {
+            // 防呆：如果手機瀏覽器因為隱私安全限制，不允許按鈕偷看剪貼簿，就給予替代方案提示
+            alert("⚠️ 您的手機瀏覽器安全限制，不允許按鈕直接讀取剪貼簿。\n\n💡 替代絕招：\n請直接「長按畫面」選擇原生貼上，然後點開上方的【🛠️ 格式整理 ➔ 📝 文字除髒】，就能一秒把髒格式洗乾淨了！");
+        }
+    };
 
     // 4. 真正有效的分類切換引擎
     window.toggleMobileToolbar = function(groupName) {
